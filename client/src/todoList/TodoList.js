@@ -1,23 +1,23 @@
-import React, { useState } from "react";
-import Swal from "sweetalert2";
+import React, { useState } from 'react';
+import Swal from 'sweetalert2';
 
 // 신규 TODO 항목 추가 폼 컴포넌트
 function CreateTodoForm(props) {
   const { onAddTodo, onCancel } = props;
-  const [todoContent, setTodoContent] = useState("");
-  const [todoNote, setTodoNote] = useState("");
+  const [todoContent, setTodoContent] = useState('');
+  const [todoNote, setTodoNote] = useState('');
   const [todoFiles, setTodoFiles] = useState([]);
 
   function handleChange(e) {
     const thisName = e.target.name;
     switch (thisName) {
-      case "TODO_CONTENT":
+      case 'TODO_CONTENT':
         setTodoContent(e.target.value);
         break;
-      case "TODO_NOTE":
+      case 'TODO_NOTE':
         setTodoNote(e.target.value);
         break;
-      case "TODO_FILES":
+      case 'TODO_FILES':
         const selectedFiles = Array.from(e.target.files);
         setTodoFiles(selectedFiles);
         break;
@@ -31,9 +31,9 @@ function CreateTodoForm(props) {
 
     if (todoContent.trim()) {
       onAddTodo(todoContent);
-      setTodoContent("");
+      setTodoContent('');
     } else {
-      Swal.fire("할 일을 입력해주세요.", "", "warning");
+      Swal.fire('할 일을 입력해주세요.', '', 'warning');
     }
   }
 
@@ -52,7 +52,7 @@ function CreateTodoForm(props) {
           maxLength={4000}
           required="true"
           rows={3}
-          style={{ resize: "none" }}
+          style={{ resize: 'none' }}
         />
         <label className="mb-1">비고</label>
         <textarea
@@ -64,7 +64,7 @@ function CreateTodoForm(props) {
           name="TODO_NOTE"
           maxLength={4000}
           rows={3}
-          style={{ resize: "none" }}
+          style={{ resize: 'none' }}
         />
         <label className="mb-1">첨부파일</label>
         <input
@@ -98,10 +98,10 @@ function TodoList(props) {
 
   function handleWholeCheckbox(e) {
     const isChecked = e.target.checked;
-    Array.from(document.getElementsByClassName("todo-checkbox")).forEach(
+    Array.from(document.getElementsByClassName('todo-checkbox')).forEach(
       function (todoCheckboxElement) {
         todoCheckboxElement.checked = isChecked;
-      }
+      },
     );
   }
 
@@ -186,7 +186,7 @@ function TodoContainer() {
     // 0개 선택되어있으면 alert
     // 1개 초과하여 선택되어있으면 alert
     const todoCheckboxElements = Array.from(
-      document.getElementsByClassName("todo-checkbox")
+      document.getElementsByClassName('todo-checkbox'),
     )
       .filter(function (todoCheckbox) {
         return todoCheckbox.checked;
@@ -197,10 +197,10 @@ function TodoContainer() {
     const todoCheckboxElementsLength = todoCheckboxElements.length;
 
     if (todoCheckboxElementsLength === 0) {
-      Swal.fire("선택된 할 일이 없습니다.", "", "warning");
+      Swal.fire('선택된 할 일이 없습니다.', '', 'warning');
       return;
     } else if (todoCheckboxElementsLength > 1) {
-      Swal.fire("수정할 할 일을 하나만 선택해주세요.", "", "warning");
+      Swal.fire('수정할 할 일을 하나만 선택해주세요.', '', 'warning');
       return;
     }
 
@@ -212,7 +212,7 @@ function TodoContainer() {
   function handleDeleteTodo() {
     // 0개 선택되어있으면 alert
     const todoCheckboxElements = Array.from(
-      document.getElementsByClassName("todo-checkbox")
+      document.getElementsByClassName('todo-checkbox'),
     )
       .filter(function (todoCheckbox) {
         return todoCheckbox.checked;
@@ -222,7 +222,7 @@ function TodoContainer() {
       });
 
     if (todoCheckboxElements.length === 0) {
-      Swal.fire("선택된 할 일이 없습니다.", "", "warning");
+      Swal.fire('선택된 할 일이 없습니다.', '', 'warning');
       return;
     }
 
@@ -237,12 +237,12 @@ function TodoContainer() {
       <button
         className={
           isCreating || isEditing
-            ? "btn btn-secondary mb-3"
-            : "btn btn-primary mb-3"
+            ? 'btn btn-secondary mb-3'
+            : 'btn btn-primary mb-3'
         }
         onClick={handleToggleCreate}
       >
-        {isCreating || isEditing ? "취소" : "신규"}
+        {isCreating || isEditing ? '취소' : '신규'}
       </button>
       {!isCreating && !isEditing && (
         <button
