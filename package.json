@@ -11,26 +11,16 @@
     "build": "concurrently \"cd src && npm run build\" \"cd client && npm run build\"",
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,json,css,scss,md}\""
   },
-  "dependencies": {
-    "@nestjs/platform-express": "^11.1.5",
-    "@nestjs/typeorm": "^11.0.0",
-    "@types/bcrypt": "^6.0.0",
-    "babel-preset-react-app": "^10.1.0",
-    "bcrypt": "^6.0.0",
-    "bootstrap": "^5.3.7",
-    "concurrently": "^9.2.0",
-    "dotenv": "^17.2.1",
-    "express-session": "^1.18.2",
-    "pg": "^8.16.3",
-    "react-bootstrap": "^2.10.10",
-    "sweetalert2": "^11.22.2",
-    "typeorm": "^0.3.25"
-  },
   "devDependencies": {
-    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
-    "@types/express-session": "^1.18.2",
-    "@types/multer": "^2.0.0",
-    "npm-check-updates": "^18.0.2",
+    "concurrently": "^9.2.0",
     "prettier": "^3.6.2"
+  },
+  "overrides": {
+    "nth-check": "2.1.1",
+    "postcss": ">=8.4.31",
+    "tmp": "^0.2.4",
+    "svgo": "^4.0.0",
+    "css-select": "^6.0.0",
+    "resolve-url-loader": ">=5.0.0"
   }
 }
