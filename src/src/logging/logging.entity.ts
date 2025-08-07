@@ -16,7 +16,7 @@ export class LogEntity {
   @Column({ name: 'connect_url', length: 4000 })
   connectUrl: string;
 
-  @Column({ name: 'error_content', length: 'max', nullable: true })
+  @Column({ name: 'error_content', type: 'text', nullable: true })
   errorContent: string;
 
   @Column(() => AuditColumns) // 복합 엔티티를 포함
