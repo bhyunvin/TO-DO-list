@@ -1,14 +1,14 @@
-import { useState } from "react";
-import Swal from "sweetalert2";
+import { useState } from 'react';
+import Swal from 'sweetalert2';
 
-import "./loginForm.css";
+import './loginForm.css';
 
 function SignupForm({ onSignupComplete }) {
   // Validation 메세지 state
-  const [idError, setIdError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
-  const [confirmPasswordError, setConfirmPasswordError] = useState("");
-  const [emailError, setEmailError] = useState("");
+  const [idError, setIdError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [confirmPasswordError, setConfirmPasswordError] = useState('');
+  const [emailError, setEmailError] = useState('');
 
   const [profileImage, setProfileImage] = useState(null);
   function handleImageChange(e) {
@@ -25,40 +25,40 @@ function SignupForm({ onSignupComplete }) {
   }
 
   //아이디 입력 handler
-  const [userId, setUserId] = useState("");
+  const [userId, setUserId] = useState('');
   function userIdChangeHandler(e) {
     //아이디 변경시 아이디 중복체크 관련 초기화
     setIsIdDuplicated(false);
-    setIdDuplicatedResult("");
+    setIdDuplicatedResult('');
 
     const idValue = e.target.value;
 
     if (idValue && idValue.length <= 40) {
-      setIdError("");
+      setIdError('');
       setUserId(idValue);
     } else {
-      setIdError("아이디를 확인해주세요.");
-      setUserId("");
+      setIdError('아이디를 확인해주세요.');
+      setUserId('');
     }
   }
 
   //아이디 중복체크 버튼 클릭
   const [isIdDuplicated, setIsIdDuplicated] = useState(false);
-  const [idDuplicatedResult, setIdDuplicatedResult] = useState("");
+  const [idDuplicatedResult, setIdDuplicatedResult] = useState('');
   async function checkIdDuplicated() {
     if (!userId) {
-      setIdError("ID를 입력해주세요.");
+      setIdError('ID를 입력해주세요.');
       return;
     }
 
-    setIdError("");
+    setIdError('');
 
     try {
       const apiUrl = process.env.REACT_APP_API_URL;
       const response = await fetch(`${apiUrl}/user/duplicate/${userId}`, {
-        method: "GET",
+        method: 'GET',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
       });
 
@@ -69,38 +69,38 @@ function SignupForm({ onSignupComplete }) {
 
         if (!data) {
           //중복된 아이디 없음
-          setIdDuplicatedResult("사용하실 수 있는 아이디입니다.");
+          setIdDuplicatedResult('사용하실 수 있는 아이디입니다.');
         } else {
-          setIdDuplicatedResult("중복된 아이디가 있습니다.");
+          setIdDuplicatedResult('중복된 아이디가 있습니다.');
         }
       } else {
         // 비정상 응답 처리
-        Swal.fire("로그인 실패", "서버 오류가 발생했습니다.", "error");
+        Swal.fire('로그인 실패', '서버 오류가 발생했습니다.', 'error');
       }
     } catch (error) {
       // 네트워크 오류 처리
-      console.error("LoginForm Login Error : ", error);
-      Swal.fire("오류 발생", "서버와의 연결에 문제가 발생했습니다.", "error");
+      console.error('LoginForm Login Error : ', error);
+      Swal.fire('오류 발생', '서버와의 연결에 문제가 발생했습니다.', 'error');
     }
   }
 
   //비밀번호 입력 handler
-  const [userPassword, setUserPassword] = useState("");
+  const [userPassword, setUserPassword] = useState('');
   function userPasswordChangeHandler(e) {
     const passwordValue = e.target.value;
     setUserPassword(passwordValue);
   }
 
   //비밀번호 확인 입력 handler
-  const [confirmUserPassword, setConfirmUserPassword] = useState("");
+  const [confirmUserPassword, setConfirmUserPassword] = useState('');
   function confirmUserPasswordChangeHandler(e) {
     const confirmPasswordValue = e.target.value;
 
     if (userPassword !== confirmPasswordValue) {
-      setConfirmPasswordError("비밀번호를 다시 한번 확인해주세요.");
-      setConfirmUserPassword("");
+      setConfirmPasswordError('비밀번호를 다시 한번 확인해주세요.');
+      setConfirmUserPassword('');
     } else {
-      setConfirmPasswordError("");
+      setConfirmPasswordError('');
       setConfirmUserPassword(confirmPasswordValue);
     }
   }
@@ -109,21 +109,21 @@ function SignupForm({ onSignupComplete }) {
   // const [userName, setUserName] = useState('');
 
   //이메일 입력 handler
-  const [userEmail, setUserEmail] = useState("");
+  const [userEmail, setUserEmail] = useState('');
   function emailChangeHandler(e) {
     const emailValue = e.target.value;
 
     if (!emailValue || !/[a-z0-9]+@[a-z]+\.[a-z]{2,3}/.test(emailValue)) {
-      setEmailError("이메일을 확인해주세요.");
-      setUserEmail("");
+      setEmailError('이메일을 확인해주세요.');
+      setUserEmail('');
     } else {
-      setEmailError("");
+      setEmailError('');
       setUserEmail(emailValue);
     }
   }
 
   //추가설명 입력 handler
-  const [userDescription, setUserDescription] = useState("");
+  const [userDescription, setUserDescription] = useState('');
   function userDescriptionChangeHandler(e) {
     const descriptionValue = e.target.value;
     setUserDescription(descriptionValue);
@@ -144,27 +144,27 @@ function SignupForm({ onSignupComplete }) {
   function validateSignupForm() {
     //아이디
     if (!userId || userId.length > 40) {
-      setIdError("아이디를 확인해주세요.");
+      setIdError('아이디를 확인해주세요.');
       return false;
     }
 
     if (isIdDuplicated) {
-      setIdError("아이디 중복체크를 진행해주세요.");
+      setIdError('아이디 중복체크를 진행해주세요.');
       return false;
     }
 
     if (!userPassword) {
-      setPasswordError("비밀번호를 확인해주세요.");
+      setPasswordError('비밀번호를 확인해주세요.');
       return false;
     }
 
     if (!confirmUserPassword || userPassword !== confirmUserPassword) {
-      setConfirmPasswordError("비밀번호를 다시 한번 확인해주세요.");
+      setConfirmPasswordError('비밀번호를 다시 한번 확인해주세요.');
       return false;
     }
 
     if (!userEmail || !/[a-z0-9]+@[a-z]+\.[a-z]{2,3}/.test(userEmail)) {
-      setEmailError("이메일을 확인해주세요.");
+      setEmailError('이메일을 확인해주세요.');
       return false;
     }
 
@@ -175,16 +175,16 @@ function SignupForm({ onSignupComplete }) {
   async function submitSignup() {
     const signupFormData = new FormData();
 
-    signupFormData.append("userId", userId);
-    signupFormData.append("userPassword", userPassword);
-    signupFormData.append("userEmail", userEmail);
-    signupFormData.append("userDescription", userDescription);
-    if (profileImage) signupFormData.append("profileImage[]", profileImage);
+    signupFormData.append('userId', userId);
+    signupFormData.append('userPassword', userPassword);
+    signupFormData.append('userEmail', userEmail);
+    signupFormData.append('userDescription', userDescription);
+    if (profileImage) signupFormData.append('profileImage[]', profileImage);
 
     try {
       const apiUrl = process.env.REACT_APP_API_URL;
       const response = await fetch(`${apiUrl}/user/signup`, {
-        method: "POST",
+        method: 'POST',
         body: signupFormData,
       });
 
@@ -192,20 +192,20 @@ function SignupForm({ onSignupComplete }) {
         const data = await response.json();
 
         if (data.user?.userSeq) {
-          Swal.fire("", "회원가입되었습니다.", "success");
+          Swal.fire('', '회원가입되었습니다.', 'success');
           onSignupComplete();
         } else {
-          console.error("회원가입 실패 : ", data);
-          Swal.fire("", "회원가입에 실패했습니다.", "error");
+          console.error('회원가입 실패 : ', data);
+          Swal.fire('', '회원가입에 실패했습니다.', 'error');
         }
       } else {
         // 비정상 응답 처리
-        Swal.fire("회원가입 실패", "서버 오류가 발생했습니다.", "error");
+        Swal.fire('회원가입 실패', '서버 오류가 발생했습니다.', 'error');
       }
     } catch (error) {
       // 네트워크 오류 처리
-      console.error("LoginForm Login Error : ", error);
-      Swal.fire("오류 발생", "서버와의 연결에 문제가 발생했습니다.", "error");
+      console.error('LoginForm Login Error : ', error);
+      Swal.fire('오류 발생', '서버와의 연결에 문제가 발생했습니다.', 'error');
     }
   }
 
@@ -240,7 +240,7 @@ function SignupForm({ onSignupComplete }) {
               </button>
             </div>
             <small className="text-danger">{idError}</small>
-            <small className={isIdDuplicated ? "text-danger" : ""}>
+            <small className={isIdDuplicated ? 'text-danger' : ''}>
               {idDuplicatedResult}
             </small>
           </div>
@@ -351,7 +351,7 @@ function SignupForm({ onSignupComplete }) {
               <img
                 src={profileImage}
                 alt="프로필 미리보기"
-                style={{ width: "100px", height: "100px", objectFit: "cover" }}
+                style={{ width: '100px', height: '100px', objectFit: 'cover' }}
               />
             </div>
           </div>
@@ -368,7 +368,7 @@ function SignupForm({ onSignupComplete }) {
               id="userDescription"
               rows="3"
               placeholder="추가 설명을 입력해주세요."
-              style={{ resize: "none" }}
+              style={{ resize: 'none' }}
               onChange={userDescriptionChangeHandler}
               spellCheck="false"
             ></textarea>
