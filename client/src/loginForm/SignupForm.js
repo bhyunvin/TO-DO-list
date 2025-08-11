@@ -11,9 +11,11 @@ function SignupForm({ onSignupComplete }) {
   const [emailError, setEmailError] = useState('');
 
   const [profileImage, setProfileImage] = useState(null);
+  const [profileImageFile, setProfileImageFile] = useState(null);
   function handleImageChange(e) {
     const file = e.target.files[0];
     if (file) {
+      setProfileImageFile(file);
       const reader = new FileReader();
 
       reader.onloadend = function () {
@@ -106,7 +108,11 @@ function SignupForm({ onSignupComplete }) {
   }
 
   //이름 입력 handler
-  // const [userName, setUserName] = useState('');
+  const [userName, setUserName] = useState('');
+  function userNameChangeHandler(e) {
+    const nameValue = e.target.value;
+    setUserName(nameValue);
+  }
 
   //이메일 입력 handler
   const [userEmail, setUserEmail] = useState('');
@@ -163,6 +169,10 @@ function SignupForm({ onSignupComplete }) {
       return false;
     }
 
+    if (!userName) {
+      return false;
+    }
+
     if (!userEmail || !/[a-z0-9]+@[a-z]+\.[a-z]{2,3}/.test(userEmail)) {
       setEmailError('이메일을 확인해주세요.');
       return false;
@@ -176,10 +186,12 @@ function SignupForm({ onSignupComplete }) {
     const signupFormData = new FormData();
 
     signupFormData.append('userId', userId);
+    signupFormData.append('userName', userName);
     signupFormData.append('userPassword', userPassword);
     signupFormData.append('userEmail', userEmail);
     signupFormData.append('userDescription', userDescription);
-    if (profileImage) signupFormData.append('profileImage[]', profileImage);
+    if (profileImageFile)
+      signupFormData.append('profileImage', profileImageFile);
 
     try {
       const apiUrl = process.env.REACT_APP_API_URL;
@@ -191,7 +203,7 @@ function SignupForm({ onSignupComplete }) {
       if (response.ok) {
         const data = await response.json();
 
-        if (data.user?.userSeq) {
+        if (data.userSeq) {
           Swal.fire('', '회원가입되었습니다.', 'success');
           onSignupComplete();
         } else {
@@ -297,7 +309,7 @@ function SignupForm({ onSignupComplete }) {
                 id="userName"
                 placeholder="이름을 입력해주세요."
                 autoComplete="off"
-                // onChange={userNameChangeHandler}
+                onChange={userNameChangeHandler}
                 required
                 length={200}
                 spellCheck="false"
