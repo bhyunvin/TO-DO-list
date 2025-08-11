@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository, InjectDataSource } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
+import { Request, Response } from 'express';
 import { UserEntity } from './user.entity';
 import { UserDto } from './user.dto';
 import { encrypt, isHashValid } from '../utils/cryptUtil';
@@ -83,6 +84,21 @@ export class UserService {
       }
 
       return savedUser;
+    });
+  }
+
+  //로그아웃
+  async logout(req: Request, res: Response): Promise<Response> {
+    return new Promise((resolve, reject) => {
+      req.session.destroy((err) => {
+        if (err) {
+          this.logger.error('Session destruction error:', err);
+          return reject(res.status(500).send('Could not log out.'));
+        }
+        res.clearCookie('connect.sid'); // 세션 쿠키 삭제
+        this.logger.log('Session destroyed and user logged out.');
+        return resolve(res.status(200).send({ message: 'Logged out' }));
+      });
     });
   }
 }
