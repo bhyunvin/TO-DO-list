@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository, InjectDataSource } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { UserEntity } from './user.entity';
@@ -9,6 +9,8 @@ import { AuditSettings, setAuditColumn } from '../utils/auditColumns';
 
 @Injectable()
 export class UserService {
+  private readonly logger = new Logger(UserService.name);
+
   constructor(
     @InjectRepository(UserEntity)
     private userRepository: Repository<UserEntity>,
@@ -21,6 +23,7 @@ export class UserService {
   async getUserOneInfo(
     userDto: UserDto,
   ): Promise<UserEntity | { message: string }> {
+    this.logger.log(`Login DTO received: ${JSON.stringify(userDto)}`);
     const selectedUser = await this.userRepository.findOne({
       where: { userId: userDto.userId },
     });
@@ -53,6 +56,7 @@ export class UserService {
     profileImageFile: Express.Multer.File[],
     ip: string,
   ): Promise<UserDto> {
+    this.logger.log(`Signup DTO received: ${JSON.stringify(userDto)}`);
     return this.dataSource.transaction(async (transactionalEntityManager) => {
       userDto.userPassword = await encrypt(userDto.userPassword); // 비밀번호 암호화
 
