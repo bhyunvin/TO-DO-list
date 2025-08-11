@@ -48,9 +48,9 @@ function LoginForm() {
       if (response.ok) {
         const data = await response.json();
 
-        if (data.user) {
+        if (data.userSeq) {
           // 로그인 성공
-          login(data.user); // 사용자 정보를 AuthContext에 저장
+          login(data); // 사용자 정보를 AuthContext에 저장
           Swal.fire('로그인 성공!', '', 'success');
         } else if (response.status === 204) {
           // No content
