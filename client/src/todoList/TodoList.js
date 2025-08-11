@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Swal from 'sweetalert2';
+import { useAuth } from '../authContext/AuthContext';
 
 // 신규 TODO 항목 추가 폼 컴포넌트
 function CreateTodoForm(props) {
@@ -161,6 +162,7 @@ function TodoList(props) {
 
 // TODO 리스트 및 폼을 조건부로 렌더링하는 컨테이너 컴포넌트
 function TodoContainer() {
+  const { user, logout } = useAuth();
   const [todos, setTodos] = useState([]);
   const [isCreating, setIsCreating] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -231,9 +233,38 @@ function TodoContainer() {
 
   function getUncompleteTodoList() {}
 
+  async function handleLogout() {
+    try {
+      const apiUrl = process.env.REACT_APP_API_URL;
+      const response = await fetch(`${apiUrl}/user/logout`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        logout(); // AuthContext에서 user 상태 null로 변경
+      } else {
+        Swal.fire('로그아웃 실패', '서버 오류가 발생했습니다.', 'error');
+      }
+    } catch (error) {
+      console.error('Logout Error : ', error);
+      Swal.fire('오류 발생', '서버와의 연결에 문제가 발생했습니다.', 'error');
+    }
+  }
+
   return (
     <div className="todo-container">
-      <h2>TO-DO 리스트</h2>
+      <div className="todo-header">
+        <h2>TO-DO 리스트</h2>
+        <div className="header-right">
+          <span>{user.userName}님 환영합니다.</span>
+          <button className="btn btn-link" onClick={handleLogout}>
+            로그아웃
+          </button>
+        </div>
+      </div>
       <button
         className={
           isCreating || isEditing

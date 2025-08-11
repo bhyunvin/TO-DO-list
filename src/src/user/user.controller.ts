@@ -7,7 +7,10 @@ import {
   UploadedFile,
   UseInterceptors,
   Ip,
+  Req,
+  Res,
 } from '@nestjs/common';
+import { Request, Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { multerOptions } from '../fileUpload/fileUploadUtil';
 
@@ -42,5 +45,14 @@ export class UserController {
     @Ip() ip: string,
   ): Promise<UserDto | null> {
     return await this.userService.signup(userDto, profileImageFile, ip);
+  }
+
+  //로그아웃
+  @Post('logout')
+  async logout(
+    @Req() req: Request,
+    @Res() res: Response,
+  ): Promise<Response> {
+    return await this.userService.logout(req, res);
   }
 }
