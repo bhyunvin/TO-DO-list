@@ -22,6 +22,7 @@ export class UserService {
 
   //사용자 1명 조회
   async getUserOneInfo(
+    req: Request,
     userDto: UserDto,
   ): Promise<UserEntity | { message: string }> {
     this.logger.log(`Login DTO received: ${JSON.stringify(userDto)}`);
@@ -40,6 +41,12 @@ export class UserService {
       return { message: '아이디나 비밀번호가 다릅니다.' };
     }
 
+    // 세션에 사용자 정보 저장
+    req.session.userSeq = selectedUser.userSeq;
+    this.logger.log(
+      `User ${selectedUser.userId} logged in, session saved.`,
+    );
+
     return selectedUser;
   }
 
@@ -54,7 +61,7 @@ export class UserService {
   //회원가입
   async signup(
     userDto: UserDto,
-    profileImageFile: Express.Multer.File[],
+    profileImageFile: Express.Multer.File,
     ip: string,
   ): Promise<UserDto> {
     this.logger.log(`Signup DTO received: ${JSON.stringify(userDto)}`);
@@ -70,9 +77,9 @@ export class UserService {
       );
 
       // 프로필 이미지 등록 시
-      if (profileImageFile.length > 0) {
+      if (profileImageFile) {
         const fileUploadResult = await this.fileUploadUtil.saveFileInfo(
-          profileImageFile,
+          [profileImageFile], // saveFileInfo expects an array
           { entity: null, id: userDto.userId, ip },
         );
         userDto.userProfileImageFileGroupNo = fileUploadResult.fileGroupNo;
