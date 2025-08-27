@@ -50,10 +50,7 @@ export class UserController {
 
   //로그아웃
   @Post('logout')
-  async logout(
-    @Req() req: Request,
-    @Res() res: Response,
-  ): Promise<Response> {
+  async logout(@Req() req: Request, @Res() res: Response): Promise<Response> {
     return await this.userService.logout(req, res);
   }
 }

@@ -34,7 +34,12 @@ import { TodoEntity } from './todo/todo.entity';
 @Module({
   imports: [
     TypeOrmModule.forRoot(ormconfig),
-    TypeOrmModule.forFeature([UserEntity, LogEntity, FileInfoEntity, TodoEntity]),
+    TypeOrmModule.forFeature([
+      UserEntity,
+      LogEntity,
+      FileInfoEntity,
+      TodoEntity,
+    ]),
   ],
   controllers: [UserController],
   providers: [

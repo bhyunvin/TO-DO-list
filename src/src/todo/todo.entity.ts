@@ -13,7 +13,12 @@ export class TodoEntity {
   @Column({ name: 'user_seq', type: 'int' })
   userSeq: number;
 
-  @Column({ name: 'todo_content', type: 'varchar', length: 4000, nullable: true })
+  @Column({
+    name: 'todo_content',
+    type: 'varchar',
+    length: 4000,
+    nullable: true,
+  })
   todoContent: string;
 
   @Column({ name: 'todo_date', type: 'date', nullable: true })
