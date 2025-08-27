@@ -28,10 +28,13 @@ import session from 'express-session';
 import { FileUploadUtil } from './fileUpload/fileUploadUtil';
 import { FileInfoEntity } from './fileUpload/file.entity';
 
+// 할 일 관련 정보
+import { TodoEntity } from './todo/todo.entity';
+
 @Module({
   imports: [
     TypeOrmModule.forRoot(ormconfig),
-    TypeOrmModule.forFeature([UserEntity, LogEntity, FileInfoEntity]),
+    TypeOrmModule.forFeature([UserEntity, LogEntity, FileInfoEntity, TodoEntity]),
   ],
   controllers: [UserController],
   providers: [
