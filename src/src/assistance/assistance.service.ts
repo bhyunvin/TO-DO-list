@@ -5,6 +5,8 @@ import { firstValueFrom } from 'rxjs';
 import { InternalServerErrorException } from '@nestjs/common';
 import { decrypt } from '../utils/cryptUtil';
 import { GeminiApiResponse } from './gemini.interface';
+import { marked } from 'marked';
+import * as sanitizeHtml from 'sanitize-html';
 
 @Injectable()
 export class AssistanceService {
@@ -41,7 +43,9 @@ export class AssistanceService {
       );
 
       const responseText = response.data.candidates[0].content.parts[0].text;
-      requestAssistanceDto.response = responseText;
+      const unsafeHtml = await marked.parse(responseText);
+      const safeHtml = sanitizeHtml.default(unsafeHtml);
+      requestAssistanceDto.response = safeHtml;
       return requestAssistanceDto;
     } catch (error) {
       this.logger.error('Failed to get response from Gemini API', error.response?.data || error.message);
