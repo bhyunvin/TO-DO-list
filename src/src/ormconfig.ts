@@ -8,9 +8,10 @@ export const ormconfig: TypeOrmModuleOptions = {
   host: process.env.DB_DEV_SERVER,
   port: Number(process.env.DB_DEV_PORT),
   username: process.env.DB_DEV_USERNAME,
-  password: process.env.DB_DEV_PASSOWRD,
-  database: process.env.DB_DEV_DATEBASE,
+  password: process.env.DB_DEV_PASSWORD,
+  database: process.env.DB_DEV_DATABASE,
   entities: ['dist/**/*.entity{.ts,.js}'],
   synchronize: false,
   namingStrategy: new CustomNamingStrategy(),
+  ssl: false,
 };
