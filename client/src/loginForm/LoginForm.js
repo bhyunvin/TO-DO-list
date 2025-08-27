@@ -85,25 +85,34 @@ function LoginForm() {
   }
 
   // 임시 API 테스트
-  async function handleApiTest() {
+  const [prompt, setPrompt] = useState('');
+  const [responseHtml, setResponseHtml] = useState('');
+  const handleApiTest = async () => {
     const apiUrl = process.env.REACT_APP_API_URL;
-    const prompt = 'AGI에 대해 한국어로 간단히 설명해주세요.';
-    
-    const response = await fetch(`${apiUrl}/assistance/assist`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        prompt: prompt,
-      }),
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      console.log(data);
+    const currentPrompt = prompt || '안녕하세요? 당신에 대한 간략한 소개를 해주세요.';
+  
+    try {
+      const response = await fetch(`${apiUrl}/assistance/assist`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prompt: currentPrompt,
+        }),
+      });
+  
+      if (response.ok) {
+        const data = await response.json();
+        setResponseHtml(data.response);
+      } else {
+        setResponseHtml('<p style="color: red;">API 요청에 실패했습니다.</p>');
+      }
+    } catch (error) {
+      console.error("API 요청 오류:", error);
+      setResponseHtml('<p style="color: red;">네트워크 오류가 발생했습니다.</p>');
     }
-  }
+  };
 
   //기본은 loginForm
   let resultComponent = (
@@ -144,9 +153,18 @@ function LoginForm() {
         <span onClick={handleSignup} style={{ cursor: 'pointer' }}>
           회원가입
         </span>
-        <span onClick={handleApiTest} style={{ cursor: 'pointer', marginLeft: '10px' }}>
+        <span onClick={handleApiTest} style={{ cursor: 'pointer', marginLeft: '10px' }} className="mb-3">
           API 테스트
         </span>
+        <input
+          type="text"
+          className="form-control mt-3 mb-3"
+          placeholder="프롬프트를 입력해주세요."
+          spellCheck="false"
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value)}
+        />
+        <div dangerouslySetInnerHTML={{ __html: responseHtml }} />
       </form>
     </div>
   );
