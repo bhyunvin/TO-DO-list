@@ -30,7 +30,7 @@ export class LoggingInterceptor implements NestInterceptor {
       request.connection.remoteAddress ||
       '';
 
-    this.logger.log(`Incoming request: ${method} ${url}. userSeq : ${userSeq}`);
+    this.logger.log(`Incoming request: ${method} ${url}. userSeq : ${isNaN(userSeq) ? 'anonymous user' : userSeq}`);
 
     return next.handle().pipe(
       tap(() => {
