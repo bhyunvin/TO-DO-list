@@ -25,6 +25,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const status = exception.getStatus();
     const message = exception.message || 'Internal server error';
     const userSeq = Number(request.session.userSeq);
+    const userId = request.session.userId;
     const ip =
       request.headers['x-forwarded-for'] ||
       request.connection.remoteAddress ||
@@ -37,6 +38,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
     logEntity.connectUrl = url;
     logEntity.errorContent = exception.stack;
     logEntity.auditColumns.regIp = ip;
+    logEntity.auditColumns.regId = userId || null;
+    logEntity.auditColumns.updIp = ip;
+    logEntity.auditColumns.updId = userId || null;
 
     await this.loggingService.log(logEntity);
 

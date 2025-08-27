@@ -24,6 +24,7 @@ export class LoggingInterceptor implements NestInterceptor {
     const method = request.method;
     const url = request.url;
     const userSeq = Number(request.session.userSeq);
+    const userId = request.session.userId;
     const ip =
       request.headers['x-forwarded-for'] ||
       request.connection.remoteAddress ||
@@ -37,6 +38,9 @@ export class LoggingInterceptor implements NestInterceptor {
         logEntity.userSeq = userSeq || null;
         logEntity.connectUrl = url;
         logEntity.auditColumns.regIp = ip;
+        logEntity.auditColumns.regId = userId || null;
+        logEntity.auditColumns.updIp = ip;
+        logEntity.auditColumns.updId = userId || null;
 
         this.loggerService.log(logEntity);
       }),

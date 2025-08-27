@@ -43,6 +43,7 @@ export class UserService {
 
     // 세션에 사용자 정보 저장
     req.session.userSeq = selectedUser.userSeq;
+    req.session.userId = selectedUser.userId;
     this.logger.log(
       `User ${selectedUser.userId} logged in, session saved.`,
     );
