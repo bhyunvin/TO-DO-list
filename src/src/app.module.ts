@@ -14,38 +14,30 @@ import { HttpExceptionFilter } from './filter/http-exception.filter';
 
 //logging
 import { LoggerService } from './logging/logging.service';
-import { LogEntity } from './logging/logging.entity';
+import { LoggingModule } from './logging/logging.module';
 
 //로그인
-import { UserController } from './user/user.controller';
-import { UserService } from './user/user.service';
-import { UserEntity } from './user/user.entity';
+import { UserModule } from './user/user.module';
 
 //session
 import session from 'express-session';
 
 //file upload
 import { FileUploadUtil } from './fileUpload/fileUploadUtil';
-import { FileInfoEntity } from './fileUpload/file.entity';
+import { FileUploadModule } from './fileUpload/fileUpload.module';
 
-// 할 일 관련 정보
-import { TodoEntity } from './todo/todo.entity';
+// ai assistance
+import { AssistanceModule } from './assistance/assistance.module';
 
 @Module({
   imports: [
     TypeOrmModule.forRoot(ormconfig),
-    TypeOrmModule.forFeature([
-      UserEntity,
-      LogEntity,
-      FileInfoEntity,
-      TodoEntity,
-    ]),
+    AssistanceModule,
+    UserModule,
+    LoggingModule,
+    FileUploadModule,
   ],
-  controllers: [UserController],
   providers: [
-    UserService,
-    LoggerService,
-    FileUploadUtil,
     {
       provide: APP_INTERCEPTOR,
       useClass: LoggingInterceptor,

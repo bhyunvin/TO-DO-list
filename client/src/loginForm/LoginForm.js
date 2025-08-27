@@ -84,6 +84,27 @@ function LoginForm() {
     setAuthMode('login');
   }
 
+  // 임시 API 테스트
+  async function handleApiTest() {
+    const apiUrl = process.env.REACT_APP_API_URL;
+    const prompt = 'AGI에 대해 한국어로 간단히 설명해주세요.';
+    
+    const response = await fetch(`${apiUrl}/assistance/assist`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        prompt: prompt,
+      }),
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      console.log(data);
+    }
+  }
+
   //기본은 loginForm
   let resultComponent = (
     <div className="login-container">
@@ -122,6 +143,9 @@ function LoginForm() {
         </button>
         <span onClick={handleSignup} style={{ cursor: 'pointer' }}>
           회원가입
+        </span>
+        <span onClick={handleApiTest} style={{ cursor: 'pointer', marginLeft: '10px' }}>
+          API 테스트
         </span>
       </form>
     </div>

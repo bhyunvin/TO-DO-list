@@ -6,7 +6,7 @@ import { UserEntity } from './user.entity';
 import { UserDto } from './user.dto';
 import { encrypt, isHashValid } from '../utils/cryptUtil';
 import { FileUploadUtil } from '../fileUpload/fileUploadUtil';
-import { AuditSettings, setAuditColumn } from '../utils/auditColumns';
+import { setAuditColumn } from '../utils/auditColumns';
 
 @Injectable()
 export class UserService {
