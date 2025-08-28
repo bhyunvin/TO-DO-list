@@ -4,9 +4,7 @@ import { AssistanceService } from './assistance.service';
 import { HttpModule } from '@nestjs/axios';
 
 @Module({
-  imports: [
-    HttpModule,
-  ],
+  imports: [HttpModule],
   controllers: [AssistanceController],
   providers: [AssistanceService],
 })

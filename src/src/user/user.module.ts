@@ -8,10 +8,7 @@ import { UserService } from './user.service';
 import { FileUploadModule } from '../fileUpload/fileUpload.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([UserEntity]),
-    FileUploadModule,
-  ],
+  imports: [TypeOrmModule.forFeature([UserEntity]), FileUploadModule],
   controllers: [UserController],
   providers: [UserService],
   exports: [UserService],

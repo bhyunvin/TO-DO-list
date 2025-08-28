@@ -1,8 +1,4 @@
-import {
-  Controller,
-  Post,
-  Body,
-} from '@nestjs/common';
+import { Controller, Post, Body } from '@nestjs/common';
 import { RequestAssistanceDto } from './assistance.dto';
 import { AssistanceService } from './assistance.service';
 

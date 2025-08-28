@@ -1,20 +1,20 @@
 interface GeminiPart {
-    text: string;
-  }
+  text: string;
+}
 
 interface GeminiContent {
-    parts: GeminiPart[];
-    role: string;
+  parts: GeminiPart[];
+  role: string;
 }
 
 interface GeminiCandidate {
-    content: GeminiContent;
-    finishReason: string;
-    index: number;
-    // 필요한 다른 속성들을 추가할 수 있습니다.
+  content: GeminiContent;
+  finishReason: string;
+  index: number;
+  // 필요한 다른 속성들을 추가할 수 있습니다.
 }
 
 export interface GeminiApiResponse {
-    candidates: GeminiCandidate[];
-    // 필요한 다른 속성들을 추가할 수 있습니다.
+  candidates: GeminiCandidate[];
+  // 필요한 다른 속성들을 추가할 수 있습니다.
 }
