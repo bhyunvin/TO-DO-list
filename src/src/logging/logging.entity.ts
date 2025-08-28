@@ -13,11 +13,17 @@ export class LogEntity {
   @Column({ name: 'user_seq', nullable: true })
   userSeq: number;
 
-  @Column({ name: 'connect_url', length: 4000 })
+  @Column({ name: 'connect_url', type: 'text' })
   connectUrl: string;
 
   @Column({ name: 'error_content', type: 'text', nullable: true })
   errorContent: string;
+
+  @Column({ name: 'method', type: 'varchar', length: 10 })
+  method: string;
+
+  @Column({ name: 'request', type: 'text', nullable: true })
+  request: string;
 
   @Column(() => AuditColumns) // 복합 엔티티를 포함
   auditColumns: AuditColumns;
