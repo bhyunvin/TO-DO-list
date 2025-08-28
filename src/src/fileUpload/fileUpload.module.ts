@@ -6,10 +6,8 @@ import { FileInfoEntity } from './file.entity';
 import { FileUploadUtil } from './fileUploadUtil';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([FileInfoEntity]),
-  ],
+  imports: [TypeOrmModule.forFeature([FileInfoEntity])],
   providers: [FileUploadUtil],
-  exports: [FileUploadUtil], 
+  exports: [FileUploadUtil],
 })
 export class FileUploadModule {}
