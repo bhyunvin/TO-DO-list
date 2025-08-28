@@ -36,8 +36,6 @@ export class KeychainUtil {
         return null;
       }
 
-      console.log('account', account, 'password', stdout.trim());
-
       // stdout의 마지막 개행 문자를 제거하고 반환합니다.
       return stdout.trim();
     } catch (error) {
