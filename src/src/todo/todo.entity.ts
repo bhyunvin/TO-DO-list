@@ -15,8 +15,7 @@ export class TodoEntity {
 
   @Column({
     name: 'todo_content',
-    type: 'varchar',
-    length: 4000,
+    type: 'text',
     nullable: true,
   })
   todoContent: string;
@@ -27,7 +26,7 @@ export class TodoEntity {
   @Column({ name: 'complete_dtm', type: 'timestamp', nullable: true })
   completeDtm: string;
 
-  @Column({ name: 'todo_note', type: 'varchar', length: 4000, nullable: true })
+  @Column({ name: 'todo_note', type: 'text', nullable: true })
   todoNote: string;
 
   @Column({ name: 'todo_file_group_no', type: 'int', nullable: true })

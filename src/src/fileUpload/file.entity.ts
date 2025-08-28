@@ -13,10 +13,10 @@ export class FileInfoEntity {
   @Column({ name: 'file_group_no', type: 'int' })
   fileGroupNo: number;
 
-  @Column({ name: 'file_path', type: 'varchar', length: 4000 })
+  @Column({ name: 'file_path', type: 'text' })
   filePath: string;
 
-  @Column({ name: 'save_file_nm', type: 'varchar', length: 4000 })
+  @Column({ name: 'save_file_nm', type: 'text' })
   saveFileName: string;
 
   @Column({ name: 'file_ext', type: 'varchar', length: 10 })
