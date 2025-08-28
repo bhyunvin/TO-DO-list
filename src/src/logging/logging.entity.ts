@@ -22,8 +22,8 @@ export class LogEntity {
   @Column({ name: 'method', type: 'varchar', length: 10 })
   method: string;
 
-  @Column({ name: 'request', type: 'text', nullable: true })
-  request: string;
+  @Column({ name: 'request_body', type: 'text', nullable: true })
+  requestBody: string;
 
   @Column(() => AuditColumns) // 복합 엔티티를 포함
   auditColumns: AuditColumns;

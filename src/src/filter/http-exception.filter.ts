@@ -38,7 +38,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     logEntity.connectUrl = url;
     logEntity.errorContent = exception.stack;
     logEntity.method = request.method;
-    logEntity.request = JSON.stringify(request.body);
+    logEntity.requestBody = JSON.stringify(request.body);
     logEntity.auditColumns.regIp = ip;
     logEntity.auditColumns.regId = userId || null;
     logEntity.auditColumns.updIp = ip;

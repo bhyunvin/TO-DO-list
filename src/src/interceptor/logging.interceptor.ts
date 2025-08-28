@@ -40,7 +40,7 @@ export class LoggingInterceptor implements NestInterceptor {
         logEntity.userSeq = userSeq || null;
         logEntity.connectUrl = url;
         logEntity.method = method;
-        logEntity.request = JSON.stringify(request.body);
+        logEntity.requestBody = JSON.stringify(request.body);
         logEntity.auditColumns.regIp = ip;
         logEntity.auditColumns.regId = userId || null;
         logEntity.auditColumns.updIp = ip;
