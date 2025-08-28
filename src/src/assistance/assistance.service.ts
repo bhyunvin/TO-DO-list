@@ -7,21 +7,36 @@ import { decrypt } from '../utils/cryptUtil';
 import { GeminiApiResponse } from './gemini.interface';
 import { marked } from 'marked';
 import * as sanitizeHtml from 'sanitize-html';
+import * as fs from 'fs';
+import * as path from 'path';
 
 @Injectable()
 export class AssistanceService {
   private readonly logger = new Logger(AssistanceService.name);
 
-  constructor(
-    private readonly httpService: HttpService,
-  ) {}
+  constructor(private readonly httpService: HttpService) {}
 
-  async getGeminiResponse(requestAssistanceDto: RequestAssistanceDto): Promise<RequestAssistanceDto> {
+  async getGeminiResponse(
+    requestAssistanceDto: RequestAssistanceDto,
+  ): Promise<RequestAssistanceDto> {
     const apiKey = decrypt(process.env.GOOGLE_API_KEY);
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+    let systemPrompt = '';
 
-    // curl의 -d 부분에 해당하는 요청 본문
+    try {
+      const promptPath =
+        process.env.SYSTEM_PROMPT_PATH ||
+        './src/assistance/assistance.systemPrompt.txt';
+      systemPrompt = fs.readFileSync(path.resolve(promptPath), 'utf-8').trim();
+    } catch (error) {
+      this.logger.error('시스템 프롬프트를 불러오는 중 오류 발생:', error);
+      systemPrompt = `[ROLE] 당신은 친절한 한국어 비서입니다. 존댓말로 할 일 목록에 관해서만 답변하세요.`;
+    }
+
     const requestData = {
+      system_instruction: {
+        parts: [{ text: systemPrompt }],
+      },
       contents: [
         {
           parts: [
@@ -48,7 +63,10 @@ export class AssistanceService {
       requestAssistanceDto.response = safeHtml;
       return requestAssistanceDto;
     } catch (error) {
-      this.logger.error('Failed to get response from Gemini API', error.response?.data || error.message);
+      this.logger.error(
+        'Failed to get response from Gemini API',
+        error.response?.data || error.message,
+      );
       throw new InternalServerErrorException('AI Assistant API request failed');
     }
   }
