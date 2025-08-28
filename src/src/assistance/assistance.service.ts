@@ -9,17 +9,23 @@ import { marked } from 'marked';
 import * as sanitizeHtml from 'sanitize-html';
 import * as fs from 'fs';
 import * as path from 'path';
+import { KeychainUtil } from '../utils/keychainUtil';
 
 @Injectable()
 export class AssistanceService {
   private readonly logger = new Logger(AssistanceService.name);
 
-  constructor(private readonly httpService: HttpService) {}
+  constructor(
+    private readonly httpService: HttpService,
+    private readonly keychainUtil: KeychainUtil,
+  ) {}
 
   async getGeminiResponse(
     requestAssistanceDto: RequestAssistanceDto,
   ): Promise<RequestAssistanceDto> {
-    const apiKey = decrypt(process.env.GOOGLE_API_KEY);
+    const apiKey = await decrypt(
+      await this.keychainUtil.getPassword('encrypt-google-api-key'),
+    );
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
     let systemPrompt = '';
 
