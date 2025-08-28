@@ -1,5 +1,8 @@
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
+import { KeychainUtil } from './keychainUtil';
+
+const keychainUtil = new KeychainUtil();
 
 // 암호화
 export async function encrypt(rawText: string): Promise<string> {
@@ -16,9 +19,9 @@ export async function isHashValid(
 }
 
 // DB, API KEY 등 복호화 가능하게끔 암호화
-export function encryptForDecrypt(text: string) {
+export async function encryptForDecrypt(text: string): Promise<string> {
   const algorithm = 'aes-256-cbc';
-  const secretKey = process.env.SECRET_KEY;
+  const secretKey = await keychainUtil.getPassword('secret-key');
   const iv = crypto.randomBytes(16);
   const cipher = crypto.createCipheriv(algorithm, Buffer.from(secretKey), iv);
   let encrypted = cipher.update(text);
@@ -27,8 +30,8 @@ export function encryptForDecrypt(text: string) {
 }
 
 // 암호화된 텍스트 복호화
-export function decrypt(text: string): string {
-  const secretKey = process.env.SECRET_KEY;
+export async function decrypt(text: string): Promise<string> {
+  const secretKey = await keychainUtil.getPassword('secret-key');
   const textParts = text.split(':');
   const iv = Buffer.from(textParts.shift(), 'hex');
   const encryptedText = Buffer.from(textParts.join(':'), 'hex');
