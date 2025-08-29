@@ -41,8 +41,6 @@ export class HttpExceptionFilter implements ExceptionFilter {
     logEntity.requestBody = JSON.stringify(request.body);
     logEntity.auditColumns.regIp = ip;
     logEntity.auditColumns.regId = userId || null;
-    logEntity.auditColumns.updIp = ip;
-    logEntity.auditColumns.updId = userId || null;
 
     await this.loggingService.log(logEntity);
 
