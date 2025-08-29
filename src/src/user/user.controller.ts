@@ -24,11 +24,11 @@ export class UserController {
 
   //로그인
   @Post('login')
-  async getUserInfo(
+  async login(
     @Req() req: Request,
     @Body() userDto: UserDto,
   ): Promise<UserEntity | { message: string }> {
-    return await this.userService.getUserOneInfo(req, userDto);
+    return await this.userService.getUserOneInfoForLogin(req, userDto);
   }
 
   //아이디 중복체크

@@ -20,8 +20,8 @@ export class UserService {
     private readonly dataSource: DataSource,
   ) {}
 
-  //사용자 1명 조회
-  async getUserOneInfo(
+  // 로그인 위해 아이디, 비밀번호로 사용자 1명 조회
+  async getUserOneInfoForLogin(
     req: Request,
     userDto: UserDto,
   ): Promise<UserEntity | { message: string }> {
@@ -49,7 +49,7 @@ export class UserService {
     return selectedUser;
   }
 
-  //ID 중복체크
+  // ID 중복체크
   async checkIdDuplicated(userId: string): Promise<boolean> {
     const selectedUser = await this.userRepository.findOne({
       where: { userId },
@@ -57,7 +57,7 @@ export class UserService {
     return !!selectedUser;
   }
 
-  //회원가입
+  //  회원가입
   async signup(
     userDto: UserDto,
     profileImageFile: Express.Multer.File,
@@ -93,7 +93,7 @@ export class UserService {
     });
   }
 
-  //로그아웃
+  // 로그아웃
   async logout(req: Request, res: Response): Promise<Response> {
     return new Promise((resolve, reject) => {
       req.session.destroy((err) => {
@@ -106,5 +106,10 @@ export class UserService {
         return resolve(res.status(200).send({ message: 'Logged out' }));
       });
     });
+  }
+
+  // 세션의 userSeq를 통한 사용자 정보 조회
+  async getUserInfoByUserSeq(userSeq: number): Promise<UserEntity> {
+    return await this.userRepository.findOne({ where: { userSeq } });
   }
 }
