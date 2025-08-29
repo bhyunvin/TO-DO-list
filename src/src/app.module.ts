@@ -40,13 +40,16 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true, 
+      isGlobal: true,
       envFilePath: '.env', // .env 파일 경로 지정
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule, KeychainModule], // KeychainService를 사용하기 위해 KeychainModule 임포트
       inject: [ConfigService, KeychainUtil], // useFactory에 KeychainService 주입
-      useFactory: async (configService: ConfigService, keychainUtil: KeychainUtil) => {
+      useFactory: async (
+        configService: ConfigService,
+        keychainUtil: KeychainUtil,
+      ) => {
         const encryptedDbPassword = await keychainUtil.getPassword(
           'encrypt-db-password',
         );

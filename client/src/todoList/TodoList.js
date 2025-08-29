@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Swal from 'sweetalert2';
 import { useAuthStore } from '../authStore/authStore';
+import './todoList.css';
 
 // 신규 TODO 항목 추가 폼 컴포넌트
 function CreateTodoForm(props) {
@@ -231,8 +232,6 @@ function TodoContainer() {
     // 서버에 id 목록 던져서 삭제 + 확인 alert + 삭제한 당일 리스트로 조회
   }
 
-  function getUncompleteTodoList() {}
-
   async function handleLogout() {
     try {
       const apiUrl = process.env.REACT_APP_API_URL;
@@ -244,7 +243,7 @@ function TodoContainer() {
       });
 
       if (response.ok) {
-        logout(); // AuthContext에서 user 상태 null로 변경
+        logout(); // user 상태 null로 변경
       } else {
         Swal.fire('로그아웃 실패', '서버 오류가 발생했습니다.', 'error');
       }
@@ -256,46 +255,50 @@ function TodoContainer() {
 
   return (
     <div className="todo-container">
-      <div className="todo-header">
+      {/* 1. 제목을 중앙에 배치하기 위한 헤더 */}
+      <div className="todo-title-header">
         <h2>TO-DO 리스트</h2>
-        <div className="header-right">
-          <span>{user.userName}님 환영합니다.</span>
-          <button className="btn btn-link" onClick={handleLogout}>
-            로그아웃
-          </button>
-        </div>
       </div>
-      <button
-        className={
-          isCreating || isEditing
-            ? 'btn btn-secondary mb-3'
-            : 'btn btn-primary mb-3'
-        }
-        onClick={handleToggleCreate}
-      >
-        {isCreating || isEditing ? '취소' : '신규'}
-      </button>
-      {!isCreating && !isEditing && (
+  
+      {/* 2. 사용자 정보를 우측에 배치하기 위한 헤더 */}
+      <div className="user-info-header">
+        <span>{user.userName}님 환영합니다.</span>
+        <button className="btn btn-outline-secondary" onClick={handleLogout}>
+          로그아웃
+        </button>
+      </div>
+  
+      {/* '신규', '수정', '삭제' 버튼을 오른쪽으로 배치하기 위한 컨테이너 */}
+      <div className="todo-actions">
+        {/* '신규' 버튼은 '취소' 버튼으로 토글됩니다. */}
         <button
-          className="btn btn-secondary mb-3 mr-3"
-          onClick={getUncompleteTodoList}
+          className={
+            isCreating || isEditing
+              ? 'btn btn-secondary'
+              : 'btn btn-primary'
+          }
+          onClick={handleToggleCreate}
         >
-          완료되지 않은 할 일 불러오기
+          {isCreating || isEditing ? '취소' : '신규'}
         </button>
-      )}
-      {!isCreating && !isEditing && (
-        <button
-          className="btn btn-secondary mb-3 mr-3"
-          onClick={handleModifyTodo}
-        >
-          수정
-        </button>
-      )}
-      {!isCreating && (
-        <button className="btn btn-danger mb-3 mr-3" onClick={handleDeleteTodo}>
-          삭제
-        </button>
-      )}
+  
+        {/* 수정과 삭제 버튼은 isCreating, isEditing 상태가 아닐 때만 보입니다. */}
+        {!isCreating && !isEditing && (
+          <>
+            <button
+              className="btn btn-secondary"
+              onClick={handleModifyTodo}
+            >
+              수정
+            </button>
+            <button className="btn btn-danger" onClick={handleDeleteTodo}>
+              삭제
+            </button>
+          </>
+        )}
+      </div>
+  
+      {/* 할 일 목록 또는 할 일 생성 폼을 보여주는 부분 */}
       {isCreating ? (
         <CreateTodoForm
           onAddTodo={handleAddTodo}
