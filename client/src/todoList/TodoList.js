@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import Swal from 'sweetalert2';
 import { useAuthStore } from '../authStore/authStore';
 import './todoList.css';
+import DatePicker from 'react-datepicker';
+import { ko } from 'date-fns/locale';
+import "react-datepicker/dist/react-datepicker.css";
 
 // 신규 TODO 항목 추가 폼 컴포넌트
 function CreateTodoForm(props) {
@@ -168,6 +171,7 @@ function TodoContainer() {
   const [isCreating, setIsCreating] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [/*checkedTodoIdArray,*/ setCheckedTodoIdArray] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
   //CreateTodoForm에서 넘어온 Todo 요소 추가
   function handleAddTodo(todo) {
@@ -253,6 +257,19 @@ function TodoContainer() {
     }
   }
 
+  // 이전/다음 날짜로 변경하는 핸들러 함수
+  const handlePrevDay = () => {
+    const newDate = new Date(selectedDate);
+    newDate.setDate(selectedDate.getDate() - 1);
+    setSelectedDate(newDate);
+  };
+
+  const handleNextDay = () => {
+    const newDate = new Date(selectedDate);
+    newDate.setDate(selectedDate.getDate() + 1);
+    setSelectedDate(newDate);
+  };
+
   return (
     <div className="todo-container">
       {/* 1. 제목을 중앙에 배치하기 위한 헤더 */}
@@ -296,6 +313,18 @@ function TodoContainer() {
             </button>
           </>
         )}
+      </div>
+
+      <div className="date-navigator">
+        <button onClick={handlePrevDay} className="date-nav-btn">&lt;</button>
+        <DatePicker
+          locale={ko} // 달력을 한국어로 설정
+          selected={selectedDate} // 현재 선택된 날짜
+          onChange={(date) => setSelectedDate(date)} // 날짜 선택 시 상태 변경
+          dateFormat="yyyy-MM-dd" // 표시 형식
+          className="date-display" // CSS 스타일링을 위한 클래스
+        />
+        <button onClick={handleNextDay} className="date-nav-btn">&gt;</button>
       </div>
   
       {/* 할 일 목록 또는 할 일 생성 폼을 보여주는 부분 */}
