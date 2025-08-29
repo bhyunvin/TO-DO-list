@@ -107,9 +107,4 @@ export class UserService {
       });
     });
   }
-
-  // 세션의 userSeq를 통한 사용자 정보 조회
-  async getUserInfoByUserSeq(userSeq: number): Promise<UserEntity> {
-    return await this.userRepository.findOne({ where: { userSeq } });
-  }
 }
