@@ -81,7 +81,7 @@ function SignupForm({ onSignupComplete }) {
       }
     } catch (error) {
       // 네트워크 오류 처리
-      console.error('LoginForm Login Error : ', error);
+      console.error('SignupForm Error : ', error);
       Swal.fire('오류 발생', '서버와의 연결에 문제가 발생했습니다.', 'error');
     }
   }
@@ -216,9 +216,29 @@ function SignupForm({ onSignupComplete }) {
       }
     } catch (error) {
       // 네트워크 오류 처리
-      console.error('LoginForm Login Error : ', error);
+      console.error('SignupForm Error : ', error);
       Swal.fire('오류 발생', '서버와의 연결에 문제가 발생했습니다.', 'error');
     }
+  }
+
+  // 취소 시
+  function onCancel() {
+    Swal.fire({
+      title: '정말 취소하시겠습니까?',
+      text: '작성중인 내용이 사라집니다.',
+      icon: 'warning',
+      showCancelButton: true,
+      reverseButtons: true,
+      confirmButtonColor: '#0d6efd',
+      cancelButtonColor: '#6C757D',
+      confirmButtonText: '확인',
+      cancelButtonText: '취소',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // 로그인 화면으로
+        onSignupComplete();
+      }
+    });
   }
 
   return (
@@ -387,9 +407,20 @@ function SignupForm({ onSignupComplete }) {
           </div>
         </div>
 
-        <button type="submit" className="btn btn-primary mb-3">
-          회원가입
-        </button>
+        <div className="row">
+          {/* 취소 버튼 */}
+          <div className="col-3">
+            <button type="button" className="btn btn-secondary" onClick={onCancel}>
+              취소
+            </button>
+          </div>
+          {/* 회원가입 버튼 */}
+          <div className="col-9">
+            <button type="submit" className="btn btn-primary">
+              회원가입
+            </button>
+          </div>
+        </div>
       </form>
     </div>
   );
