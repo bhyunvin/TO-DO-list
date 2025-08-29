@@ -51,7 +51,6 @@ function LoginForm() {
         if (data.userSeq) {
           // 로그인 성공
           login(data); // 사용자 정보를 AuthContext에 저장
-          Swal.fire('로그인 성공!', '', 'success');
         } else if (response.status === 204) {
           // No content
           Swal.fire('로그인 실패', '사용자가 존재하지 않습니다.', 'error');
