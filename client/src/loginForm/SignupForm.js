@@ -77,7 +77,7 @@ function SignupForm({ onSignupComplete }) {
         }
       } else {
         // 비정상 응답 처리
-        Swal.fire('로그인 실패', '서버 오류가 발생했습니다.', 'error');
+        Swal.fire('아이디 중복체크 실패', '서버 오류가 발생했습니다.', 'error');
       }
     } catch (error) {
       // 네트워크 오류 처리
