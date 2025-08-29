@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import Swal from 'sweetalert2';
-import { useAuth } from '../authContext/AuthContext';
+import { useAuthStore } from '../authStore/authStore';
 import SignupForm from './SignupForm';
 
 import './loginForm.css';
@@ -18,7 +18,7 @@ function LoginForm() {
     setPassword(e.target.value);
   }
 
-  const { login } = useAuth();
+  const { login } = useAuthStore();
   async function submitLogin(e) {
     e.preventDefault();
 

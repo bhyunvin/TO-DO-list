@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Swal from 'sweetalert2';
-import { useAuth } from '../authContext/AuthContext';
+import { useAuthStore } from '../authStore/authStore';
 
 // 신규 TODO 항목 추가 폼 컴포넌트
 function CreateTodoForm(props) {
@@ -162,7 +162,7 @@ function TodoList(props) {
 
 // TODO 리스트 및 폼을 조건부로 렌더링하는 컨테이너 컴포넌트
 function TodoContainer() {
-  const { user, logout } = useAuth();
+  const { user, logout } = useAuthStore();
   const [todos, setTodos] = useState([]);
   const [isCreating, setIsCreating] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
