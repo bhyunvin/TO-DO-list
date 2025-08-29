@@ -204,8 +204,9 @@ function SignupForm({ onSignupComplete }) {
         const data = await response.json();
 
         if (data.userSeq) {
-          Swal.fire('', '회원가입되었습니다.', 'success');
-          onSignupComplete();
+          Swal.fire('', '회원가입되었습니다.', 'success').then(() => {
+            onSignupComplete();
+          });
         } else {
           console.error('회원가입 실패 : ', data);
           Swal.fire('', '회원가입에 실패했습니다.', 'error');
