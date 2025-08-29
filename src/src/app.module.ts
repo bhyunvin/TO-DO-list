@@ -32,14 +32,21 @@ import { KeychainUtil } from './utils/keychainUtil';
 
 // DB 관련
 import { CustomNamingStrategy } from './utils/customNamingStrategy';
-import { decrypt } from './utils/cryptUtil';
+import { decrypt, encryptForDecrypt } from './utils/cryptUtil';
+
+// config
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true, 
+      envFilePath: '.env', // .env 파일 경로 지정
+    }),
     TypeOrmModule.forRootAsync({
-      imports: [KeychainModule], // KeychainService를 사용하기 위해 KeychainModule 임포트
-      inject: [KeychainUtil], // useFactory에 KeychainService 주입
-      useFactory: async (keychainUtil: KeychainUtil) => {
+      imports: [ConfigModule, KeychainModule], // KeychainService를 사용하기 위해 KeychainModule 임포트
+      inject: [ConfigService, KeychainUtil], // useFactory에 KeychainService 주입
+      useFactory: async (configService: ConfigService, keychainUtil: KeychainUtil) => {
         const encryptedDbPassword = await keychainUtil.getPassword(
           'encrypt-db-password',
         );
@@ -52,15 +59,15 @@ import { decrypt } from './utils/cryptUtil';
 
         return {
           type: 'postgres',
-          host: process.env.DB_DEV_SERVER,
-          port: Number(process.env.DB_DEV_PORT),
-          username: process.env.DB_DEV_USERNAME,
+          host: configService.get<string>('DB_DEV_SERVER'),
+          port: Number(configService.get<string>('DB_DEV_PORT')),
+          username: configService.get<string>('DB_DEV_USERNAME'),
           password: dbPassword,
-          database: process.env.DB_DEV_DATABASE,
+          database: configService.get<string>('DB_DEV_DATABASE'),
           entities: ['dist/**/*.entity{.ts,.js}'],
           synchronize: false,
           namingStrategy: new CustomNamingStrategy(),
-          ssl: false,
+          ssl: { rejectUnauthorized: false },
         };
       },
     }),
