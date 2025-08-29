@@ -1,0 +1,52 @@
+/* 전체 TODO 컨테이너 */
+.todo-container {
+    max-width: 800px;
+    margin: 40px auto; /* 상하 여백 증가로 보기 좋게 */
+    padding: 24px;
+    border: 1px solid #e0e0e0; /* 테두리 색상 약간 연하게 */
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); /* 그림자 효과 */
+    background-color: #fff;
+}
+
+/* 1. 제목을 위한 헤더: 중앙 정렬 */
+.todo-title-header {
+    text-align: center; /* 텍스트를 중앙으로 정렬합니다. */
+    margin-bottom: 8px; /* 사용자 정보와의 약간의 간격 */
+    padding-bottom: 16px;
+    border-bottom: 1px solid #f0f0f0; /* 구분선 */
+}
+
+.todo-title-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+/* 2. 사용자 정보를 위한 헤더: 우측 정렬 */
+.user-info-header {
+    display: flex;
+    justify-content: flex-end; /* 내용을 오른쪽 끝으로 보냅니다. */
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px; /* 아래의 액션 버튼들과의 간격 */
+}
+
+/* 신규, 수정, 삭제 버튼 그룹 */
+.todo-actions {
+    display: flex;
+    justify-content: flex-end; /* 오른쪽 정렬 */
+    gap: 8px; /* 버튼 간 간격 */
+    margin-bottom: 20px;
+}
+
+/* todo-actions 내부의 버튼들이 불필요하게 늘어나는 것을 방지 */
+.todo-actions .btn {
+    width: auto; /* 버튼 내용에 맞게 너비 자동 설정 */
+    flex-grow: 0; /* flex item이 늘어나지 않도록 설정 */
+    min-width: 80px; /* 버튼의 최소 너비 지정 (선택 사항) */
+}
+
+/* 할 일 목록 섹션 */
+.todo-list-section {
+    margin-top: 20px;
+}
