@@ -36,7 +36,6 @@ import { decrypt } from './utils/cryptUtil';
 
 @Module({
   imports: [
-    // 1. TypeORM 비동기 설정
     TypeOrmModule.forRootAsync({
       imports: [KeychainModule], // KeychainService를 사용하기 위해 KeychainModule 임포트
       inject: [KeychainUtil], // useFactory에 KeychainService 주입
@@ -65,12 +64,11 @@ import { decrypt } from './utils/cryptUtil';
         };
       },
     }),
-    // --- Other Application Modules ---
     AssistanceModule,
     UserModule,
     LoggingModule,
     FileUploadModule,
-    KeychainModule, // AppModule에서도 KeychainService를 주입받아 사용하므로 필요합니다.
+    KeychainModule,
   ],
   providers: [
     {
@@ -87,7 +85,6 @@ export class AppModule implements NestModule {
   // 생성자에서 KeychainService를 주입받습니다.
   constructor(private readonly keychainService: KeychainUtil) {}
 
-  // 2. 세션 미들웨어 비동기 설정
   async configure(consumer: MiddlewareConsumer) {
     const sessionSecret = await this.keychainService.getPassword(
       'encrypt-session-key',
