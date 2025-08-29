@@ -51,10 +51,6 @@ import { decrypt } from './utils/cryptUtil';
         }
         const dbPassword = await decrypt(encryptedDbPassword);
 
-        const decryptApiKey = await decrypt(
-          await keychainUtil.getPassword('encrypt-google-api-key'),
-        );
-
         return {
           type: 'postgres',
           host: process.env.DB_DEV_SERVER,
