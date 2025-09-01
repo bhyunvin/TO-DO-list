@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 import { useAuthStore } from '../authStore/authStore';
 import './todoList.css';
@@ -99,61 +99,63 @@ function CreateTodoForm(props) {
 
 // TODO 항목 목록을 표시하는 컴포넌트
 function TodoList(props) {
-  const { todos } = props;
-
-  function handleWholeCheckbox(e) {
-    const isChecked = e.target.checked;
-    Array.from(document.getElementsByClassName('todo-checkbox')).forEach(
-      function (todoCheckboxElement) {
-        todoCheckboxElement.checked = isChecked;
-      },
-    );
-  }
+  const { todos, onToggleComplete, onDeleteTodo, onEditTodo } = props;
 
   return (
     <table className="todo-list">
       <colgroup>
-        <col width={30}></col>
-        <col width={30}></col>
-        <col width={200}></col>
-        <col width={50}></col>
-        <col width={200}></col>
-        <col width={200}></col>
+        <col width="5%" />
+        <col width="10%" />
+        <col width="35%" />
+        <col width="15%" />
+        <col width="20%" />
+        <col width="15%" />
       </colgroup>
       <thead>
-        <th>
-          <input
-            type="checkbox"
-            className="form-check-input"
-            onClick={handleWholeCheckbox}
-          ></input>
-        </th>
-        <th>번호</th>
-        <th>내용</th>
-        <th>완료일시</th>
-        <th>비고</th>
-        <th>파일</th>
+        <tr>
+          <th>완료</th>
+          <th>번호</th>
+          <th>내용</th>
+          <th>완료일시</th>
+          <th>비고</th>
+          <th>작업</th>
+        </tr>
       </thead>
       <tbody>
         {todos.length > 0 ? (
-          todos.map(function (todo, index) {
-            return (
-              <tr id={todo.TODO_SEQ} key={todo.TODO_SEQ}>
-                <td>
-                  <input
-                    type="checkbox"
-                    className="form-check-input todo-checkbox"
-                    checked=""
-                  ></input>
-                </td>
-                <td>{index + 1}</td>
-                <td>{todo.TODO_COMMENT}</td>
-                <td>{todo.COMPLETE_DTM}</td>
-                <td>{todo.TODO_NOTE}</td>
-                <td>파일 작업필요</td>
-              </tr>
-            );
-          })
+          todos.map((todo, index) => (
+            <tr
+              key={todo.todoSeq}
+              className={todo.completeDtm ? 'completed' : ''}
+            >
+              <td>
+                <input
+                  type="checkbox"
+                  className="form-check-input"
+                  checked={!!todo.completeDtm}
+                  onChange={() => onToggleComplete(todo.todoSeq, !!todo.completeDtm)}
+                />
+              </td>
+              <td>{index + 1}</td>
+              <td className="todo-content">{todo.todoContent}</td>
+              <td>{todo.completeDtm}</td>
+              <td>{todo.todoNote}</td>
+              <td>
+                <button
+                  className="btn btn-sm btn-info"
+                  onClick={() => onEditTodo(todo)}
+                >
+                  수정
+                </button>
+                <button
+                  className="btn btn-sm btn-danger ml-2"
+                  onClick={() => onDeleteTodo(todo.todoSeq)}
+                >
+                  삭제
+                </button>
+              </td>
+            </tr>
+          ))
         ) : (
           <tr>
             <td colSpan={6}>할 일이 없습니다.</td>
@@ -164,77 +166,210 @@ function TodoList(props) {
   );
 }
 
+// ToDo 항목 수정을 위한 폼 컴포넌트
+function EditTodoForm({ todo, onSave, onCancel }) {
+  const [todoContent, setTodoContent] = useState(todo.todoContent);
+  const [todoNote, setTodoNote] = useState(todo.todoNote);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSave(todo.todoSeq, { todoContent, todoNote });
+  };
+
+  return (
+    <div className="edit-todo-form">
+      <h3>ToDo 수정</h3>
+      <form onSubmit={handleSubmit}>
+        <label className="mb-1">할 일</label>
+        <textarea
+          className="form-control mb-3"
+          value={todoContent}
+          onChange={(e) => setTodoContent(e.target.value)}
+          required
+        />
+        <label className="mb-1">비고</label>
+        <textarea
+          className="form-control mb-3"
+          value={todoNote}
+          onChange={(e) => setTodoNote(e.target.value)}
+        />
+        <button type="submit" className="btn btn-primary">
+          저장
+        </button>
+        <button type="button" className="btn btn-secondary ml-2" onClick={onCancel}>
+          취소
+        </button>
+      </form>
+    </div>
+  );
+}
+
+
+// 날짜를 YYYY-MM-DD 형식의 문자열로 변환하는 헬퍼 함수
+function formatDate(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 // TODO 리스트 및 폼을 조건부로 렌더링하는 컨테이너 컴포넌트
 function TodoContainer() {
   const { user, logout } = useAuthStore();
   const [todos, setTodos] = useState([]);
   const [isCreating, setIsCreating] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [/*checkedTodoIdArray,*/ setCheckedTodoIdArray] = useState([]);
+  const [editingTodo, setEditingTodo] = useState(null); // 수정 중인 ToDo 항목 전체를 저장
   const [selectedDate, setSelectedDate] = useState(new Date());
 
+  // API URL 환경 변수에서 가져오기
+  const apiUrl = process.env.REACT_APP_API_URL;
+
+  // 선택된 날짜에 해당하는 ToDo 목록을 서버에서 가져오는 함수
+  const fetchTodos = async () => {
+    try {
+      const formattedDate = formatDate(selectedDate);
+      const response = await fetch(`${apiUrl}/todo?date=${formattedDate}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setTodos(data);
+      } else {
+        Swal.fire('오류', '할 일 목록을 불러오는 데 실패했습니다.', 'error');
+      }
+    } catch (error) {
+      console.error('Fetch Todos Error:', error);
+      Swal.fire('오류', '서버와의 통신 중 문제가 발생했습니다.', 'error');
+    }
+  };
+
+  // selectedDate가 변경될 때마다 ToDo 목록을 새로고침
+  useEffect(() => {
+    fetchTodos();
+  }, [selectedDate]);
+
+
   //CreateTodoForm에서 넘어온 Todo 요소 추가
-  function handleAddTodo(todo) {
-    setTodos(function (prevTodos) {
-      return [...prevTodos, todo];
-    });
-    setIsCreating(false);
+  async function handleAddTodo(todoContent) {
+    try {
+      const formattedDate = formatDate(selectedDate);
+      const response = await fetch(`${apiUrl}/todo`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          todoContent,
+          todoDate: formattedDate,
+          todoNote: '', // todoNote는 현재 폼에서 사용하지 않으므로 빈 문자열로 전달
+        }),
+      });
+
+      if (response.ok) {
+        Swal.fire('성공', '새로운 할 일이 추가되었습니다.', 'success');
+        setIsCreating(false);
+        fetchTodos(); // 목록 새로고침
+      } else {
+        Swal.fire('오류', '할 일 추가에 실패했습니다.', 'error');
+      }
+    } catch (error) {
+      console.error('Add Todo Error:', error);
+      Swal.fire('오류', '서버와의 통신 중 문제가 발생했습니다.', 'error');
+    }
   }
+
+  // ToDo 항목의 완료 상태를 토글하는 함수
+  const handleToggleComplete = async (todoSeq, isCompleted) => {
+    try {
+      const response = await fetch(`${apiUrl}/todo/${todoSeq}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          completeDtm: isCompleted ? null : new Date().toISOString(),
+        }),
+      });
+
+      if (response.ok) {
+        fetchTodos();
+      } else {
+        Swal.fire('오류', '상태 변경에 실패했습니다.', 'error');
+      }
+    } catch (error) {
+      console.error('Toggle Complete Error:', error);
+      Swal.fire('오류', '서버와의 통신 중 문제가 발생했습니다.', 'error');
+    }
+  };
+
+  // ToDo 항목을 삭제하는 함수
+  const handleDeleteTodo = async (todoSeq) => {
+    // 사용자에게 삭제 확인을 받습니다.
+    const result = await Swal.fire({
+      title: '정말로 삭제하시겠습니까?',
+      text: "삭제된 데이터는 복구할 수 없습니다.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: '네, 삭제합니다!',
+      cancelButtonText: '아니오'
+    });
+
+    // 사용자가 '네'를 클릭한 경우에만 삭제를 진행합니다.
+    if (result.isConfirmed) {
+      try {
+        const response = await fetch(`${apiUrl}/todo`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ todoIds: [todoSeq] }),
+        });
+
+        if (response.ok) {
+          Swal.fire('삭제 완료!', '할 일이 성공적으로 삭제되었습니다.', 'success');
+          fetchTodos(); // 목록 새로고침
+        } else {
+          const errorData = await response.json();
+          Swal.fire('오류', `삭제에 실패했습니다: ${errorData.message}`, 'error');
+        }
+      } catch (error) {
+        console.error('Delete Todo Error:', error);
+        Swal.fire('오류', '서버와의 통신 중 문제가 발생했습니다.', 'error');
+      }
+    }
+  };
+
+  // ToDo 항목 수정을 시작하는 함수
+  const handleEditTodo = (todo) => {
+    setEditingTodo(todo);
+  };
+
+  // ToDo 항목 수정을 저장하는 함수
+  const handleSaveTodo = async (todoSeq, updatedData) => {
+    try {
+      const response = await fetch(`${apiUrl}/todo/${todoSeq}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedData),
+      });
+
+      if (response.ok) {
+        Swal.fire('성공', '할 일이 수정되었습니다.', 'success');
+        setEditingTodo(null);
+        fetchTodos();
+      } else {
+        Swal.fire('오류', '수정에 실패했습니다.', 'error');
+      }
+    } catch (error) {
+      console.error('Save Todo Error:', error);
+      Swal.fire('오류', '서버와의 통신 중 문제가 발생했습니다.', 'error');
+    }
+  };
 
   // 신규 버튼 클릭 여부 처리
   function handleToggleCreate() {
-    setIsCreating(function (prevIsCreating) {
-      return !prevIsCreating;
-    });
+    setIsCreating((prev) => !prev);
+    setEditingTodo(null); // 신규 작성 시 수정 상태는 해제
   }
 
-  // 수정 버튼 클릭 이벤트 - 수정 form 그리기
-  function handleModifyTodo() {
-    // 0개 선택되어있으면 alert
-    // 1개 초과하여 선택되어있으면 alert
-    const todoCheckboxElements = Array.from(
-      document.getElementsByClassName('todo-checkbox'),
-    )
-      .filter(function (todoCheckbox) {
-        return todoCheckbox.checked;
-      })
-      .map(function (checkedElement) {
-        return checkedElement.id;
-      });
-    const todoCheckboxElementsLength = todoCheckboxElements.length;
-
-    if (todoCheckboxElementsLength === 0) {
-      Swal.fire('선택된 할 일이 없습니다.', '', 'warning');
-      return;
-    } else if (todoCheckboxElementsLength > 1) {
-      Swal.fire('수정할 할 일을 하나만 선택해주세요.', '', 'warning');
-      return;
-    }
-
-    setIsEditing(true);
-    setCheckedTodoIdArray(todoCheckboxElements);
-  }
-
-  // 삭제 버튼 클릭 이벤트
-  function handleDeleteTodo() {
-    // 0개 선택되어있으면 alert
-    const todoCheckboxElements = Array.from(
-      document.getElementsByClassName('todo-checkbox'),
-    )
-      .filter(function (todoCheckbox) {
-        return todoCheckbox.checked;
-      })
-      .map(function (checkedElement) {
-        return checkedElement.id;
-      });
-
-    if (todoCheckboxElements.length === 0) {
-      Swal.fire('선택된 할 일이 없습니다.', '', 'warning');
-      return;
-    }
-
-    // 서버에 id 목록 던져서 삭제 + 확인 alert + 삭제한 당일 리스트로 조회
-  }
 
   async function handleLogout() {
     try {
@@ -270,6 +405,34 @@ function TodoContainer() {
     setSelectedDate(newDate);
   };
 
+  const renderContent = () => {
+    if (editingTodo) {
+      return (
+        <EditTodoForm
+          todo={editingTodo}
+          onSave={handleSaveTodo}
+          onCancel={() => setEditingTodo(null)}
+        />
+      );
+    }
+    if (isCreating) {
+      return (
+        <CreateTodoForm
+          onAddTodo={handleAddTodo}
+          onCancel={handleToggleCreate}
+        />
+      );
+    }
+    return (
+      <TodoList
+        todos={todos}
+        onToggleComplete={handleToggleComplete}
+        onDeleteTodo={handleDeleteTodo}
+        onEditTodo={handleEditTodo}
+      />
+    );
+  };
+
   return (
     <div className="todo-container">
       {/* 1. 제목을 중앙에 배치하기 위한 헤더 */}
@@ -285,34 +448,14 @@ function TodoContainer() {
         </button>
       </div>
   
-      {/* '신규', '수정', '삭제' 버튼을 오른쪽으로 배치하기 위한 컨테이너 */}
+      {/* '신규' 버튼을 오른쪽으로 배치하기 위한 컨테이너 */}
       <div className="todo-actions">
-        {/* '신규' 버튼은 '취소' 버튼으로 토글됩니다. */}
         <button
-          className={
-            isCreating || isEditing
-              ? 'btn btn-secondary'
-              : 'btn btn-primary'
-          }
-          onClick={handleToggleCreate}
+          className={isCreating || editingTodo ? 'btn btn-secondary' : 'btn btn-primary'}
+          onClick={isCreating || editingTodo ? () => { setIsCreating(false); setEditingTodo(null); } : handleToggleCreate}
         >
-          {isCreating || isEditing ? '취소' : '신규'}
+          {isCreating || editingTodo ? '취소' : '신규'}
         </button>
-  
-        {/* 수정과 삭제 버튼은 isCreating, isEditing 상태가 아닐 때만 보입니다. */}
-        {!isCreating && !isEditing && (
-          <>
-            <button
-              className="btn btn-secondary"
-              onClick={handleModifyTodo}
-            >
-              수정
-            </button>
-            <button className="btn btn-danger" onClick={handleDeleteTodo}>
-              삭제
-            </button>
-          </>
-        )}
       </div>
 
       <div className="date-navigator">
@@ -327,15 +470,8 @@ function TodoContainer() {
         <button onClick={handleNextDay} className="date-nav-btn">&gt;</button>
       </div>
   
-      {/* 할 일 목록 또는 할 일 생성 폼을 보여주는 부분 */}
-      {isCreating ? (
-        <CreateTodoForm
-          onAddTodo={handleAddTodo}
-          onCancel={handleToggleCreate}
-        />
-      ) : (
-        <TodoList todos={todos} />
-      )}
+      {/* 할 일 목록 또는 할 일 생성/수정 폼을 보여주는 부분 */}
+      {renderContent()}
     </div>
   );
 }
