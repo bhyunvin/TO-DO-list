@@ -26,6 +26,8 @@ import { FileUploadModule } from './fileUpload/fileUpload.module';
 // ai assistance
 import { AssistanceModule } from './assistance/assistance.module';
 
+import { TodoModule } from './todo/todo.module';
+
 // keychain
 import { KeychainModule } from './utils/keychain.module';
 import { KeychainUtil } from './utils/keychainUtil';
@@ -77,6 +79,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     AssistanceModule,
     UserModule,
     LoggingModule,
+    TodoModule,
     FileUploadModule,
     KeychainModule,
   ],
