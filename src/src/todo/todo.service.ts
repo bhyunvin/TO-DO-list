@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import { TodoEntity } from './todo.entity';
 import { CreateTodoDto, UpdateTodoDto } from './todo.dto';
+import { setAuditColumn } from 'src/utils/auditColumns';
 
 @Injectable()
 export class TodoService {
@@ -24,7 +25,10 @@ export class TodoService {
   }
 
   // 새로운 ToDo 항목을 생성합니다.
-  async create(userSeq: number, createTodoDto: CreateTodoDto): Promise<TodoEntity> {
+  async create(
+    userSeq: number,
+    createTodoDto: CreateTodoDto,
+  ): Promise<TodoEntity> {
     const newTodo = this.todoRepository.create({
       ...createTodoDto,
       userSeq, // 사용자 ID를 설정합니다.
@@ -45,7 +49,9 @@ export class TodoService {
     userSeq: number,
     updateTodoDto: UpdateTodoDto,
   ): Promise<TodoEntity> {
-    const todo = await this.todoRepository.findOne({ where: { todoSeq: id, userSeq } });
+    const todo = await this.todoRepository.findOne({
+      where: { todoSeq: id, userSeq },
+    });
     if (!todo) {
       // ToDo 항목이 없으면 null을 반환합니다.
       return null;
@@ -53,8 +59,7 @@ export class TodoService {
 
     // 수정된 내용을 적용합니다.
     Object.assign(todo, updateTodoDto);
-    todo.auditColumns.latest_update_user_seq = userSeq;
-    todo.auditColumns.latest_update_dtm = new Date().toISOString();
+    setAuditColumn({ entity: todo, id: userDto.userId, ip, isUpdate: true });
 
     return this.todoRepository.save(todo);
   }
@@ -64,14 +69,14 @@ export class TodoService {
     await this.todoRepository.update(
       {
         todoSeq: In(todoIds), // ID 배열에 포함된 모든 항목을 대상으로 합니다.
-        userSeq
+        userSeq,
       },
       {
         delYn: 'Y', // 'Y'로 설정하여 soft delete 처리합니다.
         auditColumns: {
-            latest_update_user_seq: userSeq,
-            latest_update_dtm: new Date().toISOString(),
-        }
+          updId: session.userId,
+          updDtm: new Date(),
+        },
       },
     );
   }
