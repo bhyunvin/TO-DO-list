@@ -1,20 +1,24 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, In } from 'typeorm';
+import { Injectable, Logger } from '@nestjs/common';
+import { InjectRepository, InjectDataSource } from '@nestjs/typeorm';
+import { Repository, In, DataSource } from 'typeorm';
 import { TodoEntity } from './todo.entity';
 import { CreateTodoDto, UpdateTodoDto } from './todo.dto';
 import { setAuditColumn } from 'src/utils/auditColumns';
 
 @Injectable()
 export class TodoService {
+  private readonly logger = new Logger(TodoService.name);
+
   constructor(
-    // TodoEntity의 Repository를 주입합니다.
     @InjectRepository(TodoEntity)
     private todoRepository: Repository<TodoEntity>,
+    @InjectDataSource()
+    private readonly dataSource: DataSource,
   ) {}
 
   // 특정 사용자의 특정 날짜의 모든 ToDo 항목을 조회합니다.
   async findAll(userSeq: number, todoDate: string): Promise<TodoEntity[]> {
+    this.logger.log(`Finding all todos for user ${userSeq} on date ${todoDate}`);
     return this.todoRepository.find({
       where: {
         userSeq,
@@ -28,19 +32,18 @@ export class TodoService {
   async create(
     userSeq: number,
     createTodoDto: CreateTodoDto,
+    userId: string,
+    ip: string,
   ): Promise<TodoEntity> {
-    const newTodo = this.todoRepository.create({
-      ...createTodoDto,
-      userSeq, // 사용자 ID를 설정합니다.
-      auditColumns: {
-        // 생성 및 수정 정보를 설정합니다.
-        creation_user_seq: userSeq,
-        creation_dtm: new Date().toISOString(),
-        latest_update_user_seq: userSeq,
-        latest_update_dtm: new Date().toISOString(),
-      },
+    this.logger.log(`Creating a new todo for user ${userSeq}`);
+    return this.dataSource.transaction(async (transactionalEntityManager) => {
+      let newTodo = this.todoRepository.create({
+        ...createTodoDto,
+        userSeq, // 사용자 ID를 설정합니다.
+      });
+      newTodo = setAuditColumn({ entity: newTodo, id: userId, ip });
+      return transactionalEntityManager.save(TodoEntity, newTodo);
     });
-    return this.todoRepository.save(newTodo);
   }
 
   // 특정 ToDo 항목을 수정합니다.
@@ -48,36 +51,49 @@ export class TodoService {
     id: number,
     userSeq: number,
     updateTodoDto: UpdateTodoDto,
+    userId: string,
+    ip: string,
   ): Promise<TodoEntity> {
-    const todo = await this.todoRepository.findOne({
-      where: { todoSeq: id, userSeq },
+    this.logger.log(`Updating todo ${id} for user ${userSeq}`);
+    return this.dataSource.transaction(async (transactionalEntityManager) => {
+      const todo = await transactionalEntityManager.findOne(TodoEntity, {
+        where: { todoSeq: id, userSeq, delYn: 'N' },
+      });
+      if (!todo) {
+        // ToDo 항목이 없으면 null을 반환합니다.
+        return null;
+      }
+
+      // 수정된 내용을 적용합니다.
+      Object.assign(todo, updateTodoDto);
+      setAuditColumn({ entity: todo, id: userId, ip, isUpdate: true });
+
+      return transactionalEntityManager.save(TodoEntity, todo);
     });
-    if (!todo) {
-      // ToDo 항목이 없으면 null을 반환합니다.
-      return null;
-    }
-
-    // 수정된 내용을 적용합니다.
-    Object.assign(todo, updateTodoDto);
-    setAuditColumn({ entity: todo, id: userDto.userId, ip, isUpdate: true });
-
-    return this.todoRepository.save(todo);
   }
 
   // 여러 ToDo 항목을 삭제 (soft delete)합니다.
-  async delete(userSeq: number, todoIds: number[]): Promise<void> {
-    await this.todoRepository.update(
-      {
-        todoSeq: In(todoIds), // ID 배열에 포함된 모든 항목을 대상으로 합니다.
-        userSeq,
-      },
-      {
-        delYn: 'Y', // 'Y'로 설정하여 soft delete 처리합니다.
-        auditColumns: {
-          updId: session.userId,
-          updDtm: new Date(),
+  async delete(
+    userSeq: number,
+    todoIds: number[],
+    userId: string,
+    ip: string,
+  ): Promise<void> {
+    this.logger.log(`Deleting todos ${todoIds} for user ${userSeq}`);
+    await this.dataSource.transaction(async (transactionalEntityManager) => {
+      const todos = await transactionalEntityManager.find(TodoEntity, {
+        where: {
+          todoSeq: In(todoIds),
+          userSeq,
+          delYn: 'N',
         },
-      },
-    );
+      });
+
+      for (const todo of todos) {
+        todo.delYn = 'Y';
+        setAuditColumn({ entity: todo, id: userId, ip, isUpdate: true });
+        await transactionalEntityManager.save(TodoEntity, todo);
+      }
+    });
   }
 }

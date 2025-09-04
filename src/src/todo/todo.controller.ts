@@ -10,7 +10,9 @@ import {
   Query,
   HttpCode,
   HttpStatus,
+  Req,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { TodoService } from './todo.service';
 import { CreateTodoDto, UpdateTodoDto, DeleteTodoDto } from './todo.dto';
 
@@ -23,9 +25,10 @@ export class TodoController {
   create(
     @Session() session: Record<string, any>,
     @Body() createTodoDto: CreateTodoDto,
+    @Req() req: Request,
   ) {
-    const userSeq = session.user.userSeq;
-    return this.todoService.create(userSeq, createTodoDto);
+    const { userSeq, userId } = session.user;
+    return this.todoService.create(userSeq, createTodoDto, userId, req.ip);
   }
 
   // 특정 날짜의 모든 ToDo 항목을 조회합니다.
@@ -34,7 +37,7 @@ export class TodoController {
     @Session() session: Record<string, any>,
     @Query('date') date: string,
   ) {
-    const userSeq = session.user.userSeq;
+    const { userSeq } = session.user;
     return this.todoService.findAll(userSeq, date);
   }
 
@@ -44,9 +47,10 @@ export class TodoController {
     @Param('id') id: string,
     @Session() session: Record<string, any>,
     @Body() updateTodoDto: UpdateTodoDto,
+    @Req() req: Request,
   ) {
-    const userSeq = session.user.userSeq;
-    return this.todoService.update(+id, userSeq, updateTodoDto);
+    const { userSeq, userId } = session.user;
+    return this.todoService.update(+id, userSeq, updateTodoDto, userId, req.ip);
   }
 
   // 여러 ToDo 항목을 삭제합니다.
@@ -55,8 +59,9 @@ export class TodoController {
   remove(
     @Session() session: Record<string, any>,
     @Body() deleteTodoDto: DeleteTodoDto,
+    @Req() req: Request,
   ) {
-    const userSeq = session.user.userSeq;
-    return this.todoService.delete(userSeq, deleteTodoDto.todoIds);
+    const { userSeq, userId } = session.user;
+    return this.todoService.delete(userSeq, deleteTodoDto.todoIds, userId, req.ip);
   }
 }
