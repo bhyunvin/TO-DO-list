@@ -10,6 +10,7 @@ import {
   Query,
   HttpCode,
   HttpStatus,
+  Ip,
 } from '@nestjs/common';
 import { TodoService } from './todo.service';
 import { CreateTodoDto, UpdateTodoDto, DeleteTodoDto } from './todo.dto';
@@ -23,9 +24,9 @@ export class TodoController {
   create(
     @Session() session: Record<string, any>,
     @Body() createTodoDto: CreateTodoDto,
+    @Ip() ip: string,
   ) {
-    const userSeq = session.user.userSeq;
-    return this.todoService.create(userSeq, createTodoDto);
+    return this.todoService.create(session.user, ip, createTodoDto);
   }
 
   // 특정 날짜의 모든 ToDo 항목을 조회합니다.
@@ -34,8 +35,7 @@ export class TodoController {
     @Session() session: Record<string, any>,
     @Query('date') date: string,
   ) {
-    const userSeq = session.user.userSeq;
-    return this.todoService.findAll(userSeq, date);
+    return this.todoService.findAll(session.user.userSeq, date);
   }
 
   // 특정 ToDo 항목을 수정합니다.
@@ -43,10 +43,15 @@ export class TodoController {
   update(
     @Param('id') id: string,
     @Session() session: Record<string, any>,
+    @Ip() ip: string,
     @Body() updateTodoDto: UpdateTodoDto,
   ) {
-    const userSeq = session.user.userSeq;
-    return this.todoService.update(+id, userSeq, updateTodoDto);
+    return this.todoService.update(
+      Number(id),
+      session.user,
+      ip,
+      updateTodoDto,
+    );
   }
 
   // 여러 ToDo 항목을 삭제합니다.
@@ -54,9 +59,9 @@ export class TodoController {
   @HttpCode(HttpStatus.NO_CONTENT) // 성공적으로 삭제되었을 때 204 No Content를 반환합니다.
   remove(
     @Session() session: Record<string, any>,
+    @Ip() ip: string,
     @Body() deleteTodoDto: DeleteTodoDto,
   ) {
-    const userSeq = session.user.userSeq;
-    return this.todoService.delete(userSeq, deleteTodoDto.todoIds);
+    return this.todoService.delete(session.user, ip, deleteTodoDto.todoIds);
   }
 }
