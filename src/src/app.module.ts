@@ -34,7 +34,7 @@ import { KeychainUtil } from './utils/keychainUtil';
 
 // DB 관련
 import { CustomNamingStrategy } from './utils/customNamingStrategy';
-import { decrypt, encryptForDecrypt } from './utils/cryptUtil';
+import { decrypt } from './utils/cryptUtil';
 
 // config
 import { ConfigModule, ConfigService } from '@nestjs/config';
