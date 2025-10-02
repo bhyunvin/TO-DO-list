@@ -3,7 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import { TodoEntity } from './todo.entity';
 import { CreateTodoDto, UpdateTodoDto } from './todo.dto';
-import { setAuditColumn } from '../utils/auditColumns';
+import { setAuditColumn, AuditSettings } from '../utils/auditColumns';
+import { UserEntity } from '../user/user.entity';
 
 @Injectable()
 export class TodoService {
@@ -26,7 +27,7 @@ export class TodoService {
 
   // 새로운 ToDo 항목을 생성합니다.
   async create(
-    user: any,
+    user: Omit<UserEntity, 'userPassword'>,
     ip: string,
     createTodoDto: CreateTodoDto,
   ): Promise<TodoEntity> {
@@ -34,7 +35,12 @@ export class TodoService {
       ...createTodoDto,
       userSeq: user.userSeq, // 사용자 번호를 설정합니다.
     });
-    setAuditColumn({ entity: newTodo, id: user.userId, ip: ip });
+    const auditSettings: AuditSettings = {
+      entity: newTodo,
+      id: user.userId,
+      ip: ip,
+    };
+    setAuditColumn(auditSettings);
 
     return this.todoRepository.save(newTodo);
   }
@@ -42,7 +48,7 @@ export class TodoService {
   // 특정 ToDo 항목을 수정합니다.
   async update(
     id: number,
-    user: any,
+    user: Omit<UserEntity, 'userPassword'>,
     ip: string,
     updateTodoDto: UpdateTodoDto,
   ): Promise<TodoEntity> {
@@ -56,26 +62,35 @@ export class TodoService {
 
     // 수정된 내용을 적용합니다.
     Object.assign(todo, updateTodoDto);
-    setAuditColumn({ entity: todo, id: user.userId, ip: ip, isUpdate: true });
+    const auditSettings: AuditSettings = {
+      entity: todo,
+      id: user.userId,
+      ip: ip,
+      isUpdate: true,
+    };
+    setAuditColumn(auditSettings);
 
     return this.todoRepository.save(todo);
   }
 
   // 여러 ToDo 항목을 삭제 (soft delete)합니다.
-  async delete(user: any, ip: string, todoIds: number[]): Promise<void> {
-    await this.todoRepository.update(
-      {
-        todoSeq: In(todoIds), // ID 배열에 포함된 모든 항목을 대상으로 합니다.
+  async delete(
+    user: Omit<UserEntity, 'userPassword'>,
+    ip: string,
+    todoIds: number[],
+  ): Promise<void> {
+    const todosToDelete = await this.todoRepository.find({
+      where: {
+        todoSeq: In(todoIds),
         userSeq: user.userSeq,
       },
-      {
-        delYn: 'Y', // 'Y'로 설정하여 soft delete 처리합니다.
-        auditColumns: {
-          updId: user.userId,
-          updDtm: new Date(),
-          updIp: ip,
-        },
-      },
-    );
+    });
+
+    for (const todo of todosToDelete) {
+      todo.delYn = 'Y';
+      setAuditColumn({ entity: todo, id: user.userId, ip, isUpdate: true });
+    }
+
+    await this.todoRepository.save(todosToDelete);
   }
 }

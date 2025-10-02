@@ -41,12 +41,16 @@ export class UserService {
       return { message: '아이디나 비밀번호가 다릅니다.' };
     }
 
-    // 세션에 사용자 정보 저장
-    req.session.userSeq = selectedUser.userSeq;
-    req.session.userId = selectedUser.userId;
-    this.logger.log(`User ${selectedUser.userId} logged in, session saved.`);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { userPassword, ...userToStore } = selectedUser;
 
-    return selectedUser;
+    // 세션에 사용자 정보 저장 (비밀번호 제외)
+    req.session.user = userToStore;
+
+    this.logger.log(`User ${userToStore.userId} logged in, session saved.`);
+
+    // 클라이언트에는 비밀번호를 제외한 사용자 정보 반환
+    return userToStore as UserEntity;
   }
 
   // ID 중복체크

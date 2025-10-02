@@ -13,6 +13,7 @@ import {
   Ip,
 } from '@nestjs/common';
 import { TodoService } from './todo.service';
+import { SessionData } from 'express-session';
 import { CreateTodoDto, UpdateTodoDto, DeleteTodoDto } from './todo.dto';
 
 @Controller('todo')
@@ -22,7 +23,7 @@ export class TodoController {
   // 새로운 ToDo 항목을 생성합니다.
   @Post()
   create(
-    @Session() session: Record<string, any>,
+    @Session() session: SessionData,
     @Body() createTodoDto: CreateTodoDto,
     @Ip() ip: string,
   ) {
@@ -32,9 +33,7 @@ export class TodoController {
   // 특정 날짜의 모든 ToDo 항목을 조회합니다.
   @Get()
   findAll(
-    @Session() session: Record<string, any>,
-    @Query('date') date: string,
-  ) {
+    @Session() session: SessionData, @Query('date') date: string) {
     return this.todoService.findAll(session.user.userSeq, date);
   }
 
@@ -42,7 +41,7 @@ export class TodoController {
   @Patch(':id')
   update(
     @Param('id') id: string,
-    @Session() session: Record<string, any>,
+    @Session() session: SessionData,
     @Ip() ip: string,
     @Body() updateTodoDto: UpdateTodoDto,
   ) {
@@ -58,7 +57,7 @@ export class TodoController {
   @Delete()
   @HttpCode(HttpStatus.NO_CONTENT) // 성공적으로 삭제되었을 때 204 No Content를 반환합니다.
   remove(
-    @Session() session: Record<string, any>,
+    @Session() session: SessionData,
     @Ip() ip: string,
     @Body() deleteTodoDto: DeleteTodoDto,
   ) {
