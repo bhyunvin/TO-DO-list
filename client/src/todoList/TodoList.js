@@ -103,7 +103,7 @@ function CreateTodoForm(props) {
 
 // TODO 항목 목록을 표시하는 컴포넌트
 function TodoList(props) {
-  const { todos, onToggleComplete, onDeleteTodo, onEditTodo } = props;
+  const { todos, onToggleComplete, onDeleteTodo, onEditTodo, togglingTodoSeq } = props;
 
   return (
     <table className="todo-list">
@@ -137,6 +137,7 @@ function TodoList(props) {
                   type="checkbox"
                   className="form-check-input"
                   checked={!!todo.completeDtm}
+                  disabled={togglingTodoSeq === todo.todoSeq}
                   onChange={() => onToggleComplete(todo.todoSeq, !!todo.completeDtm)}
                 />
               </td>
@@ -144,7 +145,7 @@ function TodoList(props) {
               <td className="todo-content">
                 <span className="text-truncate" title={todo.todoContent}>{todo.todoContent}</span>
               </td>
-              <td className="text-center">{todo.completeDtm}</td>
+              <td className="text-center">{formatDateTime(todo.completeDtm)}</td>
               <td>
                 <span className="text-truncate" title={todo.todoNote}>{todo.todoNote}</span>
               </td>
@@ -225,6 +226,19 @@ function formatDate(date) {
   return `${year}-${month}-${day}`;
 }
 
+// ISO 날짜 문자열을 'YYYY-MM-DD HH:mm' 형식으로 변환하는 헬퍼 함수
+function formatDateTime(isoString) {
+  if (!isoString) {
+    return '';
+  }
+  const date = new Date(isoString);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  return `${year}-${month}-${day} ${hours}:${minutes}`;
+}
 // TODO 리스트 및 폼을 조건부로 렌더링하는 컨테이너 컴포넌트
 function TodoContainer() {
   const { user, logout, api } = useAuthStore(); // api 함수 가져오기
@@ -232,6 +246,7 @@ function TodoContainer() {
   const [isCreating, setIsCreating] = useState(false);
   const [editingTodo, setEditingTodo] = useState(null); // 수정 중인 ToDo 항목 전체를 저장
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [togglingTodoSeq, setTogglingTodoSeq] = useState(null);
 
   // 선택된 날짜에 해당하는 ToDo 목록을 서버에서 가져오는 함수
   const fetchTodos = useCallback(async () => {
@@ -291,6 +306,7 @@ function TodoContainer() {
 
   // ToDo 항목의 완료 상태를 토글하는 함수
   const handleToggleComplete = async (todoSeq, isCompleted) => {
+    setTogglingTodoSeq(todoSeq);
     try {
       const response = await api(`/api/todo/${todoSeq}`, { // fetch -> api
         method: 'PATCH',
@@ -309,6 +325,8 @@ function TodoContainer() {
     } catch (error) {
       console.error('Toggle Complete Error:', error);
       Swal.fire('오류', '서버와의 통신 중 문제가 발생했습니다.', 'error');
+    } finally {
+      setTogglingTodoSeq(null);
     }
   };
 
@@ -447,6 +465,7 @@ function TodoContainer() {
         onToggleComplete={handleToggleComplete}
         onDeleteTodo={handleDeleteTodo}
         onEditTodo={handleEditTodo}
+        togglingTodoSeq={togglingTodoSeq}
       />
     );
   };
