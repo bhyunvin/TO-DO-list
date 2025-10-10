@@ -33,12 +33,12 @@ function LoginForm() {
     }
 
     try {
-      const apiUrl = process.env.REACT_APP_API_URL;
-      const response = await fetch(`${apiUrl}/user/login`, {
+      const response = await fetch(`/api/user/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include', // 다른 도메인으로 쿠키를 전송하기 위한 설정
         body: JSON.stringify({
           userId: String(id).trim(),
           userPassword: String(password).trim(),

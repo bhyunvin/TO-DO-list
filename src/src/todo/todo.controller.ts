@@ -10,6 +10,7 @@ import {
   Query,
   HttpCode,
   HttpStatus,
+  Logger,
   UseGuards,
   Ip,
 } from '@nestjs/common';
@@ -21,6 +22,8 @@ import { AuthenticatedGuard } from '../../types/express/auth.guard';
 @UseGuards(AuthenticatedGuard) // 컨트롤러 전체에 인증 가드 적용
 @Controller('todo')
 export class TodoController {
+  private readonly logger = new Logger(TodoController.name);
+
   constructor(private readonly todoService: TodoService) {}
 
   // 새로운 ToDo 항목을 생성합니다.

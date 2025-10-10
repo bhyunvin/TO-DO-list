@@ -221,16 +221,14 @@ function TodoContainer() {
   const [editingTodo, setEditingTodo] = useState(null); // 수정 중인 ToDo 항목 전체를 저장
   const [selectedDate, setSelectedDate] = useState(new Date());
 
-  // API URL 환경 변수에서 가져오기
-  const apiUrl = process.env.REACT_APP_API_URL;
-
   // 선택된 날짜에 해당하는 ToDo 목록을 서버에서 가져오는 함수
   const fetchTodos = async () => {
     try {
       const formattedDate = formatDate(selectedDate);
-      const response = await fetch(`${apiUrl}/todo?date=${formattedDate}`, {
+      const response = await fetch(`/api/todo?date=${formattedDate}`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', // 다른 도메인으로 쿠키를 전송하기 위한 설정
       });
 
       if (response.ok) {
@@ -255,9 +253,10 @@ function TodoContainer() {
   async function handleAddTodo(todoContent) {
     try {
       const formattedDate = formatDate(selectedDate);
-      const response = await fetch(`${apiUrl}/todo`, {
+      const response = await fetch(`/api/todo`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', // 다른 도메인으로 쿠키를 전송하기 위한 설정
         body: JSON.stringify({
           todoContent,
           todoDate: formattedDate,
@@ -281,9 +280,10 @@ function TodoContainer() {
   // ToDo 항목의 완료 상태를 토글하는 함수
   const handleToggleComplete = async (todoSeq, isCompleted) => {
     try {
-      const response = await fetch(`${apiUrl}/todo/${todoSeq}`, {
+      const response = await fetch(`/api/todo/${todoSeq}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', // 다른 도메인으로 쿠키를 전송하기 위한 설정
         body: JSON.stringify({
           completeDtm: isCompleted ? null : new Date().toISOString(),
         }),
@@ -317,9 +317,10 @@ function TodoContainer() {
     // 사용자가 '네'를 클릭한 경우에만 삭제를 진행합니다.
     if (result.isConfirmed) {
       try {
-        const response = await fetch(`${apiUrl}/todo`, {
+        const response = await fetch(`/api/todo`, {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'include', // 다른 도메인으로 쿠키를 전송하기 위한 설정
           body: JSON.stringify({ todoIds: [todoSeq] }),
         });
 
@@ -345,9 +346,10 @@ function TodoContainer() {
   // ToDo 항목 수정을 저장하는 함수
   const handleSaveTodo = async (todoSeq, updatedData) => {
     try {
-      const response = await fetch(`${apiUrl}/todo/${todoSeq}`, {
+      const response = await fetch(`/api/todo/${todoSeq}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', // 다른 도메인으로 쿠키를 전송하기 위한 설정
         body: JSON.stringify(updatedData),
       });
 
@@ -373,12 +375,12 @@ function TodoContainer() {
 
   async function handleLogout() {
     try {
-      const apiUrl = process.env.REACT_APP_API_URL;
-      const response = await fetch(`${apiUrl}/user/logout`, {
+      const response = await fetch(`/api/user/logout`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include', // 다른 도메인으로 쿠키를 전송하기 위한 설정
       });
 
       if (response.ok) {
