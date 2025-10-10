@@ -35,8 +35,9 @@ function CreateTodoForm(props) {
     e.preventDefault();
 
     if (todoContent.trim()) {
-      onAddTodo(todoContent);
+      onAddTodo({ todoContent, todoNote });
       setTodoContent('');
+      setTodoNote('');
     } else {
       Swal.fire('할 일을 입력해주세요.', '', 'warning');
     }
@@ -116,12 +117,12 @@ function TodoList(props) {
       </colgroup>
       <thead>
         <tr>
-          <th>완료</th>
-          <th>번호</th>
+          <th className="text-center">완료</th>
+          <th className="text-center">번호</th>
           <th>내용</th>
-          <th>완료일시</th>
+          <th className="text-center">완료일시</th>
           <th>비고</th>
-          <th>작업</th>
+          <th className="text-center"></th>
         </tr>
       </thead>
       <tbody>
@@ -131,7 +132,7 @@ function TodoList(props) {
               key={todo.todoSeq}
               className={todo.completeDtm ? 'completed' : ''}
             >
-              <td>
+              <td className="text-center">
                 <input
                   type="checkbox"
                   className="form-check-input"
@@ -139,11 +140,15 @@ function TodoList(props) {
                   onChange={() => onToggleComplete(todo.todoSeq, !!todo.completeDtm)}
                 />
               </td>
-              <td>{index + 1}</td>
-              <td className="todo-content">{todo.todoContent}</td>
-              <td>{todo.completeDtm}</td>
-              <td>{todo.todoNote}</td>
+              <td className="text-center">{index + 1}</td>
+              <td className="todo-content">
+                <span className="text-truncate" title={todo.todoContent}>{todo.todoContent}</span>
+              </td>
+              <td className="text-center">{todo.completeDtm}</td>
               <td>
+                <span className="text-truncate" title={todo.todoNote}>{todo.todoNote}</span>
+              </td>
+              <td className="text-center">
                 <button
                   className="btn btn-sm btn-info"
                   onClick={() => onEditTodo(todo)}
@@ -257,7 +262,7 @@ function TodoContainer() {
 
 
   //CreateTodoForm에서 넘어온 Todo 요소 추가
-  async function handleAddTodo(todoContent) {
+  async function handleAddTodo({ todoContent, todoNote }) {
     try {
       const formattedDate = formatDate(selectedDate);
       const response = await api(`/api/todo`, { // fetch -> api
@@ -267,7 +272,7 @@ function TodoContainer() {
         body: JSON.stringify({
           todoContent,
           todoDate: formattedDate,
-          todoNote: '', // todoNote는 현재 폼에서 사용하지 않으므로 빈 문자열로 전달
+          todoNote: todoNote,
         }),
       });
 

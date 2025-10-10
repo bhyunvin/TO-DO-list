@@ -32,9 +32,9 @@ export function setAuditColumn(setting: AuditSettings) {
 
   entity.auditColumns.regId = id;
   entity.auditColumns.regIp = ip;
-  entity.auditColumns.updId = id;
 
   if (isUpdate) {
+    entity.auditColumns.updId = id;
     entity.auditColumns.updIp = ip;
   }
 
