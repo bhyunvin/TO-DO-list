@@ -247,7 +247,7 @@ function TodoContainer() {
         const data = await response.json();
         setTodos(data);
       } else {
-        Swal.fire('오류', '할 일 목록을 불러오는 데 실패했습니다.', 'error');
+        Swal.fire('오류', '로그아웃되었거나<br>서버와의 통신 중 문제가 발생했습니다.', 'error');
       }
     } catch (error) {
       console.error('Fetch Todos Error:', error);
