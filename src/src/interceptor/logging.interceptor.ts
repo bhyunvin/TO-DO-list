@@ -23,8 +23,9 @@ export class LoggingInterceptor implements NestInterceptor {
     const request = ctx.getRequest();
     const method = request.method;
     const url = request.url;
-    const userSeq = Number(request.session.userSeq);
-    const userId = request.session.userId;
+    const user = request.session.user;
+    const userSeq = user ? Number(user.userSeq) : undefined;
+    const userId = user ? user.userId : undefined;
     const ip =
       request.connection.remoteAddress ||
       request.headers['x-forwarded-for'] ||
@@ -37,7 +38,7 @@ export class LoggingInterceptor implements NestInterceptor {
     return next.handle().pipe(
       tap(() => {
         const logEntity = new LogEntity();
-        logEntity.userSeq = userSeq || null;
+        logEntity.userSeq = isNaN(userSeq) ? null : userSeq;
         logEntity.connectUrl = url;
         logEntity.method = method;
         logEntity.requestBody = JSON.stringify(request.body);
