@@ -23,7 +23,6 @@ export class UserService {
   async login(
     userDto: UserDto,
   ): Promise<Omit<UserEntity, 'userPassword'>> {
-    this.logger.log(`Login DTO received: ${JSON.stringify(userDto)}`);
     const selectedUser = await this.userRepository.findOne({
       where: { userId: userDto.userId },
     });
@@ -40,7 +39,6 @@ export class UserService {
     }
 
     const { userPassword, ...userToStore } = selectedUser;
-    this.logger.log(`User ${userToStore.userId} logged in, session saved.`);
     return userToStore;
   }
 
@@ -58,7 +56,6 @@ export class UserService {
     profileImageFile: Express.Multer.File,
     ip: string,
   ): Promise<UserDto> {
-    this.logger.log(`Signup DTO received: ${JSON.stringify(userDto)}`);
     return this.dataSource.transaction(async (transactionalEntityManager) => {
       userDto.userPassword = await encrypt(userDto.userPassword); // 비밀번호 암호화
 
