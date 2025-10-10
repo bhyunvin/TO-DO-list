@@ -104,3 +104,41 @@
 .react-datepicker-popper {
     z-index: 10; /* 다른 요소들 위에 보이도록 z-index 설정 */
 }
+
+/* 할 일 목록의 액션 버튼 셀 */
+.todo-actions-cell {
+    position: relative; /* 팝업 메뉴의 기준점 */
+    text-align: center;
+}
+
+/* 더보기(...) 버튼 */
+.more-actions-btn {
+    background: none;
+    border: none;
+    padding: 4px 8px;
+    cursor: pointer;
+}
+
+/* 액션 팝업 메뉴 */
+.action-menu {
+    position: absolute;
+    left: 50%; /* 버튼의 중앙에서 시작 */
+    top: 50%; /* 수직 중앙 정렬 */
+    transform: translate(20px, -50%); /* 수직 중앙 정렬 및 오른쪽으로 이동 */
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    z-index: 10;
+    display: flex;
+    gap: 8px; /* 버튼 간 간격 */
+    padding: 8px;
+}
+
+/* 팝업 메뉴 안의 버튼 */
+.action-menu .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 10px;
+}
