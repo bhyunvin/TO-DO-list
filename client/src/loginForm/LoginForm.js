@@ -33,7 +33,7 @@ function LoginForm() {
     }
 
     try {
-      const response = await api(`/api/user/login`, { // fetch -> api
+      const response = await api(`/api/user/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

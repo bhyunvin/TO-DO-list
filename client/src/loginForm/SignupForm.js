@@ -58,7 +58,7 @@ function SignupForm({ onSignupComplete }) {
     setIdError('');
 
     try {
-      const response = await api(`/api/user/duplicate/${userId}`, { // fetch -> api
+      const response = await api(`/api/user/duplicate/${userId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -195,7 +195,7 @@ function SignupForm({ onSignupComplete }) {
       signupFormData.append('profileImage', profileImageFile);
 
     try {
-      const response = await api(`/api/user/signup`, { // fetch -> api
+      const response = await api(`/api/user/signup`, {
         method: 'POST',
         body: signupFormData,
       });
