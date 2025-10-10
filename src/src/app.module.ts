@@ -25,7 +25,7 @@ import { FileUploadModule } from './fileUpload/fileUpload.module';
 
 // ai assistance
 import { AssistanceModule } from './assistance/assistance.module';
-import { AuthModule } from '../../src/types/express/auth.module';
+import { AuthModule } from '../types/express/auth.module';
 
 import { TodoModule } from './todo/todo.module';
 
