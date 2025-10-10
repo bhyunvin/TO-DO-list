@@ -569,12 +569,11 @@ function TodoContainer() {
   
       {/* '신규' 버튼을 오른쪽으로 배치하기 위한 컨테이너 */}
       <div className="todo-actions">
-        <button
-          className={isCreating || editingTodo ? 'btn btn-secondary' : 'btn btn-primary'}
-          onClick={isCreating || editingTodo ? () => { setIsCreating(false); setEditingTodo(null); } : handleToggleCreate}
-        >
-          {isCreating || editingTodo ? '취소' : '신규'}
-        </button>
+        {!isCreating && !editingTodo && (
+          <button className="btn btn-primary" onClick={handleToggleCreate}>
+            신규
+          </button>
+        )}
       </div>
 
       {/* 할 일 목록을 볼 때만 DatePicker를 표시합니다. */}
