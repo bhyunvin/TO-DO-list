@@ -16,7 +16,7 @@ import {
 import { TodoService } from './todo.service';
 import { SessionData } from 'express-session';
 import { CreateTodoDto, UpdateTodoDto, DeleteTodoDto } from './todo.dto';
-import { AuthenticatedGuard } from '../../../src/types/express/auth.guard';
+import { AuthenticatedGuard } from '../../types/express/auth.guard';
 
 @UseGuards(AuthenticatedGuard) // 컨트롤러 전체에 인증 가드 적용
 @Controller('todo')
