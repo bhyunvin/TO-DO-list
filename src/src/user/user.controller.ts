@@ -45,8 +45,6 @@ export class UserController {
                 this.logger.error('Session save error', err);
                 return reject(new Error('세션 저장에 실패했습니다.'));
             }
-            this.logger.log(`Session saved for user: ${user.userId}, Session ID: ${session.id}`);
-            this.logger.debug(`Session data: ${JSON.stringify(session)}`);
             resolve(user);
         });
     });
