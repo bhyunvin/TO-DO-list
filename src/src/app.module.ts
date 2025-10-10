@@ -1,4 +1,4 @@
-import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer, Logger } from '@nestjs/common';
 
 //DB
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -25,7 +25,6 @@ import { FileUploadModule } from './fileUpload/fileUpload.module';
 
 // ai assistance
 import { AssistanceModule } from './assistance/assistance.module';
-import { AuthModule } from '../types/express/auth.module';
 
 import { TodoModule } from './todo/todo.module';
 
@@ -82,7 +81,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     LoggingModule,
     TodoModule,
     FileUploadModule,
-    AuthModule,
     KeychainModule,
   ],
   providers: [
@@ -97,6 +95,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
   ],
 })
 export class AppModule implements NestModule {
+  private readonly logger = new Logger(AppModule.name);
+
   // 생성자에서 KeychainService를 주입받습니다.
   constructor(private readonly keychainService: KeychainUtil) {}
 
@@ -106,18 +106,25 @@ export class AppModule implements NestModule {
     );
 
     if (!sessionSecret) {
-      throw new Error(
+      this.logger.error(
         '세션 비밀 키를 키체인에서 찾을 수 없습니다! 애플리케이션을 시작할 수 없습니다.',
       );
+      throw new Error('Session secret key not found.');
     }
 
+    this.logger.log('Session middleware configured with a valid secret key.');
     consumer
       .apply(
         session({
+          name: 'todo-session-id', // 세션 쿠키 이름 지정
           secret: sessionSecret,
           resave: false,
-          saveUninitialized: true,
-          cookie: { secure: false }, // HTTPS에서 secure: true로 설정
+          saveUninitialized: false,
+          cookie: {
+            secure: false, // HTTPS에서 secure: true로 설정
+            httpOnly: true,
+            // domain: 'localhost', // 이 줄을 주석 처리하거나 삭제합니다.
+          },
         }),
       )
       .forRoutes('*'); // 모든 라우트에 세션 미들웨어 적용

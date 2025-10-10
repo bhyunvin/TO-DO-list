@@ -56,8 +56,7 @@ function SignupForm({ onSignupComplete }) {
     setIdError('');
 
     try {
-      const apiUrl = process.env.REACT_APP_API_URL;
-      const response = await fetch(`${apiUrl}/user/duplicate/${userId}`, {
+      const response = await fetch(`/api/user/duplicate/${userId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -194,8 +193,7 @@ function SignupForm({ onSignupComplete }) {
       signupFormData.append('profileImage', profileImageFile);
 
     try {
-      const apiUrl = process.env.REACT_APP_API_URL;
-      const response = await fetch(`${apiUrl}/user/signup`, {
+      const response = await fetch(`/api/user/signup`, {
         method: 'POST',
         body: signupFormData,
       });
