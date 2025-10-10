@@ -332,7 +332,7 @@ function SignupForm({ onSignupComplete }) {
                 autoComplete="off"
                 onChange={userNameChangeHandler}
                 required
-                length={200}
+                maxLength={40}
                 spellCheck="false"
               />
             </div>
@@ -355,6 +355,7 @@ function SignupForm({ onSignupComplete }) {
               onChange={emailChangeHandler}
               required
               spellCheck="false"
+              maxLength={100}
             />
             <small className="text-danger">{emailError}</small>
           </div>
@@ -411,7 +412,7 @@ function SignupForm({ onSignupComplete }) {
         <div className="row">
           {/* 취소 버튼 */}
           <div className="col-3">
-            <button type="button" className="btn btn-secondary" onClick={onCancel}>
+            <button type="button" className="btn btn-secondary full-width" onClick={onCancel}>
               취소
             </button>
           </div>
