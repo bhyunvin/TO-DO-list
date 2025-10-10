@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Swal from 'sweetalert2';
 import { useAuthStore } from '../authStore/authStore';
 import './todoList.css';
 import DatePicker from 'react-datepicker';
 import { ko } from 'date-fns/locale';
-import "react-datepicker/dist/react-datepicker.css";
+import 'react-datepicker/dist/react-datepicker.css';
 
 // 신규 TODO 항목 추가 폼 컴포넌트
 function CreateTodoForm(props) {
@@ -44,10 +44,11 @@ function CreateTodoForm(props) {
 
   return (
     <div className="create-todo-form">
-      <h3>새로운 TODO 추가</h3>
+      <h3>새로운 TO-DO 항목추가</h3>
       <form onSubmit={handleSubmit}>
-        <label className="mb-1">할 일</label>
+        <label className="mb-1" htmlFor="todoContent">할 일</label>
         <textarea
+          id="todoContent"
           type="text"
           className="form-control mb-3"
           placeholder="할 일을 입력해주세요."
@@ -55,12 +56,13 @@ function CreateTodoForm(props) {
           onChange={handleChange}
           name="TODO_CONTENT"
           maxLength={4000}
-          required="true"
+          required={true}
           rows={3}
           style={{ resize: 'none' }}
         />
-        <label className="mb-1">비고</label>
+        <label className="mb-1" htmlFor="todoNote">비고</label>
         <textarea
+          id="todoNote"
           type="text"
           className="form-control mb-3"
           placeholder="필요 시 비고를 입력해주세요."
@@ -71,10 +73,11 @@ function CreateTodoForm(props) {
           rows={3}
           style={{ resize: 'none' }}
         />
-        <label className="mb-1">첨부파일</label>
+        <label className="mb-1" htmlFor="todoFiles">첨부파일</label>
         <input
+          id="todoFiles"
           type="file"
-          multiple="true"
+          multiple={true}
           className="form-control mb-3"
           placeholder="필요 시 파일을 업로드해주세요."
           value={todoFiles}
@@ -87,7 +90,7 @@ function CreateTodoForm(props) {
         </button>
         <button
           type="button"
-          className="btn btn-secondary ml-2"
+          className="btn btn-secondary ms-2"
           onClick={onCancel}
         >
           취소
@@ -148,7 +151,7 @@ function TodoList(props) {
                   수정
                 </button>
                 <button
-                  className="btn btn-sm btn-danger ml-2"
+                  className="btn btn-sm btn-danger ms-2"
                   onClick={() => onDeleteTodo(todo.todoSeq)}
                 >
                   삭제
@@ -178,17 +181,21 @@ function EditTodoForm({ todo, onSave, onCancel }) {
 
   return (
     <div className="edit-todo-form">
-      <h3>ToDo 수정</h3>
+      <h3>TO-DO 항목수정</h3>
       <form onSubmit={handleSubmit}>
-        <label className="mb-1">할 일</label>
+        <label className="mb-1" htmlFor="todoContent">할 일</label>
         <textarea
+          id="todoContent"
+          name="TODO_CONTENT"
           className="form-control mb-3"
           value={todoContent}
           onChange={(e) => setTodoContent(e.target.value)}
           required
         />
-        <label className="mb-1">비고</label>
+        <label className="mb-1" htmlFor="todoNote">비고</label>
         <textarea
+          id="todoNote"
+          name="TODO_NOTE"
           className="form-control mb-3"
           value={todoNote}
           onChange={(e) => setTodoNote(e.target.value)}
@@ -196,7 +203,7 @@ function EditTodoForm({ todo, onSave, onCancel }) {
         <button type="submit" className="btn btn-primary">
           저장
         </button>
-        <button type="button" className="btn btn-secondary ml-2" onClick={onCancel}>
+        <button type="button" className="btn btn-secondary ms-2" onClick={onCancel}>
           취소
         </button>
       </form>
@@ -222,7 +229,7 @@ function TodoContainer() {
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   // 선택된 날짜에 해당하는 ToDo 목록을 서버에서 가져오는 함수
-  const fetchTodos = async () => {
+  const fetchTodos = useCallback(async () => {
     try {
       const formattedDate = formatDate(selectedDate);
       const response = await api(`/api/todo?date=${formattedDate}`, { // fetch -> api
@@ -241,12 +248,12 @@ function TodoContainer() {
       console.error('Fetch Todos Error:', error);
       Swal.fire('오류', '서버와의 통신 중 문제가 발생했습니다.', 'error');
     }
-  };
+  }, [api, selectedDate]);
 
   // selectedDate가 변경될 때마다 ToDo 목록을 새로고침
   useEffect(() => {
     fetchTodos();
-  }, [selectedDate]);
+  }, [fetchTodos]);
 
 
   //CreateTodoForm에서 넘어온 Todo 요소 추가
@@ -464,18 +471,20 @@ function TodoContainer() {
         </button>
       </div>
 
-      <div className="date-navigator">
-        <button onClick={handlePrevDay} className="date-nav-btn">&lt;</button>
-        <DatePicker
-          locale={ko} // 달력을 한국어로 설정
-          selected={selectedDate} // 현재 선택된 날짜
-          onChange={(date) => setSelectedDate(date)} // 날짜 선택 시 상태 변경
-          dateFormat="yyyy-MM-dd" // 표시 형식
-          className="date-display" // CSS 스타일링을 위한 클래스
-        />
-        <button onClick={handleNextDay} className="date-nav-btn">&gt;</button>
-      </div>
-  
+      {/* 할 일 목록을 볼 때만 DatePicker를 표시합니다. */}
+      {!isCreating && !editingTodo && (
+        <div className="date-navigator">
+          <button onClick={handlePrevDay} className="date-nav-btn">&lt;</button>
+          <DatePicker
+            locale={ko} // 달력을 한국어로 설정
+            selected={selectedDate} // 현재 선택된 날짜
+            onChange={(date) => setSelectedDate(date)} // 날짜 선택 시 상태 변경
+            dateFormat="yyyy-MM-dd" // 표시 형식
+            className="date-display" // CSS 스타일링을 위한 클래스
+          />
+          <button onClick={handleNextDay} className="date-nav-btn">&gt;</button>
+        </div>
+      )}
       {/* 할 일 목록 또는 할 일 생성/수정 폼을 보여주는 부분 */}
       {renderContent()}
     </div>
