@@ -215,7 +215,7 @@ function formatDate(date) {
 
 // TODO 리스트 및 폼을 조건부로 렌더링하는 컨테이너 컴포넌트
 function TodoContainer() {
-  const { user, logout } = useAuthStore();
+  const { user, logout, api } = useAuthStore(); // api 함수 가져오기
   const [todos, setTodos] = useState([]);
   const [isCreating, setIsCreating] = useState(false);
   const [editingTodo, setEditingTodo] = useState(null); // 수정 중인 ToDo 항목 전체를 저장
@@ -225,7 +225,7 @@ function TodoContainer() {
   const fetchTodos = async () => {
     try {
       const formattedDate = formatDate(selectedDate);
-      const response = await fetch(`/api/todo?date=${formattedDate}`, {
+      const response = await api(`/api/todo?date=${formattedDate}`, { // fetch -> api
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include', // 다른 도메인으로 쿠키를 전송하기 위한 설정
@@ -253,7 +253,7 @@ function TodoContainer() {
   async function handleAddTodo(todoContent) {
     try {
       const formattedDate = formatDate(selectedDate);
-      const response = await fetch(`/api/todo`, {
+      const response = await api(`/api/todo`, { // fetch -> api
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include', // 다른 도메인으로 쿠키를 전송하기 위한 설정
@@ -280,7 +280,7 @@ function TodoContainer() {
   // ToDo 항목의 완료 상태를 토글하는 함수
   const handleToggleComplete = async (todoSeq, isCompleted) => {
     try {
-      const response = await fetch(`/api/todo/${todoSeq}`, {
+      const response = await api(`/api/todo/${todoSeq}`, { // fetch -> api
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include', // 다른 도메인으로 쿠키를 전송하기 위한 설정
@@ -317,7 +317,7 @@ function TodoContainer() {
     // 사용자가 '네'를 클릭한 경우에만 삭제를 진행합니다.
     if (result.isConfirmed) {
       try {
-        const response = await fetch(`/api/todo`, {
+        const response = await api(`/api/todo`, { // fetch -> api
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include', // 다른 도메인으로 쿠키를 전송하기 위한 설정
@@ -346,7 +346,7 @@ function TodoContainer() {
   // ToDo 항목 수정을 저장하는 함수
   const handleSaveTodo = async (todoSeq, updatedData) => {
     try {
-      const response = await fetch(`/api/todo/${todoSeq}`, {
+      const response = await api(`/api/todo/${todoSeq}`, { // fetch -> api
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include', // 다른 도메인으로 쿠키를 전송하기 위한 설정
@@ -375,7 +375,7 @@ function TodoContainer() {
 
   async function handleLogout() {
     try {
-      const response = await fetch(`/api/user/logout`, {
+      const response = await api(`/api/user/logout`, { // fetch -> api
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -383,14 +383,18 @@ function TodoContainer() {
         credentials: 'include', // 다른 도메인으로 쿠키를 전송하기 위한 설정
       });
 
-      if (response.ok) {
-        logout(); // user 상태 null로 변경
-      } else {
-        Swal.fire('로그아웃 실패', '서버 오류가 발생했습니다.', 'error');
+      // 서버 응답이 정상이 아니더라도 클라이언트에서는 로그아웃을 진행합니다.
+      // 사용자에게는 실패 사실을 알립니다.
+      if (!response.ok) {
+        await Swal.fire('로그아웃 실패', '서버와 통신에 실패했지만, 클라이언트에서 로그아웃합니다.', 'error');
       }
     } catch (error) {
       console.error('Logout Error : ', error);
-      Swal.fire('오류 발생', '서버와의 연결에 문제가 발생했습니다.', 'error');
+      // 네트워크 오류 등이 발생해도 사용자에게 알린 후 로그아웃을 진행합니다.
+      await Swal.fire('오류 발생', '서버와의 연결에 문제가 발생했습니다.', 'error');
+    } finally {
+      // API 요청의 성공/실패 여부와 관계없이 항상 클라이언트의 상태를 로그아웃 처리합니다.
+      logout();
     }
   }
 

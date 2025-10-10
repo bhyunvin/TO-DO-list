@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import Swal from 'sweetalert2';
+import { useAuthStore } from '../authStore/authStore';
 
 import './loginForm.css';
 
 function SignupForm({ onSignupComplete }) {
+  const { api } = useAuthStore(); // api 함수 가져오기
   // Validation 메세지 state
   const [idError, setIdError] = useState('');
   const [passwordError, setPasswordError] = useState('');
@@ -56,7 +58,7 @@ function SignupForm({ onSignupComplete }) {
     setIdError('');
 
     try {
-      const response = await fetch(`/api/user/duplicate/${userId}`, {
+      const response = await api(`/api/user/duplicate/${userId}`, { // fetch -> api
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -193,7 +195,7 @@ function SignupForm({ onSignupComplete }) {
       signupFormData.append('profileImage', profileImageFile);
 
     try {
-      const response = await fetch(`/api/user/signup`, {
+      const response = await api(`/api/user/signup`, { // fetch -> api
         method: 'POST',
         body: signupFormData,
       });

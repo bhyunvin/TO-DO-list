@@ -18,7 +18,7 @@ function LoginForm() {
     setPassword(e.target.value);
   }
 
-  const { login } = useAuthStore();
+  const { login, api } = useAuthStore(); // api 함수 가져오기
   async function submitLogin(e) {
     e.preventDefault();
 
@@ -33,7 +33,7 @@ function LoginForm() {
     }
 
     try {
-      const response = await fetch(`/api/user/login`, {
+      const response = await api(`/api/user/login`, { // fetch -> api
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
