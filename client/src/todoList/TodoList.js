@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Swal from 'sweetalert2';
 import { useAuthStore } from '../authStore/authStore';
 import './todoList.css';
 import DatePicker from 'react-datepicker';
 import { ko } from 'date-fns/locale';
+import 'bootstrap-icons/font/bootstrap-icons.css';
 import 'react-datepicker/dist/react-datepicker.css';
 
 // 신규 TODO 항목 추가 폼 컴포넌트
@@ -104,7 +105,40 @@ function CreateTodoForm(props) {
 
 // TODO 항목 목록을 표시하는 컴포넌트
 function TodoList(props) {
-  const { todos, onToggleComplete, onDeleteTodo, onEditTodo, togglingTodoSeq } = props;
+  const {
+    todos,
+    onToggleComplete,
+    onDeleteTodo,
+    onEditTodo,
+    togglingTodoSeq,
+    openActionMenu,
+    setOpenActionMenu,
+  } = props;
+
+  const menuRef = useRef(null);
+
+  // 메뉴 외부 클릭 시 닫기 처리
+  useEffect(() => {
+    function handleClickOutside(event) {
+      // menuRef.current가 존재하고, 클릭된 요소가 메뉴나 그 자식 요소가 아닐 때 메뉴를 닫음
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        // 'more-actions-btn' 클래스를 가진 버튼을 클릭한 경우는 제외 (버튼 자체 토글 로직을 따름)
+        if (!event.target.closest('.more-actions-btn')) {
+          setOpenActionMenu(null);
+        }
+      }
+    }
+
+    // 메뉴가 열려 있을 때만 이벤트 리스너를 추가합니다.
+    if (openActionMenu !== null) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    // 컴포넌트가 언마운트되거나 openActionMenu가 변경되기 전에 이벤트 리스너를 제거합니다.
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [openActionMenu, setOpenActionMenu]);
 
   return (
     <table className="todo-list">
@@ -150,19 +184,29 @@ function TodoList(props) {
               <td>
                 <span className="text-truncate" title={todo.todoNote}>{todo.todoNote}</span>
               </td>
-              <td className="text-center">
-                <button
-                  className="btn btn-sm btn-success"
-                  onClick={() => onEditTodo(todo)}
-                >
-                  수정
+              <td className="todo-actions-cell">
+                <button className="more-actions-btn" onClick={() => setOpenActionMenu(openActionMenu === todo.todoSeq ? null : todo.todoSeq)}>
+                  <i className="bi bi-three-dots-vertical"></i>
                 </button>
-                <button
-                  className="btn btn-sm btn-danger ms-2"
-                  onClick={() => onDeleteTodo(todo.todoSeq)}
-                >
-                  삭제
-                </button>
+                {openActionMenu === todo.todoSeq && (
+                  <div className="action-menu" ref={menuRef}>
+                    <button
+                      className="btn btn-sm btn-outline-success"
+                      onClick={() => {
+                        onEditTodo(todo);
+                        setOpenActionMenu(null);
+                      }}
+                      title="수정"
+                    >
+                      <i className="bi bi-pencil-fill"></i>
+                    </button>
+                    <button
+                      className="btn btn-sm btn-outline-danger"
+                      onClick={() => onDeleteTodo(todo.todoSeq)}
+                      title="삭제"
+                    ><i className="bi bi-trash-fill"></i></button>
+                  </div>
+                )}
               </td>
             </tr>
           ))
@@ -282,6 +326,7 @@ function TodoContainer() {
   const [editingTodo, setEditingTodo] = useState(null); // 수정 중인 ToDo 항목 전체를 저장
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [togglingTodoSeq, setTogglingTodoSeq] = useState(null);
+  const [openActionMenu, setOpenActionMenu] = useState(null); // '...' 메뉴 상태
 
   // 선택된 날짜에 해당하는 ToDo 목록을 서버에서 가져오는 함수
   const fetchTodos = useCallback(async () => {
@@ -501,6 +546,8 @@ function TodoContainer() {
         onDeleteTodo={handleDeleteTodo}
         onEditTodo={handleEditTodo}
         togglingTodoSeq={togglingTodoSeq}
+        openActionMenu={openActionMenu}
+        setOpenActionMenu={setOpenActionMenu}
       />
     );
   };
