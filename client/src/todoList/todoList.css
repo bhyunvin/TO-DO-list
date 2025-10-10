@@ -9,6 +9,15 @@
     background-color: #fff;
 }
 
+/* 긴 텍스트를 자르고 말줄임표(...)로 표시하는 유틸리티 클래스 */
+.text-truncate {
+    display: block;
+    max-width: 100%; /* 부모 요소의 너비를 넘지 않도록 설정 */
+    white-space: nowrap; /* 텍스트가 한 줄로 표시되도록 강제 */
+    overflow: hidden; /* 넘치는 텍스트를 숨김 */
+    text-overflow: ellipsis; /* 숨겨진 텍스트를 말줄임표로 표시 */
+}
+
 /* 1. 제목을 위한 헤더: 중앙 정렬 */
 .todo-title-header {
     text-align: center; /* 텍스트를 중앙으로 정렬합니다. */
