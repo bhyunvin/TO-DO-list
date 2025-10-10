@@ -20,9 +20,7 @@ export class UserService {
   ) {}
 
   // 로그인 로직 (컨트롤러에서 세션 처리)
-  async login(
-    userDto: UserDto,
-  ): Promise<Omit<UserEntity, 'userPassword'>> {
+  async login(userDto: UserDto): Promise<Omit<UserEntity, 'userPassword'>> {
     const selectedUser = await this.userRepository.findOne({
       where: { userId: userDto.userId },
     });

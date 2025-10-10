@@ -108,7 +108,12 @@ export class TodoService {
 
     if (todoToDelete) {
       todoToDelete.delYn = 'Y';
-      setAuditColumn({ ip, entity: todoToDelete, id: user.userId, isUpdate: true });
+      setAuditColumn({
+        ip,
+        entity: todoToDelete,
+        id: user.userId,
+        isUpdate: true,
+      });
       await this.todoRepository.save(todoToDelete);
     }
   }

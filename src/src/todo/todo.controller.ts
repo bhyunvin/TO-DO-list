@@ -38,8 +38,7 @@ export class TodoController {
 
   // 특정 날짜의 모든 ToDo 항목을 조회합니다.
   @Get()
-  findAll(
-    @Session() session: SessionData, @Query('date') date: string) {
+  findAll(@Session() session: SessionData, @Query('date') date: string) {
     return this.todoService.findAll(session.user.userSeq, date);
   }
 
@@ -51,12 +50,7 @@ export class TodoController {
     @Ip() ip: string,
     @Body() updateTodoDto: UpdateTodoDto,
   ) {
-    return this.todoService.update(
-      Number(id),
-      session.user,
-      ip,
-      updateTodoDto,
-    );
+    return this.todoService.update(Number(id), session.user, ip, updateTodoDto);
   }
 
   // 특정 ToDo 항목을 삭제합니다.
