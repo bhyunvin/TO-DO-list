@@ -59,14 +59,14 @@ export class TodoController {
     );
   }
 
-  // 여러 ToDo 항목을 삭제합니다.
-  @Delete()
+  // 특정 ToDo 항목을 삭제합니다.
+  @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT) // 성공적으로 삭제되었을 때 204 No Content를 반환합니다.
   remove(
+    @Param('id') id: string,
     @Session() session: SessionData,
     @Ip() ip: string,
-    @Body() deleteTodoDto: DeleteTodoDto,
   ) {
-    return this.todoService.delete(session.user, ip, deleteTodoDto.todoIds);
+    return this.todoService.delete(session.user, ip, Number(id));
   }
 }

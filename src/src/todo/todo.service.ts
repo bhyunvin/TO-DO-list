@@ -56,9 +56,9 @@ export class TodoService {
       userSeq: user.userSeq, // 사용자 번호를 설정합니다.
     });
     const auditSettings: AuditSettings = {
+      ip,
       entity: newTodo,
       id: user.userId,
-      ip: ip,
     };
     setAuditColumn(auditSettings);
 
@@ -83,9 +83,9 @@ export class TodoService {
     // 수정된 내용을 적용합니다.
     Object.assign(todo, updateTodoDto);
     const auditSettings: AuditSettings = {
+      ip,
       entity: todo,
       id: user.userId,
-      ip: ip,
       isUpdate: true,
     };
     setAuditColumn(auditSettings);
@@ -93,24 +93,23 @@ export class TodoService {
     return this.todoRepository.save(todo);
   }
 
-  // 여러 ToDo 항목을 삭제 (soft delete)합니다.
+  // 특정 ToDo 항목을 삭제 (soft delete)합니다.
   async delete(
     user: Omit<UserEntity, 'userPassword'>,
     ip: string,
-    todoIds: number[],
+    todoId: number,
   ): Promise<void> {
-    const todosToDelete = await this.todoRepository.find({
+    const todoToDelete = await this.todoRepository.findOne({
       where: {
-        todoSeq: In(todoIds),
+        todoSeq: todoId,
         userSeq: user.userSeq,
       },
     });
 
-    for (const todo of todosToDelete) {
-      todo.delYn = 'Y';
-      setAuditColumn({ entity: todo, id: user.userId, ip, isUpdate: true });
+    if (todoToDelete) {
+      todoToDelete.delYn = 'Y';
+      setAuditColumn({ ip, entity: todoToDelete, id: user.userId, isUpdate: true });
+      await this.todoRepository.save(todoToDelete);
     }
-
-    await this.todoRepository.save(todosToDelete);
   }
 }

@@ -332,7 +332,7 @@ function TodoContainer() {
   const fetchTodos = useCallback(async () => {
     try {
       const formattedDate = formatDate(selectedDate);
-      const response = await api(`/api/todo?date=${formattedDate}`, { // fetch -> api
+      const response = await api(`/api/todo?date=${formattedDate}`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include', // 다른 도메인으로 쿠키를 전송하기 위한 설정
@@ -360,7 +360,7 @@ function TodoContainer() {
   async function handleAddTodo({ todoContent, todoNote }) {
     try {
       const formattedDate = formatDate(selectedDate);
-      const response = await api(`/api/todo`, { // fetch -> api
+      const response = await api(`/api/todo`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include', // 다른 도메인으로 쿠키를 전송하기 위한 설정
@@ -388,7 +388,7 @@ function TodoContainer() {
   const handleToggleComplete = async (todoSeq, isCompleted) => {
     setTogglingTodoSeq(todoSeq);
     try {
-      const response = await api(`/api/todo/${todoSeq}`, { // fetch -> api
+      const response = await api(`/api/todo/${todoSeq}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include', // 다른 도메인으로 쿠키를 전송하기 위한 설정
@@ -427,11 +427,9 @@ function TodoContainer() {
     // 사용자가 '네'를 클릭한 경우에만 삭제를 진행합니다.
     if (result.isConfirmed) {
       try {
-        const response = await api(`/api/todo`, { // fetch -> api
+        const response = await api(`/api/todo/${todoSeq}`, {
           method: 'DELETE',
-          headers: { 'Content-Type': 'application/json' },
           credentials: 'include', // 다른 도메인으로 쿠키를 전송하기 위한 설정
-          body: JSON.stringify({ todoIds: [todoSeq] }),
         });
 
         if (response.ok) {
@@ -456,7 +454,7 @@ function TodoContainer() {
   // ToDo 항목 수정을 저장하는 함수
   const handleSaveTodo = async (todoSeq, updatedData) => {
     try {
-      const response = await api(`/api/todo/${todoSeq}`, { // fetch -> api
+      const response = await api(`/api/todo/${todoSeq}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include', // 다른 도메인으로 쿠키를 전송하기 위한 설정
@@ -485,7 +483,7 @@ function TodoContainer() {
 
   async function handleLogout() {
     try {
-      const response = await api(`/api/user/logout`, { // fetch -> api
+      const response = await api(`/api/user/logout`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
