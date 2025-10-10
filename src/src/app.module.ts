@@ -25,6 +25,7 @@ import { FileUploadModule } from './fileUpload/fileUpload.module';
 
 // ai assistance
 import { AssistanceModule } from './assistance/assistance.module';
+import { AuthModule } from '../../src/types/express/auth.module';
 
 import { TodoModule } from './todo/todo.module';
 
@@ -81,6 +82,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     LoggingModule,
     TodoModule,
     FileUploadModule,
+    AuthModule,
     KeychainModule,
   ],
   providers: [

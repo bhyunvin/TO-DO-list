@@ -10,12 +10,15 @@ import {
   Query,
   HttpCode,
   HttpStatus,
+  UseGuards,
   Ip,
 } from '@nestjs/common';
 import { TodoService } from './todo.service';
 import { SessionData } from 'express-session';
 import { CreateTodoDto, UpdateTodoDto, DeleteTodoDto } from './todo.dto';
+import { AuthenticatedGuard } from '../../../src/types/express/auth.guard';
 
+@UseGuards(AuthenticatedGuard) // 컨트롤러 전체에 인증 가드 적용
 @Controller('todo')
 export class TodoController {
   constructor(private readonly todoService: TodoService) {}
