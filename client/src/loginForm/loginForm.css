@@ -31,10 +31,14 @@
 }
 
 .form-group input {
-  border-radius: 20px;
+  border-radius: 10px;
 }
 
 .btn-primary {
   border-radius: 20px;
+  width: 100%;
+}
+
+.btn-secondary.full-width {
   width: 100%;
 }

@@ -116,12 +116,12 @@ function LoginForm() {
             spellCheck="false"
           />
         </div>
-        <button type="submit" className="btn btn-primary mb-3">
+        <button type="submit" className="btn btn-primary mt-3">
           로그인
         </button>
-        <span onClick={handleSignup} style={{ cursor: 'pointer' }}>
+        <button type="button" className="btn btn-secondary mt-3 full-width" onClick={handleSignup}>
           회원가입
-        </span>
+        </button>
       </form>
     </div>
   );
