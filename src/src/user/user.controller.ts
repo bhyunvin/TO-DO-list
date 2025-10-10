@@ -7,10 +7,12 @@ import {
   UploadedFile,
   UseInterceptors,
   Ip,
-  Req,
-  Res,
+  Session,
+  HttpCode,
+  HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
-import { Request, Response } from 'express';
+import { Session as SessionInterface, SessionData } from 'express-session';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { multerOptions } from '../fileUpload/fileUploadUtil';
 
@@ -18,17 +20,22 @@ import { UserService } from './user.service';
 import { UserDto } from './user.dto';
 import { UserEntity } from './user.entity';
 
+import { AuthenticatedGuard } from '../../../src/types/express/auth.guard';
+
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   //로그인
   @Post('login')
+  @HttpCode(HttpStatus.OK)
   async login(
-    @Req() req: Request,
+    @Session() session: SessionData,
     @Body() userDto: UserDto,
-  ): Promise<UserEntity | { message: string }> {
-    return await this.userService.getUserOneInfoForLogin(req, userDto);
+  ): Promise<Omit<UserEntity, 'userPassword'>> {
+    const user = await this.userService.login(userDto);
+    session.user = user; // 서비스에서 반환된 사용자 정보를 세션에 저장
+    return user;
   }
 
   //아이디 중복체크
@@ -49,8 +56,12 @@ export class UserController {
   }
 
   //로그아웃
+  @UseGuards(AuthenticatedGuard)
   @Post('logout')
-  async logout(@Req() req: Request, @Res() res: Response): Promise<Response> {
-    return await this.userService.logout(req, res);
+  @HttpCode(HttpStatus.NO_CONTENT)
+  logout(@Session() session: SessionInterface): void {
+    session.destroy((err) => {
+      // 로그아웃 처리 중 에러 발생 시 처리 로직을 추가할 수 있습니다.
+    });
   }
 }

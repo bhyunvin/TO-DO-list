@@ -1,7 +1,6 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository, InjectDataSource } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
-import { Request, Response } from 'express';
 import { UserEntity } from './user.entity';
 import { UserDto } from './user.dto';
 import { encrypt, isHashValid } from '../utils/cryptUtil';
@@ -20,17 +19,16 @@ export class UserService {
     private readonly dataSource: DataSource,
   ) {}
 
-  // 로그인 위해 아이디, 비밀번호로 사용자 1명 조회
-  async getUserOneInfoForLogin(
-    req: Request,
+  // 로그인 로직 (컨트롤러에서 세션 처리)
+  async login(
     userDto: UserDto,
-  ): Promise<UserEntity | { message: string }> {
+  ): Promise<Omit<UserEntity, 'userPassword'>> {
     this.logger.log(`Login DTO received: ${JSON.stringify(userDto)}`);
     const selectedUser = await this.userRepository.findOne({
       where: { userId: userDto.userId },
     });
     if (!selectedUser) {
-      return { message: '아이디나 비밀번호가 다릅니다.' };
+      throw new UnauthorizedException('아이디나 비밀번호가 다릅니다.');
     }
 
     const isPasswordMatch = await isHashValid(
@@ -38,19 +36,12 @@ export class UserService {
       selectedUser.userPassword,
     );
     if (!isPasswordMatch) {
-      return { message: '아이디나 비밀번호가 다릅니다.' };
+      throw new UnauthorizedException('아이디나 비밀번호가 다릅니다.');
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { userPassword, ...userToStore } = selectedUser;
-
-    // 세션에 사용자 정보 저장 (비밀번호 제외)
-    req.session.user = userToStore;
-
     this.logger.log(`User ${userToStore.userId} logged in, session saved.`);
-
-    // 클라이언트에는 비밀번호를 제외한 사용자 정보 반환
-    return userToStore as UserEntity;
+    return userToStore;
   }
 
   // ID 중복체크
@@ -94,21 +85,6 @@ export class UserService {
       }
 
       return savedUser;
-    });
-  }
-
-  // 로그아웃
-  async logout(req: Request, res: Response): Promise<Response> {
-    return new Promise((resolve, reject) => {
-      req.session.destroy((err) => {
-        if (err) {
-          this.logger.error('Session destruction error:', err);
-          return reject(res.status(500).send('Could not log out.'));
-        }
-        res.clearCookie('connect.sid'); // 세션 쿠키 삭제
-        this.logger.log('Session destroyed and user logged out.');
-        return resolve(res.status(200).send({ message: 'Logged out' }));
-      });
     });
   }
 }
