@@ -35,9 +35,10 @@ function CreateTodoForm(props) {
     e.preventDefault();
 
     if (todoContent.trim()) {
-      onAddTodo({ todoContent, todoNote });
+      onAddTodo({ todoContent, todoNote, todoFiles });
       setTodoContent('');
       setTodoNote('');
+      setTodoFiles([]);
     } else {
       Swal.fire('할 일을 입력해주세요.', '', 'warning');
     }
@@ -151,7 +152,7 @@ function TodoList(props) {
               </td>
               <td className="text-center">
                 <button
-                  className="btn btn-sm btn-info"
+                  className="btn btn-sm btn-success"
                   onClick={() => onEditTodo(todo)}
                 >
                   수정
@@ -179,10 +180,29 @@ function TodoList(props) {
 function EditTodoForm({ todo, onSave, onCancel }) {
   const [todoContent, setTodoContent] = useState(todo.todoContent);
   const [todoNote, setTodoNote] = useState(todo.todoNote);
+  const [todoFiles, setTodoFiles] = useState([]);
+
+  function handleChange(e) {
+    const thisName = e.target.name;
+    switch (thisName) {
+      case 'TODO_CONTENT':
+        setTodoContent(e.target.value);
+        break;
+      case 'TODO_NOTE':
+        setTodoNote(e.target.value);
+        break;
+      case 'TODO_FILES':
+        const selectedFiles = Array.from(e.target.files);
+        setTodoFiles(selectedFiles);
+        break;
+      default:
+        break;
+    }
+  }
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave(todo.todoSeq, { todoContent, todoNote });
+    onSave(todo.todoSeq, { todoContent, todoNote, todoFiles });
   };
 
   return (
@@ -195,7 +215,8 @@ function EditTodoForm({ todo, onSave, onCancel }) {
           name="TODO_CONTENT"
           className="form-control mb-3"
           value={todoContent}
-          onChange={(e) => setTodoContent(e.target.value)}
+          onChange={handleChange}
+          maxLength={4000}
           required
         />
         <label className="mb-1" htmlFor="todoNote">비고</label>
@@ -204,10 +225,23 @@ function EditTodoForm({ todo, onSave, onCancel }) {
           name="TODO_NOTE"
           className="form-control mb-3"
           value={todoNote}
-          onChange={(e) => setTodoNote(e.target.value)}
+          onChange={handleChange}
+          maxLength={4000}
         />
-        <button type="submit" className="btn btn-primary">
-          저장
+        <label className="mb-1" htmlFor="todoFiles">첨부파일</label>
+        <input
+          id="todoFiles"
+          type="file"
+          multiple={true}
+          className="form-control mb-3"
+          placeholder="필요 시 파일을 업로드해주세요."
+          value={todoFiles}
+          onChange={handleChange}
+          name="TODO_FILES"
+          maxLength={4000}
+        />
+        <button type="submit" className="btn btn-success">
+          수정
         </button>
         <button type="button" className="btn btn-secondary ms-2" onClick={onCancel}>
           취소
@@ -239,6 +273,7 @@ function formatDateTime(isoString) {
   const minutes = String(date.getMinutes()).padStart(2, '0');
   return `${year}-${month}-${day} ${hours}:${minutes}`;
 }
+
 // TODO 리스트 및 폼을 조건부로 렌더링하는 컨테이너 컴포넌트
 function TodoContainer() {
   const { user, logout, api } = useAuthStore(); // api 함수 가져오기
