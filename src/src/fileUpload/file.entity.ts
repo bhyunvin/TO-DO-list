@@ -5,6 +5,7 @@ import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 export class FileInfoEntity {
   constructor() {
     this.auditColumns = new AuditColumns(); // auditColumns을 초기화
+    this.validationStatus = 'pending'; // Initialize validation status
   }
 
   @PrimaryGeneratedColumn({ name: 'file_no' })
@@ -19,11 +20,23 @@ export class FileInfoEntity {
   @Column({ name: 'save_file_nm', type: 'text' })
   saveFileName: string;
 
+  @Column({ name: 'original_file_nm', type: 'text' })
+  originalFileName: string;
+
   @Column({ name: 'file_ext', type: 'varchar', length: 10 })
   fileExt: string;
 
   @Column({ name: 'file_size', type: 'int' })
   fileSize: number;
+
+  @Column({ name: 'file_category', type: 'varchar', length: 50 })
+  fileCategory: string; // 'profile_image' | 'todo_attachment'
+
+  @Column({ name: 'validation_status', type: 'varchar', length: 20, default: 'pending' })
+  validationStatus: string; // 'pending' | 'validated' | 'rejected'
+
+  @Column({ name: 'rejection_reason', type: 'text', nullable: true })
+  rejectionReason?: string;
 
   @Column(() => AuditColumns) // 복합 엔티티를 포함
   auditColumns: AuditColumns;

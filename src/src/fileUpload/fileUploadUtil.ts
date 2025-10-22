@@ -5,6 +5,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { FileInfoEntity } from './file.entity';
+import { FileValidationService } from './validation/file-validation.service';
+import { FileCategory } from './validation/file-validation.interfaces';
+import { FILE_UPLOAD_POLICY, FILE_VALIDATION_ERRORS } from './validation/file-validation.constants';
 
 import { AuditSettings, setAuditColumn } from '../utils/auditColumns';
 
@@ -15,12 +18,14 @@ export class FileUploadUtil {
   constructor(
     @InjectRepository(FileInfoEntity)
     private readonly fileInfoRepository: Repository<FileInfoEntity>,
+    private readonly fileValidationService: FileValidationService,
   ) {}
 
   // 파일 정보를 DB에 저장하는 함수
   async saveFileInfo(
     files: Express.Multer.File[],
     setting: AuditSettings,
+    fileCategory: FileCategory = 'todo_attachment',
   ): Promise<{ savedFiles: FileInfoEntity[]; fileGroupNo: number }> {
     const savedFiles: FileInfoEntity[] = [];
     let fileGroupNo: number | null = null;
@@ -31,8 +36,11 @@ export class FileUploadUtil {
       let newFirstFile = this.fileInfoRepository.create({
         filePath: firstFile.path,
         saveFileName: firstFile.filename,
+        originalFileName: firstFile.originalname,
         fileExt: extname(firstFile.originalname).substring(1),
         fileSize: firstFile.size,
+        fileCategory: fileCategory,
+        validationStatus: 'validated',
       });
 
       setting.entity = newFirstFile;
@@ -59,8 +67,11 @@ export class FileUploadUtil {
           fileGroupNo: fileGroupNo, // 모든 파일에 같은 fileGroupNo 설정
           filePath: file.path,
           saveFileName: file.filename,
+          originalFileName: file.originalname,
           fileExt: extname(file.originalname).substring(1),
           fileSize: file.size,
+          fileCategory: fileCategory,
+          validationStatus: 'validated',
         });
 
         setting.entity = newFile;
@@ -75,7 +86,60 @@ export class FileUploadUtil {
   }
 }
 
-// Multer 옵션 설정
+// Enhanced file filter function with validation
+export const createFileFilter = (category: FileCategory) => {
+  return (req: any, file: Express.Multer.File, callback: Function) => {
+    const fileValidationService = new FileValidationService();
+    const validationResults = fileValidationService.validateFilesByCategory([file], category);
+    const result = validationResults[0];
+
+    if (!result.isValid) {
+      const error = new Error(result.errorMessage);
+      (error as any).code = result.errorCode;
+      return callback(error, false);
+    }
+
+    callback(null, true);
+  };
+};
+
+// Enhanced multer configuration for profile images
+export const profileImageMulterOptions = {
+  storage: diskStorage({
+    destination: uploadFileDirectory,
+    filename: (req, file, callback) => {
+      const uniqueSuffix = Date.now() + '_' + Math.round(Math.random() * 1e9);
+      const ext = extname(file.originalname);
+      const filename = `profile_${uniqueSuffix}${ext}`;
+      callback(null, filename);
+    },
+  }),
+  fileFilter: createFileFilter('profile_image'),
+  limits: {
+    fileSize: FILE_UPLOAD_POLICY.profileImage.maxSize,
+    files: FILE_UPLOAD_POLICY.profileImage.maxCount,
+  },
+};
+
+// Enhanced multer configuration for TODO attachments
+export const todoAttachmentMulterOptions = {
+  storage: diskStorage({
+    destination: uploadFileDirectory,
+    filename: (req, file, callback) => {
+      const uniqueSuffix = Date.now() + '_' + Math.round(Math.random() * 1e9);
+      const ext = extname(file.originalname);
+      const filename = `todo_${uniqueSuffix}${ext}`;
+      callback(null, filename);
+    },
+  }),
+  fileFilter: createFileFilter('todo_attachment'),
+  limits: {
+    fileSize: FILE_UPLOAD_POLICY.todoAttachment.maxSize,
+    files: FILE_UPLOAD_POLICY.todoAttachment.maxCount,
+  },
+};
+
+// Legacy multer options (for backward compatibility)
 export const multerOptions = {
   storage: diskStorage({
     destination: uploadFileDirectory,
