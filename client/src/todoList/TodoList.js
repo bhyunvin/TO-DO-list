@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Swal from 'sweetalert2';
 import { useAuthStore } from '../authStore/authStore';
+import { useFileUploadValidator } from '../hooks/useFileUploadValidator';
 import './todoList.css';
 import DatePicker from 'react-datepicker';
 import { ko } from 'date-fns/locale';
@@ -10,9 +11,17 @@ import 'react-datepicker/dist/react-datepicker.css';
 // 신규 TODO 항목 추가 폼 컴포넌트
 function CreateTodoForm(props) {
   const { onAddTodo, onCancel } = props;
+  const { 
+    validateFiles, 
+    formatFileSize, 
+    getUploadPolicy
+  } = useFileUploadValidator();
+  
   const [todoContent, setTodoContent] = useState('');
   const [todoNote, setTodoNote] = useState('');
   const [todoFiles, setTodoFiles] = useState([]);
+  const [fileValidationResults, setFileValidationResults] = useState([]);
+  const [fileError, setFileError] = useState('');
 
   function handleChange(e) {
     const thisName = e.target.name;
@@ -24,25 +33,77 @@ function CreateTodoForm(props) {
         setTodoNote(e.target.value);
         break;
       case 'TODO_FILES':
-        const selectedFiles = Array.from(e.target.files);
-        setTodoFiles(selectedFiles);
+        handleFileChange(e);
         break;
       default:
         break;
     }
   }
 
+  function handleFileChange(e) {
+    const selectedFiles = Array.from(e.target.files);
+    
+    // Clear previous state
+    setTodoFiles([]);
+    setFileValidationResults([]);
+    setFileError('');
+    
+    if (selectedFiles.length > 0) {
+      // Validate files
+      const validationResults = validateFiles(selectedFiles, 'todoAttachment');
+      setFileValidationResults(validationResults);
+      
+      // Check if all files are valid
+      const invalidFiles = validationResults.filter(result => !result.isValid);
+      if (invalidFiles.length > 0) {
+        setFileError(`${invalidFiles.length}개 파일에 문제가 있습니다.`);
+        // Clear the file input
+        e.target.value = '';
+      } else {
+        setTodoFiles(selectedFiles);
+        setFileError('');
+      }
+    }
+  }
+
+  function removeFile(index) {
+    const newFiles = todoFiles.filter((_, i) => i !== index);
+    const newValidationResults = fileValidationResults.filter((_, i) => i !== index);
+    
+    setTodoFiles(newFiles);
+    setFileValidationResults(newValidationResults);
+    
+    if (newFiles.length === 0) {
+      setFileError('');
+      // Clear the file input
+      const fileInput = document.getElementById('todoFiles');
+      if (fileInput) fileInput.value = '';
+    }
+  }
+
   function handleSubmit(e) {
     e.preventDefault();
 
-    if (todoContent.trim()) {
-      onAddTodo({ todoContent, todoNote, todoFiles });
-      setTodoContent('');
-      setTodoNote('');
-      setTodoFiles([]);
-    } else {
+    if (!todoContent.trim()) {
       Swal.fire('할 일을 입력해주세요.', '', 'warning');
+      return;
     }
+
+    // Validate files if any are selected
+    if (todoFiles.length > 0) {
+      const invalidFiles = fileValidationResults.filter(result => !result.isValid);
+      if (invalidFiles.length > 0) {
+        Swal.fire('파일 오류', '유효하지 않은 파일이 있습니다. 파일을 다시 선택해주세요.', 'error');
+        return;
+      }
+    }
+
+    onAddTodo({ todoContent, todoNote, todoFiles });
+    setTodoContent('');
+    setTodoNote('');
+    setTodoFiles([]);
+    setFileValidationResults([]);
+    setFileError('');
   }
 
   return (
@@ -81,13 +142,59 @@ function CreateTodoForm(props) {
           id="todoFiles"
           type="file"
           multiple={true}
-          className="form-control mb-3"
-          placeholder="필요 시 파일을 업로드해주세요."
-          value={todoFiles}
+          className={`form-control ${fileError ? 'is-invalid' : todoFiles.length > 0 ? 'is-valid' : ''}`}
+          accept=".xlsx,.pptx,.docx,.pdf,.hwp,.txt"
           onChange={handleChange}
           name="TODO_FILES"
-          maxLength={4000}
         />
+        <small className="form-text text-muted">
+          허용 파일: XLSX, PPTX, DOCX, PDF, HWP, TXT | 최대 크기: {formatFileSize(getUploadPolicy('todoAttachment')?.maxSize || 0)} | 최대 {getUploadPolicy('todoAttachment')?.maxCount || 0}개
+        </small>
+        {fileError && (
+          <div className="text-danger mt-1">
+            <small>{fileError}</small>
+          </div>
+        )}
+        
+        {/* File validation results and preview */}
+        {fileValidationResults.length > 0 && (
+          <div className="mt-2 mb-3">
+            {fileValidationResults.map((result, index) => (
+              <div key={index} className={`d-flex align-items-center justify-content-between p-2 mb-1 border rounded ${result.isValid ? 'border-success bg-light' : 'border-danger bg-light'}`}>
+                <div className="flex-grow-1">
+                  <div className={`fw-bold ${result.isValid ? 'text-success' : 'text-danger'}`}>
+                    {result.fileName}
+                  </div>
+                  <small className="text-muted">
+                    크기: {formatFileSize(result.fileSize)} | 타입: {result.fileType}
+                  </small>
+                  {!result.isValid && (
+                    <div className="text-danger">
+                      <small>{result.errorMessage}</small>
+                    </div>
+                  )}
+                </div>
+                <div className="ms-2">
+                  {result.isValid ? (
+                    <span className="text-success">✓</span>
+                  ) : (
+                    <span className="text-danger">✗</span>
+                  )}
+                  {result.isValid && (
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-outline-danger ms-2"
+                      onClick={() => removeFile(index)}
+                      title="파일 제거"
+                    >
+                      <i className="bi bi-x"></i>
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
         <button type="submit" className="btn btn-success">
           추가
         </button>
@@ -222,9 +329,17 @@ function TodoList(props) {
 
 // ToDo 항목 수정을 위한 폼 컴포넌트
 function EditTodoForm({ todo, onSave, onCancel }) {
+  const { 
+    validateFiles, 
+    formatFileSize, 
+    getUploadPolicy 
+  } = useFileUploadValidator();
+  
   const [todoContent, setTodoContent] = useState(todo.todoContent);
   const [todoNote, setTodoNote] = useState(todo.todoNote);
   const [todoFiles, setTodoFiles] = useState([]);
+  const [fileValidationResults, setFileValidationResults] = useState([]);
+  const [fileError, setFileError] = useState('');
 
   function handleChange(e) {
     const thisName = e.target.name;
@@ -236,16 +351,66 @@ function EditTodoForm({ todo, onSave, onCancel }) {
         setTodoNote(e.target.value);
         break;
       case 'TODO_FILES':
-        const selectedFiles = Array.from(e.target.files);
-        setTodoFiles(selectedFiles);
+        handleFileChange(e);
         break;
       default:
         break;
     }
   }
 
+  function handleFileChange(e) {
+    const selectedFiles = Array.from(e.target.files);
+    
+    // Clear previous state
+    setTodoFiles([]);
+    setFileValidationResults([]);
+    setFileError('');
+    
+    if (selectedFiles.length > 0) {
+      // Validate files
+      const validationResults = validateFiles(selectedFiles, 'todoAttachment');
+      setFileValidationResults(validationResults);
+      
+      // Check if all files are valid
+      const invalidFiles = validationResults.filter(result => !result.isValid);
+      if (invalidFiles.length > 0) {
+        setFileError(`${invalidFiles.length}개 파일에 문제가 있습니다.`);
+        // Clear the file input
+        e.target.value = '';
+      } else {
+        setTodoFiles(selectedFiles);
+        setFileError('');
+      }
+    }
+  }
+
+  function removeFile(index) {
+    const newFiles = todoFiles.filter((_, i) => i !== index);
+    const newValidationResults = fileValidationResults.filter((_, i) => i !== index);
+    
+    setTodoFiles(newFiles);
+    setFileValidationResults(newValidationResults);
+    
+    if (newFiles.length === 0) {
+      setFileError('');
+      // Clear the file input
+      const fileInput = document.getElementById('todoFiles');
+      if (fileInput) fileInput.value = '';
+    }
+  }
+
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    // Validate files if any are selected
+    if (todoFiles.length > 0) {
+      const invalidFiles = fileValidationResults.filter(result => !result.isValid);
+      if (invalidFiles.length > 0) {
+        Swal.fire('파일 오류', '유효하지 않은 파일이 있습니다. 파일을 다시 선택해주세요.', 'error');
+        return;
+      }
+    }
+
     onSave(todo.todoSeq, { todoContent, todoNote, todoFiles });
   };
 
@@ -277,13 +442,59 @@ function EditTodoForm({ todo, onSave, onCancel }) {
           id="todoFiles"
           type="file"
           multiple={true}
-          className="form-control mb-3"
-          placeholder="필요 시 파일을 업로드해주세요."
-          value={todoFiles}
+          className={`form-control ${fileError ? 'is-invalid' : todoFiles.length > 0 ? 'is-valid' : ''}`}
+          accept=".xlsx,.pptx,.docx,.pdf,.hwp,.txt"
           onChange={handleChange}
           name="TODO_FILES"
-          maxLength={4000}
         />
+        <small className="form-text text-muted">
+          허용 파일: XLSX, PPTX, DOCX, PDF, HWP, TXT | 최대 크기: {formatFileSize(getUploadPolicy('todoAttachment')?.maxSize || 0)} | 최대 {getUploadPolicy('todoAttachment')?.maxCount || 0}개
+        </small>
+        {fileError && (
+          <div className="text-danger mt-1">
+            <small>{fileError}</small>
+          </div>
+        )}
+        
+        {/* File validation results and preview */}
+        {fileValidationResults.length > 0 && (
+          <div className="mt-2 mb-3">
+            {fileValidationResults.map((result, index) => (
+              <div key={index} className={`d-flex align-items-center justify-content-between p-2 mb-1 border rounded ${result.isValid ? 'border-success bg-light' : 'border-danger bg-light'}`}>
+                <div className="flex-grow-1">
+                  <div className={`fw-bold ${result.isValid ? 'text-success' : 'text-danger'}`}>
+                    {result.fileName}
+                  </div>
+                  <small className="text-muted">
+                    크기: {formatFileSize(result.fileSize)} | 타입: {result.fileType}
+                  </small>
+                  {!result.isValid && (
+                    <div className="text-danger">
+                      <small>{result.errorMessage}</small>
+                    </div>
+                  )}
+                </div>
+                <div className="ms-2">
+                  {result.isValid ? (
+                    <span className="text-success">✓</span>
+                  ) : (
+                    <span className="text-danger">✗</span>
+                  )}
+                  {result.isValid && (
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-outline-danger ms-2"
+                      onClick={() => removeFile(index)}
+                      title="파일 제거"
+                    >
+                      <i className="bi bi-x"></i>
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
         <button type="submit" className="btn btn-success">
           수정
         </button>
@@ -357,18 +568,27 @@ function TodoContainer() {
 
 
   //CreateTodoForm에서 넘어온 Todo 요소 추가
-  async function handleAddTodo({ todoContent, todoNote }) {
+  async function handleAddTodo({ todoContent, todoNote, todoFiles }) {
     try {
       const formattedDate = formatDate(selectedDate);
+      
+      // Create FormData for file upload
+      const formData = new FormData();
+      formData.append('todoContent', todoContent);
+      formData.append('todoDate', formattedDate);
+      formData.append('todoNote', todoNote || '');
+      
+      // Add files if any
+      if (todoFiles && todoFiles.length > 0) {
+        todoFiles.forEach((file) => {
+          formData.append('files', file);
+        });
+      }
+
       const response = await api(`/api/todo`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         credentials: 'include', // 다른 도메인으로 쿠키를 전송하기 위한 설정
-        body: JSON.stringify({
-          todoContent,
-          todoDate: formattedDate,
-          todoNote: todoNote,
-        }),
+        body: formData, // Use FormData instead of JSON
       });
 
       if (response.ok) {
@@ -376,7 +596,8 @@ function TodoContainer() {
         setIsCreating(false);
         fetchTodos(); // 목록 새로고침
       } else {
-        Swal.fire('오류', '할 일 추가에 실패했습니다.', 'error');
+        const errorData = await response.json();
+        Swal.fire('오류', errorData.message || '할 일 추가에 실패했습니다.', 'error');
       }
     } catch (error) {
       console.error('Add Todo Error:', error);
@@ -454,11 +675,24 @@ function TodoContainer() {
   // ToDo 항목 수정을 저장하는 함수
   const handleSaveTodo = async (todoSeq, updatedData) => {
     try {
+      const { todoContent, todoNote, todoFiles } = updatedData;
+      
+      // Create FormData for file upload
+      const formData = new FormData();
+      formData.append('todoContent', todoContent);
+      formData.append('todoNote', todoNote || '');
+      
+      // Add files if any
+      if (todoFiles && todoFiles.length > 0) {
+        todoFiles.forEach((file) => {
+          formData.append('files', file);
+        });
+      }
+
       const response = await api(`/api/todo/${todoSeq}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
         credentials: 'include', // 다른 도메인으로 쿠키를 전송하기 위한 설정
-        body: JSON.stringify(updatedData),
+        body: formData, // Use FormData instead of JSON
       });
 
       if (response.ok) {
@@ -466,7 +700,8 @@ function TodoContainer() {
         setEditingTodo(null);
         fetchTodos();
       } else {
-        Swal.fire('오류', '수정에 실패했습니다.', 'error');
+        const errorData = await response.json();
+        Swal.fire('오류', errorData.message || '수정에 실패했습니다.', 'error');
       }
     } catch (error) {
       console.error('Save Todo Error:', error);
