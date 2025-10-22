@@ -24,14 +24,14 @@
     - Handle validation errors with descriptive messages
     - _Requirements: 4.1, 4.2, 4.4, 4.5_
 
-- [ ] 3. Update user registration file upload
-  - [ ] 3.1 Enhance user controller signup endpoint
+- [x] 3. Update user registration file upload
+  - [x] 3.1 Enhance user controller signup endpoint
     - Apply new file validation to profile image upload
     - Update error handling for validation failures
     - Add file category tracking for profile images
     - _Requirements: 2.1, 2.2, 2.4, 2.5_
 
-  - [ ] 3.2 Update user service for profile image handling
+  - [x] 3.2 Update user service for profile image handling
     - Integrate FileValidationService into user signup process
     - Handle validation errors and file rejection scenarios
     - Update file metadata storage with validation status

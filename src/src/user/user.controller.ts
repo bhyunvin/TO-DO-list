@@ -15,7 +15,8 @@ import {
 } from '@nestjs/common';
 import { Session as SessionInterface, SessionData } from 'express-session';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { multerOptions } from '../fileUpload/fileUploadUtil';
+import { profileImageMulterOptions } from '../fileUpload/fileUploadUtil';
+import { ProfileImageValidationInterceptor } from '../fileUpload/validation/file-validation.interceptor';
 
 import { UserService } from './user.service';
 import { UserDto } from './user.dto';
@@ -59,13 +60,28 @@ export class UserController {
 
   //회원가입
   @Post('signup')
-  @UseInterceptors(FileInterceptor('profileImage', multerOptions))
+  @UseInterceptors(
+    FileInterceptor('profileImage', profileImageMulterOptions),
+    ProfileImageValidationInterceptor,
+  )
   async signup(
     @Body() userDto: UserDto,
     @UploadedFile() profileImageFile: Express.Multer.File,
     @Ip() ip: string,
   ): Promise<UserDto | null> {
-    return await this.userService.signup(userDto, profileImageFile, ip);
+    try {
+      return await this.userService.signup(userDto, profileImageFile, ip);
+    } catch (error) {
+      this.logger.error('Profile image upload failed during signup', {
+        userId: userDto.userId,
+        error: error.message,
+        fileName: profileImageFile?.originalname,
+        fileSize: profileImageFile?.size,
+      });
+      
+      // Re-throw the error to be handled by global exception filter
+      throw error;
+    }
   }
 
   //로그아웃
