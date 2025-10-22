@@ -37,20 +37,20 @@
     - Update file metadata storage with validation status
     - _Requirements: 2.1, 2.4, 2.5_
 
-- [ ] 4. Implement TODO attachment upload system
-  - [ ] 4.1 Add file upload endpoints to TODO controller
+- [x] 4. Implement TODO attachment upload system
+  - [x] 4.1 Add file upload endpoints to TODO controller
     - Create POST endpoint for TODO file attachments
     - Implement multiple file upload handling
     - Add file validation for TODO-specific file types
     - _Requirements: 3.1, 3.2, 3.4_
 
-  - [ ] 4.2 Update TODO service for file attachment handling
+  - [x] 4.2 Update TODO service for file attachment handling
     - Integrate file upload with TODO creation and updates
     - Handle multiple file validation and storage
     - Link uploaded files to specific TODO items
     - _Requirements: 3.1, 3.4, 4.3_
 
-  - [ ] 4.3 Update TODO DTOs for file upload support
+  - [x] 4.3 Update TODO DTOs for file upload support
     - Add file upload fields to CreateTodoDto and UpdateTodoDto
     - Create file attachment response DTOs
     - Handle file validation error responses

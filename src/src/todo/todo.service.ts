@@ -2,9 +2,18 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In, LessThanOrEqual, IsNull, Not } from 'typeorm';
 import { TodoEntity } from './todo.entity';
-import { CreateTodoDto, UpdateTodoDto } from './todo.dto';
+import { 
+  CreateTodoDto, 
+  UpdateTodoDto, 
+  CreateTodoWithFilesDto,
+  TodoWithFilesResponseDto,
+  FileAttachmentResponseDto,
+  FileUploadResponseDto
+} from './todo.dto';
 import { setAuditColumn, AuditSettings } from '../utils/auditColumns';
 import { UserEntity } from '../user/user.entity';
+import { FileInfoEntity } from '../fileUpload/file.entity';
+import { FileUploadUtil } from '../fileUpload/fileUploadUtil';
 
 @Injectable()
 export class TodoService {
@@ -12,6 +21,11 @@ export class TodoService {
     // TodoEntity의 Repository를 주입합니다.
     @InjectRepository(TodoEntity)
     private todoRepository: Repository<TodoEntity>,
+    // FileInfoEntity의 Repository를 주입합니다.
+    @InjectRepository(FileInfoEntity)
+    private fileInfoRepository: Repository<FileInfoEntity>,
+    // FileUploadUtil을 주입합니다.
+    private fileUploadUtil: FileUploadUtil,
   ) {}
 
   // 특정 사용자의 특정 날짜의 모든 ToDo 항목을 조회합니다.
@@ -116,5 +130,260 @@ export class TodoService {
       });
       await this.todoRepository.save(todoToDelete);
     }
+  }
+
+  // 파일 첨부만 업로드합니다 (독립적인 파일 업로드)
+  async uploadAttachments(
+    user: Omit<UserEntity, 'userPassword'>,
+    ip: string,
+    files: Express.Multer.File[],
+  ): Promise<FileUploadResponseDto> {
+    if (!files || files.length === 0) {
+      return {
+        success: false,
+        uploadedFiles: [],
+        message: 'No files provided for upload',
+      };
+    }
+
+    const auditSettings: AuditSettings = {
+      ip,
+      entity: null, // Will be set in saveFileInfo
+      id: user.userId,
+    };
+
+    try {
+      const { savedFiles, fileGroupNo } = await this.fileUploadUtil.saveFileInfo(
+        files,
+        auditSettings,
+        'todo_attachment',
+      );
+
+      const attachmentResponses: FileAttachmentResponseDto[] = savedFiles.map(file => ({
+        fileNo: file.fileNo,
+        originalFileName: file.originalFileName,
+        fileSize: file.fileSize,
+        fileExt: file.fileExt,
+        uploadDate: file.auditColumns.regDtm.toISOString(),
+        validationStatus: file.validationStatus,
+      }));
+
+      return {
+        success: true,
+        uploadedFiles: attachmentResponses,
+        fileGroupNo,
+        message: `Successfully uploaded ${savedFiles.length} file(s)`,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        uploadedFiles: [],
+        message: `File upload failed: ${error.message}`,
+      };
+    }
+  }
+
+  // 파일과 함께 새로운 TODO 항목을 생성합니다.
+  async createWithFiles(
+    user: Omit<UserEntity, 'userPassword'>,
+    ip: string,
+    createTodoDto: CreateTodoWithFilesDto,
+    files: Express.Multer.File[],
+  ): Promise<TodoWithFilesResponseDto> {
+    // 먼저 TODO 항목을 생성합니다.
+    const newTodo = await this.create(user, ip, createTodoDto);
+
+    let attachments: FileAttachmentResponseDto[] = [];
+    let fileGroupNo: number | null = null;
+
+    // 파일이 있는 경우 파일을 업로드하고 TODO와 연결합니다.
+    if (files && files.length > 0) {
+      const auditSettings: AuditSettings = {
+        ip,
+        entity: null, // Will be set in saveFileInfo
+        id: user.userId,
+      };
+
+      try {
+        const { savedFiles, fileGroupNo: uploadedFileGroupNo } = await this.fileUploadUtil.saveFileInfo(
+          files,
+          auditSettings,
+          'todo_attachment',
+        );
+
+        fileGroupNo = uploadedFileGroupNo;
+
+        // TODO 항목에 파일 그룹 번호를 연결합니다.
+        newTodo.todoFileGroupNo = fileGroupNo;
+        await this.todoRepository.save(newTodo);
+
+        attachments = savedFiles.map(file => ({
+          fileNo: file.fileNo,
+          originalFileName: file.originalFileName,
+          fileSize: file.fileSize,
+          fileExt: file.fileExt,
+          uploadDate: file.auditColumns.regDtm.toISOString(),
+          validationStatus: file.validationStatus,
+        }));
+      } catch (error) {
+        // 파일 업로드 실패 시에도 TODO는 생성된 상태로 유지
+        console.error('File upload failed during TODO creation:', error);
+      }
+    }
+
+    return {
+      todoSeq: newTodo.todoSeq,
+      todoContent: newTodo.todoContent,
+      todoDate: newTodo.todoDate,
+      todoNote: newTodo.todoNote,
+      completeDtm: newTodo.completeDtm,
+      attachments,
+      createdAt: newTodo.auditColumns.regDtm.toISOString(),
+    };
+  }
+
+  // 기존 TODO 항목에 파일을 추가합니다.
+  async addAttachments(
+    todoId: number,
+    user: Omit<UserEntity, 'userPassword'>,
+    ip: string,
+    files: Express.Multer.File[],
+  ): Promise<FileUploadResponseDto> {
+    // TODO 항목이 존재하고 사용자 소유인지 확인합니다.
+    const todo = await this.todoRepository.findOne({
+      where: { todoSeq: todoId, userSeq: user.userSeq, delYn: 'N' },
+    });
+
+    if (!todo) {
+      return {
+        success: false,
+        uploadedFiles: [],
+        message: 'TODO item not found or access denied',
+      };
+    }
+
+    if (!files || files.length === 0) {
+      return {
+        success: false,
+        uploadedFiles: [],
+        message: 'No files provided for upload',
+      };
+    }
+
+    const auditSettings: AuditSettings = {
+      ip,
+      entity: null, // Will be set in saveFileInfo
+      id: user.userId,
+    };
+
+    try {
+      let fileGroupNo = todo.todoFileGroupNo;
+
+      // TODO에 기존 파일 그룹이 없는 경우 새로 생성
+      if (!fileGroupNo) {
+        const { savedFiles, fileGroupNo: newFileGroupNo } = await this.fileUploadUtil.saveFileInfo(
+          files,
+          auditSettings,
+          'todo_attachment',
+        );
+
+        fileGroupNo = newFileGroupNo;
+        todo.todoFileGroupNo = fileGroupNo;
+        await this.todoRepository.save(todo);
+
+        const attachmentResponses: FileAttachmentResponseDto[] = savedFiles.map(file => ({
+          fileNo: file.fileNo,
+          originalFileName: file.originalFileName,
+          fileSize: file.fileSize,
+          fileExt: file.fileExt,
+          uploadDate: file.auditColumns.regDtm.toISOString(),
+          validationStatus: file.validationStatus,
+        }));
+
+        return {
+          success: true,
+          uploadedFiles: attachmentResponses,
+          fileGroupNo,
+          message: `Successfully added ${savedFiles.length} file(s) to TODO`,
+        };
+      } else {
+        // 기존 파일 그룹에 파일 추가
+        const savedFiles: FileInfoEntity[] = [];
+
+        for (const file of files) {
+          let newFile = this.fileInfoRepository.create({
+            fileGroupNo: fileGroupNo,
+            filePath: file.path,
+            saveFileName: file.filename,
+            originalFileName: file.originalname,
+            fileExt: file.originalname.split('.').pop() || '',
+            fileSize: file.size,
+            fileCategory: 'todo_attachment',
+            validationStatus: 'validated',
+          });
+
+          auditSettings.entity = newFile;
+          newFile = setAuditColumn(auditSettings);
+
+          const savedFile = await this.fileInfoRepository.save(newFile);
+          savedFiles.push(savedFile);
+        }
+
+        const attachmentResponses: FileAttachmentResponseDto[] = savedFiles.map(file => ({
+          fileNo: file.fileNo,
+          originalFileName: file.originalFileName,
+          fileSize: file.fileSize,
+          fileExt: file.fileExt,
+          uploadDate: file.auditColumns.regDtm.toISOString(),
+          validationStatus: file.validationStatus,
+        }));
+
+        return {
+          success: true,
+          uploadedFiles: attachmentResponses,
+          fileGroupNo,
+          message: `Successfully added ${savedFiles.length} file(s) to existing TODO`,
+        };
+      }
+    } catch (error) {
+      return {
+        success: false,
+        uploadedFiles: [],
+        message: `File upload failed: ${error.message}`,
+      };
+    }
+  }
+
+  // TODO 항목의 첨부 파일 목록을 조회합니다.
+  async getAttachments(
+    todoId: number,
+    userSeq: number,
+  ): Promise<FileAttachmentResponseDto[]> {
+    // TODO 항목이 존재하고 사용자 소유인지 확인합니다.
+    const todo = await this.todoRepository.findOne({
+      where: { todoSeq: todoId, userSeq: userSeq, delYn: 'N' },
+    });
+
+    if (!todo || !todo.todoFileGroupNo) {
+      return [];
+    }
+
+    // 파일 그룹에 속한 모든 파일을 조회합니다.
+    const files = await this.fileInfoRepository.find({
+      where: { 
+        fileGroupNo: todo.todoFileGroupNo,
+        fileCategory: 'todo_attachment',
+      },
+      order: { fileNo: 'ASC' },
+    });
+
+    return files.map(file => ({
+      fileNo: file.fileNo,
+      originalFileName: file.originalFileName,
+      fileSize: file.fileSize,
+      fileExt: file.fileExt,
+      uploadDate: file.auditColumns.regDtm.toISOString(),
+      validationStatus: file.validationStatus,
+    }));
   }
 }
