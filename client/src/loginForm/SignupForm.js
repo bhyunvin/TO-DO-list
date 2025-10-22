@@ -1,30 +1,60 @@
 import { useState } from 'react';
 import Swal from 'sweetalert2';
 import { useAuthStore } from '../authStore/authStore';
+import { useFileUploadValidator } from '../hooks/useFileUploadValidator';
 
 import './loginForm.css';
 
 function SignupForm({ onSignupComplete }) {
   const { api } = useAuthStore(); // api 함수 가져오기
+  const { 
+    validateFiles, 
+    formatFileSize, 
+    getUploadPolicy, 
+    FILE_VALIDATION_ERRORS 
+  } = useFileUploadValidator();
+  
   // Validation 메세지 state
   const [idError, setIdError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
   const [emailError, setEmailError] = useState('');
+  const [profileImageError, setProfileImageError] = useState('');
 
   const [profileImage, setProfileImage] = useState(null);
   const [profileImageFile, setProfileImageFile] = useState(null);
+  const [profileImageValidation, setProfileImageValidation] = useState(null);
   function handleImageChange(e) {
     const file = e.target.files[0];
+    
+    // Clear previous state
+    setProfileImage(null);
+    setProfileImageFile(null);
+    setProfileImageValidation(null);
+    setProfileImageError('');
+    
     if (file) {
-      setProfileImageFile(file);
-      const reader = new FileReader();
-
-      reader.onloadend = function () {
-        setProfileImage(reader.result);
-      };
-
-      reader.readAsDataURL(file);
+      // Validate the file
+      const validationResults = validateFiles([file], 'profileImage');
+      const validation = validationResults[0];
+      
+      setProfileImageValidation(validation);
+      
+      if (validation.isValid) {
+        setProfileImageFile(file);
+        setProfileImageError('');
+        
+        // Create preview
+        const reader = new FileReader();
+        reader.onloadend = function () {
+          setProfileImage(reader.result);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        setProfileImageError(validation.errorMessage);
+        // Clear the file input
+        e.target.value = '';
+      }
     }
   }
 
@@ -176,6 +206,12 @@ function SignupForm({ onSignupComplete }) {
 
     if (!userEmail || !/[a-z0-9]+@[a-z]+\.[a-z]{2,3}/.test(userEmail)) {
       setEmailError('이메일을 확인해주세요.');
+      return false;
+    }
+
+    // Validate profile image if provided
+    if (profileImageFile && profileImageValidation && !profileImageValidation.isValid) {
+      setProfileImageError(profileImageValidation.errorMessage);
       return false;
     }
 
@@ -369,24 +405,54 @@ function SignupForm({ onSignupComplete }) {
           <div className="col-9">
             <input
               type="file"
-              className="form-control"
+              className={`form-control ${profileImageError ? 'is-invalid' : profileImageValidation?.isValid ? 'is-valid' : ''}`}
               id="profileImage"
               accept="image/*"
               onChange={handleImageChange}
             />
+            <small className="form-text text-muted">
+              허용 파일: JPG, JPEG, PNG, GIF, WEBP | 최대 크기: {formatFileSize(getUploadPolicy('profileImage')?.maxSize || 0)}
+            </small>
+            {profileImageError && (
+              <div className="text-danger mt-1">
+                <small>{profileImageError}</small>
+              </div>
+            )}
+            {profileImageValidation?.isValid && (
+              <div className="text-success mt-1">
+                <small>✓ 유효한 이미지 파일입니다 ({formatFileSize(profileImageFile?.size || 0)})</small>
+              </div>
+            )}
           </div>
         </div>
 
         {/* 이미지 미리보기 */}
-        {profileImage && (
+        {profileImage && profileImageValidation?.isValid && (
           <div className="form-group row mb-3">
-            <label className="col-3 col-form-label"></label>
+            <label className="col-3 col-form-label">미리보기</label>
             <div className="col-9">
-              <img
-                src={profileImage}
-                alt="프로필 미리보기"
-                style={{ width: '100px', height: '100px', objectFit: 'cover' }}
-              />
+              <div className="d-flex align-items-center">
+                <img
+                  src={profileImage}
+                  alt="프로필 미리보기"
+                  style={{ 
+                    width: '100px', 
+                    height: '100px', 
+                    objectFit: 'cover',
+                    border: '2px solid #28a745',
+                    borderRadius: '8px'
+                  }}
+                />
+                <div className="ms-3">
+                  <div className="text-success">
+                    <small>
+                      <strong>{profileImageFile?.name}</strong><br/>
+                      크기: {formatFileSize(profileImageFile?.size || 0)}<br/>
+                      상태: 검증 완료 ✓
+                    </small>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         )}

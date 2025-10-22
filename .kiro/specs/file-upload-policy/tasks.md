@@ -56,21 +56,21 @@
     - Handle file validation error responses
     - _Requirements: 3.1, 3.4_
 
-- [ ] 5. Enhance frontend file upload validation
-  - [ ] 5.1 Create client-side file validation hook
+- [x] 5. Enhance frontend file upload validation
+  - [x] 5.1 Create client-side file validation hook
     - Implement useFileUploadValidator React hook
     - Add file size, type, and count validation functions
     - Create validation result formatting utilities
     - _Requirements: 5.1, 5.2, 5.4_
 
-  - [ ] 5.2 Update SignupForm with enhanced profile image upload
+  - [x] 5.2 Update SignupForm with enhanced profile image upload
     - Add client-side validation for image file types
     - Implement file size validation and user feedback
     - Show validation errors before upload attempt
     - Add file preview with validation status
     - _Requirements: 2.2, 2.3, 2.4, 5.1, 5.2, 5.4_
 
-  - [ ] 5.3 Enhance TodoList components for file attachments
+  - [x] 5.3 Enhance TodoList components for file attachments
     - Update CreateTodoForm to support multiple file uploads
     - Add file selection validation and preview
     - Implement file removal from selection
