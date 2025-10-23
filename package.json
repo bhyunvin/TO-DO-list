@@ -17,8 +17,6 @@
     "node": ">=24.0.0"
   },
   "devDependencies": {
-    "@types/marked": "^5.0.2",
-    "@types/sanitize-html": "^2.16.0",
     "concurrently": "^9.2.0",
     "prettier": "^3.6.2"
   },
@@ -31,14 +29,5 @@
     "resolve-url-loader": ">=5.0.0",
     "webpack-dev-server": "^4.15.2"
   },
-  "dependencies": {
-    "@langchain/google-genai": "^0.2.16",
-    "@nestjs/axios": "^4.0.1",
-    "@nestjs/config": "^4.0.2",
-    "date-fns": "^4.1.0",
-    "marked": "^16.2.0",
-    "react-datepicker": "^8.7.0",
-    "sanitize-html": "^2.17.0",
-    "zustand": "^5.0.8"
-  }
+  "dependencies": {}
 }

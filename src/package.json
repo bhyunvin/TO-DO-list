@@ -29,10 +29,8 @@
     "dotenv": "^17.2.1",
     "express-session": "^1.18.2",
     "pg": "^8.16.3",
-    "react-scripts": "^5.0.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
-    "sweetalert2": "^11.22.2",
     "typeorm": "^0.3.25"
   },
   "devDependencies": {
@@ -42,7 +40,9 @@
     "@types/bcrypt": "^6.0.0",
     "@types/express-session": "^1.18.2",
     "@types/jest": "^30.0.0",
+    "@types/marked": "^5.0.2",
     "@types/node": "^24.2.0",
+    "@types/sanitize-html": "^2.16.0",
     "@types/supertest": "^6.0.3",
     "jest": "^30.0.5",
     "source-map-support": "^0.5.21",
