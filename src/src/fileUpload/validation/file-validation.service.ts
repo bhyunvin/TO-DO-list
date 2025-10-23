@@ -114,7 +114,13 @@ export class FileValidationService {
     files: File[] | Express.Multer.File[],
     category: FileCategory,
   ): ValidationResult[] {
-    const policyConfig = FILE_UPLOAD_POLICY[category];
+    // Map snake_case category to camelCase policy key
+    const policyKey = category === 'profile_image' ? 'profileImage' : 'todoAttachment';
+    const policyConfig = FILE_UPLOAD_POLICY[policyKey];
+    
+    if (!policyConfig) {
+      throw new Error(`Invalid file category: ${category}`);
+    }
     
     const validationConfig: ValidationConfig = {
       maxFileSize: policyConfig.maxSize,
