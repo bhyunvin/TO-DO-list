@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Swal from 'sweetalert2';
 import { useAuthStore } from '../authStore/authStore';
 import { useFileUploadValidator } from '../hooks/useFileUploadValidator';
+import { useFileUploadProgress } from '../hooks/useFileUploadProgress';
+import FileUploadProgress from '../components/FileUploadProgress';
 import './todoList.css';
 import DatePicker from 'react-datepicker';
 import { ko } from 'date-fns/locale';
@@ -17,11 +19,23 @@ function CreateTodoForm(props) {
     getUploadPolicy
   } = useFileUploadValidator();
   
+  const {
+    uploadStatus,
+    uploadProgress,
+    uploadErrors,
+    uploadedFiles,
+    validationResults: progressValidationResults,
+    validateFilesForUpload,
+    resetUploadState,
+    uploadFilesWithValidation,
+  } = useFileUploadProgress();
+  
   const [todoContent, setTodoContent] = useState('');
   const [todoNote, setTodoNote] = useState('');
   const [todoFiles, setTodoFiles] = useState([]);
   const [fileValidationResults, setFileValidationResults] = useState([]);
   const [fileError, setFileError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   function handleChange(e) {
     const thisName = e.target.name;
@@ -81,7 +95,7 @@ function CreateTodoForm(props) {
     }
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
 
     if (!todoContent.trim()) {
@@ -98,12 +112,26 @@ function CreateTodoForm(props) {
       }
     }
 
-    onAddTodo({ todoContent, todoNote, todoFiles });
-    setTodoContent('');
-    setTodoNote('');
-    setTodoFiles([]);
-    setFileValidationResults([]);
-    setFileError('');
+    setIsSubmitting(true);
+    
+    try {
+      // Use the enhanced upload function with progress tracking
+      const result = await onAddTodo({ todoContent, todoNote, todoFiles });
+      
+      if (result && result.success) {
+        // Reset form on success
+        setTodoContent('');
+        setTodoNote('');
+        setTodoFiles([]);
+        setFileValidationResults([]);
+        setFileError('');
+        resetUploadState();
+      }
+    } catch (error) {
+      console.error('Submit error:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -156,47 +184,45 @@ function CreateTodoForm(props) {
           </div>
         )}
         
-        {/* File validation results and preview */}
-        {fileValidationResults.length > 0 && (
+        {/* Enhanced file upload progress and validation */}
+        {(fileValidationResults.length > 0 || uploadStatus !== 'idle') && (
           <div className="mt-2 mb-3">
-            {fileValidationResults.map((result, index) => (
-              <div key={index} className={`d-flex align-items-center justify-content-between p-2 mb-1 border rounded ${result.isValid ? 'border-success bg-light' : 'border-danger bg-light'}`}>
-                <div className="flex-grow-1">
-                  <div className={`fw-bold ${result.isValid ? 'text-success' : 'text-danger'}`}>
-                    {result.fileName}
-                  </div>
-                  <small className="text-muted">
-                    크기: {formatFileSize(result.fileSize)} | 타입: {result.fileType}
-                  </small>
-                  {!result.isValid && (
-                    <div className="text-danger">
-                      <small>{result.errorMessage}</small>
-                    </div>
-                  )}
-                </div>
-                <div className="ms-2">
-                  {result.isValid ? (
-                    <span className="text-success">✓</span>
-                  ) : (
-                    <span className="text-danger">✗</span>
-                  )}
-                  {result.isValid && (
-                    <button
-                      type="button"
-                      className="btn btn-sm btn-outline-danger ms-2"
-                      onClick={() => removeFile(index)}
-                      title="파일 제거"
-                    >
-                      <i className="bi bi-x"></i>
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
+            <FileUploadProgress
+              files={todoFiles}
+              validationResults={fileValidationResults}
+              uploadProgress={uploadProgress}
+              uploadStatus={uploadStatus}
+              uploadErrors={uploadErrors}
+              uploadedFiles={uploadedFiles}
+              onRemoveFile={removeFile}
+              onRetryUpload={async (failedFiles) => {
+                // Reset validation for retry
+                const retryValidation = validateFiles(failedFiles, 'todoAttachment');
+                setFileValidationResults(retryValidation);
+                setTodoFiles(failedFiles);
+                setFileError('');
+              }}
+              showValidation={true}
+              showProgress={true}
+              showDetailedStatus={true}
+            />
           </div>
         )}
-        <button type="submit" className="btn btn-success">
-          추가
+        
+        <button 
+          type="submit" 
+          className="btn btn-success"
+          disabled={isSubmitting || uploadStatus === 'uploading' || uploadStatus === 'validating'}
+        >
+          {isSubmitting || uploadStatus === 'uploading' ? (
+            <>
+              <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+              {uploadStatus === 'uploading' ? '업로드 중...' : 
+               uploadStatus === 'validating' ? '검증 중...' : '추가 중...'}
+            </>
+          ) : (
+            '추가'
+          )}
         </button>
         <button
           type="button"
@@ -335,11 +361,20 @@ function EditTodoForm({ todo, onSave, onCancel }) {
     getUploadPolicy 
   } = useFileUploadValidator();
   
+  const {
+    uploadStatus,
+    uploadProgress,
+    uploadErrors,
+    uploadedFiles,
+    resetUploadState,
+  } = useFileUploadProgress();
+  
   const [todoContent, setTodoContent] = useState(todo.todoContent);
   const [todoNote, setTodoNote] = useState(todo.todoNote);
   const [todoFiles, setTodoFiles] = useState([]);
   const [fileValidationResults, setFileValidationResults] = useState([]);
   const [fileError, setFileError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   function handleChange(e) {
     const thisName = e.target.name;
@@ -399,7 +434,7 @@ function EditTodoForm({ todo, onSave, onCancel }) {
     }
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Validate files if any are selected
@@ -411,7 +446,19 @@ function EditTodoForm({ todo, onSave, onCancel }) {
       }
     }
 
-    onSave(todo.todoSeq, { todoContent, todoNote, todoFiles });
+    setIsSubmitting(true);
+    
+    try {
+      const result = await onSave(todo.todoSeq, { todoContent, todoNote, todoFiles });
+      
+      if (result && result.success) {
+        resetUploadState();
+      }
+    } catch (error) {
+      console.error('Submit error:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -456,47 +503,45 @@ function EditTodoForm({ todo, onSave, onCancel }) {
           </div>
         )}
         
-        {/* File validation results and preview */}
-        {fileValidationResults.length > 0 && (
+        {/* Enhanced file upload progress and validation */}
+        {(fileValidationResults.length > 0 || uploadStatus !== 'idle') && (
           <div className="mt-2 mb-3">
-            {fileValidationResults.map((result, index) => (
-              <div key={index} className={`d-flex align-items-center justify-content-between p-2 mb-1 border rounded ${result.isValid ? 'border-success bg-light' : 'border-danger bg-light'}`}>
-                <div className="flex-grow-1">
-                  <div className={`fw-bold ${result.isValid ? 'text-success' : 'text-danger'}`}>
-                    {result.fileName}
-                  </div>
-                  <small className="text-muted">
-                    크기: {formatFileSize(result.fileSize)} | 타입: {result.fileType}
-                  </small>
-                  {!result.isValid && (
-                    <div className="text-danger">
-                      <small>{result.errorMessage}</small>
-                    </div>
-                  )}
-                </div>
-                <div className="ms-2">
-                  {result.isValid ? (
-                    <span className="text-success">✓</span>
-                  ) : (
-                    <span className="text-danger">✗</span>
-                  )}
-                  {result.isValid && (
-                    <button
-                      type="button"
-                      className="btn btn-sm btn-outline-danger ms-2"
-                      onClick={() => removeFile(index)}
-                      title="파일 제거"
-                    >
-                      <i className="bi bi-x"></i>
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
+            <FileUploadProgress
+              files={todoFiles}
+              validationResults={fileValidationResults}
+              uploadProgress={uploadProgress}
+              uploadStatus={uploadStatus}
+              uploadErrors={uploadErrors}
+              uploadedFiles={uploadedFiles}
+              onRemoveFile={removeFile}
+              onRetryUpload={async (failedFiles) => {
+                // Reset validation for retry
+                const retryValidation = validateFiles(failedFiles, 'todoAttachment');
+                setFileValidationResults(retryValidation);
+                setTodoFiles(failedFiles);
+                setFileError('');
+              }}
+              showValidation={true}
+              showProgress={true}
+              showDetailedStatus={true}
+            />
           </div>
         )}
-        <button type="submit" className="btn btn-success">
-          수정
+        
+        <button 
+          type="submit" 
+          className="btn btn-success"
+          disabled={isSubmitting || uploadStatus === 'uploading' || uploadStatus === 'validating'}
+        >
+          {isSubmitting || uploadStatus === 'uploading' ? (
+            <>
+              <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+              {uploadStatus === 'uploading' ? '업로드 중...' : 
+               uploadStatus === 'validating' ? '검증 중...' : '수정 중...'}
+            </>
+          ) : (
+            '수정'
+          )}
         </button>
         <button type="button" className="btn btn-secondary ms-2" onClick={onCancel}>
           취소
@@ -592,16 +637,43 @@ function TodoContainer() {
       });
 
       if (response.ok) {
-        Swal.fire('성공', '새로운 할 일이 추가되었습니다.', 'success');
+        const responseData = await response.json();
+        Swal.fire({
+          title: '성공',
+          html: `
+            <div class="text-start">
+              <p>새로운 할 일이 추가되었습니다.</p>
+              ${todoFiles && todoFiles.length > 0 ? `<p>✓ ${todoFiles.length}개 파일이 업로드되었습니다.</p>` : ''}
+            </div>
+          `,
+          icon: 'success'
+        });
         setIsCreating(false);
         fetchTodos(); // 목록 새로고침
+        return { success: true, data: responseData };
       } else {
         const errorData = await response.json();
-        Swal.fire('오류', errorData.message || '할 일 추가에 실패했습니다.', 'error');
+        
+        // Handle file upload errors specifically
+        if (errorData.errors && Array.isArray(errorData.errors)) {
+          const errorMessages = errorData.errors.map(err => 
+            `${err.fileName}: ${err.errorMessage}`
+          ).join('<br>');
+          
+          Swal.fire({
+            title: '파일 업로드 오류',
+            html: errorMessages,
+            icon: 'error'
+          });
+        } else {
+          Swal.fire('오류', errorData.message || '할 일 추가에 실패했습니다.', 'error');
+        }
+        return { success: false, errors: errorData.errors || [] };
       }
     } catch (error) {
       console.error('Add Todo Error:', error);
       Swal.fire('오류', '서버와의 통신 중 문제가 발생했습니다.', 'error');
+      return { success: false, error: error.message };
     }
   }
 
@@ -696,16 +768,43 @@ function TodoContainer() {
       });
 
       if (response.ok) {
-        Swal.fire('성공', '할 일이 수정되었습니다.', 'success');
+        const responseData = await response.json();
+        Swal.fire({
+          title: '성공',
+          html: `
+            <div class="text-start">
+              <p>할 일이 수정되었습니다.</p>
+              ${todoFiles && todoFiles.length > 0 ? `<p>✓ ${todoFiles.length}개 파일이 업로드되었습니다.</p>` : ''}
+            </div>
+          `,
+          icon: 'success'
+        });
         setEditingTodo(null);
         fetchTodos();
+        return { success: true, data: responseData };
       } else {
         const errorData = await response.json();
-        Swal.fire('오류', errorData.message || '수정에 실패했습니다.', 'error');
+        
+        // Handle file upload errors specifically
+        if (errorData.errors && Array.isArray(errorData.errors)) {
+          const errorMessages = errorData.errors.map(err => 
+            `${err.fileName}: ${err.errorMessage}`
+          ).join('<br>');
+          
+          Swal.fire({
+            title: '파일 업로드 오류',
+            html: errorMessages,
+            icon: 'error'
+          });
+        } else {
+          Swal.fire('오류', errorData.message || '수정에 실패했습니다.', 'error');
+        }
+        return { success: false, errors: errorData.errors || [] };
       }
     } catch (error) {
       console.error('Save Todo Error:', error);
       Swal.fire('오류', '서버와의 통신 중 문제가 발생했습니다.', 'error');
+      return { success: false, error: error.message };
     }
   };
 

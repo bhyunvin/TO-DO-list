@@ -23,6 +23,16 @@ const FILE_VALIDATION_MESSAGES = {
   [FILE_VALIDATION_ERRORS.TOO_MANY_FILES]: 'Too many files selected',
 };
 
+/**
+ * User-friendly error messages with additional context
+ */
+const USER_FRIENDLY_MESSAGES = {
+  [FILE_VALIDATION_ERRORS.FILE_TOO_LARGE]: 'This file is too large. Please choose a file smaller than 10MB.',
+  [FILE_VALIDATION_ERRORS.INVALID_FILE_TYPE]: 'This file type is not supported. Please choose a different file.',
+  [FILE_VALIDATION_ERRORS.BLOCKED_FILE_TYPE]: 'This file type is not allowed for security reasons. Please choose a different file.',
+  [FILE_VALIDATION_ERRORS.TOO_MANY_FILES]: 'You have selected too many files. Please reduce the number of files.',
+};
+
 const FILE_UPLOAD_POLICY = {
   profileImage: {
     maxSize: MAX_FILE_SIZE,
@@ -257,6 +267,94 @@ export const useFileUploadValidator = () => {
   }, []);
 
   /**
+   * Get user-friendly error message for display
+   * @param {Object} error - Validation error object
+   * @returns {string} User-friendly error message
+   */
+  const getUserFriendlyMessage = useCallback((error) => {
+    const baseMessage = USER_FRIENDLY_MESSAGES[error.errorCode] || error.errorMessage;
+    
+    switch (error.errorCode) {
+      case FILE_VALIDATION_ERRORS.FILE_TOO_LARGE:
+        return `${baseMessage} (Current size: ${formatFileSize(error.fileSize || 0)})`;
+      
+      case FILE_VALIDATION_ERRORS.INVALID_FILE_TYPE:
+      case FILE_VALIDATION_ERRORS.BLOCKED_FILE_TYPE:
+        return `${baseMessage} (File type: ${error.fileType || 'unknown'})`;
+      
+      default:
+        return baseMessage;
+    }
+  }, [formatFileSize]);
+
+  /**
+   * Format multiple validation errors into a summary message
+   * @param {Object[]} errors - Array of validation errors
+   * @returns {string} Formatted error summary
+   */
+  const formatErrorSummary = useCallback((errors) => {
+    if (errors.length === 0) {
+      return '';
+    }
+
+    if (errors.length === 1) {
+      return `"${errors[0].fileName}": ${getUserFriendlyMessage(errors[0])}`;
+    }
+
+    // Group errors by type
+    const errorGroups = errors.reduce((groups, error) => {
+      const key = error.errorCode;
+      if (!groups[key]) {
+        groups[key] = [];
+      }
+      groups[key].push(error);
+      return groups;
+    }, {});
+
+    const messages = [];
+    for (const [errorCode, fileErrors] of Object.entries(errorGroups)) {
+      if (fileErrors.length === 1) {
+        messages.push(`"${fileErrors[0].fileName}": ${getUserFriendlyMessage(fileErrors[0])}`);
+      } else {
+        const fileNames = fileErrors.map(e => `"${e.fileName}"`).join(', ');
+        messages.push(`${fileNames}: ${getUserFriendlyMessage(fileErrors[0])}`);
+      }
+    }
+
+    return messages.join('; ');
+  }, [getUserFriendlyMessage]);
+
+  /**
+   * Parse server error response and extract validation errors
+   * @param {Object} errorResponse - Server error response
+   * @returns {Object[]} Array of validation errors
+   */
+  const parseServerErrors = useCallback((errorResponse) => {
+    if (errorResponse?.errors && Array.isArray(errorResponse.errors)) {
+      return errorResponse.errors;
+    }
+
+    // Handle different error response formats
+    if (errorResponse?.response?.data?.errors) {
+      return errorResponse.response.data.errors;
+    }
+
+    if (errorResponse?.message) {
+      return [{
+        fileName: 'Unknown',
+        errorCode: 'UPLOAD_FAILED',
+        errorMessage: errorResponse.message,
+      }];
+    }
+
+    return [{
+      fileName: 'Unknown',
+      errorCode: 'UPLOAD_FAILED',
+      errorMessage: 'An unexpected error occurred during file upload',
+    }];
+  }, []);
+
+  /**
    * Clear validation results
    */
   const clearValidationResults = useCallback(() => {
@@ -274,6 +372,9 @@ export const useFileUploadValidator = () => {
     formatFileSize,
     getFileExtension,
     getUploadPolicy,
+    getUserFriendlyMessage,
+    formatErrorSummary,
+    parseServerErrors,
     
     // State and actions
     validationResults,
@@ -282,6 +383,7 @@ export const useFileUploadValidator = () => {
     // Constants
     FILE_VALIDATION_ERRORS,
     FILE_VALIDATION_MESSAGES,
+    USER_FRIENDLY_MESSAGES,
     FILE_UPLOAD_POLICY,
   };
 };

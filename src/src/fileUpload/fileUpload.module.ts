@@ -6,6 +6,7 @@ import { FileInfoEntity } from './file.entity';
 import { FileUploadUtil } from './fileUploadUtil';
 import { 
   FileValidationService,
+  FileUploadErrorService,
   ProfileImageValidationInterceptor,
   TodoAttachmentValidationInterceptor,
 } from './validation';
@@ -15,12 +16,14 @@ import {
   providers: [
     FileUploadUtil, 
     FileValidationService,
+    FileUploadErrorService,
     ProfileImageValidationInterceptor,
     TodoAttachmentValidationInterceptor,
   ],
   exports: [
     FileUploadUtil, 
     FileValidationService,
+    FileUploadErrorService,
     ProfileImageValidationInterceptor,
     TodoAttachmentValidationInterceptor,
   ],
