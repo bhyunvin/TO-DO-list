@@ -22,6 +22,7 @@ import { SessionData } from 'express-session';
 import { CreateTodoDto, UpdateTodoDto, DeleteTodoDto, CreateTodoWithFilesDto } from './todo.dto';
 import { AuthenticatedGuard } from '../../types/express/auth.guard';
 import { TodoAttachmentValidationInterceptor } from '../fileUpload/validation/file-validation.interceptor';
+import { FileUploadErrorService } from '../fileUpload/validation/file-upload-error.service';
 import { todoAttachmentMulterOptions } from '../fileUpload/fileUploadUtil';
 
 @UseGuards(AuthenticatedGuard) // 컨트롤러 전체에 인증 가드 적용
@@ -29,7 +30,10 @@ import { todoAttachmentMulterOptions } from '../fileUpload/fileUploadUtil';
 export class TodoController {
   private readonly logger = new Logger(TodoController.name);
 
-  constructor(private readonly todoService: TodoService) {}
+  constructor(
+    private readonly todoService: TodoService,
+    private readonly fileUploadErrorService: FileUploadErrorService,
+  ) {}
 
   // 새로운 ToDo 항목을 생성합니다.
   @Post()
@@ -75,12 +79,39 @@ export class TodoController {
     FilesInterceptor('files', 10, todoAttachmentMulterOptions),
     TodoAttachmentValidationInterceptor,
   )
-  uploadAttachments(
+  async uploadAttachments(
     @Session() session: SessionData,
     @UploadedFiles() files: Express.Multer.File[],
     @Ip() ip: string,
   ) {
-    return this.todoService.uploadAttachments(session.user, ip, files);
+    try {
+      const result = await this.todoService.uploadAttachments(session.user, ip, files);
+      
+      // Log successful upload
+      const errorContext = this.fileUploadErrorService.extractErrorContext(
+        { ip, get: () => '', headers: {}, method: 'POST', path: '/todo/upload-attachments' } as any,
+        'todo_attachment',
+        session.user.userSeq,
+      );
+      
+      this.fileUploadErrorService.logSuccessfulUpload(
+        files.map(f => ({ originalFileName: f.originalname, fileSize: f.size })),
+        errorContext,
+      );
+      
+      return this.fileUploadErrorService.createSuccessResponse(
+        result,
+        `Successfully uploaded ${files.length} attachment(s)`,
+        errorContext.requestId,
+      );
+    } catch (error) {
+      this.logger.error('TODO attachment upload failed', {
+        userId: session.user.userSeq,
+        error: error.message,
+        fileCount: files?.length || 0,
+      });
+      throw error;
+    }
   }
 
   // 파일과 함께 새로운 TODO 항목을 생성합니다.
@@ -89,13 +120,38 @@ export class TodoController {
     FilesInterceptor('files', 10, todoAttachmentMulterOptions),
     TodoAttachmentValidationInterceptor,
   )
-  createWithFiles(
+  async createWithFiles(
     @Session() session: SessionData,
     @Body() createTodoDto: CreateTodoWithFilesDto,
     @UploadedFiles() files: Express.Multer.File[],
     @Ip() ip: string,
   ) {
-    return this.todoService.createWithFiles(session.user, ip, createTodoDto, files);
+    try {
+      const result = await this.todoService.createWithFiles(session.user, ip, createTodoDto, files);
+      
+      // Log successful creation with files
+      if (files && files.length > 0) {
+        const errorContext = this.fileUploadErrorService.extractErrorContext(
+          { ip, get: () => '', headers: {}, method: 'POST', path: '/todo/with-files' } as any,
+          'todo_attachment',
+          session.user.userSeq,
+        );
+        
+        this.fileUploadErrorService.logSuccessfulUpload(
+          files.map(f => ({ originalFileName: f.originalname, fileSize: f.size })),
+          errorContext,
+        );
+      }
+      
+      return result;
+    } catch (error) {
+      this.logger.error('TODO creation with files failed', {
+        userId: session.user.userSeq,
+        error: error.message,
+        fileCount: files?.length || 0,
+      });
+      throw error;
+    }
   }
 
   // 기존 TODO 항목에 파일을 추가합니다.
@@ -104,13 +160,41 @@ export class TodoController {
     FilesInterceptor('files', 10, todoAttachmentMulterOptions),
     TodoAttachmentValidationInterceptor,
   )
-  addAttachments(
+  async addAttachments(
     @Param('id') id: string,
     @Session() session: SessionData,
     @UploadedFiles() files: Express.Multer.File[],
     @Ip() ip: string,
   ) {
-    return this.todoService.addAttachments(Number(id), session.user, ip, files);
+    try {
+      const result = await this.todoService.addAttachments(Number(id), session.user, ip, files);
+      
+      // Log successful attachment addition
+      const errorContext = this.fileUploadErrorService.extractErrorContext(
+        { ip, get: () => '', headers: {}, method: 'POST', path: `/todo/${id}/attachments` } as any,
+        'todo_attachment',
+        session.user.userSeq,
+      );
+      
+      this.fileUploadErrorService.logSuccessfulUpload(
+        files.map(f => ({ originalFileName: f.originalname, fileSize: f.size })),
+        errorContext,
+      );
+      
+      return this.fileUploadErrorService.createSuccessResponse(
+        result,
+        `Successfully added ${files.length} attachment(s) to TODO ${id}`,
+        errorContext.requestId,
+      );
+    } catch (error) {
+      this.logger.error('TODO attachment addition failed', {
+        todoId: id,
+        userId: session.user.userSeq,
+        error: error.message,
+        fileCount: files?.length || 0,
+      });
+      throw error;
+    }
   }
 
   // TODO 항목의 첨부 파일 목록을 조회합니다.

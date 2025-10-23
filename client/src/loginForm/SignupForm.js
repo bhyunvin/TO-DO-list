@@ -2,6 +2,8 @@ import { useState } from 'react';
 import Swal from 'sweetalert2';
 import { useAuthStore } from '../authStore/authStore';
 import { useFileUploadValidator } from '../hooks/useFileUploadValidator';
+import { useFileUploadProgress } from '../hooks/useFileUploadProgress';
+import FileUploadProgress from '../components/FileUploadProgress';
 
 import './loginForm.css';
 
@@ -14,6 +16,15 @@ function SignupForm({ onSignupComplete }) {
     FILE_VALIDATION_ERRORS 
   } = useFileUploadValidator();
   
+  const {
+    uploadStatus,
+    uploadProgress,
+    uploadErrors,
+    validationResults: progressValidationResults,
+    resetUploadState,
+    uploadFilesWithValidation,
+  } = useFileUploadProgress();
+  
   // Validation 메세지 state
   const [idError, setIdError] = useState('');
   const [passwordError, setPasswordError] = useState('');
@@ -24,6 +35,7 @@ function SignupForm({ onSignupComplete }) {
   const [profileImage, setProfileImage] = useState(null);
   const [profileImageFile, setProfileImageFile] = useState(null);
   const [profileImageValidation, setProfileImageValidation] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   function handleImageChange(e) {
     const file = e.target.files[0];
     
@@ -167,13 +179,18 @@ function SignupForm({ onSignupComplete }) {
   }
 
   //회원가입 form submit
-  function submitSignupHandler(e) {
+  async function submitSignupHandler(e) {
     e.preventDefault();
 
     const validationResult = validateSignupForm(); //유효성체크
 
     if (validationResult) {
-      submitSignup(); //회원가입 정보 전송
+      setIsSubmitting(true);
+      try {
+        await submitSignup(); //회원가입 정보 전송
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   }
 
@@ -240,7 +257,19 @@ function SignupForm({ onSignupComplete }) {
         const data = await response.json();
 
         if (data.userSeq) {
-          Swal.fire('', '회원가입되었습니다.', 'success').then(() => {
+          Swal.fire({
+            title: '회원가입 완료!',
+            html: `
+              <div class="text-start">
+                <p><strong>환영합니다, ${userName}님!</strong></p>
+                <p>회원가입이 성공적으로 완료되었습니다.</p>
+                ${profileImageFile ? `<p>✓ 프로필 이미지가 업로드되었습니다.</p>` : ''}
+              </div>
+            `,
+            icon: 'success',
+            confirmButtonText: '로그인하기'
+          }).then(() => {
+            resetUploadState();
             onSignupComplete();
           });
         } else {
@@ -248,8 +277,22 @@ function SignupForm({ onSignupComplete }) {
           Swal.fire('', '회원가입에 실패했습니다.', 'error');
         }
       } else {
-        // 비정상 응답 처리
-        Swal.fire('회원가입 실패', '서버 오류가 발생했습니다.', 'error');
+        // Handle server validation errors
+        const errorData = await response.json().catch(() => ({}));
+        
+        if (errorData.errors && Array.isArray(errorData.errors)) {
+          const errorMessages = errorData.errors.map(err => 
+            `${err.fileName}: ${err.errorMessage}`
+          ).join('<br>');
+          
+          Swal.fire({
+            title: '파일 업로드 오류',
+            html: errorMessages,
+            icon: 'error'
+          });
+        } else {
+          Swal.fire('회원가입 실패', errorData.message || '서버 오류가 발생했습니다.', 'error');
+        }
       }
     } catch (error) {
       // 네트워크 오류 처리
@@ -426,7 +469,7 @@ function SignupForm({ onSignupComplete }) {
           </div>
         </div>
 
-        {/* 이미지 미리보기 */}
+        {/* 이미지 미리보기 및 업로드 상태 */}
         {profileImage && profileImageValidation?.isValid && (
           <div className="form-group row mb-3">
             <label className="col-3 col-form-label">미리보기</label>
@@ -453,6 +496,33 @@ function SignupForm({ onSignupComplete }) {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Enhanced upload progress for profile image */}
+        {profileImageFile && (uploadStatus !== 'idle' || isSubmitting) && (
+          <div className="form-group row mb-3">
+            <label className="col-3 col-form-label">업로드 상태</label>
+            <div className="col-9">
+              <FileUploadProgress
+                files={[profileImageFile]}
+                validationResults={[profileImageValidation]}
+                uploadProgress={uploadProgress}
+                uploadStatus={uploadStatus}
+                uploadErrors={uploadErrors}
+                showValidation={false}
+                showProgress={true}
+                showDetailedStatus={true}
+                onRetryUpload={async (failedFiles) => {
+                  // For profile image, just reset the validation
+                  if (failedFiles.length > 0) {
+                    const file = failedFiles[0];
+                    const validationResults = validateFiles([file], 'profileImage');
+                    setProfileImageValidation(validationResults[0]);
+                  }
+                }}
+              />
             </div>
           </div>
         )}
@@ -484,8 +554,20 @@ function SignupForm({ onSignupComplete }) {
           </div>
           {/* 회원가입 버튼 */}
           <div className="col-9">
-            <button type="submit" className="btn btn-primary">
-              회원가입
+            <button 
+              type="submit" 
+              className="btn btn-primary"
+              disabled={isSubmitting || uploadStatus === 'uploading' || uploadStatus === 'validating'}
+            >
+              {isSubmitting || uploadStatus === 'uploading' || uploadStatus === 'validating' ? (
+                <>
+                  <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  {uploadStatus === 'uploading' ? '이미지 업로드 중...' : 
+                   uploadStatus === 'validating' ? '파일 검증 중...' : '가입 중...'}
+                </>
+              ) : (
+                '회원가입'
+              )}
             </button>
           </div>
         </div>

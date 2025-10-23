@@ -17,6 +17,7 @@ import { Session as SessionInterface, SessionData } from 'express-session';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { profileImageMulterOptions } from '../fileUpload/fileUploadUtil';
 import { ProfileImageValidationInterceptor } from '../fileUpload/validation/file-validation.interceptor';
+import { FileUploadErrorService } from '../fileUpload/validation/file-upload-error.service';
 
 import { UserService } from './user.service';
 import { UserDto } from './user.dto';
@@ -28,7 +29,10 @@ import { AuthenticatedGuard } from '../../types/express/auth.guard';
 export class UserController {
   private readonly logger = new Logger(UserController.name);
 
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly fileUploadErrorService: FileUploadErrorService,
+  ) {}
 
   //로그인
   @Post('login')
@@ -70,7 +74,23 @@ export class UserController {
     @Ip() ip: string,
   ): Promise<UserDto | null> {
     try {
-      return await this.userService.signup(userDto, profileImageFile, ip);
+      const result = await this.userService.signup(userDto, profileImageFile, ip);
+      
+      // Log successful signup with file upload
+      if (profileImageFile) {
+        const errorContext = this.fileUploadErrorService.extractErrorContext(
+          { ip, get: () => '', headers: {}, method: 'POST', path: '/user/signup' } as any,
+          'profile_image',
+          result?.userSeq,
+        );
+        
+        this.fileUploadErrorService.logSuccessfulUpload(
+          [{ originalFileName: profileImageFile.originalname, fileSize: profileImageFile.size }],
+          errorContext,
+        );
+      }
+      
+      return result;
     } catch (error) {
       this.logger.error('Profile image upload failed during signup', {
         userId: userDto.userId,
