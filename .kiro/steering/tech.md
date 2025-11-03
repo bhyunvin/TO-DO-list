@@ -25,8 +25,13 @@
 
 ## Common Commands
 
+**IMPORTANT**: Always run `nvm use 24` before executing any commands to ensure correct Node.js version.
+
 ### Development
 ```bash
+# Switch to correct Node version (REQUIRED)
+nvm use 24
+
 # Start both frontend and backend
 npm start
 
@@ -42,6 +47,9 @@ npm run build
 
 ### Backend Specific (from src/ directory)
 ```bash
+# Switch to correct Node version (REQUIRED)
+nvm use 24
+
 # Development with hot reload
 npm run start:dev
 
@@ -57,6 +65,9 @@ npm run lint
 
 ### Frontend Specific (from client/ directory)
 ```bash
+# Switch to correct Node version (REQUIRED)
+nvm use 24
+
 # Development server
 npm start
 
@@ -65,6 +76,18 @@ npm run build
 
 # Run tests
 npm test
+```
+
+### Testing Commands
+```bash
+# Switch to correct Node version (REQUIRED)
+nvm use 24
+
+# Run specific test files
+npm test -- --testPathPatterns=filename.spec.ts
+
+# Run tests with specific pattern
+npm test -- --testNamePattern="test name pattern"
 ```
 
 ## Environment Configuration
