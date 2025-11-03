@@ -312,7 +312,7 @@ export const useFileUploadValidator = () => {
     }, {});
 
     const messages = [];
-    for (const [errorCode, fileErrors] of Object.entries(errorGroups)) {
+    for (const [fileErrors] of Object.entries(errorGroups)) {
       if (fileErrors.length === 1) {
         messages.push(`"${fileErrors[0].fileName}": ${getUserFriendlyMessage(fileErrors[0])}`);
       } else {

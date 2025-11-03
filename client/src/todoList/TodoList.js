@@ -4,6 +4,7 @@ import { useAuthStore } from '../authStore/authStore';
 import { useFileUploadValidator } from '../hooks/useFileUploadValidator';
 import { useFileUploadProgress } from '../hooks/useFileUploadProgress';
 import FileUploadProgress from '../components/FileUploadProgress';
+import ProfileUpdateForm from '../components/ProfileUpdateForm';
 import './todoList.css';
 import DatePicker from 'react-datepicker';
 import { ko } from 'date-fns/locale';
@@ -24,10 +25,7 @@ function CreateTodoForm(props) {
     uploadProgress,
     uploadErrors,
     uploadedFiles,
-    validationResults: progressValidationResults,
-    validateFilesForUpload,
     resetUploadState,
-    uploadFilesWithValidation,
   } = useFileUploadProgress();
   
   const [todoContent, setTodoContent] = useState('');
@@ -576,10 +574,11 @@ function formatDateTime(isoString) {
 
 // TODO 리스트 및 폼을 조건부로 렌더링하는 컨테이너 컴포넌트
 function TodoContainer() {
-  const { user, logout, api } = useAuthStore(); // api 함수 가져오기
+  const { user, logout, api, login } = useAuthStore(); // api 함수 가져오기
   const [todos, setTodos] = useState([]);
   const [isCreating, setIsCreating] = useState(false);
   const [editingTodo, setEditingTodo] = useState(null); // 수정 중인 ToDo 항목 전체를 저장
+  const [isUpdatingProfile, setIsUpdatingProfile] = useState(false); // 프로필 수정 상태
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [togglingTodoSeq, setTogglingTodoSeq] = useState(null);
   const [openActionMenu, setOpenActionMenu] = useState(null); // '...' 메뉴 상태
@@ -812,6 +811,71 @@ function TodoContainer() {
   function handleToggleCreate() {
     setIsCreating((prev) => !prev);
     setEditingTodo(null); // 신규 작성 시 수정 상태는 해제
+    setIsUpdatingProfile(false); // 신규 작성 시 프로필 수정 상태는 해제
+  }
+
+  // 프로필 수정 시작
+  function handleUpdateProfile() {
+    setIsUpdatingProfile(true);
+    setIsCreating(false);
+    setEditingTodo(null);
+  }
+
+  // 프로필 수정 취소
+  function handleCancelProfileUpdate() {
+    setIsUpdatingProfile(false);
+  }
+
+  // 프로필 수정 저장
+  async function handleSaveProfile(profileData) {
+    try {
+      const response = await api('/api/user/profile', {
+        method: 'PATCH',
+        credentials: 'include',
+        body: profileData.formData, // Use FormData for file upload
+      });
+
+      if (response.ok) {
+        const updatedUser = await response.json();
+        
+        // Update user session data
+        login(updatedUser);
+        
+        Swal.fire({
+          title: '프로필 수정 완료!',
+          html: `
+            <div class="text-start">
+              <p><strong>프로필이 성공적으로 수정되었습니다.</strong></p>
+              ${profileData.profileImageFile ? `<p>✓ 프로필 이미지가 업데이트되었습니다.</p>` : ''}
+            </div>
+          `,
+          icon: 'success',
+          confirmButtonText: '확인'
+        }).then(() => {
+          setIsUpdatingProfile(false);
+        });
+      } else {
+        // Handle server validation errors
+        const errorData = await response.json().catch(() => ({}));
+        
+        if (errorData.errors && Array.isArray(errorData.errors)) {
+          const errorMessages = errorData.errors.map(err => 
+            `${err.fileName}: ${err.errorMessage}`
+          ).join('<br>');
+          
+          Swal.fire({
+            title: '파일 업로드 오류',
+            html: errorMessages,
+            icon: 'error'
+          });
+        } else {
+          Swal.fire('프로필 수정 실패', errorData.message || '서버 오류가 발생했습니다.', 'error');
+        }
+      }
+    } catch (error) {
+      console.error('Profile update error:', error);
+      Swal.fire('오류 발생', '서버와의 연결에 문제가 발생했습니다.', 'error');
+    }
   }
 
 
@@ -854,6 +918,15 @@ function TodoContainer() {
   };
 
   const renderContent = () => {
+    if (isUpdatingProfile) {
+      return (
+        <ProfileUpdateForm
+          user={user}
+          onSave={handleSaveProfile}
+          onCancel={handleCancelProfileUpdate}
+        />
+      );
+    }
     if (editingTodo) {
       return (
         <EditTodoForm
@@ -894,6 +967,13 @@ function TodoContainer() {
       {/* 2. 사용자 정보를 우측에 배치하기 위한 헤더 */}
       <div className="user-info-header">
         <span>{user.userName}님 환영합니다.</span>
+        <button 
+          className="btn btn-outline-primary me-2" 
+          onClick={handleUpdateProfile}
+          disabled={isUpdatingProfile}
+        >
+          프로필 수정
+        </button>
         <button className="btn btn-outline-secondary" onClick={handleLogout}>
           로그아웃
         </button>
@@ -901,7 +981,7 @@ function TodoContainer() {
   
       {/* '신규' 버튼을 오른쪽으로 배치하기 위한 컨테이너 */}
       <div className="todo-actions">
-        {!isCreating && !editingTodo && (
+        {!isCreating && !editingTodo && !isUpdatingProfile && (
           <button className="btn btn-primary" onClick={handleToggleCreate}>
             신규
           </button>
@@ -909,7 +989,7 @@ function TodoContainer() {
       </div>
 
       {/* 할 일 목록을 볼 때만 DatePicker를 표시합니다. */}
-      {!isCreating && !editingTodo && (
+      {!isCreating && !editingTodo && !isUpdatingProfile && (
         <div className="date-navigator">
           <button onClick={handlePrevDay} className="date-nav-btn">&lt;</button>
           <DatePicker

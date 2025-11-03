@@ -223,6 +223,31 @@ export const useFileUploadProgress = () => {
   }, [resetUploadState, uploadFiles]);
 
   /**
+   * Get user-friendly status message with enhanced details
+   */
+  const getStatusMessage = useCallback(() => {
+    const totalFiles = validationResults.length;
+    const uploadedCount = uploadedFiles.length;
+    const failedCount = uploadErrors.length;
+    const overallProgress = Object.values(uploadProgress).reduce((sum, progress) => sum + progress, 0) / Math.max(totalFiles, 1);
+    
+    switch (uploadStatus) {
+      case 'validating':
+        return `${totalFiles}개 파일 보안 검사 및 유효성 검증 중...`;
+      case 'uploading':
+        return `${totalFiles}개 파일 업로드 중... (${Math.round(overallProgress)}% 완료)`;
+      case 'success':
+        return `🎉 ${uploadedCount}개 파일이 성공적으로 업로드되었습니다!`;
+      case 'partial_success':
+        return `⚠️ ${uploadedCount}개 파일 업로드 완료, ${failedCount}개 파일 실패`;
+      case 'error':
+        return `❌ 업로드 실패 (${failedCount}개 파일) - 다시 시도해주세요`;
+      default:
+        return '';
+    }
+  }, [uploadStatus, validationResults, uploadedFiles, uploadErrors, uploadProgress]);
+
+  /**
    * Get detailed upload summary with enhanced metrics
    */
   const getUploadSummary = useCallback(() => {
@@ -265,32 +290,7 @@ export const useFileUploadProgress = () => {
       canRetry: uploadStatus === 'partial_success' || uploadStatus === 'error',
       statusMessage: getStatusMessage(),
     };
-  }, [validationResults, uploadedFiles, uploadErrors, uploadStatus, uploadProgress]);
-
-  /**
-   * Get user-friendly status message with enhanced details
-   */
-  const getStatusMessage = useCallback(() => {
-    const totalFiles = validationResults.length;
-    const uploadedCount = uploadedFiles.length;
-    const failedCount = uploadErrors.length;
-    const overallProgress = Object.values(uploadProgress).reduce((sum, progress) => sum + progress, 0) / Math.max(totalFiles, 1);
-    
-    switch (uploadStatus) {
-      case 'validating':
-        return `${totalFiles}개 파일 보안 검사 및 유효성 검증 중...`;
-      case 'uploading':
-        return `${totalFiles}개 파일 업로드 중... (${Math.round(overallProgress)}% 완료)`;
-      case 'success':
-        return `🎉 ${uploadedCount}개 파일이 성공적으로 업로드되었습니다!`;
-      case 'partial_success':
-        return `⚠️ ${uploadedCount}개 파일 업로드 완료, ${failedCount}개 파일 실패`;
-      case 'error':
-        return `❌ 업로드 실패 (${failedCount}개 파일) - 다시 시도해주세요`;
-      default:
-        return '';
-    }
-  }, [uploadStatus, validationResults, uploadedFiles, uploadErrors, uploadProgress]);
+  }, [validationResults, uploadedFiles, uploadErrors, uploadStatus, uploadProgress, getStatusMessage]);
 
   return {
     // State

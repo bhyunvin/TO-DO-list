@@ -92,15 +92,15 @@ const FileUploadProgress = ({
   /**
    * Render file validation status badge
    */
-  const renderValidationBadge = (file, index) => {
-    const status = getFileValidationStatus(file, index);
+  // const renderValidationBadge = (file, index) => {
+  //   const status = getFileValidationStatus(file, index);
     
-    if (status.isValid) {
-      return <Badge bg="success" className="ms-2">✓ 유효</Badge>;
-    } else {
-      return <Badge bg="danger" className="ms-2">✗ 오류</Badge>;
-    }
-  };
+  //   if (status.isValid) {
+  //     return <Badge bg="success" className="ms-2">✓ 유효</Badge>;
+  //   } else {
+  //     return <Badge bg="danger" className="ms-2">✗ 오류</Badge>;
+  //   }
+  // };
 
   /**
    * Render file progress bar with enhanced visual feedback and real-time status

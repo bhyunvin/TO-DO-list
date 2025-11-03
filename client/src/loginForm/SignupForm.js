@@ -13,16 +13,13 @@ function SignupForm({ onSignupComplete }) {
     validateFiles, 
     formatFileSize, 
     getUploadPolicy, 
-    FILE_VALIDATION_ERRORS 
   } = useFileUploadValidator();
   
   const {
     uploadStatus,
     uploadProgress,
     uploadErrors,
-    validationResults: progressValidationResults,
     resetUploadState,
-    uploadFilesWithValidation,
   } = useFileUploadProgress();
   
   // Validation 메세지 state
