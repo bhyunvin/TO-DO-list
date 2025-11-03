@@ -15,3 +15,11 @@ export class UserDto {
 
   adminYn: string; //관리자여부
 }
+
+export class UpdateUserDto {
+  userName?: string; //사용자명
+
+  userEmail?: string; //사용자이메일
+
+  userDescription?: string; //사용자설명
+}

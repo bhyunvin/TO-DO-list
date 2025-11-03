@@ -12,6 +12,7 @@ import {
   HttpStatus,
   Logger,
   UseGuards,
+  Patch,
 } from '@nestjs/common';
 import { Session as SessionInterface, SessionData } from 'express-session';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -20,7 +21,7 @@ import { ProfileImageValidationInterceptor } from '../fileUpload/validation/file
 import { FileUploadErrorService } from '../fileUpload/validation/file-upload-error.service';
 
 import { UserService } from './user.service';
-import { UserDto } from './user.dto';
+import { UserDto, UpdateUserDto } from './user.dto';
 import { UserEntity } from './user.entity';
 
 import { AuthenticatedGuard } from '../../types/express/auth.guard';
@@ -112,5 +113,56 @@ export class UserController {
     session.destroy((err) => {
       // 로그아웃 처리 중 에러 발생 시 처리 로직을 추가할 수 있습니다.
     });
+  }
+
+  //프로필 업데이트
+  @UseGuards(AuthenticatedGuard)
+  @Patch('profile')
+  @UseInterceptors(
+    FileInterceptor('profileImage', profileImageMulterOptions),
+    ProfileImageValidationInterceptor,
+  )
+  async updateProfile(
+    @Session() session: SessionInterface & SessionData,
+    @Body() updateUserDto: UpdateUserDto,
+    @UploadedFile() profileImageFile: Express.Multer.File,
+    @Ip() ip: string,
+  ): Promise<Omit<UserEntity, 'userPassword'>> {
+    try {
+      const userSeq = session.user?.userSeq;
+      if (!userSeq) {
+        throw new Error('User session not found');
+      }
+
+      const updatedUser = await this.userService.updateProfile(
+        userSeq,
+        updateUserDto,
+        profileImageFile,
+        ip,
+      );
+
+      // Update session with new user data
+      session.user = updatedUser;
+
+      return new Promise((resolve, reject) => {
+        session.save((err) => {
+          if (err) {
+            this.logger.error('Session save error during profile update', err);
+            return reject(new Error('세션 저장에 실패했습니다.'));
+          }
+          resolve(updatedUser);
+        });
+      });
+    } catch (error) {
+      this.logger.error('Profile update failed', {
+        userSeq: session.user?.userSeq,
+        error: error.message,
+        fileName: profileImageFile?.originalname,
+        fileSize: profileImageFile?.size,
+      });
+
+      // Re-throw the error to be handled by global exception filter
+      throw error;
+    }
   }
 }
