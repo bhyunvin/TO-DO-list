@@ -17,5 +17,6 @@ import { FileInfoEntity } from '../fileUpload/file.entity';
   ],
   controllers: [TodoController], // TodoController를 이 모듈의 컨트롤러로 등록합니다.
   providers: [TodoService], // TodoService를 이 모듈의 프로바이더로 등록합니다.
+  exports: [TodoService], // TodoService를 다른 모듈에서 사용할 수 있도록 export합니다.
 })
 export class TodoModule {}
