@@ -1,10 +1,24 @@
+interface GeminiFunctionCall {
+  name: string;
+  args?: Record<string, any>;
+}
+
+interface GeminiFunctionResponse {
+  name: string;
+  response: {
+    content: any;
+  };
+}
+
 interface GeminiPart {
-  text: string;
+  text?: string;
+  functionCall?: GeminiFunctionCall;
+  functionResponse?: GeminiFunctionResponse;
 }
 
 interface GeminiContent {
   parts: GeminiPart[];
-  role: string;
+  role?: string;
 }
 
 interface GeminiCandidate {

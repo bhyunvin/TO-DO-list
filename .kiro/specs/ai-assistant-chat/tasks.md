@@ -1,18 +1,18 @@
 # Implementation Plan
 
-- [ ] 1. Enhance backend AssistanceService with function calling
+- [x] 1. Enhance backend AssistanceService with function calling
   - Modify AssistanceService to support Gemini function calling with getTodos tool
   - Add TodoService injection and implement getTodos method for AI queries
   - Update system prompt handling and error management for function calls
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 4.4_
 
-- [ ] 1.1 Update AssistanceService for function calling
+- [x] 1.1 Update AssistanceService for function calling
   - Add TodoService dependency injection to AssistanceService constructor
   - Implement getTodos tool definition with proper parameters (status, days)
   - Modify getGeminiResponse method to handle function calling workflow
   - _Requirements: 3.1, 3.2, 3.3_
 
-- [ ] 1.2 Add TodoService getTodos method for AI queries
+- [x] 1.2 Add TodoService getTodos method for AI queries
   - Create getTodos method in TodoService that accepts status and days parameters
   - Implement flexible todo querying logic for different status filters (completed, incomplete, overdue)
   - Return structured todo data suitable for AI context processing
