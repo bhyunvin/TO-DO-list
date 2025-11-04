@@ -24,19 +24,19 @@
   - Test system prompt loading and fallback behavior
   - _Requirements: 3.1, 3.2, 3.3, 3.4_
 
-- [ ] 2. Create chat API endpoint and DTOs
+- [x] 2. Create chat API endpoint and DTOs
   - Create ChatController with POST /api/assistance/chat endpoint
   - Implement ChatRequestDto and ChatResponseDto for API communication
   - Add session authentication guard and user context handling
   - _Requirements: 2.1, 2.2, 4.4_
 
-- [ ] 2.1 Create chat DTOs and interfaces
+- [x] 2.1 Create chat DTOs and interfaces
   - Define ChatRequestDto with prompt validation
   - Define ChatResponseDto with response, timestamp, and error fields
   - Create TodoSummaryDto for structured AI responses
   - _Requirements: 2.1, 2.2_
 
-- [ ] 2.2 Implement ChatController
+- [x] 2.2 Implement ChatController
   - Create ChatController with proper dependency injection
   - Implement POST /api/assistance/chat endpoint with authentication
   - Add request validation and error handling middleware

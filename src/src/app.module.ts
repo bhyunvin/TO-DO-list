@@ -32,6 +32,9 @@ import { TodoModule } from './todo/todo.module';
 import { KeychainModule } from './utils/keychain.module';
 import { KeychainUtil } from './utils/keychainUtil';
 
+// auth
+import { AuthModule } from '../types/express/auth.module';
+
 // DB 관련
 import { CustomNamingStrategy } from './utils/customNamingStrategy';
 import { decrypt } from './utils/cryptUtil';
@@ -45,6 +48,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       isGlobal: true,
       envFilePath: '.env', // .env 파일 경로 지정
     }),
+    AuthModule,
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule, KeychainModule], // KeychainService를 사용하기 위해 KeychainModule 임포트
       inject: [ConfigService, KeychainUtil], // useFactory에 KeychainService 주입
