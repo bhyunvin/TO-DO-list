@@ -640,7 +640,7 @@ function TodoContainer() {
         Swal.fire({
           title: '성공',
           html: `
-            <div class="text-start">
+            <div class="text-center">
               <p>새로운 할 일이 추가되었습니다.</p>
               ${todoFiles && todoFiles.length > 0 ? `<p>✓ ${todoFiles.length}개 파일이 업로드되었습니다.</p>` : ''}
             </div>
@@ -771,7 +771,7 @@ function TodoContainer() {
         Swal.fire({
           title: '성공',
           html: `
-            <div class="text-start">
+            <div class="text-center">
               <p>할 일이 수정되었습니다.</p>
               ${todoFiles && todoFiles.length > 0 ? `<p>✓ ${todoFiles.length}개 파일이 업로드되었습니다.</p>` : ''}
             </div>
@@ -844,7 +844,7 @@ function TodoContainer() {
         Swal.fire({
           title: '프로필 수정 완료!',
           html: `
-            <div class="text-start">
+            <div class="text-center">
               <p><strong>프로필이 성공적으로 수정되었습니다.</strong></p>
               ${profileData.profileImageFile ? `<p>✓ 프로필 이미지가 업데이트되었습니다.</p>` : ''}
             </div>

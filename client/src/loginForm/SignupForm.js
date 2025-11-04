@@ -257,7 +257,7 @@ function SignupForm({ onSignupComplete }) {
           Swal.fire({
             title: '회원가입 완료!',
             html: `
-              <div class="text-start">
+              <div class="text-center">
                 <p><strong>환영합니다, ${userName}님!</strong></p>
                 <p>회원가입이 성공적으로 완료되었습니다.</p>
                 ${profileImageFile ? `<p>✓ 프로필 이미지가 업로드되었습니다.</p>` : ''}
