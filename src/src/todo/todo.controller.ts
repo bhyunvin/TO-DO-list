@@ -100,7 +100,7 @@ export class TodoController {
       );
       
       return this.fileUploadErrorService.createSuccessResponse(
-        result,
+        Array.isArray(result) ? result : [result],
         `Successfully uploaded ${files.length} attachment(s)`,
         errorContext.requestId,
       );
@@ -182,7 +182,7 @@ export class TodoController {
       );
       
       return this.fileUploadErrorService.createSuccessResponse(
-        result,
+        Array.isArray(result) ? result : [result],
         `Successfully added ${files.length} attachment(s) to TODO ${id}`,
         errorContext.requestId,
       );

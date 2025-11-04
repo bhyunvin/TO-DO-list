@@ -13,6 +13,10 @@ import {
   Logger,
   UseGuards,
   Patch,
+  UsePipes,
+  ValidationPipe,
+  ForbiddenException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { Session as SessionInterface, SessionData } from 'express-session';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -23,6 +27,7 @@ import { FileUploadErrorService } from '../fileUpload/validation/file-upload-err
 import { UserService } from './user.service';
 import { UserDto, UpdateUserDto } from './user.dto';
 import { UserEntity } from './user.entity';
+import { UserProfileValidationPipe } from './user-validation.pipe';
 
 import { AuthenticatedGuard } from '../../types/express/auth.guard';
 
@@ -122,16 +127,60 @@ export class UserController {
     FileInterceptor('profileImage', profileImageMulterOptions),
     ProfileImageValidationInterceptor,
   )
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true, forbidNonWhitelisted: true }))
   async updateProfile(
     @Session() session: SessionInterface & SessionData,
-    @Body() updateUserDto: UpdateUserDto,
+    @Body(UserProfileValidationPipe) updateUserDto: UpdateUserDto,
     @UploadedFile() profileImageFile: Express.Multer.File,
     @Ip() ip: string,
   ): Promise<Omit<UserEntity, 'userPassword'>> {
     try {
-      const userSeq = session.user?.userSeq;
-      if (!userSeq) {
-        throw new Error('User session not found');
+      // Enhanced authentication and authorization checks
+      const currentUser = session.user;
+      if (!currentUser || !currentUser.userSeq) {
+        this.logger.warn('Profile update attempted without valid session', {
+          sessionId: session.id,
+          ip,
+        });
+        throw new UnauthorizedException('유효한 세션이 없습니다. 다시 로그인해주세요.');
+      }
+
+      // Additional session validation - check if session is still valid
+      if (!session.user.userId) {
+        this.logger.warn('Profile update attempted with incomplete session data', {
+          userSeq: currentUser.userSeq,
+          sessionId: session.id,
+          ip,
+        });
+        throw new UnauthorizedException('세션 데이터가 불완전합니다. 다시 로그인해주세요.');
+      }
+
+      // Verify user can only update their own profile
+      const userSeq = currentUser.userSeq;
+      
+      // Log profile update attempt for audit purposes
+      this.logger.log('Profile update attempt', {
+        userSeq,
+        userId: currentUser.userId,
+        updateFields: Object.keys(updateUserDto),
+        hasProfileImage: !!profileImageFile,
+        ip,
+        sessionId: session.id,
+      });
+
+      // Rate limiting check - prevent too frequent updates
+      const lastUpdateTime = session.lastProfileUpdate;
+      const now = Date.now();
+      const minUpdateInterval = 60000; // 1 minute minimum between updates
+
+      if (lastUpdateTime && (now - lastUpdateTime) < minUpdateInterval) {
+        this.logger.warn('Profile update rate limit exceeded', {
+          userSeq,
+          lastUpdate: new Date(lastUpdateTime),
+          timeSinceLastUpdate: now - lastUpdateTime,
+          ip,
+        });
+        throw new ForbiddenException('프로필 업데이트가 너무 빈번합니다. 잠시 후 다시 시도해주세요.');
       }
 
       const updatedUser = await this.userService.updateProfile(
@@ -141,24 +190,41 @@ export class UserController {
         ip,
       );
 
-      // Update session with new user data
+      // Update session with new user data and timestamp
       session.user = updatedUser;
+      session.lastProfileUpdate = now;
 
       return new Promise((resolve, reject) => {
         session.save((err) => {
           if (err) {
-            this.logger.error('Session save error during profile update', err);
+            this.logger.error('Session save error during profile update', {
+              userSeq,
+              error: err.message,
+              ip,
+            });
             return reject(new Error('세션 저장에 실패했습니다.'));
           }
+
+          this.logger.log('Profile update completed successfully', {
+            userSeq,
+            userId: updatedUser.userId,
+            updatedFields: Object.keys(updateUserDto),
+            hasNewProfileImage: !!profileImageFile,
+            ip,
+          });
+
           resolve(updatedUser);
         });
       });
     } catch (error) {
       this.logger.error('Profile update failed', {
         userSeq: session.user?.userSeq,
+        userId: session.user?.userId,
         error: error.message,
         fileName: profileImageFile?.originalname,
         fileSize: profileImageFile?.size,
+        ip,
+        sessionId: session.id,
       });
 
       // Re-throw the error to be handled by global exception filter

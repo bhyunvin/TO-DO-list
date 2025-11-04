@@ -6,11 +6,12 @@ import { UserEntity } from './user.entity';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
 import { FileUploadModule } from '../fileUpload/fileUpload.module';
+import { InputSanitizerService } from '../utils/inputSanitizer';
 
 @Module({
   imports: [TypeOrmModule.forFeature([UserEntity]), FileUploadModule],
   controllers: [UserController],
-  providers: [UserService],
+  providers: [UserService, InputSanitizerService],
   exports: [UserService],
 })
 export class UserModule {}

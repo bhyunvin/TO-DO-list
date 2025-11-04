@@ -63,7 +63,7 @@ export class AssistanceService {
         }),
       );
 
-      const responseText = response.data.candidates[0].content.parts[0].text;
+      const responseText = (response.data as GeminiApiResponse).candidates[0].content.parts[0].text;
       const unsafeHtml = await marked.parse(responseText);
       const safeHtml = sanitizeHtml.default(unsafeHtml);
       requestAssistanceDto.response = safeHtml;
