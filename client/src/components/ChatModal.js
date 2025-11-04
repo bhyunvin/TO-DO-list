@@ -7,6 +7,8 @@ const ChatModal = ({ isOpen, onClose, user, messages, onSendMessage, isLoading }
   const [inputValue, setInputValue] = useState('');
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const modalRef = useRef(null);
+  const previousFocusRef = useRef(null);
 
   // Auto-scroll to bottom when new messages are added
   useEffect(() => {
@@ -15,12 +17,25 @@ const ChatModal = ({ isOpen, onClose, user, messages, onSendMessage, isLoading }
     }
   }, [messages]);
 
-  // Focus input when modal opens
+  // Focus management when modal opens/closes
   useEffect(() => {
-    if (isOpen && inputRef.current) {
+    if (isOpen) {
+      // Store the previously focused element
+      previousFocusRef.current = document.activeElement;
+      
+      // Focus the input field after modal animation
       setTimeout(() => {
-        inputRef.current.focus();
-      }, 100);
+        if (inputRef.current) {
+          inputRef.current.focus();
+        }
+      }, 150);
+    } else {
+      // Restore focus to the previously focused element when modal closes
+      if (previousFocusRef.current && typeof previousFocusRef.current.focus === 'function') {
+        setTimeout(() => {
+          previousFocusRef.current.focus();
+        }, 100);
+      }
     }
   }, [isOpen]);
 
@@ -32,7 +47,7 @@ const ChatModal = ({ isOpen, onClose, user, messages, onSendMessage, isLoading }
     }
   };
 
-  const handleKeyPress = (e) => {
+  const handleInputKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
@@ -42,6 +57,33 @@ const ChatModal = ({ isOpen, onClose, user, messages, onSendMessage, isLoading }
   const handleKeyDown = (e) => {
     if (e.key === 'Escape') {
       onClose();
+    }
+    
+    // Focus trap - keep focus within modal
+    if (e.key === 'Tab') {
+      const modal = modalRef.current;
+      if (!modal) return;
+      
+      const focusableElements = modal.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+      
+      if (e.shiftKey) {
+        // Shift + Tab
+        if (document.activeElement === firstElement) {
+          e.preventDefault();
+          lastElement.focus();
+        }
+      } else {
+        // Tab
+        if (document.activeElement === lastElement) {
+          e.preventDefault();
+          firstElement.focus();
+        }
+      }
     }
   };
 
@@ -53,19 +95,29 @@ const ChatModal = ({ isOpen, onClose, user, messages, onSendMessage, isLoading }
       centered
       className="chat-modal"
       onKeyDown={handleKeyDown}
+      aria-labelledby="chat-modal-title"
+      aria-describedby="chat-modal-description"
+      ref={modalRef}
     >
       <Modal.Header closeButton className="chat-modal-header">
-        <Modal.Title>
+        <Modal.Title id="chat-modal-title">
           <i className="bi bi-robot me-2"></i>
           AI 어시스턴트
         </Modal.Title>
       </Modal.Header>
       
       <Modal.Body className="chat-modal-body">
-        <div className="chat-messages" role="log" aria-live="polite" aria-label="채팅 메시지">
+        <div 
+          id="chat-modal-description" 
+          className="chat-messages" 
+          role="log" 
+          aria-live="polite" 
+          aria-label="채팅 메시지"
+          aria-atomic="false"
+        >
           {messages.length === 0 ? (
-            <div className="welcome-message">
-              <i className="bi bi-chat-heart mb-3"></i>
+            <div className="welcome-message" role="status">
+              <i className="bi bi-chat-heart mb-3" aria-hidden="true"></i>
               <p>안녕하세요! 할 일 관리에 대해 무엇이든 물어보세요.</p>
             </div>
           ) : (
@@ -78,8 +130,8 @@ const ChatModal = ({ isOpen, onClose, user, messages, onSendMessage, isLoading }
             ))
           )}
           {isLoading && (
-            <div className="typing-indicator">
-              <div className="typing-dots">
+            <div className="typing-indicator" role="status" aria-live="polite">
+              <div className="typing-dots" aria-hidden="true">
                 <span></span>
                 <span></span>
                 <span></span>
@@ -101,9 +153,10 @@ const ChatModal = ({ isOpen, onClose, user, messages, onSendMessage, isLoading }
               placeholder="할 일에 대해 질문해보세요..."
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              onKeyPress={handleKeyPress}
+              onKeyDown={handleInputKeyDown}
               disabled={isLoading}
               aria-label="채팅 메시지 입력"
+              aria-describedby="chat-input-help"
             />
             <button
               className="btn btn-primary chat-send-button"
@@ -114,7 +167,7 @@ const ChatModal = ({ isOpen, onClose, user, messages, onSendMessage, isLoading }
               <i className="bi bi-send"></i>
             </button>
           </div>
-          <small className="text-muted mt-1">
+          <small id="chat-input-help" className="text-muted mt-1">
             Enter로 전송, Shift+Enter로 줄바꿈
           </small>
         </div>

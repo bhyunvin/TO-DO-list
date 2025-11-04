@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Swal from 'sweetalert2';
 import { useAuthStore } from '../authStore/authStore';
+import { useChatStore } from '../stores/chatStore';
 import { useFileUploadValidator } from '../hooks/useFileUploadValidator';
 import { useFileUploadProgress } from '../hooks/useFileUploadProgress';
 import FileUploadProgress from '../components/FileUploadProgress';
 import ProfileUpdateForm from '../components/ProfileUpdateForm';
+import FloatingActionButton from '../components/FloatingActionButton';
+import ChatModal from '../components/ChatModal';
 import './todoList.css';
 import DatePicker from 'react-datepicker';
 import { ko } from 'date-fns/locale';
@@ -575,6 +578,16 @@ function formatDateTime(isoString) {
 // TODO 리스트 및 폼을 조건부로 렌더링하는 컨테이너 컴포넌트
 function TodoContainer() {
   const { user, logout, api, login } = useAuthStore(); // api 함수 가져오기
+  const { 
+    messages, 
+    isLoading, 
+    error, 
+    addMessage, 
+    setLoading, 
+    setError, 
+    clearError 
+  } = useChatStore();
+  
   const [todos, setTodos] = useState([]);
   const [isCreating, setIsCreating] = useState(false);
   const [editingTodo, setEditingTodo] = useState(null); // 수정 중인 ToDo 항목 전체를 저장
@@ -582,6 +595,7 @@ function TodoContainer() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [togglingTodoSeq, setTogglingTodoSeq] = useState(null);
   const [openActionMenu, setOpenActionMenu] = useState(null); // '...' 메뉴 상태
+  const [isChatOpen, setIsChatOpen] = useState(false); // 채팅 모달 상태
 
   // 선택된 날짜에 해당하는 ToDo 목록을 서버에서 가져오는 함수
   const fetchTodos = useCallback(async () => {
@@ -917,6 +931,72 @@ function TodoContainer() {
     setSelectedDate(newDate);
   };
 
+  // 채팅 관련 핸들러
+  const handleChatToggle = () => {
+    setIsChatOpen(!isChatOpen);
+    if (error) {
+      clearError();
+    }
+  };
+
+  const handleSendMessage = async (messageContent) => {
+    // Add user message immediately
+    addMessage({
+      content: messageContent,
+      isUser: true,
+    });
+
+    // Set loading state
+    setLoading(true);
+    clearError();
+
+    try {
+      const response = await api('/api/assistance/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          prompt: messageContent,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        
+        // Add AI response
+        addMessage({
+          content: data.response,
+          isUser: false,
+          isHtml: true,
+        });
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.message || '죄송합니다. 일시적인 문제가 발생했습니다. 잠시 후 다시 시도해주세요.';
+        
+        addMessage({
+          content: errorMessage,
+          isUser: false,
+        });
+        
+        setError(errorMessage);
+      }
+    } catch (error) {
+      console.error('Chat API Error:', error);
+      const errorMessage = '네트워크 연결을 확인해주세요.';
+      
+      addMessage({
+        content: errorMessage,
+        isUser: false,
+      });
+      
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const renderContent = () => {
     if (isUpdatingProfile) {
       return (
@@ -1004,6 +1084,21 @@ function TodoContainer() {
       )}
       {/* 할 일 목록 또는 할 일 생성/수정 폼을 보여주는 부분 */}
       {renderContent()}
+
+      {/* 채팅 인터페이스 */}
+      <FloatingActionButton
+        isOpen={isChatOpen}
+        onClick={handleChatToggle}
+      />
+      
+      <ChatModal
+        isOpen={isChatOpen}
+        onClose={handleChatToggle}
+        user={user}
+        messages={messages}
+        onSendMessage={handleSendMessage}
+        isLoading={isLoading}
+      />
     </div>
   );
 }

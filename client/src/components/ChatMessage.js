@@ -46,21 +46,25 @@ const ChatMessage = ({ message, isUser }) => {
   };
 
   return (
-    <div className={`chat-message ${isUser ? 'user-message' : 'ai-message'}`}>
+    <div 
+      className={`chat-message ${isUser ? 'user-message' : 'ai-message'}`}
+      role="article"
+      aria-label={`${isUser ? '사용자' : 'AI 어시스턴트'} 메시지`}
+    >
       <div className="message-container">
         {!isUser && (
-          <div className="message-avatar">
+          <div className="message-avatar" aria-hidden="true">
             <i className="bi bi-robot"></i>
           </div>
         )}
         <div className="message-bubble">
           {renderContent()}
-          <div className="message-timestamp">
+          <div className="message-timestamp" aria-label={`전송 시간: ${formatTimestamp(message.timestamp)}`}>
             {formatTimestamp(message.timestamp)}
           </div>
         </div>
         {isUser && (
-          <div className="message-avatar user-avatar">
+          <div className="message-avatar user-avatar" aria-hidden="true">
             <i className="bi bi-person-fill"></i>
           </div>
         )}
