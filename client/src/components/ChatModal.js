@@ -3,7 +3,7 @@ import { Modal } from 'react-bootstrap';
 import ChatMessage from './ChatMessage';
 import './ChatModal.css';
 
-const ChatModal = ({ isOpen, onClose, user, messages, onSendMessage, isLoading }) => {
+const ChatModal = ({ isOpen, onClose, user, messages, onSendMessage, isLoading, error, onRetry, onClearError }) => {
   const [inputValue, setInputValue] = useState('');
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
@@ -44,6 +44,13 @@ const ChatModal = ({ isOpen, onClose, user, messages, onSendMessage, isLoading }
     if (trimmedMessage && !isLoading) {
       onSendMessage(trimmedMessage);
       setInputValue('');
+      
+      // Focus back to input after sending (for better UX)
+      setTimeout(() => {
+        if (inputRef.current && !isLoading) {
+          inputRef.current.focus();
+        }
+      }, 100);
     }
   };
 
@@ -139,6 +146,33 @@ const ChatModal = ({ isOpen, onClose, user, messages, onSendMessage, isLoading }
               <span className="typing-text">AI가 응답을 준비하고 있습니다...</span>
             </div>
           )}
+          {error && (
+            <div className="error-message" role="alert" aria-live="assertive">
+              <div className="error-content">
+                <i className="bi bi-exclamation-triangle-fill me-2" aria-hidden="true"></i>
+                <span className="error-text">{error}</span>
+              </div>
+              {onRetry && (
+                <div className="error-actions mt-2">
+                  <button
+                    className="btn btn-sm btn-outline-primary me-2"
+                    onClick={onRetry}
+                    disabled={isLoading}
+                  >
+                    <i className="bi bi-arrow-clockwise me-1"></i>
+                    다시 시도
+                  </button>
+                  <button
+                    className="btn btn-sm btn-outline-secondary"
+                    onClick={onClearError}
+                    disabled={isLoading}
+                  >
+                    닫기
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
           <div ref={messagesEndRef} />
         </div>
       </Modal.Body>
@@ -162,13 +196,24 @@ const ChatModal = ({ isOpen, onClose, user, messages, onSendMessage, isLoading }
               className="btn btn-primary chat-send-button"
               onClick={handleSendMessage}
               disabled={!inputValue.trim() || isLoading}
-              aria-label="메시지 보내기"
+              aria-label={isLoading ? "메시지 전송 중..." : "메시지 보내기"}
             >
-              <i className="bi bi-send"></i>
+              {isLoading ? (
+                <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              ) : (
+                <i className="bi bi-send"></i>
+              )}
             </button>
           </div>
           <small id="chat-input-help" className="text-muted mt-1">
-            Enter로 전송, Shift+Enter로 줄바꿈
+            {isLoading ? (
+              <span className="text-primary">
+                <i className="bi bi-arrow-up-circle me-1"></i>
+                메시지를 전송하고 있습니다...
+              </span>
+            ) : (
+              'Enter로 전송, Shift+Enter로 줄바꿈'
+            )}
           </small>
         </div>
       </Modal.Footer>

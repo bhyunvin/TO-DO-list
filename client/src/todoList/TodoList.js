@@ -584,8 +584,12 @@ function TodoContainer() {
     error, 
     addMessage, 
     setLoading, 
-    setError, 
-    clearError 
+    clearError,
+    handleApiError,
+    setRetryMessage,
+    getRetryMessage,
+    resetRetryState,
+    canSendRequest
   } = useChatStore();
   
   const [todos, setTodos] = useState([]);
@@ -939,18 +943,32 @@ function TodoContainer() {
     }
   };
 
-  const handleSendMessage = async (messageContent) => {
-    // Add user message immediately
-    addMessage({
-      content: messageContent,
-      isUser: true,
-    });
+  const handleSendMessage = async (messageContent, isRetry = false) => {
+    // Check if we can send a request (throttling)
+    if (!isRetry && !canSendRequest()) {
+      return; // Silently ignore if request is throttled
+    }
 
-    // Set loading state
+    // Store message for potential retry
+    if (!isRetry) {
+      setRetryMessage(messageContent);
+      
+      // Add user message immediately (only for new messages, not retries)
+      addMessage({
+        content: messageContent,
+        isUser: true,
+      });
+    }
+
+    // Set loading state and clear any previous errors
     setLoading(true);
     clearError();
 
     try {
+      // Create AbortController for timeout handling
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
       const response = await api('/api/assistance/chat', {
         method: 'POST',
         headers: {
@@ -960,41 +978,86 @@ function TodoContainer() {
         body: JSON.stringify({
           prompt: messageContent,
         }),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (response.ok) {
         const data = await response.json();
         
-        // Add AI response
-        addMessage({
-          content: data.response,
-          isUser: false,
-          isHtml: true,
-        });
+        // Check if response is successful
+        if (data.success !== false) {
+          // Add AI response
+          addMessage({
+            content: data.response,
+            isUser: false,
+            isHtml: true,
+          });
+          
+          // Reset retry state on success
+          resetRetryState();
+        } else {
+          // Handle API error response
+          const { shouldRetry } = handleApiError(new Error(data.error || 'API Error'), response);
+          
+          if (!shouldRetry) {
+            addMessage({
+              content: data.error || '죄송합니다. 일시적인 문제가 발생했습니다.',
+              isUser: false,
+            });
+          }
+        }
       } else {
+        // Handle HTTP error responses
         const errorData = await response.json().catch(() => ({}));
-        const errorMessage = errorData.message || '죄송합니다. 일시적인 문제가 발생했습니다. 잠시 후 다시 시도해주세요.';
+        const { shouldRetry } = handleApiError(new Error(errorData.error || 'HTTP Error'), response);
+        
+        if (!shouldRetry) {
+          const errorMessage = errorData.error || '죄송합니다. 일시적인 문제가 발생했습니다. 잠시 후 다시 시도해주세요.';
+          addMessage({
+            content: errorMessage,
+            isUser: false,
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Chat API Error:', error);
+      
+      // Handle different types of errors
+      const { shouldRetry } = handleApiError(error);
+      
+      if (!shouldRetry) {
+        let errorMessage = '문제가 발생했습니다. 다시 시도해주세요.';
+        
+        if (error.name === 'AbortError') {
+          errorMessage = '요청 시간이 초과되었습니다. 다시 시도해주세요.';
+        } else if (error.name === 'TypeError' && error.message.includes('fetch')) {
+          errorMessage = '네트워크 연결을 확인해주세요.';
+        }
         
         addMessage({
           content: errorMessage,
           isUser: false,
         });
-        
-        setError(errorMessage);
       }
-    } catch (error) {
-      console.error('Chat API Error:', error);
-      const errorMessage = '네트워크 연결을 확인해주세요.';
-      
-      addMessage({
-        content: errorMessage,
-        isUser: false,
-      });
-      
-      setError(errorMessage);
     } finally {
       setLoading(false);
     }
+  };
+
+  // Retry handler
+  const handleRetry = () => {
+    const lastMessage = getRetryMessage();
+    if (lastMessage) {
+      handleSendMessage(lastMessage, true);
+    }
+  };
+
+  // Clear error handler
+  const handleClearError = () => {
+    clearError();
+    resetRetryState();
   };
 
   const renderContent = () => {
@@ -1098,6 +1161,9 @@ function TodoContainer() {
         messages={messages}
         onSendMessage={handleSendMessage}
         isLoading={isLoading}
+        error={error}
+        onRetry={handleRetry}
+        onClearError={handleClearError}
       />
     </div>
   );
