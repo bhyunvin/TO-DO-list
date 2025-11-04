@@ -222,20 +222,19 @@ export class UserService {
 
       // Update user fields with additional validation
       if (sanitizedDto.userName !== undefined && sanitizedDto.userName !== currentUser.userName) {
-        if (sanitizedDto.userName.length === 0) {
-          throw new BadRequestException({
-            message: 'Name cannot be empty',
-            error: '사용자명은 비어있을 수 없습니다.',
-            errorCode: 'EMPTY_NAME',
-          });
+        // userName이 undefined가 아니고 실제로 값이 있을 때만 업데이트
+        if (sanitizedDto.userName && sanitizedDto.userName.trim().length > 0) {
+          currentUser.userName = sanitizedDto.userName;
+          updatedFields.push('userName');
         }
-        currentUser.userName = sanitizedDto.userName;
-        updatedFields.push('userName');
       }
 
       if (sanitizedDto.userEmail !== undefined && sanitizedDto.userEmail !== currentUser.userEmail) {
-        currentUser.userEmail = sanitizedDto.userEmail;
-        updatedFields.push('userEmail');
+        // userEmail이 undefined가 아니고 실제로 값이 있을 때만 업데이트
+        if (sanitizedDto.userEmail && sanitizedDto.userEmail.trim().length > 0) {
+          currentUser.userEmail = sanitizedDto.userEmail;
+          updatedFields.push('userEmail');
+        }
       }
 
       if (sanitizedDto.userDescription !== undefined && sanitizedDto.userDescription !== currentUser.userDescription) {

@@ -30,20 +30,33 @@ export class UserDto {
 export class UpdateUserDto {
   @IsOptional()
   @IsString({ message: '사용자명은 문자열이어야 합니다.' })
-  @IsNotEmpty({ message: '사용자명은 비어있을 수 없습니다.' })
   @MinLength(1, { message: '사용자명은 최소 1자 이상이어야 합니다.' })
   @MaxLength(200, { message: '사용자명은 최대 200자까지 입력 가능합니다.' })
   @Matches(/^[a-zA-Z0-9\s\-'.가-힣]+$/, { 
     message: '사용자명에는 문자, 숫자, 공백, 하이픈, 아포스트로피, 마침표만 사용할 수 있습니다.' 
   })
-  @Transform(({ value }) => typeof value === 'string' ? value.trim() : value)
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      // 빈 문자열이면 undefined로 변환하여 필드를 제외
+      return trimmed === '' ? undefined : trimmed;
+    }
+    return value;
+  })
   userName?: string; //사용자명
 
   @IsOptional()
   @IsString({ message: '이메일은 문자열이어야 합니다.' })
   @IsEmail({}, { message: '올바른 이메일 형식이 아닙니다.' })
   @MaxLength(100, { message: '이메일은 최대 100자까지 입력 가능합니다.' })
-  @Transform(({ value }) => typeof value === 'string' ? value.trim().toLowerCase() : value)
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      const trimmed = value.trim().toLowerCase();
+      // 빈 문자열이면 undefined로 변환하여 필드를 제외
+      return trimmed === '' ? undefined : trimmed;
+    }
+    return value;
+  })
   userEmail?: string; //사용자이메일
 
   @IsOptional()
