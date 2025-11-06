@@ -602,6 +602,9 @@ function TodoContainer() {
   const [togglingTodoSeq, setTogglingTodoSeq] = useState(null);
   const [openActionMenu, setOpenActionMenu] = useState(null); // '...' 메뉴 상태
   const [isChatOpen, setIsChatOpen] = useState(false); // 채팅 모달 상태
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false); // 사용자 메뉴 드롭다운 상태
+  
+  const userMenuRef = useRef(null); // 사용자 메뉴 외부 클릭 감지용
 
   // 선택된 날짜에 해당하는 ToDo 목록을 서버에서 가져오는 함수
   const fetchTodos = useCallback(async () => {
@@ -629,6 +632,23 @@ function TodoContainer() {
   useEffect(() => {
     fetchTodos();
   }, [fetchTodos]);
+
+  // 사용자 메뉴 외부 클릭 시 닫기 처리
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setIsUserMenuOpen(false);
+      }
+    }
+
+    if (isUserMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isUserMenuOpen]);
 
 
   //CreateTodoForm에서 넘어온 Todo 요소 추가
@@ -835,12 +855,18 @@ function TodoContainer() {
     setIsChangingPassword(false); // 신규 작성 시 비밀번호 변경 상태는 해제
   }
 
+  // 사용자 메뉴 토글
+  function handleUserMenuToggle() {
+    setIsUserMenuOpen((prev) => !prev);
+  }
+
   // 프로필 수정 시작
   function handleUpdateProfile() {
     setIsUpdatingProfile(true);
     setIsCreating(false);
     setEditingTodo(null);
     setIsChangingPassword(false);
+    setIsUserMenuOpen(false); // 메뉴 닫기
   }
 
   // 프로필 수정 취소
@@ -854,6 +880,7 @@ function TodoContainer() {
     setIsCreating(false);
     setEditingTodo(null);
     setIsUpdatingProfile(false);
+    setIsUserMenuOpen(false); // 메뉴 닫기
   }
 
   // 비밀번호 변경 취소
@@ -966,6 +993,24 @@ function TodoContainer() {
   }
 
   async function handleLogout() {
+    // 로그아웃 확인 다이얼로그 표시
+    const result = await Swal.fire({
+      title: '로그아웃',
+      text: '정말로 로그아웃하시겠습니까?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: '네, 로그아웃합니다',
+      cancelButtonText: '취소'
+    });
+
+    // 사용자가 취소를 선택한 경우 로그아웃을 중단
+    if (!result.isConfirmed) {
+      return;
+    }
+
+    setIsUserMenuOpen(false); // 메뉴 닫기
     try {
       const response = await api(`/api/user/logout`, {
         method: 'POST',
@@ -1186,23 +1231,39 @@ function TodoContainer() {
       {/* 2. 사용자 정보를 우측에 배치하기 위한 헤더 */}
       <div className="user-info-header">
         <span>{user.userName}님 환영합니다.</span>
-        <button 
-          className="btn btn-outline-primary me-2" 
-          onClick={handleUpdateProfile}
-          disabled={isUpdatingProfile || isChangingPassword}
-        >
-          프로필 수정
-        </button>
-        <button 
-          className="btn btn-outline-warning me-2" 
-          onClick={handleChangePassword}
-          disabled={isUpdatingProfile || isChangingPassword}
-        >
-          비밀번호 변경
-        </button>
-        <button className="btn btn-outline-secondary" onClick={handleLogout}>
-          로그아웃
-        </button>
+        <div className="user-menu-container" ref={userMenuRef}>
+          <button 
+            className="user-menu-icon"
+            onClick={handleUserMenuToggle}
+            aria-label="사용자 메뉴"
+          >
+            <i className="bi bi-person-circle"></i>
+          </button>
+          {isUserMenuOpen && (
+            <div className="user-dropdown-menu">
+              <button 
+                className="dropdown-item" 
+                onClick={handleUpdateProfile}
+                disabled={isUpdatingProfile || isChangingPassword}
+              >
+                프로필 수정
+              </button>
+              <button 
+                className="dropdown-item" 
+                onClick={handleChangePassword}
+                disabled={isUpdatingProfile || isChangingPassword}
+              >
+                비밀번호 변경
+              </button>
+              <button 
+                className="dropdown-item" 
+                onClick={handleLogout}
+              >
+                로그아웃
+              </button>
+            </div>
+          )}
+        </div>
       </div>
   
       {/* '신규' 버튼을 오른쪽으로 배치하기 위한 컨테이너 */}

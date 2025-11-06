@@ -40,6 +40,94 @@
     margin-bottom: 20px; /* 아래의 액션 버튼들과의 간격 */
 }
 
+/* 사용자 메뉴 컨테이너 */
+.user-menu-container {
+    position: relative;
+}
+
+/* 사용자 메뉴 아이콘 버튼 */
+.user-menu-icon {
+    background: none;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    font-size: 1.5rem;
+    color: #6c757d;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.user-menu-icon:hover {
+    background-color: #f8f9fa;
+    color: #495057;
+    transform: scale(1.1);
+}
+
+.user-menu-icon:focus {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+}
+
+/* 사용자 드롭다운 메뉴 */
+.user-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: white;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    min-width: 160px;
+    padding: 0.5rem 0;
+    margin-top: 0.125rem;
+    animation: dropdownFadeIn 0.15s ease-out;
+}
+
+/* 드롭다운 메뉴 항목 */
+.user-dropdown-menu .dropdown-item {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 1rem;
+    clear: both;
+    font-weight: 400;
+    color: #212529;
+    text-align: left;
+    text-decoration: none;
+    white-space: nowrap;
+    background-color: transparent;
+    border: 0;
+    cursor: pointer;
+    transition: background-color 0.15s ease-in-out;
+}
+
+.user-dropdown-menu .dropdown-item:hover,
+.user-dropdown-menu .dropdown-item:focus {
+    background-color: #f8f9fa;
+    color: #16181b;
+}
+
+.user-dropdown-menu .dropdown-item:disabled {
+    color: #6c757d;
+    pointer-events: none;
+    background-color: transparent;
+}
+
+/* 드롭다운 애니메이션 */
+@keyframes dropdownFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 /* 신규, 수정, 삭제 버튼 그룹 */
 .todo-actions {
     display: flex;
