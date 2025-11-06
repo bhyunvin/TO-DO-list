@@ -2,7 +2,7 @@ import { Injectable, Logger, UnauthorizedException, BadRequestException, Forbidd
 import { InjectRepository, InjectDataSource } from '@nestjs/typeorm';
 import { Repository, DataSource, Not } from 'typeorm';
 import { UserEntity } from './user.entity';
-import { UserDto, UpdateUserDto } from './user.dto';
+import { UserDto, UpdateUserDto, ChangePasswordDto } from './user.dto';
 import { encrypt, isHashValid } from '../utils/cryptUtil';
 import { FileUploadUtil } from '../fileUpload/fileUploadUtil';
 import { FileValidationService } from '../fileUpload/validation/file-validation.service';
@@ -467,5 +467,90 @@ export class UserService {
         errorCode: 'INVALID_FILE_TYPE',
       });
     }
+  }
+
+  // 비밀번호 변경
+  async changePassword(
+    userSeq: number,
+    changePasswordDto: ChangePasswordDto,
+    ip: string,
+  ): Promise<void> {
+    return this.dataSource.transaction(async (transactionalEntityManager) => {
+      // Enhanced user validation
+      const currentUser = await transactionalEntityManager.findOne(UserEntity, {
+        where: { userSeq },
+      });
+
+      if (!currentUser) {
+        this.logger.error('Password change attempted for non-existent user', {
+          userSeq,
+          ip,
+        });
+        throw new BadRequestException('사용자를 찾을 수 없습니다.');
+      }
+
+      // Additional security check - ensure user is active
+      if (currentUser.adminYn === 'SUSPENDED') {
+        this.logger.warn('Password change attempted by suspended user', {
+          userSeq,
+          userId: currentUser.userId,
+          ip,
+        });
+        throw new ForbiddenException('계정이 일시 정지되어 비밀번호를 변경할 수 없습니다.');
+      }
+
+      // Validate current password
+      const isCurrentPasswordValid = await isHashValid(
+        changePasswordDto.currentPassword,
+        currentUser.userPassword,
+      );
+
+      if (!isCurrentPasswordValid) {
+        this.logger.warn('Password change attempted with incorrect current password', {
+          userSeq,
+          userId: currentUser.userId,
+          ip,
+        });
+        throw new UnauthorizedException('현재 비밀번호가 올바르지 않습니다.');
+      }
+
+      // Validate new password confirmation
+      if (changePasswordDto.newPassword !== changePasswordDto.confirmPassword) {
+        throw new BadRequestException('새 비밀번호와 비밀번호 확인이 일치하지 않습니다.');
+      }
+
+      // Check if new password is different from current password
+      const isSamePassword = await isHashValid(
+        changePasswordDto.newPassword,
+        currentUser.userPassword,
+      );
+
+      if (isSamePassword) {
+        throw new BadRequestException('새 비밀번호는 현재 비밀번호와 달라야 합니다.');
+      }
+
+      // Encrypt new password
+      const encryptedNewPassword = await encrypt(changePasswordDto.newPassword);
+
+      // Update password
+      currentUser.userPassword = encryptedNewPassword;
+
+      // Set audit columns for update
+      const updatedUser = setAuditColumn({
+        entity: currentUser,
+        id: currentUser.userId,
+        ip
+      });
+
+      // Save updated user
+      await transactionalEntityManager.save(UserEntity, updatedUser);
+
+      // Log successful password change
+      this.logger.log('Password change completed successfully', {
+        userSeq,
+        userId: currentUser.userId,
+        ip,
+      });
+    });
   }
 }

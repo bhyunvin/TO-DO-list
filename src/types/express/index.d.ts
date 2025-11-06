@@ -7,5 +7,7 @@ declare module 'express-session' {
     user?: Omit<UserEntity, 'userPassword'>;
     // 프로필 업데이트 시간 추적을 위한 타임스탬프
     lastProfileUpdate?: number;
+    // 비밀번호 변경 시간 추적을 위한 타임스탬프 (rate limiting용)
+    lastPasswordChange?: number;
   }
 }

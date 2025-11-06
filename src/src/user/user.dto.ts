@@ -65,3 +65,22 @@ export class UpdateUserDto {
   @Transform(({ value }) => typeof value === 'string' ? value.trim() : value)
   userDescription?: string; //사용자설명
 }
+
+export class ChangePasswordDto {
+  @IsNotEmpty({ message: '현재 비밀번호를 입력해주세요.' })
+  @IsString({ message: '현재 비밀번호는 문자열이어야 합니다.' })
+  currentPassword: string; //현재 비밀번호
+
+  @IsNotEmpty({ message: '새 비밀번호를 입력해주세요.' })
+  @IsString({ message: '새 비밀번호는 문자열이어야 합니다.' })
+  @MinLength(8, { message: '새 비밀번호는 최소 8자 이상이어야 합니다.' })
+  @MaxLength(100, { message: '새 비밀번호는 최대 100자까지 입력 가능합니다.' })
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, {
+    message: '새 비밀번호는 대문자, 소문자, 숫자, 특수문자를 각각 하나 이상 포함해야 합니다.'
+  })
+  newPassword: string; //새 비밀번호
+
+  @IsNotEmpty({ message: '새 비밀번호 확인을 입력해주세요.' })
+  @IsString({ message: '새 비밀번호 확인은 문자열이어야 합니다.' })
+  confirmPassword: string; //새 비밀번호 확인
+}

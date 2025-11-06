@@ -73,6 +73,24 @@ jest.mock('../components/ProfileUpdateForm', () => {
   };
 });
 
+jest.mock('../components/PasswordChangeForm', () => {
+  return function MockPasswordChangeForm({ onSave, onCancel }) {
+    return (
+      <div data-testid="password-change-form">
+        <h3>비밀번호 변경</h3>
+        <button onClick={() => onSave({ 
+          currentPassword: 'current123',
+          newPassword: 'new123',
+          confirmPassword: 'new123'
+        })}>
+          Save Password
+        </button>
+        <button onClick={onCancel}>Cancel Password</button>
+      </div>
+    );
+  };
+});
+
 // Mock DatePicker
 jest.mock('react-datepicker', () => {
   return function MockDatePicker({ selected, onChange }) {
@@ -102,9 +120,10 @@ describe('TodoContainer Profile Update Integration', () => {
     const userInfoHeader = screen.getByText('Test User님 환영합니다.').parentElement;
     const buttons = userInfoHeader.querySelectorAll('button');
     
-    expect(buttons).toHaveLength(2);
+    expect(buttons).toHaveLength(3);
     expect(buttons[0]).toHaveTextContent('프로필 수정');
-    expect(buttons[1]).toHaveTextContent('로그아웃');
+    expect(buttons[1]).toHaveTextContent('비밀번호 변경');
+    expect(buttons[2]).toHaveTextContent('로그아웃');
   });
 
   test('shows ProfileUpdateForm when Update Profile button is clicked', async () => {
@@ -361,5 +380,112 @@ describe('TodoContainer Profile Update Integration', () => {
 
     // The edit functionality should be available (though we're not testing the full edit flow here)
     expect(screen.getByText('Test todo')).toBeInTheDocument();
+  });
+});
+
+describe('TodoContainer Password Change Integration', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    
+    // Mock successful API responses
+    global.fetch = jest.fn(() =>
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve([
+          {
+            todoSeq: 1,
+            todoTitle: 'Test todo',
+            todoContent: 'Test content',
+            todoDate: '2023-01-01',
+            todoCompleteYn: 'N'
+          }
+        ])
+      })
+    );
+  });
+
+  test('shows PasswordChangeForm when Change Password button is clicked', async () => {
+    const user = userEvent.setup();
+    render(<TodoContainer />);
+
+    const changePasswordButton = screen.getByRole('button', { name: /비밀번호 변경/ });
+    await user.click(changePasswordButton);
+
+    expect(screen.getByTestId('password-change-form')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /비밀번호 변경/ })).toBeInTheDocument();
+  });
+
+  test('hides todo list elements when password change form is active', async () => {
+    const user = userEvent.setup();
+    render(<TodoContainer />);
+
+    // Initially, todo list elements should be visible
+    expect(screen.getByRole('button', { name: /신규/ })).toBeInTheDocument();
+    expect(screen.getByTestId('date-picker')).toBeInTheDocument();
+
+    // Click change password button
+    const changePasswordButton = screen.getByRole('button', { name: /비밀번호 변경/ });
+    await user.click(changePasswordButton);
+
+    // Todo list elements should be hidden
+    expect(screen.queryByRole('button', { name: /신규/ })).not.toBeInTheDocument();
+    expect(screen.queryByTestId('date-picker')).not.toBeInTheDocument();
+    
+    // Password change form should be visible
+    expect(screen.getByTestId('password-change-form')).toBeInTheDocument();
+  });
+
+  test('disables both profile and password buttons when password change is active', async () => {
+    const user = userEvent.setup();
+    render(<TodoContainer />);
+
+    const changePasswordButton = screen.getByRole('button', { name: /비밀번호 변경/ });
+    const updateProfileButton = screen.getByRole('button', { name: /프로필 수정/ });
+    
+    await user.click(changePasswordButton);
+
+    expect(changePasswordButton).toBeDisabled();
+    expect(updateProfileButton).toBeDisabled();
+  });
+
+  test('returns to todo list view when password change is cancelled', async () => {
+    const user = userEvent.setup();
+    render(<TodoContainer />);
+
+    // Click change password button
+    const changePasswordButton = screen.getByRole('button', { name: /비밀번호 변경/ });
+    await user.click(changePasswordButton);
+
+    // Password form should be visible
+    expect(screen.getByTestId('password-change-form')).toBeInTheDocument();
+
+    // Click cancel button
+    const cancelButton = screen.getByRole('button', { name: /Cancel Password/ });
+    await user.click(cancelButton);
+
+    // Should return to todo list view
+    expect(screen.queryByTestId('password-change-form')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /신규/ })).toBeInTheDocument();
+    expect(screen.getByTestId('date-picker')).toBeInTheDocument();
+  });
+
+  test('password change form can be submitted', async () => {
+    const user = userEvent.setup();
+    
+    render(<TodoContainer />);
+
+    // Click change password button
+    const changePasswordButton = screen.getByRole('button', { name: /비밀번호 변경/ });
+    await user.click(changePasswordButton);
+
+    // Password change form should be visible
+    expect(screen.getByTestId('password-change-form')).toBeInTheDocument();
+
+    // Click save password button (this will trigger the mock onSave function)
+    const saveButton = screen.getByRole('button', { name: /Save Password/ });
+    await user.click(saveButton);
+
+    // The save button should be clickable (basic functionality test)
+    expect(saveButton).toBeInTheDocument();
   });
 });

@@ -25,7 +25,7 @@ import { ProfileImageValidationInterceptor } from '../fileUpload/validation/file
 import { FileUploadErrorService } from '../fileUpload/validation/file-upload-error.service';
 
 import { UserService } from './user.service';
-import { UserDto, UpdateUserDto } from './user.dto';
+import { UserDto, UpdateUserDto, ChangePasswordDto } from './user.dto';
 import { UserEntity } from './user.entity';
 import { UserProfileValidationPipe } from './user-validation.pipe';
 
@@ -223,6 +223,101 @@ export class UserController {
         error: error.message,
         fileName: profileImageFile?.originalname,
         fileSize: profileImageFile?.size,
+        ip,
+        sessionId: session.id,
+      });
+
+      // Re-throw the error to be handled by global exception filter
+      throw error;
+    }
+  }
+
+  //비밀번호 변경
+  @UseGuards(AuthenticatedGuard)
+  @Patch('password')
+  @HttpCode(HttpStatus.OK)
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true, forbidNonWhitelisted: true }))
+  async changePassword(
+    @Session() session: SessionInterface & SessionData,
+    @Body() changePasswordDto: ChangePasswordDto,
+    @Ip() ip: string,
+  ): Promise<{ message: string }> {
+    try {
+      // Enhanced authentication checks
+      const currentUser = session.user;
+      if (!currentUser || !currentUser.userSeq) {
+        this.logger.warn('Password change attempted without valid session', {
+          sessionId: session.id,
+          ip,
+        });
+        throw new UnauthorizedException('유효한 세션이 없습니다. 다시 로그인해주세요.');
+      }
+
+      // Additional session validation
+      if (!session.user.userId) {
+        this.logger.warn('Password change attempted with incomplete session data', {
+          userSeq: currentUser.userSeq,
+          sessionId: session.id,
+          ip,
+        });
+        throw new UnauthorizedException('세션 데이터가 불완전합니다. 다시 로그인해주세요.');
+      }
+
+      const userSeq = currentUser.userSeq;
+      
+      // Log password change attempt for audit purposes
+      this.logger.log('Password change attempt', {
+        userSeq,
+        userId: currentUser.userId,
+        ip,
+        sessionId: session.id,
+      });
+
+      // Rate limiting check - prevent too frequent password changes
+      const lastPasswordChange = session.lastPasswordChange;
+      const now = Date.now();
+      const minChangeInterval = 300000; // 5 minutes minimum between password changes
+
+      if (lastPasswordChange && (now - lastPasswordChange) < minChangeInterval) {
+        this.logger.warn('Password change rate limit exceeded', {
+          userSeq,
+          lastChange: new Date(lastPasswordChange),
+          timeSinceLastChange: now - lastPasswordChange,
+          ip,
+        });
+        throw new ForbiddenException('비밀번호 변경이 너무 빈번합니다. 5분 후 다시 시도해주세요.');
+      }
+
+      await this.userService.changePassword(userSeq, changePasswordDto, ip);
+
+      // Update session with password change timestamp
+      session.lastPasswordChange = now;
+
+      return new Promise((resolve, reject) => {
+        session.save((err) => {
+          if (err) {
+            this.logger.error('Session save error during password change', {
+              userSeq,
+              error: err.message,
+              ip,
+            });
+            return reject(new Error('세션 저장에 실패했습니다.'));
+          }
+
+          this.logger.log('Password change completed successfully', {
+            userSeq,
+            userId: currentUser.userId,
+            ip,
+          });
+
+          resolve({ message: '비밀번호가 성공적으로 변경되었습니다.' });
+        });
+      });
+    } catch (error) {
+      this.logger.error('Password change failed', {
+        userSeq: session.user?.userSeq,
+        userId: session.user?.userId,
+        error: error.message,
         ip,
         sessionId: session.id,
       });

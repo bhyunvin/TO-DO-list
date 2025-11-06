@@ -6,6 +6,7 @@ import { useFileUploadValidator } from '../hooks/useFileUploadValidator';
 import { useFileUploadProgress } from '../hooks/useFileUploadProgress';
 import FileUploadProgress from '../components/FileUploadProgress';
 import ProfileUpdateForm from '../components/ProfileUpdateForm';
+import PasswordChangeForm from '../components/PasswordChangeForm';
 import FloatingActionButton from '../components/FloatingActionButton';
 import ChatModal from '../components/ChatModal';
 import './todoList.css';
@@ -596,6 +597,7 @@ function TodoContainer() {
   const [isCreating, setIsCreating] = useState(false);
   const [editingTodo, setEditingTodo] = useState(null); // 수정 중인 ToDo 항목 전체를 저장
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false); // 프로필 수정 상태
+  const [isChangingPassword, setIsChangingPassword] = useState(false); // 비밀번호 변경 상태
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [togglingTodoSeq, setTogglingTodoSeq] = useState(null);
   const [openActionMenu, setOpenActionMenu] = useState(null); // '...' 메뉴 상태
@@ -830,6 +832,7 @@ function TodoContainer() {
     setIsCreating((prev) => !prev);
     setEditingTodo(null); // 신규 작성 시 수정 상태는 해제
     setIsUpdatingProfile(false); // 신규 작성 시 프로필 수정 상태는 해제
+    setIsChangingPassword(false); // 신규 작성 시 비밀번호 변경 상태는 해제
   }
 
   // 프로필 수정 시작
@@ -837,11 +840,25 @@ function TodoContainer() {
     setIsUpdatingProfile(true);
     setIsCreating(false);
     setEditingTodo(null);
+    setIsChangingPassword(false);
   }
 
   // 프로필 수정 취소
   function handleCancelProfileUpdate() {
     setIsUpdatingProfile(false);
+  }
+
+  // 비밀번호 변경 시작
+  function handleChangePassword() {
+    setIsChangingPassword(true);
+    setIsCreating(false);
+    setEditingTodo(null);
+    setIsUpdatingProfile(false);
+  }
+
+  // 비밀번호 변경 취소
+  function handleCancelPasswordChange() {
+    setIsChangingPassword(false);
   }
 
   // 프로필 수정 저장
@@ -896,6 +913,57 @@ function TodoContainer() {
     }
   }
 
+  // 비밀번호 변경 저장
+  async function handleSavePassword(passwordData) {
+    try {
+      const response = await api('/api/user/password', {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          currentPassword: passwordData.currentPassword,
+          newPassword: passwordData.newPassword,
+          confirmPassword: passwordData.confirmPassword,
+        }),
+      });
+
+      if (response.ok) {
+        Swal.fire({
+          title: '비밀번호 변경 완료',
+          html: `
+            <div class="text-center">
+              <p><strong>비밀번호가 성공적으로 변경되었습니다.</strong></p>
+              <p>보안을 위해 다시 로그인해주세요.</p>
+            </div>
+          `,
+          icon: 'success',
+          confirmButtonText: '확인'
+        }).then(() => {
+          setIsChangingPassword(false);
+          // 비밀번호 변경 후 로그아웃 처리
+          handleLogout();
+        });
+      } else {
+        const errorData = await response.json();
+        let errorMessage = '비밀번호 변경에 실패했습니다.';
+        
+        if (errorData.message) {
+          if (Array.isArray(errorData.message)) {
+            errorMessage = errorData.message.join('\n');
+          } else {
+            errorMessage = errorData.message;
+          }
+        }
+        
+        Swal.fire('비밀번호 변경 실패', errorMessage, 'error');
+      }
+    } catch (error) {
+      console.error('Password change error:', error);
+      Swal.fire('오류 발생', '서버와의 연결에 문제가 발생했습니다.', 'error');
+    }
+  }
 
   async function handleLogout() {
     try {
@@ -1070,6 +1138,14 @@ function TodoContainer() {
         />
       );
     }
+    if (isChangingPassword) {
+      return (
+        <PasswordChangeForm
+          onSave={handleSavePassword}
+          onCancel={handleCancelPasswordChange}
+        />
+      );
+    }
     if (editingTodo) {
       return (
         <EditTodoForm
@@ -1113,9 +1189,16 @@ function TodoContainer() {
         <button 
           className="btn btn-outline-primary me-2" 
           onClick={handleUpdateProfile}
-          disabled={isUpdatingProfile}
+          disabled={isUpdatingProfile || isChangingPassword}
         >
           프로필 수정
+        </button>
+        <button 
+          className="btn btn-outline-warning me-2" 
+          onClick={handleChangePassword}
+          disabled={isUpdatingProfile || isChangingPassword}
+        >
+          비밀번호 변경
         </button>
         <button className="btn btn-outline-secondary" onClick={handleLogout}>
           로그아웃
@@ -1124,7 +1207,7 @@ function TodoContainer() {
   
       {/* '신규' 버튼을 오른쪽으로 배치하기 위한 컨테이너 */}
       <div className="todo-actions">
-        {!isCreating && !editingTodo && !isUpdatingProfile && (
+        {!isCreating && !editingTodo && !isUpdatingProfile && !isChangingPassword && (
           <button className="btn btn-primary" onClick={handleToggleCreate}>
             신규
           </button>
@@ -1132,7 +1215,7 @@ function TodoContainer() {
       </div>
 
       {/* 할 일 목록을 볼 때만 DatePicker를 표시합니다. */}
-      {!isCreating && !editingTodo && !isUpdatingProfile && (
+      {!isCreating && !editingTodo && !isUpdatingProfile && !isChangingPassword && (
         <div className="date-navigator">
           <button onClick={handlePrevDay} className="date-nav-btn">&lt;</button>
           <DatePicker
