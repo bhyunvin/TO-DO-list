@@ -200,12 +200,13 @@
 .table-responsive-container {
     width: 100%;
     overflow-x: auto; /* Ensure horizontal scroll is always available */
-    overflow-y: visible; /* Allow vertical overflow to be visible for dropdowns */
+    overflow-y: auto; /* Allow vertical scroll only when content exceeds max-height */
     -webkit-overflow-scrolling: touch;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     min-height: auto; /* Remove any fixed height constraints */
-    max-height: none; /* Remove any max-height constraints */
+    height: auto; /* Auto height to grow with content */
+    max-height: 50vh; /* Only scroll when content exceeds 50% of viewport height */
 }
 
 /* 모바일에서 테이블 스크롤 */
@@ -215,7 +216,8 @@
         border-radius: 0;
         position: relative;
         overflow-x: auto !important; /* Force horizontal scroll on mobile */
-        overflow-y: visible !important; /* Allow dropdowns to show */
+        overflow-y: auto !important; /* Allow vertical scroll when content exceeds max-height */
+        max-height: 50vh !important; /* Allow scrolling when content is large */
     }
     
     /* 스크롤 힌트 표시 */
@@ -278,7 +280,8 @@
     
     .table-responsive-container {
         overflow-x: auto !important; /* Ensure horizontal scroll on small screens */
-        overflow-y: visible !important; /* Allow dropdowns to show */
+        overflow-y: auto !important; /* Allow vertical scroll when content exceeds max-height */
+        max-height: 50vh !important; /* Allow scrolling when content is large */
     }
     
     .todo-list {
@@ -459,9 +462,12 @@ Additional fixes for layout issues */
     /* Remove any implicit height constraints */
     height: auto !important;
     min-height: auto !important;
-    max-height: none !important;
+    /* Use max-height to allow scrolling only when content is large */
+    max-height: 50vh !important;
     /* Ensure mobile horizontal scroll is preserved */
     overflow-x: auto !important;
+    /* Allow vertical scroll only when content exceeds max-height */
+    overflow-y: auto !important;
 }
 
 /* Ensure table cells can accommodate dropdown menus */
@@ -481,13 +487,15 @@ Additional fixes for layout issues */
     /* Force horizontal scroll on mobile devices with higher specificity */
     .todo-container .table-responsive-container {
         overflow-x: auto !important;
-        overflow-y: visible !important;
+        overflow-y: auto !important; /* Allow vertical scroll when content exceeds max-height */
         -webkit-overflow-scrolling: touch !important;
         /* Ensure the container can scroll horizontally */
         position: relative;
         width: 100%;
         /* Create a new stacking context to prevent global overflow issues */
         transform: translateZ(0);
+        /* Use max-height to allow scrolling when content is large */
+        max-height: 50vh !important;
     }
     
     /* Ensure table has minimum width to trigger scroll */
@@ -541,4 +549,24 @@ Additional fixes for layout issues */
 
 .floating-action-button.open:hover {
     background-color: #c82333 !important;
+}
+/* Apply max-height only when needed to prevent unnecessary scrollbars with few items */
+.table-responsive-container {
+    /* Use max-height to allow scrolling only when content is large */
+    max-height: 50vh !important;
+}
+
+/* Ensure table grows naturally with content */
+.todo-list {
+    height: auto !important;
+    min-height: auto !important;
+    /* Remove any table-specific height constraints */
+    max-height: none !important;
+}
+
+.todo-list tbody {
+    height: auto !important;
+    min-height: auto !important;
+    /* Remove any tbody-specific height constraints */
+    max-height: none !important;
 }
