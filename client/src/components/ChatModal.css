@@ -1,8 +1,12 @@
 .chat-modal .modal-dialog {
   max-width: 600px;
   height: 80vh;
-  margin: 10vh auto;
+  margin: 5vh auto;
   z-index: 1055; /* Ensure modal is above floating button */
+  position: fixed;
+  top: 5vh;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .chat-modal .modal-content {
@@ -248,6 +252,33 @@
   background-color: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 1040 !important;
+}
+
+/* Prevent body scroll when modal is open */
+body.modal-open {
+  overflow: hidden !important;
+  padding-right: 0 !important;
+}
+
+/* Override Bootstrap modal styles that affect body */
+.chat-modal.show {
+  display: block !important;
+}
+
+.chat-modal .modal {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  z-index: 1050 !important;
+  width: 100% !important;
+  height: 100% !important;
+  overflow: hidden !important;
 }
 
 /* High contrast mode support */
@@ -498,5 +529,54 @@
   
   .typing-indicator {
     border: 1px solid currentColor;
+  }
+}
+
+/* Additional fixes to prevent main page scrollbar */
+.chat-modal-open {
+  overflow: hidden !important;
+}
+
+/* Ensure modal doesn't affect document flow */
+.chat-modal .modal-dialog {
+  margin: 0 !important;
+  position: fixed !important;
+  top: 5vh !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: 600px !important;
+  max-width: 90vw !important;
+}
+
+/* Fix for mobile responsiveness */
+@media (max-width: 768px) {
+  .chat-modal .modal-dialog {
+    width: 95vw !important;
+    max-width: 95vw !important;
+    height: 90vh !important;
+    top: 5vh !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .chat-modal .modal-dialog {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100vh !important;
+    top: 0 !important;
+    left: 0 !important;
+    transform: none !important;
+  }
+}
+
+/* Prevent any overflow issues */
+.chat-modal .modal-content {
+  overflow: hidden !important;
+  max-height: 80vh !important;
+}
+
+@media (max-width: 480px) {
+  .chat-modal .modal-content {
+    max-height: 100vh !important;
   }
 }

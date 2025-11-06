@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Modal } from 'react-bootstrap';
 import ChatMessage from './ChatMessage';
+import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
 import './ChatModal.css';
 
 const ChatModal = ({ isOpen, onClose, user, messages, onSendMessage, isLoading, error, onRetry, onClearError }) => {
@@ -9,6 +10,9 @@ const ChatModal = ({ isOpen, onClose, user, messages, onSendMessage, isLoading, 
   const inputRef = useRef(null);
   const modalRef = useRef(null);
   const previousFocusRef = useRef(null);
+
+  // Lock body scroll when modal is open
+  useBodyScrollLock(isOpen);
 
   // Auto-scroll to bottom when new messages are added
   useEffect(() => {
@@ -105,6 +109,8 @@ const ChatModal = ({ isOpen, onClose, user, messages, onSendMessage, isLoading, 
       aria-labelledby="chat-modal-title"
       aria-describedby="chat-modal-description"
       ref={modalRef}
+      enforceFocus={false}
+      restoreFocus={false}
     >
       <Modal.Header closeButton className="chat-modal-header">
         <Modal.Title id="chat-modal-title">
