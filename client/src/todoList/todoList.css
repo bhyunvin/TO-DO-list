@@ -199,104 +199,24 @@
 /* 테이블 반응형 컨테이너 */
 .table-responsive-container {
     width: 100%;
-    overflow-x: auto; /* Ensure horizontal scroll is always available */
-    overflow-y: auto; /* Allow vertical scroll only when content exceeds max-height */
+    overflow-x: auto; /* ★ 가로 스크롤만 담당 */
+    overflow-y: visible; /* ★★★ 중요: 메뉴가 잘리지 않도록 visible로 변경 */
     -webkit-overflow-scrolling: touch;
+    border-radius: 0;
+    box-shadow: none;
+    min-height: auto;
+    height: auto;
+    max-height: none; /* ★★★ 중요: 모든 높이 제한 제거 */
+}
+
+.list-wrapper {
+    max-height: 60vh; /* 50vh보다 넉넉하게 설정 */
+    overflow-y: auto;
+    overflow-x: hidden; /* 이 컨테이너는 가로 스크롤을 하지 않음 */
+    
+    /* 기존 .table-responsive-container가 가졌던 시각적 속성을 이곳으로 이동 */
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    min-height: auto; /* Remove any fixed height constraints */
-    height: auto; /* Auto height to grow with content */
-    max-height: 50vh; /* Only scroll when content exceeds 50% of viewport height */
-}
-
-/* 모바일에서 테이블 스크롤 */
-@media (max-width: 768px) {
-    .table-responsive-container {
-        margin: 0 -12px; /* 컨테이너 패딩을 고려한 음수 마진 */
-        border-radius: 0;
-        position: relative;
-        overflow-x: auto !important; /* Force horizontal scroll on mobile */
-        overflow-y: auto !important; /* Allow vertical scroll when content exceeds max-height */
-        max-height: 50vh !important; /* Allow scrolling when content is large */
-    }
-    
-    /* 스크롤 힌트 표시 */
-    .table-responsive-container::after {
-        content: '← 좌우로 스크롤하세요 →';
-        position: absolute;
-        bottom: -25px;
-        left: 50%;
-        transform: translateX(-50%);
-        font-size: 0.75rem;
-        color: #6c757d;
-        background-color: rgba(255, 255, 255, 0.9);
-        padding: 2px 8px;
-        border-radius: 10px;
-        white-space: nowrap;
-        opacity: 0.8;
-        pointer-events: none;
-    }
-    
-    .todo-list {
-        min-width: 600px; /* 최소 너비 설정으로 스크롤 유도 */
-        border-radius: 0;
-    }
-    
-    .todo-list th,
-    .todo-list td {
-        padding: 8px 6px;
-        font-size: 0.9rem;
-    }
-    
-    .todo-list th {
-        font-size: 0.85rem;
-        font-weight: 700;
-    }
-    
-    /* 스크롤바 스타일링 */
-    .table-responsive-container::-webkit-scrollbar {
-        height: 6px;
-    }
-    
-    .table-responsive-container::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 3px;
-    }
-    
-    .table-responsive-container::-webkit-scrollbar-thumb {
-        background: #c1c1c1;
-        border-radius: 3px;
-    }
-    
-    .table-responsive-container::-webkit-scrollbar-thumb:hover {
-        background: #a8a8a8;
-    }
-}
-
-@media (max-width: 480px) {
-    .todo-container {
-        padding-bottom: 40px; /* 스크롤 힌트를 위한 여백 */
-    }
-    
-    .table-responsive-container {
-        overflow-x: auto !important; /* Ensure horizontal scroll on small screens */
-        overflow-y: auto !important; /* Allow vertical scroll when content exceeds max-height */
-        max-height: 50vh !important; /* Allow scrolling when content is large */
-    }
-    
-    .todo-list {
-        min-width: 650px; /* 더 작은 화면에서는 더 넓은 최소 너비 */
-    }
-    
-    .todo-list th,
-    .todo-list td {
-        padding: 6px 4px;
-        font-size: 0.85rem;
-    }
-    
-    .todo-list th {
-        font-size: 0.8rem;
-    }
 }
 
 /* 날짜 네비게이터 컨테이너 */

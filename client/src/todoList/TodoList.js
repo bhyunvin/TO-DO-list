@@ -276,83 +276,85 @@ function TodoList(props) {
   }, [openActionMenu, setOpenActionMenu]);
 
   return (
-    <div className="table-responsive-container">
-      <table className="todo-list">
-        <colgroup>
-          <col width="5%" />
-          <col width="10%" />
-          <col width="35%" />
-          <col width="15%" />
-          <col width="25%" />
-          <col width="10%" />
-        </colgroup>
-        <thead>
-          <tr>
-            <th className="text-center">완료</th>
-            <th className="text-center">번호</th>
-            <th>내용</th>
-            <th className="text-center">완료일시</th>
-            <th>비고</th>
-            <th className="text-center"></th>
-          </tr>
-        </thead>
-        <tbody>
-          {todos.length > 0 ? (
-            todos.map((todo, index) => (
-              <tr
-                key={todo.todoSeq}
-                className={todo.completeDtm ? 'completed' : ''}
-              >
-                <td className="text-center">
-                  <input
-                    type="checkbox"
-                    className="form-check-input"
-                    checked={!!todo.completeDtm}
-                    disabled={togglingTodoSeq === todo.todoSeq}
-                    onChange={() => onToggleComplete(todo.todoSeq, !!todo.completeDtm)}
-                  />
-                </td>
-                <td className="text-center">{index + 1}</td>
-                <td className="todo-content">
-                  <span className="text-truncate" title={todo.todoContent}>{todo.todoContent}</span>
-                </td>
-                <td className="text-center">{formatDateTime(todo.completeDtm)}</td>
-                <td>
-                  <span className="text-truncate" title={todo.todoNote}>{todo.todoNote}</span>
-                </td>
-                <td className="todo-actions-cell">
-                  <button className="more-actions-btn" onClick={() => setOpenActionMenu(openActionMenu === todo.todoSeq ? null : todo.todoSeq)}>
-                    <i className="bi bi-three-dots-vertical"></i>
-                  </button>
-                  {openActionMenu === todo.todoSeq && (
-                    <div className="action-menu" ref={menuRef}>
-                      <button
-                        className="btn btn-sm btn-outline-success"
-                        onClick={() => {
-                          onEditTodo(todo);
-                          setOpenActionMenu(null);
-                        }}
-                        title="수정"
-                      >
-                        <i className="bi bi-pencil-fill"></i>
-                      </button>
-                      <button
-                        className="btn btn-sm btn-outline-danger"
-                        onClick={() => onDeleteTodo(todo.todoSeq)}
-                        title="삭제"
-                      ><i className="bi bi-trash-fill"></i></button>
-                    </div>
-                  )}
-                </td>
-              </tr>
-            ))
-          ) : (
+    <div className="list-wrapper"> 
+      <div className="table-responsive-container">
+        <table className="todo-list">
+          <colgroup>
+            <col width="5%" />
+            <col width="10%" />
+            <col width="35%" />
+            <col width="15%" />
+            <col width="25%" />
+            <col width="10%" />
+          </colgroup>
+          <thead>
             <tr>
-              <td colSpan={6}>할 일이 없습니다.</td>
+              <th className="text-center">완료</th>
+              <th className="text-center">번호</th>
+              <th>내용</th>
+              <th className="text-center">완료일시</th>
+              <th>비고</th>
+              <th className="text-center"></th>
             </tr>
-          )}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {todos.length > 0 ? (
+              todos.map((todo, index) => (
+                <tr
+                  key={todo.todoSeq}
+                  className={todo.completeDtm ? 'completed' : ''}
+                >
+                  <td className="text-center">
+                    <input
+                      type="checkbox"
+                      className="form-check-input"
+                      checked={!!todo.completeDtm}
+                      disabled={togglingTodoSeq === todo.todoSeq}
+                      onChange={() => onToggleComplete(todo.todoSeq, !!todo.completeDtm)}
+                    />
+                  </td>
+                  <td className="text-center">{index + 1}</td>
+                  <td className="todo-content">
+                    <span className="text-truncate" title={todo.todoContent}>{todo.todoContent}</span>
+                  </td>
+                  <td className="text-center">{formatDateTime(todo.completeDtm)}</td>
+                  <td>
+                    <span className="text-truncate" title={todo.todoNote}>{todo.todoNote}</span>
+                  </td>
+                  <td className="todo-actions-cell">
+                    <button className="more-actions-btn" onClick={() => setOpenActionMenu(openActionMenu === todo.todoSeq ? null : todo.todoSeq)}>
+                      <i className="bi bi-three-dots-vertical"></i>
+                    </button>
+                    {openActionMenu === todo.todoSeq && (
+                      <div className="action-menu" ref={menuRef}>
+                        <button
+                          className="btn btn-sm btn-outline-success"
+                          onClick={() => {
+                            onEditTodo(todo);
+                            setOpenActionMenu(null);
+                          }}
+                          title="수정"
+                        >
+                          <i className="bi bi-pencil-fill"></i>
+                        </button>
+                        <button
+                          className="btn btn-sm btn-outline-danger"
+                          onClick={() => onDeleteTodo(todo.todoSeq)}
+                          title="삭제"
+                        ><i className="bi bi-trash-fill"></i></button>
+                      </div>
+                    )}
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={6}>할 일이 없습니다.</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
