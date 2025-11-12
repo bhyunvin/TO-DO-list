@@ -246,6 +246,22 @@
     background-color: #f0f0f0;
 }
 
+/* Today 버튼 */
+.date-today-btn {
+    background: none;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 5px 12px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: #555;
+    transition: background-color 0.2s;
+}
+
+.date-today-btn:hover {
+    background-color: #f0f0f0;
+}
+
 /* DatePicker의 input을 텍스트처럼 보이게 스타일링 */
 .date-display {
     background-color: transparent;

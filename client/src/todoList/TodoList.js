@@ -1208,6 +1208,10 @@ function TodoContainer() {
     setSelectedDate(newDate);
   };
 
+  const handleToday = () => {
+    setSelectedDate(new Date());
+  };
+
   // 채팅 관련 핸들러
   const handleChatToggle = () => {
     setIsChatOpen(!isChatOpen);
@@ -1596,8 +1600,12 @@ function TodoContainer() {
             onChange={(date) => setSelectedDate(date)} // 날짜 선택 시 상태 변경
             dateFormat="yyyy-MM-dd" // 표시 형식
             className="date-display" // CSS 스타일링을 위한 클래스
+            showMonthDropdown // 월 선택 드롭다운 활성화
+            showYearDropdown // 연도 선택 드롭다운 활성화
+            dropdownMode="select" // 드롭다운 모드를 select로 설정
           />
           <button onClick={handleNextDay} className="date-nav-btn">&gt;</button>
+          <button onClick={handleToday} className="date-today-btn">오늘</button>
         </div>
       )}
       {/* 할 일 목록 또는 할 일 생성/수정 폼을 보여주는 부분 */}
