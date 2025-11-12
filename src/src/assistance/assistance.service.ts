@@ -98,9 +98,17 @@ export class AssistanceService {
     private readonly todoService: TodoService,
   ) {}
 
+  /**
+   * Gets a response from Gemini API with function calling support
+   * @param requestAssistanceDto - The request containing user prompt and conversation history
+   * @param userSeq - Optional user sequence number for authenticated operations
+   * @param ip - Optional client IP address for audit logging
+   * @returns Response DTO with AI-generated response
+   */
   async getGeminiResponse(
     requestAssistanceDto: RequestAssistanceDto,
     userSeq?: number,
+    ip?: string,
   ): Promise<RequestAssistanceDto> {
     const apiKey = await decrypt(
       await this.keychainUtil.getPassword('encrypt-google-api-key'),
@@ -150,23 +158,62 @@ export class AssistanceService {
       // Check if Gemini wants to call a function
       if (firstPart.functionCall) {
         const functionCall = firstPart.functionCall;
+        const args = functionCall.args || {};
+        let functionResult: any;
         
-        if (functionCall.name === 'getTodos' && userSeq) {
-          // Execute the getTodos function
-          const args = functionCall.args || {};
-          const todoData = await this.getTodos(userSeq, args.status, args.days);
-          
-          // Add function call and response to conversation
+        // Execute the appropriate function based on function name
+        switch (functionCall.name) {
+          case 'getTodos':
+            if (userSeq) {
+              functionResult = await this.getTodos(userSeq, args.status, args.days);
+            }
+            break;
+            
+          case 'createTodo':
+            if (userSeq && ip) {
+              functionResult = await this.createTodo(
+                userSeq,
+                ip,
+                args.todoContent,
+                args.todoDate,
+                args.todoNote,
+              );
+            }
+            break;
+            
+          case 'updateTodo':
+            if (userSeq && ip) {
+              functionResult = await this.updateTodo(
+                userSeq,
+                ip,
+                args.todoSeq,
+                {
+                  todoContent: args.todoContent,
+                  completeDtm: args.completeDtm,
+                  todoNote: args.todoNote,
+                },
+              );
+            }
+            break;
+            
+          default:
+            this.logger.warn(`Unknown function call: ${functionCall.name}`);
+        }
+        
+        // If a function was executed, add the call and response to conversation
+        if (functionResult !== undefined) {
+          // Add function call to conversation
           requestData.contents.push({
             parts: [candidate.content.parts[0] as any],
           });
           
+          // Add function response to conversation
           requestData.contents.push({
             parts: [{
               functionResponse: {
-                name: 'getTodos',
+                name: functionCall.name,
                 response: {
-                  content: todoData,
+                  content: functionResult,
                 },
               },
             } as any],
