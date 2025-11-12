@@ -489,3 +489,17 @@ Additional fixes for layout issues */
     /* Remove any tbody-specific height constraints */
     max-height: none !important;
 }
+/* Clicka
+ble checkbox cell */
+.checkbox-cell {
+    user-select: none;
+    transition: background-color 0.15s ease;
+}
+
+.checkbox-cell:hover {
+    background-color: #e9ecef !important;
+}
+
+.checkbox-cell input[type="checkbox"] {
+    pointer-events: none; /* Prevent checkbox from capturing clicks */
+}

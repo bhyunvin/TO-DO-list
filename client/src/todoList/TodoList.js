@@ -304,13 +304,22 @@ function TodoList(props) {
                   key={todo.todoSeq}
                   className={todo.completeDtm ? 'completed' : ''}
                 >
-                  <td className="text-center">
+                  <td 
+                    className="text-center checkbox-cell"
+                    onClick={() => {
+                      if (togglingTodoSeq !== todo.todoSeq) {
+                        onToggleComplete(todo.todoSeq, !!todo.completeDtm);
+                      }
+                    }}
+                    style={{ cursor: togglingTodoSeq === todo.todoSeq ? 'not-allowed' : 'pointer' }}
+                  >
                     <input
                       type="checkbox"
                       className="form-check-input"
                       checked={!!todo.completeDtm}
                       disabled={togglingTodoSeq === todo.todoSeq}
                       onChange={() => onToggleComplete(todo.todoSeq, !!todo.completeDtm)}
+                      style={{ pointerEvents: 'none' }}
                     />
                   </td>
                   <td className="text-center">{index + 1}</td>
@@ -607,6 +616,7 @@ function TodoContainer() {
   const [openActionMenu, setOpenActionMenu] = useState(null); // '...' 메뉴 상태
   const [isChatOpen, setIsChatOpen] = useState(false); // 채팅 모달 상태
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false); // 사용자 메뉴 드롭다운 상태
+  const [optimisticUpdates, setOptimisticUpdates] = useState(new Map()); // 낙관적 업데이트 추적
   
   const userMenuRef = useRef(null); // 사용자 메뉴 외부 클릭 감지용
 
@@ -720,27 +730,173 @@ function TodoContainer() {
     }
   }
 
-  // ToDo 항목의 완료 상태를 토글하는 함수
+  // 낙관적 업데이트를 위한 헬퍼 함수
+  const updateTodoOptimistically = (todoSeq, newCompleteDtm) => {
+    setTodos(prevTodos => 
+      prevTodos.map(todo => 
+        todo.todoSeq === todoSeq 
+          ? { ...todo, completeDtm: newCompleteDtm }
+          : todo
+      )
+    );
+  };
+
+  // 롤백을 위한 헬퍼 함수
+  const rollbackTodoUpdate = (todoSeq, originalCompleteDtm) => {
+    setTodos(prevTodos => 
+      prevTodos.map(todo => 
+        todo.todoSeq === todoSeq 
+          ? { ...todo, completeDtm: originalCompleteDtm }
+          : todo
+      )
+    );
+  };
+
+  // 에러 메시지 생성 헬퍼 함수
+  const getErrorMessage = (error, response) => {
+    if (error.name === 'AbortError') {
+      return '요청 시간이 초과되었습니다. 네트워크 연결을 확인하고 다시 시도해주세요.';
+    }
+    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+      return '네트워크 연결을 확인해주세요.';
+    }
+    if (response && response.status >= 500) {
+      return '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+    }
+    return '상태 변경에 실패했습니다. 다시 시도해주세요.';
+  };
+
+  // ToDo 항목의 완료 상태를 토글하는 함수 (낙관적 UI 패턴)
   const handleToggleComplete = async (todoSeq, isCompleted) => {
+    // 중복 요청 방지
+    if (togglingTodoSeq === todoSeq || optimisticUpdates.has(todoSeq)) {
+      return;
+    }
+
+    // 원본 todo 항목 찾기
+    const originalTodo = todos.find(todo => todo.todoSeq === todoSeq);
+    if (!originalTodo) {
+      return;
+    }
+
+    const originalCompleteDtm = originalTodo.completeDtm;
+    const newCompleteDtm = isCompleted ? null : new Date().toISOString();
+
+    // 낙관적 UI 업데이트
+    updateTodoOptimistically(todoSeq, newCompleteDtm);
+    
+    // optimisticUpdates Map에 추가
+    setOptimisticUpdates(prev => {
+      const newMap = new Map(prev);
+      newMap.set(todoSeq, {
+        originalCompleteDtm,
+        newCompleteDtm,
+        timestamp: Date.now()
+      });
+      return newMap;
+    });
+    
     setTogglingTodoSeq(todoSeq);
+
+    console.log('Optimistic update applied:', {
+      todoSeq,
+      originalState: originalCompleteDtm,
+      newState: newCompleteDtm,
+      timestamp: new Date().toISOString()
+    });
+
+    // 30초 타임아웃을 위한 AbortController
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
+
     try {
       const response = await api(`/api/todo/${todoSeq}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include', // 다른 도메인으로 쿠키를 전송하기 위한 설정
+        credentials: 'include',
         body: JSON.stringify({
-          completeDtm: isCompleted ? null : new Date().toISOString(),
+          completeDtm: newCompleteDtm,
         }),
+        signal: controller.signal,
       });
 
+      clearTimeout(timeoutId);
+
       if (response.ok) {
-        fetchTodos();
+        // 성공: optimisticUpdates에서 제거
+        setOptimisticUpdates(prev => {
+          const newMap = new Map(prev);
+          newMap.delete(todoSeq);
+          return newMap;
+        });
+        
+        console.log('Todo toggle succeeded:', {
+          todoSeq,
+          timestamp: new Date().toISOString()
+        });
       } else {
-        Swal.fire('오류', '상태 변경에 실패했습니다.', 'error');
+        // 실패: 롤백
+        rollbackTodoUpdate(todoSeq, originalCompleteDtm);
+        
+        setOptimisticUpdates(prev => {
+          const newMap = new Map(prev);
+          newMap.delete(todoSeq);
+          return newMap;
+        });
+
+        const errorMessage = getErrorMessage(new Error(), response);
+        
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          icon: 'error',
+          title: errorMessage,
+          showConfirmButton: false,
+          timer: 4000,
+          timerProgressBar: true
+        });
+
+        console.error('Todo toggle failed:', {
+          todoSeq,
+          error: 'HTTP error',
+          status: response.status,
+          originalState: originalCompleteDtm,
+          attemptedState: newCompleteDtm,
+          timestamp: new Date().toISOString()
+        });
       }
     } catch (error) {
-      console.error('Toggle Complete Error:', error);
-      Swal.fire('오류', '서버와의 통신 중 문제가 발생했습니다.', 'error');
+      clearTimeout(timeoutId);
+      
+      // 에러 발생: 롤백
+      rollbackTodoUpdate(todoSeq, originalCompleteDtm);
+      
+      setOptimisticUpdates(prev => {
+        const newMap = new Map(prev);
+        newMap.delete(todoSeq);
+        return newMap;
+      });
+
+      const errorMessage = getErrorMessage(error, null);
+      
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'error',
+        title: errorMessage,
+        showConfirmButton: false,
+        timer: 4000,
+        timerProgressBar: true
+      });
+
+      console.error('Todo toggle failed:', {
+        todoSeq,
+        error: error.message,
+        errorName: error.name,
+        originalState: originalCompleteDtm,
+        attemptedState: newCompleteDtm,
+        timestamp: new Date().toISOString()
+      });
     } finally {
       setTogglingTodoSeq(null);
     }
