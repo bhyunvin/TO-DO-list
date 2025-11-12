@@ -1,31 +1,31 @@
 # Implementation Plan
 
-- [ ] 1. Install exceljs dependency
+- [x] 1. Install exceljs dependency
   - Install exceljs package in the backend (src directory)
   - Verify installation by checking package.json
   - _Requirements: 1.1_
 
-- [ ] 2. Implement backend Excel export service method
-  - [ ] 2.1 Add exportToExcel method to TodoService
+- [x] 2. Implement backend Excel export service method
+  - [x] 2.1 Add exportToExcel method to TodoService
     - Create method signature accepting userSeq, startDate, and endDate parameters
     - Implement database query to fetch todos filtered by date range and del_yn = 'N'
     - Sort results by todoDate and todoSeq in ascending order
     - _Requirements: 1.3, 1.4, 3.1, 3.2, 3.3, 3.4, 3.5_
   
-  - [ ] 2.2 Implement Excel workbook generation logic
+  - [x] 2.2 Implement Excel workbook generation logic
     - Create new workbook and worksheet using exceljs
     - Configure column widths (A: 0, B: 4, C: 80, D: 15, E: 90)
     - Leave Column A and Row 1 empty as per specification
     - _Requirements: 2.1, 2.2, 2.6_
   
-  - [ ] 2.3 Add header row with styling
+  - [x] 2.3 Add header row with styling
     - Set header text in cells B2:E2 (번호, 내용, 완료일시, 비고)
     - Apply light gray background fill (#D3D3D3) to header range
     - Apply borders to all sides of header cells
     - Apply bold font and center alignment to headers
     - _Requirements: 2.3, 2.4, 2.5_
   
-  - [ ] 2.4 Populate data rows
+  - [x] 2.4 Populate data rows
     - Iterate through filtered todos starting from Row 3
     - Map todo.seq to Column B
     - Map todo.todoContent to Column C
@@ -34,7 +34,7 @@
     - Handle null values for completeDtm and todoNote (display empty string)
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_
   
-  - [ ] 2.5 Generate and return Excel buffer
+  - [x] 2.5 Generate and return Excel buffer
     - Write workbook to buffer
     - Return buffer for controller to send as response
     - _Requirements: 1.5_
