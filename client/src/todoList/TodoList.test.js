@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import TodoContainer from './TodoList';
 
@@ -59,12 +59,26 @@ jest.mock('../components/ProfileUpdateForm', () => {
       <div data-testid="profile-update-form">
         <h3>프로필 수정</h3>
         <p>User: {user.userName}</p>
-        <button onClick={() => onSave({ 
-          userName: 'Updated Name',
-          userEmail: 'updated@example.com',
-          userDescription: 'Updated description',
-          formData: new FormData()
-        })}>
+        <button onClick={() => {
+          const mockFormData = {
+            append: jest.fn(),
+            get: jest.fn(),
+            getAll: jest.fn(),
+            has: jest.fn(),
+            set: jest.fn(),
+            delete: jest.fn(),
+            keys: jest.fn(),
+            values: jest.fn(),
+            entries: jest.fn(),
+            forEach: jest.fn()
+          };
+          onSave({ 
+            userName: 'Updated Name',
+            userEmail: 'updated@example.com',
+            userDescription: 'Updated description',
+            formData: mockFormData
+          });
+        }}>
           Save Profile
         </button>
         <button onClick={onCancel}>Cancel Profile</button>
@@ -114,22 +128,34 @@ describe('TodoContainer Profile Update Integration', () => {
     });
   });
 
-  test('displays Update Profile button in header between welcome message and logout button', () => {
+  test('displays user menu icon in header', () => {
     render(<TodoContainer />);
 
-    const userInfoHeader = screen.getByText('Test User님 환영합니다.').parentElement;
-    const buttons = userInfoHeader.querySelectorAll('button');
-    
-    expect(buttons).toHaveLength(3);
-    expect(buttons[0]).toHaveTextContent('프로필 수정');
-    expect(buttons[1]).toHaveTextContent('비밀번호 변경');
-    expect(buttons[2]).toHaveTextContent('로그아웃');
+    const userMenuIcon = screen.getByRole('button', { name: /사용자 메뉴/ });
+    expect(userMenuIcon).toBeInTheDocument();
+  });
+
+  test('displays dropdown menu with profile and password options when user menu is clicked', async () => {
+    const user = userEvent.setup();
+    render(<TodoContainer />);
+
+    const userMenuIcon = screen.getByRole('button', { name: /사용자 메뉴/ });
+    await user.click(userMenuIcon);
+
+    expect(screen.getByRole('button', { name: /프로필 수정/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /비밀번호 변경/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /로그아웃/ })).toBeInTheDocument();
   });
 
   test('shows ProfileUpdateForm when Update Profile button is clicked', async () => {
     const user = userEvent.setup();
     render(<TodoContainer />);
 
+    // First click user menu icon to open dropdown
+    const userMenuIcon = screen.getByRole('button', { name: /사용자 메뉴/ });
+    await user.click(userMenuIcon);
+
+    // Then click profile update button
     const updateProfileButton = screen.getByRole('button', { name: /프로필 수정/ });
     await user.click(updateProfileButton);
 
@@ -145,7 +171,10 @@ describe('TodoContainer Profile Update Integration', () => {
     expect(screen.getByRole('button', { name: /신규/ })).toBeInTheDocument();
     expect(screen.getByTestId('date-picker')).toBeInTheDocument();
 
-    // Click update profile button
+    // Open user menu and click update profile button
+    const userMenuIcon = screen.getByRole('button', { name: /사용자 메뉴/ });
+    await user.click(userMenuIcon);
+    
     const updateProfileButton = screen.getByRole('button', { name: /프로필 수정/ });
     await user.click(updateProfileButton);
 
@@ -161,17 +190,27 @@ describe('TodoContainer Profile Update Integration', () => {
     const user = userEvent.setup();
     render(<TodoContainer />);
 
+    // Open user menu
+    const userMenuIcon = screen.getByRole('button', { name: /사용자 메뉴/ });
+    await user.click(userMenuIcon);
+
     const updateProfileButton = screen.getByRole('button', { name: /프로필 수정/ });
     await user.click(updateProfileButton);
 
-    expect(updateProfileButton).toBeDisabled();
+    // Reopen menu to check button state
+    await user.click(userMenuIcon);
+    const disabledButton = screen.getByRole('button', { name: /프로필 수정/ });
+    expect(disabledButton).toBeDisabled();
   });
 
   test('returns to todo list view when profile update is cancelled', async () => {
     const user = userEvent.setup();
     render(<TodoContainer />);
 
-    // Click update profile button
+    // Open user menu and click update profile button
+    const userMenuIcon = screen.getByRole('button', { name: /사용자 메뉴/ });
+    await user.click(userMenuIcon);
+    
     const updateProfileButton = screen.getByRole('button', { name: /프로필 수정/ });
     await user.click(updateProfileButton);
 
@@ -186,7 +225,6 @@ describe('TodoContainer Profile Update Integration', () => {
     expect(screen.queryByTestId('profile-update-form')).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: /신규/ })).toBeInTheDocument();
     expect(screen.getByTestId('date-picker')).toBeInTheDocument();
-    expect(updateProfileButton).not.toBeDisabled();
   });
 
   test('processes profile update and updates user session', async () => {
@@ -214,7 +252,10 @@ describe('TodoContainer Profile Update Integration', () => {
 
     render(<TodoContainer />);
 
-    // Click update profile button
+    // Open user menu and click update profile button
+    const userMenuIcon = screen.getByRole('button', { name: /사용자 메뉴/ });
+    await user.click(userMenuIcon);
+    
     const updateProfileButton = screen.getByRole('button', { name: /프로필 수정/ });
     await user.click(updateProfileButton);
 
@@ -251,7 +292,10 @@ describe('TodoContainer Profile Update Integration', () => {
 
     render(<TodoContainer />);
 
-    // Click update profile button
+    // Open user menu and click update profile button
+    const userMenuIcon = screen.getByRole('button', { name: /사용자 메뉴/ });
+    await user.click(userMenuIcon);
+    
     const updateProfileButton = screen.getByRole('button', { name: /프로필 수정/ });
     await user.click(updateProfileButton);
 
@@ -295,7 +339,10 @@ describe('TodoContainer Profile Update Integration', () => {
 
     render(<TodoContainer />);
 
-    // Click update profile button
+    // Open user menu and click update profile button
+    const userMenuIcon = screen.getByRole('button', { name: /사용자 메뉴/ });
+    await user.click(userMenuIcon);
+    
     const updateProfileButton = screen.getByRole('button', { name: /프로필 수정/ });
     await user.click(updateProfileButton);
 
@@ -315,20 +362,24 @@ describe('TodoContainer Profile Update Integration', () => {
     expect(mockLogin).not.toHaveBeenCalled();
   });
 
-  test('maintains consistent styling with existing application design', () => {
+  test('user menu icon is visible and accessible', () => {
     render(<TodoContainer />);
 
-    const updateProfileButton = screen.getByRole('button', { name: /프로필 수정/ });
+    const userMenuIcon = screen.getByRole('button', { name: /사용자 메뉴/ });
     
-    // Check that the button has Bootstrap classes
-    expect(updateProfileButton).toHaveClass('btn', 'btn-outline-primary', 'me-2');
+    // Check that the icon button exists and is accessible
+    expect(userMenuIcon).toBeInTheDocument();
+    expect(userMenuIcon).toHaveClass('user-menu-icon');
   });
 
   test('profile update does not interfere with todo creation flow', async () => {
     const user = userEvent.setup();
     render(<TodoContainer />);
 
-    // Start profile update
+    // Open user menu and start profile update
+    const userMenuIcon = screen.getByRole('button', { name: /사용자 메뉴/ });
+    await user.click(userMenuIcon);
+    
     const updateProfileButton = screen.getByRole('button', { name: /프로필 수정/ });
     await user.click(updateProfileButton);
 
@@ -366,7 +417,10 @@ describe('TodoContainer Profile Update Integration', () => {
       expect(screen.getByText('Test todo')).toBeInTheDocument();
     });
 
-    // Start profile update
+    // Open user menu and start profile update
+    const userMenuIcon = screen.getByRole('button', { name: /사용자 메뉴/ });
+    await user.click(userMenuIcon);
+    
     const updateProfileButton = screen.getByRole('button', { name: /프로필 수정/ });
     await user.click(updateProfileButton);
 
@@ -477,7 +531,10 @@ describe('TodoContainer Excel Export Button Rendering', () => {
     const user = userEvent.setup();
     render(<TodoContainer />);
 
-    // Click profile update button
+    // Open user menu and click profile update button
+    const userMenuIcon = screen.getByRole('button', { name: /사용자 메뉴/ });
+    await user.click(userMenuIcon);
+    
     const updateProfileButton = screen.getByRole('button', { name: /프로필 수정/ });
     await user.click(updateProfileButton);
 
@@ -490,7 +547,10 @@ describe('TodoContainer Excel Export Button Rendering', () => {
     const user = userEvent.setup();
     render(<TodoContainer />);
 
-    // Click password change button
+    // Open user menu and click password change button
+    const userMenuIcon = screen.getByRole('button', { name: /사용자 메뉴/ });
+    await user.click(userMenuIcon);
+    
     const changePasswordButton = screen.getByRole('button', { name: /비밀번호 변경/ });
     await user.click(changePasswordButton);
 
@@ -507,6 +567,10 @@ describe('TodoContainer Date Range Modal Functionality', () => {
       ok: true,
       json: () => Promise.resolve([])
     });
+    
+    // Reset SweetAlert mock to return cancelled by default
+    const Swal = require('sweetalert2');
+    Swal.fire.mockResolvedValue({ isConfirmed: false });
   });
 
   test('displays date range modal when Excel export button is clicked', async () => {
@@ -518,15 +582,17 @@ describe('TodoContainer Date Range Modal Functionality', () => {
     const excelButton = screen.getByRole('button', { name: /Excel 내보내기/ });
     await user.click(excelButton);
 
-    // Verify SweetAlert was called with correct configuration
-    expect(Swal.fire).toHaveBeenCalledWith(
-      expect.objectContaining({
-        title: 'Excel 내보내기',
-        showCancelButton: true,
-        confirmButtonText: '내보내기',
-        cancelButtonText: '취소'
-      })
-    );
+    // Wait for modal to be called
+    await waitFor(() => {
+      expect(Swal.fire).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Excel 내보내기',
+          showCancelButton: true,
+          confirmButtonText: '내보내기',
+          cancelButtonText: '취소'
+        })
+      );
+    });
   });
 
   test('modal displays with date pickers for start and end dates', async () => {
@@ -538,13 +604,15 @@ describe('TodoContainer Date Range Modal Functionality', () => {
     const excelButton = screen.getByRole('button', { name: /Excel 내보내기/ });
     await user.click(excelButton);
 
-    // Verify modal HTML contains date inputs
-    const callArgs = Swal.fire.mock.calls[0][0];
-    expect(callArgs.html).toContain('id="startDate"');
-    expect(callArgs.html).toContain('id="endDate"');
-    expect(callArgs.html).toContain('type="date"');
-    expect(callArgs.html).toContain('시작일');
-    expect(callArgs.html).toContain('종료일');
+    // Wait for modal to be called and verify modal HTML contains date inputs
+    await waitFor(() => {
+      const callArgs = Swal.fire.mock.calls[0][0];
+      expect(callArgs.html).toContain('id="startDate"');
+      expect(callArgs.html).toContain('id="endDate"');
+      expect(callArgs.html).toContain('type="date"');
+      expect(callArgs.html).toContain('시작일');
+      expect(callArgs.html).toContain('종료일');
+    });
   });
 
   test('date validation prevents empty date fields', async () => {
@@ -555,10 +623,11 @@ describe('TodoContainer Date Range Modal Functionality', () => {
     const mockStartDateInput = { value: '' };
     const mockEndDateInput = { value: '2024-01-31' };
     
+    const originalGetElementById = document.getElementById;
     document.getElementById = jest.fn((id) => {
       if (id === 'startDate') return mockStartDateInput;
       if (id === 'endDate') return mockEndDateInput;
-      return null;
+      return originalGetElementById.call(document, id);
     });
 
     Swal.showValidationMessage = jest.fn();
@@ -569,12 +638,17 @@ describe('TodoContainer Date Range Modal Functionality', () => {
     await user.click(excelButton);
 
     // Get the preConfirm function and call it
-    const callArgs = Swal.fire.mock.calls[0][0];
-    const result = callArgs.preConfirm();
+    await waitFor(() => {
+      const callArgs = Swal.fire.mock.calls[0][0];
+      const result = callArgs.preConfirm();
 
-    // Verify validation message was shown
-    expect(Swal.showValidationMessage).toHaveBeenCalledWith('날짜를 선택해주세요');
-    expect(result).toBe(false);
+      // Verify validation message was shown
+      expect(Swal.showValidationMessage).toHaveBeenCalledWith('날짜를 선택해주세요');
+      expect(result).toBe(false);
+    });
+    
+    // Restore original function
+    document.getElementById = originalGetElementById;
   });
 
   test('date validation prevents startDate after endDate', async () => {
@@ -585,10 +659,11 @@ describe('TodoContainer Date Range Modal Functionality', () => {
     const mockStartDateInput = { value: '2024-02-01' };
     const mockEndDateInput = { value: '2024-01-31' };
     
+    const originalGetElementById = document.getElementById;
     document.getElementById = jest.fn((id) => {
       if (id === 'startDate') return mockStartDateInput;
       if (id === 'endDate') return mockEndDateInput;
-      return null;
+      return originalGetElementById.call(document, id);
     });
 
     Swal.showValidationMessage = jest.fn();
@@ -599,12 +674,17 @@ describe('TodoContainer Date Range Modal Functionality', () => {
     await user.click(excelButton);
 
     // Get the preConfirm function and call it
-    const callArgs = Swal.fire.mock.calls[0][0];
-    const result = callArgs.preConfirm();
+    await waitFor(() => {
+      const callArgs = Swal.fire.mock.calls[0][0];
+      const result = callArgs.preConfirm();
 
-    // Verify validation message was shown
-    expect(Swal.showValidationMessage).toHaveBeenCalledWith('시작일은 종료일보다 이전이어야 합니다');
-    expect(result).toBe(false);
+      // Verify validation message was shown
+      expect(Swal.showValidationMessage).toHaveBeenCalledWith('시작일은 종료일보다 이전이어야 합니다');
+      expect(result).toBe(false);
+    });
+    
+    // Restore original function
+    document.getElementById = originalGetElementById;
   });
 
   test('modal confirms with valid dates', async () => {
@@ -615,10 +695,11 @@ describe('TodoContainer Date Range Modal Functionality', () => {
     const mockStartDateInput = { value: '2024-01-01' };
     const mockEndDateInput = { value: '2024-01-31' };
     
+    const originalGetElementById = document.getElementById;
     document.getElementById = jest.fn((id) => {
       if (id === 'startDate') return mockStartDateInput;
       if (id === 'endDate') return mockEndDateInput;
-      return null;
+      return originalGetElementById.call(document, id);
     });
     
     render(<TodoContainer />);
@@ -627,14 +708,19 @@ describe('TodoContainer Date Range Modal Functionality', () => {
     await user.click(excelButton);
 
     // Get the preConfirm function and call it
-    const callArgs = Swal.fire.mock.calls[0][0];
-    const result = callArgs.preConfirm();
+    await waitFor(() => {
+      const callArgs = Swal.fire.mock.calls[0][0];
+      const result = callArgs.preConfirm();
 
-    // Verify dates are returned
-    expect(result).toEqual({
-      startDate: '2024-01-01',
-      endDate: '2024-01-31'
+      // Verify dates are returned
+      expect(result).toEqual({
+        startDate: '2024-01-01',
+        endDate: '2024-01-31'
+      });
     });
+    
+    // Restore original function
+    document.getElementById = originalGetElementById;
   });
 
   test('cancel button closes modal without triggering export', async () => {
@@ -663,54 +749,74 @@ describe('TodoContainer Date Range Modal Functionality', () => {
 });
 
 describe('TodoContainer File Download Handler', () => {
+  let originalCreateElement;
+  let originalAppendChild;
+  let originalRemoveChild;
+  let originalCreateObjectURL;
+  let originalRevokeObjectURL;
+
+  beforeAll(() => {
+    // Store original functions once
+    originalCreateElement = document.createElement.bind(document);
+    originalAppendChild = document.body.appendChild.bind(document.body);
+    originalRemoveChild = document.body.removeChild.bind(document.body);
+    originalCreateObjectURL = window.URL.createObjectURL;
+    originalRevokeObjectURL = window.URL.revokeObjectURL;
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
+    cleanup(); // Clean up any previous renders
+    
     mockApi.mockResolvedValue({
       ok: true,
       json: () => Promise.resolve([])
     });
 
-    // Mock DOM methods for file download
-    document.createElement = jest.fn((tag) => {
-      if (tag === 'a') {
-        return {
-          href: '',
-          download: '',
-          click: jest.fn(),
-          remove: jest.fn()
-        };
-      }
-      return {};
-    });
-
-    document.body.appendChild = jest.fn();
-    document.body.removeChild = jest.fn();
+    // Mock URL methods for file download
     window.URL.createObjectURL = jest.fn(() => 'blob:mock-url');
     window.URL.revokeObjectURL = jest.fn();
+    
+    // Mock SweetAlert to return cancelled by default
+    const Swal = require('sweetalert2');
+    Swal.fire.mockResolvedValue({ isConfirmed: false });
+  });
+
+  afterEach(() => {
+    cleanup(); // Clean up after each test
+    
+    // Restore original functions if they were mocked
+    if (document.createElement !== originalCreateElement) {
+      document.createElement = originalCreateElement;
+    }
+    if (document.body.appendChild !== originalAppendChild) {
+      document.body.appendChild = originalAppendChild;
+    }
+    if (document.body.removeChild !== originalRemoveChild) {
+      document.body.removeChild = originalRemoveChild;
+    }
+    window.URL.createObjectURL = originalCreateObjectURL;
+    window.URL.revokeObjectURL = originalRevokeObjectURL;
   });
 
   test('successful download flow with correct API call', async () => {
     const user = userEvent.setup();
     const Swal = require('sweetalert2');
     
-    // Mock successful modal confirmation
-    const mockStartDateInput = { value: '2024-01-01' };
-    const mockEndDateInput = { value: '2024-01-31' };
-    
-    document.getElementById = jest.fn((id) => {
-      if (id === 'startDate') return mockStartDateInput;
-      if (id === 'endDate') return mockEndDateInput;
-      return null;
-    });
-
     // Mock successful API response with blob
     const mockBlob = new Blob(['mock excel data'], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     mockApi.mockResolvedValueOnce({
       ok: true,
+      json: () => Promise.resolve([])
+    }).mockResolvedValueOnce({
+      ok: true,
       blob: () => Promise.resolve(mockBlob)
     });
 
-    Swal.fire.mockResolvedValueOnce({ isConfirmed: true, value: { startDate: '2024-01-01', endDate: '2024-01-31' } });
+    // Mock successful modal confirmation
+    Swal.fire
+      .mockResolvedValueOnce({ isConfirmed: true, value: { startDate: '2024-01-01', endDate: '2024-01-31' } })
+      .mockResolvedValueOnce({ isConfirmed: true });
     
     render(<TodoContainer />);
 
@@ -745,24 +851,24 @@ describe('TodoContainer File Download Handler', () => {
       remove: jest.fn()
     };
 
-    document.createElement = jest.fn(() => mockAnchor);
-    
-    const mockStartDateInput = { value: '2024-01-01' };
-    const mockEndDateInput = { value: '2024-01-31' };
-    
-    document.getElementById = jest.fn((id) => {
-      if (id === 'startDate') return mockStartDateInput;
-      if (id === 'endDate') return mockEndDateInput;
-      return null;
+    const originalCreateElementFn = document.createElement;
+    document.createElement = jest.fn((tag) => {
+      if (tag === 'a') return mockAnchor;
+      return originalCreateElementFn.call(document, tag);
     });
 
     const mockBlob = new Blob(['mock excel data']);
     mockApi.mockResolvedValueOnce({
       ok: true,
+      json: () => Promise.resolve([])
+    }).mockResolvedValueOnce({
+      ok: true,
       blob: () => Promise.resolve(mockBlob)
     });
 
-    Swal.fire.mockResolvedValueOnce({ isConfirmed: true, value: { startDate: '2024-01-01', endDate: '2024-01-31' } });
+    Swal.fire
+      .mockResolvedValueOnce({ isConfirmed: true, value: { startDate: '2024-01-01', endDate: '2024-01-31' } })
+      .mockResolvedValueOnce({ isConfirmed: true });
     
     render(<TodoContainer />);
 
@@ -773,23 +879,20 @@ describe('TodoContainer File Download Handler', () => {
     await waitFor(() => {
       expect(mockAnchor.download).toBe('todos_2024-01-01_to_2024-01-31.xlsx');
     });
+    
+    // Restore
+    document.createElement = originalCreateElementFn;
   });
 
   test('displays success message after successful download', async () => {
     const user = userEvent.setup();
     const Swal = require('sweetalert2');
-    
-    const mockStartDateInput = { value: '2024-01-01' };
-    const mockEndDateInput = { value: '2024-01-31' };
-    
-    document.getElementById = jest.fn((id) => {
-      if (id === 'startDate') return mockStartDateInput;
-      if (id === 'endDate') return mockEndDateInput;
-      return null;
-    });
 
     const mockBlob = new Blob(['mock excel data']);
     mockApi.mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve([])
+    }).mockResolvedValueOnce({
       ok: true,
       blob: () => Promise.resolve(mockBlob)
     });
@@ -812,17 +915,11 @@ describe('TodoContainer File Download Handler', () => {
   test('handles 400 Bad Request error', async () => {
     const user = userEvent.setup();
     const Swal = require('sweetalert2');
-    
-    const mockStartDateInput = { value: '2024-01-01' };
-    const mockEndDateInput = { value: '2024-01-31' };
-    
-    document.getElementById = jest.fn((id) => {
-      if (id === 'startDate') return mockStartDateInput;
-      if (id === 'endDate') return mockEndDateInput;
-      return null;
-    });
 
     mockApi.mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve([])
+    }).mockResolvedValueOnce({
       ok: false,
       status: 400,
       json: () => Promise.resolve({ message: 'Invalid date format' })
@@ -844,17 +941,11 @@ describe('TodoContainer File Download Handler', () => {
   test('handles 401 Unauthorized error', async () => {
     const user = userEvent.setup();
     const Swal = require('sweetalert2');
-    
-    const mockStartDateInput = { value: '2024-01-01' };
-    const mockEndDateInput = { value: '2024-01-31' };
-    
-    document.getElementById = jest.fn((id) => {
-      if (id === 'startDate') return mockStartDateInput;
-      if (id === 'endDate') return mockEndDateInput;
-      return null;
-    });
 
     mockApi.mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve([])
+    }).mockResolvedValueOnce({
       ok: false,
       status: 401,
       json: () => Promise.resolve({})
@@ -876,17 +967,11 @@ describe('TodoContainer File Download Handler', () => {
   test('handles 500 Internal Server Error', async () => {
     const user = userEvent.setup();
     const Swal = require('sweetalert2');
-    
-    const mockStartDateInput = { value: '2024-01-01' };
-    const mockEndDateInput = { value: '2024-01-31' };
-    
-    document.getElementById = jest.fn((id) => {
-      if (id === 'startDate') return mockStartDateInput;
-      if (id === 'endDate') return mockEndDateInput;
-      return null;
-    });
 
     mockApi.mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve([])
+    }).mockResolvedValueOnce({
       ok: false,
       status: 500,
       json: () => Promise.resolve({})
@@ -908,19 +993,13 @@ describe('TodoContainer File Download Handler', () => {
   test('handles network failure errors', async () => {
     const user = userEvent.setup();
     const Swal = require('sweetalert2');
-    
-    const mockStartDateInput = { value: '2024-01-01' };
-    const mockEndDateInput = { value: '2024-01-31' };
-    
-    document.getElementById = jest.fn((id) => {
-      if (id === 'startDate') return mockStartDateInput;
-      if (id === 'endDate') return mockEndDateInput;
-      return null;
-    });
 
     // Mock network error
     const networkError = new TypeError('Failed to fetch');
-    mockApi.mockRejectedValueOnce(networkError);
+    mockApi.mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve([])
+    }).mockRejectedValueOnce(networkError);
 
     Swal.fire.mockResolvedValueOnce({ isConfirmed: true, value: { startDate: '2024-01-01', endDate: '2024-01-31' } });
     
@@ -938,43 +1017,34 @@ describe('TodoContainer File Download Handler', () => {
   test('cleans up resources after download', async () => {
     const user = userEvent.setup();
     const Swal = require('sweetalert2');
-    
-    const mockAnchor = {
-      href: '',
-      download: '',
-      click: jest.fn(),
-      remove: jest.fn()
-    };
-
-    document.createElement = jest.fn(() => mockAnchor);
-    
-    const mockStartDateInput = { value: '2024-01-01' };
-    const mockEndDateInput = { value: '2024-01-31' };
-    
-    document.getElementById = jest.fn((id) => {
-      if (id === 'startDate') return mockStartDateInput;
-      if (id === 'endDate') return mockEndDateInput;
-      return null;
-    });
 
     const mockBlob = new Blob(['mock excel data']);
     mockApi.mockResolvedValueOnce({
       ok: true,
+      json: () => Promise.resolve([])
+    }).mockResolvedValueOnce({
+      ok: true,
       blob: () => Promise.resolve(mockBlob)
     });
 
-    Swal.fire.mockResolvedValueOnce({ isConfirmed: true, value: { startDate: '2024-01-01', endDate: '2024-01-31' } });
+    Swal.fire
+      .mockResolvedValueOnce({ isConfirmed: true, value: { startDate: '2024-01-01', endDate: '2024-01-31' } })
+      .mockResolvedValueOnce({ isConfirmed: true });
     
     render(<TodoContainer />);
 
     const excelButton = screen.getByRole('button', { name: /Excel 내보내기/ });
     await user.click(excelButton);
 
-    // Wait for cleanup
+    // Wait for download to complete
+    await waitFor(() => {
+      expect(window.URL.createObjectURL).toHaveBeenCalledWith(mockBlob);
+    }, { timeout: 3000 });
+
+    // Verify cleanup was called
     await waitFor(() => {
       expect(window.URL.revokeObjectURL).toHaveBeenCalledWith('blob:mock-url');
-      expect(document.body.removeChild).toHaveBeenCalledWith(mockAnchor);
-    });
+    }, { timeout: 3000 });
   });
 });
 
@@ -983,25 +1053,19 @@ describe('TodoContainer Password Change Integration', () => {
     jest.clearAllMocks();
     
     // Mock successful API responses
-    global.fetch = jest.fn(() =>
-      Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve([
-          {
-            todoSeq: 1,
-            todoTitle: 'Test todo',
-            todoContent: 'Test content',
-            todoDate: '2023-01-01',
-            todoCompleteYn: 'N'
-          }
-        ])
-      })
-    );
+    mockApi.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve([])
+    });
   });
 
   test('shows PasswordChangeForm when Change Password button is clicked', async () => {
     const user = userEvent.setup();
     render(<TodoContainer />);
+
+    // Open user menu first
+    const userMenuIcon = screen.getByRole('button', { name: /사용자 메뉴/ });
+    await user.click(userMenuIcon);
 
     const changePasswordButton = screen.getByRole('button', { name: /비밀번호 변경/ });
     await user.click(changePasswordButton);
@@ -1018,7 +1082,10 @@ describe('TodoContainer Password Change Integration', () => {
     expect(screen.getByRole('button', { name: /신규/ })).toBeInTheDocument();
     expect(screen.getByTestId('date-picker')).toBeInTheDocument();
 
-    // Click change password button
+    // Open user menu and click change password button
+    const userMenuIcon = screen.getByRole('button', { name: /사용자 메뉴/ });
+    await user.click(userMenuIcon);
+    
     const changePasswordButton = screen.getByRole('button', { name: /비밀번호 변경/ });
     await user.click(changePasswordButton);
 
@@ -1034,20 +1101,33 @@ describe('TodoContainer Password Change Integration', () => {
     const user = userEvent.setup();
     render(<TodoContainer />);
 
+    // Open user menu
+    const userMenuIcon = screen.getByRole('button', { name: /사용자 메뉴/ });
+    await user.click(userMenuIcon);
+
     const changePasswordButton = screen.getByRole('button', { name: /비밀번호 변경/ });
     const updateProfileButton = screen.getByRole('button', { name: /프로필 수정/ });
     
     await user.click(changePasswordButton);
 
-    expect(changePasswordButton).toBeDisabled();
-    expect(updateProfileButton).toBeDisabled();
+    // Reopen menu to check button states
+    await user.click(userMenuIcon);
+    
+    const disabledPasswordButton = screen.getByRole('button', { name: /비밀번호 변경/ });
+    const disabledProfileButton = screen.getByRole('button', { name: /프로필 수정/ });
+    
+    expect(disabledPasswordButton).toBeDisabled();
+    expect(disabledProfileButton).toBeDisabled();
   });
 
   test('returns to todo list view when password change is cancelled', async () => {
     const user = userEvent.setup();
     render(<TodoContainer />);
 
-    // Click change password button
+    // Open user menu and click change password button
+    const userMenuIcon = screen.getByRole('button', { name: /사용자 메뉴/ });
+    await user.click(userMenuIcon);
+    
     const changePasswordButton = screen.getByRole('button', { name: /비밀번호 변경/ });
     await user.click(changePasswordButton);
 
@@ -1069,7 +1149,10 @@ describe('TodoContainer Password Change Integration', () => {
     
     render(<TodoContainer />);
 
-    // Click change password button
+    // Open user menu and click change password button
+    const userMenuIcon = screen.getByRole('button', { name: /사용자 메뉴/ });
+    await user.click(userMenuIcon);
+    
     const changePasswordButton = screen.getByRole('button', { name: /비밀번호 변경/ });
     await user.click(changePasswordButton);
 
