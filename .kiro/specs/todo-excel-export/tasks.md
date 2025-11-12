@@ -60,8 +60,8 @@
     - Send Excel buffer as response
     - _Requirements: 1.5_
 
-- [ ] 4. Implement frontend Excel export button
-  - [ ] 4.1 Add Excel export button to TodoContainer
+- [x] 4. Implement frontend Excel export button
+  - [x] 4.1 Add Excel export button to TodoContainer
     - Add button to todo-actions div, positioned left of "신규" button
     - Apply btn btn-outline-success styling
     - Set button text to "Excel" or "Excel 내보내기"

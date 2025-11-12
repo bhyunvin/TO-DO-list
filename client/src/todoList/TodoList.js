@@ -1273,9 +1273,18 @@ function TodoContainer() {
       {/* '신규' 버튼을 오른쪽으로 배치하기 위한 컨테이너 */}
       <div className="todo-actions">
         {!isCreating && !editingTodo && !isUpdatingProfile && !isChangingPassword && (
-          <button className="btn btn-primary" onClick={handleToggleCreate}>
-            신규
-          </button>
+          <>
+            <button 
+              className="btn btn-outline-success" 
+              onClick={() => {/* TODO: Implement Excel export handler */}}
+              aria-label="Excel 내보내기"
+            >
+              <i className="bi bi-file-earmark-spreadsheet"></i>
+            </button>
+            <button className="btn btn-primary" onClick={handleToggleCreate}>
+              신규
+            </button>
+          </>
         )}
       </div>
 
