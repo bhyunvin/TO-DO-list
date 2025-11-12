@@ -105,8 +105,8 @@
     - Display error messages using SweetAlert
     - _Requirements: 5.5, 5.6_
 
-- [ ] 7. Add backend unit tests
-  - [ ] 7.1 Write TodoService.exportToExcel tests
+- [x] 7. Add backend unit tests
+  - [x] 7.1 Write TodoService.exportToExcel tests
     - Test successful Excel generation with valid data
     - Test empty result set handling
     - Test date range filtering accuracy
@@ -115,28 +115,28 @@
     - Test null value handling for completeDtm and todoNote
     - _Requirements: 1.3, 1.4, 3.1, 3.2, 3.3, 3.4, 3.5_
   
-  - [ ] 7.2 Write TodoController.exportToExcel tests
+  - [x] 7.2 Write TodoController.exportToExcel tests
     - Test successful response with correct headers
     - Test authentication guard enforcement
     - Test query parameter validation
     - Test error response formatting for invalid inputs
     - _Requirements: 1.1, 1.2, 1.5_
 
-- [ ] 8. Add frontend component tests
-  - [ ] 8.1 Test Excel export button rendering
+- [x] 8. Add frontend component tests
+  - [x] 8.1 Test Excel export button rendering
     - Test button renders in correct position
     - Test button styling (btn-outline-success)
     - Test button visibility in different modes
     - _Requirements: 4.1, 4.2, 4.3, 4.4_
   
-  - [ ] 8.2 Test date range modal functionality
+  - [x] 8.2 Test date range modal functionality
     - Test modal displays with date pickers
     - Test date validation logic
     - Test cancel button behavior
     - Test confirm button with valid dates
     - _Requirements: 5.1, 5.2, 5.3, 5.4_
   
-  - [ ] 8.3 Test file download handler
+  - [x] 8.3 Test file download handler
     - Test successful download flow
     - Test error handling for network failures
     - Test file naming convention

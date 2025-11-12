@@ -383,6 +383,601 @@ describe('TodoContainer Profile Update Integration', () => {
   });
 });
 
+describe('TodoContainer Excel Export Button Rendering', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockApi.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve([])
+    });
+  });
+
+  test('renders Excel export button in correct position (left of 신규 button)', () => {
+    render(<TodoContainer />);
+
+    const todoActions = document.querySelector('.todo-actions');
+    const buttons = todoActions.querySelectorAll('button');
+    
+    // Should have 2 buttons: Excel and 신규
+    expect(buttons).toHaveLength(2);
+    
+    // Excel button should be first (left)
+    expect(buttons[0]).toHaveAttribute('aria-label', 'Excel 내보내기');
+    
+    // 신규 button should be second (right)
+    expect(buttons[1]).toHaveTextContent('신규');
+  });
+
+  test('Excel export button has correct styling (btn-outline-success)', () => {
+    render(<TodoContainer />);
+
+    const excelButton = screen.getByRole('button', { name: /Excel 내보내기/ });
+    
+    expect(excelButton).toHaveClass('btn', 'btn-outline-success');
+  });
+
+  test('Excel export button is visible when not in create mode', () => {
+    render(<TodoContainer />);
+
+    const excelButton = screen.getByRole('button', { name: /Excel 내보내기/ });
+    
+    expect(excelButton).toBeVisible();
+  });
+
+  test('Excel export button is hidden when in create mode', async () => {
+    const user = userEvent.setup();
+    render(<TodoContainer />);
+
+    // Click 신규 button to enter create mode
+    const newButton = screen.getByRole('button', { name: /신규/ });
+    await user.click(newButton);
+
+    // Excel button should not be visible
+    const excelButton = screen.queryByRole('button', { name: /Excel 내보내기/ });
+    expect(excelButton).not.toBeInTheDocument();
+  });
+
+  test('Excel export button is hidden when in edit mode', async () => {
+    const user = userEvent.setup();
+    
+    // Mock todos data
+    mockApi.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve([
+        {
+          todoSeq: 1,
+          todoContent: 'Test todo',
+          todoNote: 'Test note',
+          completeDtm: null
+        }
+      ])
+    });
+
+    render(<TodoContainer />);
+
+    // Wait for todos to load
+    await waitFor(() => {
+      expect(screen.getByText('Test todo')).toBeInTheDocument();
+    });
+
+    // Click more actions button
+    const moreActionsButton = screen.getByRole('button', { name: '' });
+    await user.click(moreActionsButton);
+
+    // Click edit button
+    const editButton = screen.getByTitle('수정');
+    await user.click(editButton);
+
+    // Excel button should not be visible
+    const excelButton = screen.queryByRole('button', { name: /Excel 내보내기/ });
+    expect(excelButton).not.toBeInTheDocument();
+  });
+
+  test('Excel export button is hidden when in profile update mode', async () => {
+    const user = userEvent.setup();
+    render(<TodoContainer />);
+
+    // Click profile update button
+    const updateProfileButton = screen.getByRole('button', { name: /프로필 수정/ });
+    await user.click(updateProfileButton);
+
+    // Excel button should not be visible
+    const excelButton = screen.queryByRole('button', { name: /Excel 내보내기/ });
+    expect(excelButton).not.toBeInTheDocument();
+  });
+
+  test('Excel export button is hidden when in password change mode', async () => {
+    const user = userEvent.setup();
+    render(<TodoContainer />);
+
+    // Click password change button
+    const changePasswordButton = screen.getByRole('button', { name: /비밀번호 변경/ });
+    await user.click(changePasswordButton);
+
+    // Excel button should not be visible
+    const excelButton = screen.queryByRole('button', { name: /Excel 내보내기/ });
+    expect(excelButton).not.toBeInTheDocument();
+  });
+});
+
+describe('TodoContainer Date Range Modal Functionality', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockApi.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve([])
+    });
+  });
+
+  test('displays date range modal when Excel export button is clicked', async () => {
+    const user = userEvent.setup();
+    const Swal = require('sweetalert2');
+    
+    render(<TodoContainer />);
+
+    const excelButton = screen.getByRole('button', { name: /Excel 내보내기/ });
+    await user.click(excelButton);
+
+    // Verify SweetAlert was called with correct configuration
+    expect(Swal.fire).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Excel 내보내기',
+        showCancelButton: true,
+        confirmButtonText: '내보내기',
+        cancelButtonText: '취소'
+      })
+    );
+  });
+
+  test('modal displays with date pickers for start and end dates', async () => {
+    const user = userEvent.setup();
+    const Swal = require('sweetalert2');
+    
+    render(<TodoContainer />);
+
+    const excelButton = screen.getByRole('button', { name: /Excel 내보내기/ });
+    await user.click(excelButton);
+
+    // Verify modal HTML contains date inputs
+    const callArgs = Swal.fire.mock.calls[0][0];
+    expect(callArgs.html).toContain('id="startDate"');
+    expect(callArgs.html).toContain('id="endDate"');
+    expect(callArgs.html).toContain('type="date"');
+    expect(callArgs.html).toContain('시작일');
+    expect(callArgs.html).toContain('종료일');
+  });
+
+  test('date validation prevents empty date fields', async () => {
+    const user = userEvent.setup();
+    const Swal = require('sweetalert2');
+    
+    // Mock DOM elements for validation test
+    const mockStartDateInput = { value: '' };
+    const mockEndDateInput = { value: '2024-01-31' };
+    
+    document.getElementById = jest.fn((id) => {
+      if (id === 'startDate') return mockStartDateInput;
+      if (id === 'endDate') return mockEndDateInput;
+      return null;
+    });
+
+    Swal.showValidationMessage = jest.fn();
+    
+    render(<TodoContainer />);
+
+    const excelButton = screen.getByRole('button', { name: /Excel 내보내기/ });
+    await user.click(excelButton);
+
+    // Get the preConfirm function and call it
+    const callArgs = Swal.fire.mock.calls[0][0];
+    const result = callArgs.preConfirm();
+
+    // Verify validation message was shown
+    expect(Swal.showValidationMessage).toHaveBeenCalledWith('날짜를 선택해주세요');
+    expect(result).toBe(false);
+  });
+
+  test('date validation prevents startDate after endDate', async () => {
+    const user = userEvent.setup();
+    const Swal = require('sweetalert2');
+    
+    // Mock DOM elements with invalid date range
+    const mockStartDateInput = { value: '2024-02-01' };
+    const mockEndDateInput = { value: '2024-01-31' };
+    
+    document.getElementById = jest.fn((id) => {
+      if (id === 'startDate') return mockStartDateInput;
+      if (id === 'endDate') return mockEndDateInput;
+      return null;
+    });
+
+    Swal.showValidationMessage = jest.fn();
+    
+    render(<TodoContainer />);
+
+    const excelButton = screen.getByRole('button', { name: /Excel 내보내기/ });
+    await user.click(excelButton);
+
+    // Get the preConfirm function and call it
+    const callArgs = Swal.fire.mock.calls[0][0];
+    const result = callArgs.preConfirm();
+
+    // Verify validation message was shown
+    expect(Swal.showValidationMessage).toHaveBeenCalledWith('시작일은 종료일보다 이전이어야 합니다');
+    expect(result).toBe(false);
+  });
+
+  test('modal confirms with valid dates', async () => {
+    const user = userEvent.setup();
+    const Swal = require('sweetalert2');
+    
+    // Mock DOM elements with valid date range
+    const mockStartDateInput = { value: '2024-01-01' };
+    const mockEndDateInput = { value: '2024-01-31' };
+    
+    document.getElementById = jest.fn((id) => {
+      if (id === 'startDate') return mockStartDateInput;
+      if (id === 'endDate') return mockEndDateInput;
+      return null;
+    });
+    
+    render(<TodoContainer />);
+
+    const excelButton = screen.getByRole('button', { name: /Excel 내보내기/ });
+    await user.click(excelButton);
+
+    // Get the preConfirm function and call it
+    const callArgs = Swal.fire.mock.calls[0][0];
+    const result = callArgs.preConfirm();
+
+    // Verify dates are returned
+    expect(result).toEqual({
+      startDate: '2024-01-01',
+      endDate: '2024-01-31'
+    });
+  });
+
+  test('cancel button closes modal without triggering export', async () => {
+    const user = userEvent.setup();
+    const Swal = require('sweetalert2');
+    
+    // Mock user cancelling the modal
+    Swal.fire.mockResolvedValueOnce({ isConfirmed: false });
+    
+    render(<TodoContainer />);
+
+    const excelButton = screen.getByRole('button', { name: /Excel 내보내기/ });
+    await user.click(excelButton);
+
+    // Wait for modal to be processed
+    await waitFor(() => {
+      expect(Swal.fire).toHaveBeenCalled();
+    });
+
+    // Verify API was not called
+    expect(mockApi).not.toHaveBeenCalledWith(
+      expect.stringContaining('/api/todo/excel'),
+      expect.anything()
+    );
+  });
+});
+
+describe('TodoContainer File Download Handler', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockApi.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve([])
+    });
+
+    // Mock DOM methods for file download
+    document.createElement = jest.fn((tag) => {
+      if (tag === 'a') {
+        return {
+          href: '',
+          download: '',
+          click: jest.fn(),
+          remove: jest.fn()
+        };
+      }
+      return {};
+    });
+
+    document.body.appendChild = jest.fn();
+    document.body.removeChild = jest.fn();
+    window.URL.createObjectURL = jest.fn(() => 'blob:mock-url');
+    window.URL.revokeObjectURL = jest.fn();
+  });
+
+  test('successful download flow with correct API call', async () => {
+    const user = userEvent.setup();
+    const Swal = require('sweetalert2');
+    
+    // Mock successful modal confirmation
+    const mockStartDateInput = { value: '2024-01-01' };
+    const mockEndDateInput = { value: '2024-01-31' };
+    
+    document.getElementById = jest.fn((id) => {
+      if (id === 'startDate') return mockStartDateInput;
+      if (id === 'endDate') return mockEndDateInput;
+      return null;
+    });
+
+    // Mock successful API response with blob
+    const mockBlob = new Blob(['mock excel data'], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    mockApi.mockResolvedValueOnce({
+      ok: true,
+      blob: () => Promise.resolve(mockBlob)
+    });
+
+    Swal.fire.mockResolvedValueOnce({ isConfirmed: true, value: { startDate: '2024-01-01', endDate: '2024-01-31' } });
+    
+    render(<TodoContainer />);
+
+    const excelButton = screen.getByRole('button', { name: /Excel 내보내기/ });
+    await user.click(excelButton);
+
+    // Wait for API call
+    await waitFor(() => {
+      expect(mockApi).toHaveBeenCalledWith(
+        '/api/todo/excel?startDate=2024-01-01&endDate=2024-01-31',
+        expect.objectContaining({
+          method: 'GET',
+          credentials: 'include'
+        })
+      );
+    });
+
+    // Verify blob was created and download was triggered
+    await waitFor(() => {
+      expect(window.URL.createObjectURL).toHaveBeenCalledWith(mockBlob);
+    });
+  });
+
+  test('file naming convention follows pattern todos_YYYY-MM-DD_to_YYYY-MM-DD.xlsx', async () => {
+    const user = userEvent.setup();
+    const Swal = require('sweetalert2');
+    
+    const mockAnchor = {
+      href: '',
+      download: '',
+      click: jest.fn(),
+      remove: jest.fn()
+    };
+
+    document.createElement = jest.fn(() => mockAnchor);
+    
+    const mockStartDateInput = { value: '2024-01-01' };
+    const mockEndDateInput = { value: '2024-01-31' };
+    
+    document.getElementById = jest.fn((id) => {
+      if (id === 'startDate') return mockStartDateInput;
+      if (id === 'endDate') return mockEndDateInput;
+      return null;
+    });
+
+    const mockBlob = new Blob(['mock excel data']);
+    mockApi.mockResolvedValueOnce({
+      ok: true,
+      blob: () => Promise.resolve(mockBlob)
+    });
+
+    Swal.fire.mockResolvedValueOnce({ isConfirmed: true, value: { startDate: '2024-01-01', endDate: '2024-01-31' } });
+    
+    render(<TodoContainer />);
+
+    const excelButton = screen.getByRole('button', { name: /Excel 내보내기/ });
+    await user.click(excelButton);
+
+    // Wait for download to be triggered
+    await waitFor(() => {
+      expect(mockAnchor.download).toBe('todos_2024-01-01_to_2024-01-31.xlsx');
+    });
+  });
+
+  test('displays success message after successful download', async () => {
+    const user = userEvent.setup();
+    const Swal = require('sweetalert2');
+    
+    const mockStartDateInput = { value: '2024-01-01' };
+    const mockEndDateInput = { value: '2024-01-31' };
+    
+    document.getElementById = jest.fn((id) => {
+      if (id === 'startDate') return mockStartDateInput;
+      if (id === 'endDate') return mockEndDateInput;
+      return null;
+    });
+
+    const mockBlob = new Blob(['mock excel data']);
+    mockApi.mockResolvedValueOnce({
+      ok: true,
+      blob: () => Promise.resolve(mockBlob)
+    });
+
+    Swal.fire
+      .mockResolvedValueOnce({ isConfirmed: true, value: { startDate: '2024-01-01', endDate: '2024-01-31' } })
+      .mockResolvedValueOnce({ isConfirmed: true });
+    
+    render(<TodoContainer />);
+
+    const excelButton = screen.getByRole('button', { name: /Excel 내보내기/ });
+    await user.click(excelButton);
+
+    // Wait for success message
+    await waitFor(() => {
+      expect(Swal.fire).toHaveBeenCalledWith('성공', 'Excel 파일이 다운로드되었습니다.', 'success');
+    });
+  });
+
+  test('handles 400 Bad Request error', async () => {
+    const user = userEvent.setup();
+    const Swal = require('sweetalert2');
+    
+    const mockStartDateInput = { value: '2024-01-01' };
+    const mockEndDateInput = { value: '2024-01-31' };
+    
+    document.getElementById = jest.fn((id) => {
+      if (id === 'startDate') return mockStartDateInput;
+      if (id === 'endDate') return mockEndDateInput;
+      return null;
+    });
+
+    mockApi.mockResolvedValueOnce({
+      ok: false,
+      status: 400,
+      json: () => Promise.resolve({ message: 'Invalid date format' })
+    });
+
+    Swal.fire.mockResolvedValueOnce({ isConfirmed: true, value: { startDate: '2024-01-01', endDate: '2024-01-31' } });
+    
+    render(<TodoContainer />);
+
+    const excelButton = screen.getByRole('button', { name: /Excel 내보내기/ });
+    await user.click(excelButton);
+
+    // Wait for error message
+    await waitFor(() => {
+      expect(Swal.fire).toHaveBeenCalledWith('오류', 'Invalid date format', 'error');
+    });
+  });
+
+  test('handles 401 Unauthorized error', async () => {
+    const user = userEvent.setup();
+    const Swal = require('sweetalert2');
+    
+    const mockStartDateInput = { value: '2024-01-01' };
+    const mockEndDateInput = { value: '2024-01-31' };
+    
+    document.getElementById = jest.fn((id) => {
+      if (id === 'startDate') return mockStartDateInput;
+      if (id === 'endDate') return mockEndDateInput;
+      return null;
+    });
+
+    mockApi.mockResolvedValueOnce({
+      ok: false,
+      status: 401,
+      json: () => Promise.resolve({})
+    });
+
+    Swal.fire.mockResolvedValueOnce({ isConfirmed: true, value: { startDate: '2024-01-01', endDate: '2024-01-31' } });
+    
+    render(<TodoContainer />);
+
+    const excelButton = screen.getByRole('button', { name: /Excel 내보내기/ });
+    await user.click(excelButton);
+
+    // Wait for error message
+    await waitFor(() => {
+      expect(Swal.fire).toHaveBeenCalledWith('오류', '인증이 필요합니다. 다시 로그인해주세요.', 'error');
+    });
+  });
+
+  test('handles 500 Internal Server Error', async () => {
+    const user = userEvent.setup();
+    const Swal = require('sweetalert2');
+    
+    const mockStartDateInput = { value: '2024-01-01' };
+    const mockEndDateInput = { value: '2024-01-31' };
+    
+    document.getElementById = jest.fn((id) => {
+      if (id === 'startDate') return mockStartDateInput;
+      if (id === 'endDate') return mockEndDateInput;
+      return null;
+    });
+
+    mockApi.mockResolvedValueOnce({
+      ok: false,
+      status: 500,
+      json: () => Promise.resolve({})
+    });
+
+    Swal.fire.mockResolvedValueOnce({ isConfirmed: true, value: { startDate: '2024-01-01', endDate: '2024-01-31' } });
+    
+    render(<TodoContainer />);
+
+    const excelButton = screen.getByRole('button', { name: /Excel 내보내기/ });
+    await user.click(excelButton);
+
+    // Wait for error message
+    await waitFor(() => {
+      expect(Swal.fire).toHaveBeenCalledWith('오류', '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.', 'error');
+    });
+  });
+
+  test('handles network failure errors', async () => {
+    const user = userEvent.setup();
+    const Swal = require('sweetalert2');
+    
+    const mockStartDateInput = { value: '2024-01-01' };
+    const mockEndDateInput = { value: '2024-01-31' };
+    
+    document.getElementById = jest.fn((id) => {
+      if (id === 'startDate') return mockStartDateInput;
+      if (id === 'endDate') return mockEndDateInput;
+      return null;
+    });
+
+    // Mock network error
+    const networkError = new TypeError('Failed to fetch');
+    mockApi.mockRejectedValueOnce(networkError);
+
+    Swal.fire.mockResolvedValueOnce({ isConfirmed: true, value: { startDate: '2024-01-01', endDate: '2024-01-31' } });
+    
+    render(<TodoContainer />);
+
+    const excelButton = screen.getByRole('button', { name: /Excel 내보내기/ });
+    await user.click(excelButton);
+
+    // Wait for error message
+    await waitFor(() => {
+      expect(Swal.fire).toHaveBeenCalledWith('오류', '네트워크 연결을 확인해주세요.', 'error');
+    });
+  });
+
+  test('cleans up resources after download', async () => {
+    const user = userEvent.setup();
+    const Swal = require('sweetalert2');
+    
+    const mockAnchor = {
+      href: '',
+      download: '',
+      click: jest.fn(),
+      remove: jest.fn()
+    };
+
+    document.createElement = jest.fn(() => mockAnchor);
+    
+    const mockStartDateInput = { value: '2024-01-01' };
+    const mockEndDateInput = { value: '2024-01-31' };
+    
+    document.getElementById = jest.fn((id) => {
+      if (id === 'startDate') return mockStartDateInput;
+      if (id === 'endDate') return mockEndDateInput;
+      return null;
+    });
+
+    const mockBlob = new Blob(['mock excel data']);
+    mockApi.mockResolvedValueOnce({
+      ok: true,
+      blob: () => Promise.resolve(mockBlob)
+    });
+
+    Swal.fire.mockResolvedValueOnce({ isConfirmed: true, value: { startDate: '2024-01-01', endDate: '2024-01-31' } });
+    
+    render(<TodoContainer />);
+
+    const excelButton = screen.getByRole('button', { name: /Excel 내보내기/ });
+    await user.click(excelButton);
+
+    // Wait for cleanup
+    await waitFor(() => {
+      expect(window.URL.revokeObjectURL).toHaveBeenCalledWith('blob:mock-url');
+      expect(document.body.removeChild).toHaveBeenCalledWith(mockAnchor);
+    });
+  });
+});
+
 describe('TodoContainer Password Change Integration', () => {
   beforeEach(() => {
     jest.clearAllMocks();
