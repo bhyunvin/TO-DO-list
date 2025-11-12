@@ -56,42 +56,42 @@
     - Return structured error response with success: false and user-friendly message
     - _Requirements: 1.4, 5.3_
 
-- [ ] 4. Implement updateTodo handler method in AssistanceService
-  - [ ] 4.1 Create private updateTodo method with parameters (userSeq, ip, todoSeq, updateData)
+- [x] 4. Implement updateTodo handler method in AssistanceService
+  - [x] 4.1 Create private updateTodo method with parameters (userSeq, ip, todoSeq, updateData)
     - Add method signature with proper TypeScript types
     - Define updateData interface with optional fields
     - Add JSDoc comments explaining purpose and parameters
     - _Requirements: 2.1, 2.2_
   
-  - [ ] 4.2 Call TodoService.update with TODO ID and update DTO
+  - [x] 4.2 Call TodoService.update with TODO ID and update DTO
     - Construct user object with userSeq
     - Create UpdateTodoDto with only provided fields (partial update)
     - Call this.todoService.update(todoSeq, user, ip, updateTodoDto)
     - _Requirements: 2.1, 2.2_
   
-  - [ ] 4.3 Handle "not found" case explicitly
+  - [x] 4.3 Handle "not found" case explicitly
     - Check if TodoService.update returns null
     - Return structured error response: { success: false, error: 'TODO item not found or access denied' }
     - _Requirements: 2.5, 5.3_
   
-  - [ ] 4.4 Format success response with updated TODO data
+  - [x] 4.4 Format success response with updated TODO data
     - Return structured response with success: true and updated TODO data
     - Include all TODO fields in response
     - _Requirements: 2.1, 5.2_
   
-  - [ ] 4.5 Implement error handling and logging
+  - [x] 4.5 Implement error handling and logging
     - Wrap in try-catch block
     - Log errors with this.logger.error
     - Return structured error response with user-friendly message
     - _Requirements: 5.3_
 
-- [ ] 5. Enhance getGeminiResponse method to handle new function calls
-  - [ ] 5.1 Add ip parameter to getGeminiResponse method signature
+- [x] 5. Enhance getGeminiResponse method to handle new function calls
+  - [x] 5.1 Add ip parameter to getGeminiResponse method signature
     - Update method signature: getGeminiResponse(requestAssistanceDto, userSeq?, ip?)
     - Update JSDoc comments
     - _Requirements: 1.1, 2.1_
   
-  - [ ] 5.2 Extend function call detection logic with switch statement
+  - [x] 5.2 Extend function call detection logic with switch statement
     - Replace if statement with switch on functionCall.name
     - Add case for 'getTodos' (existing logic)
     - Add case for 'createTodo' calling this.createTodo()
@@ -99,7 +99,7 @@
     - Extract function arguments properly for each case
     - _Requirements: 1.1, 2.1_
   
-  - [ ] 5.3 Ensure function response is properly formatted for Gemini
+  - [x] 5.3 Ensure function response is properly formatted for Gemini
     - Maintain existing functionResponse structure
     - Pass function result as content in response
     - _Requirements: 1.3, 2.1_
