@@ -104,7 +104,7 @@
     - Pass function result as content in response
     - _Requirements: 1.3, 2.1_
 
-- [ ] 6. Update ChatController to pass IP address to AssistanceService
+- [x] 6. Update ChatController to pass IP address to AssistanceService
   - Add @Ip() decorator to chat method parameters
   - Pass ip parameter to this.assistanceService.getGeminiResponse()
   - _Requirements: 1.1, 2.1_

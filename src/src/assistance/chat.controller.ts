@@ -6,6 +6,7 @@ import {
   UseGuards,
   Logger,
   HttpStatus,
+  Ip,
 } from '@nestjs/common';
 import { SessionData } from 'express-session';
 import { ChatRequestDto, ChatResponseDto } from './assistance.dto';
@@ -23,6 +24,7 @@ export class ChatController {
   async chat(
     @Session() session: SessionData,
     @Body() chatRequestDto: ChatRequestDto,
+    @Ip() ip: string,
   ): Promise<ChatResponseDto> {
     const maxRetries = 3;
     const baseDelay = 1000; // 1 second base delay
@@ -42,6 +44,7 @@ export class ChatController {
         const result = await this.assistanceService.getGeminiResponse(
           requestDto,
           session.user.userSeq,
+          ip,
         );
 
         // Return structured response
