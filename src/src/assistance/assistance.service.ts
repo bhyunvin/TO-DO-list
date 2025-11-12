@@ -11,6 +11,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { KeychainUtil } from '../utils/keychainUtil';
 import { TodoService } from '../todo/todo.service';
+import { CreateTodoDto } from '../todo/todo.dto';
+import { UserEntity } from '../user/user.entity';
 
 @Injectable()
 export class AssistanceService {
@@ -256,6 +258,76 @@ export class AssistanceService {
     } catch (error) {
       this.logger.error('Failed to get todos for AI query', error);
       throw new InternalServerErrorException('Failed to retrieve todo data');
+    }
+  }
+
+  /**
+   * Creates a new TODO item for the user
+   * @param userSeq - User sequence number identifying the user
+   * @param ip - Client IP address for audit logging
+   * @param todoContent - The content/description of the TODO item
+   * @param todoDate - Target date for the TODO in YYYY-MM-DD format
+   * @param todoNote - Optional additional notes for the TODO
+   * @returns Structured response with success status and created TODO data
+   */
+  private async createTodo(
+    userSeq: number,
+    ip: string,
+    todoContent: string,
+    todoDate: string,
+    todoNote?: string,
+  ): Promise<any> {
+    try {
+      // Validate todoDate format (YYYY-MM-DD)
+      const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+      if (!dateRegex.test(todoDate)) {
+        return {
+          success: false,
+          error: 'Invalid date format. Please use YYYY-MM-DD format (e.g., 2024-12-31)',
+        };
+      }
+
+      // Construct user object (userId can be empty string for function calls)
+      // Only userSeq is actually used by TodoService, but we need to satisfy the type
+      const user = {
+        userSeq,
+        userId: '',
+        userName: '',
+        userEmail: '',
+        userDescription: '',
+        userProfileImageFileGroupNo: null,
+        adminYn: 'N',
+        auditColumns: null,
+      } as Omit<UserEntity, 'userPassword'>;
+
+      // Create DTO with TODO data
+      const createTodoDto: CreateTodoDto = {
+        todoContent,
+        todoDate,
+        todoNote,
+      };
+
+      // Call TodoService to create the TODO
+      const createdTodo = await this.todoService.create(user, ip, createTodoDto);
+
+      // Return structured success response
+      return {
+        success: true,
+        data: {
+          todoSeq: createdTodo.todoSeq,
+          todoContent: createdTodo.todoContent,
+          todoDate: createdTodo.todoDate,
+          todoNote: createdTodo.todoNote,
+          completeDtm: createdTodo.completeDtm,
+          createdAt: createdTodo.auditColumns.regDtm.toISOString(),
+        },
+      };
+    } catch (error) {
+      this.logger.error('Failed to create TODO item', error);
+      return {
+        success: false,
+        error: 'Failed to create TODO item. Please try again.',
+      };
     }
   }
 }
