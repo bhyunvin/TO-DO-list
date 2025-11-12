@@ -69,15 +69,15 @@
     - Show button only when not in create/edit/profile modes
     - _Requirements: 4.1, 4.2, 4.3, 4.4_
 
-- [ ] 5. Implement frontend date range selection modal
-  - [ ] 5.1 Create date range modal function
+- [x] 5. Implement frontend date range selection modal
+  - [x] 5.1 Create date range modal function
     - Implement SweetAlert2 modal with two date input fields
     - Stack date pickers vertically for mobile compatibility
     - Set default values to current month's first and last day
     - Add labels for "시작일" (Start Date) and "종료일" (End Date)
     - _Requirements: 5.1, 5.2, 5.3, 5.4_
   
-  - [ ] 5.2 Add date validation logic
+  - [x] 5.2 Add date validation logic
     - Validate both dates are selected
     - Validate startDate is not after endDate
     - Display inline validation messages in modal

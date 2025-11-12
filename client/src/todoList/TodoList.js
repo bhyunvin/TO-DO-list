@@ -1177,6 +1177,73 @@ function TodoContainer() {
     resetRetryState();
   };
 
+  // Show date range selection modal for Excel export
+  const showDateRangeModal = async () => {
+    // Get current month's first and last day as default values
+    const now = new Date();
+    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    
+    const formatDateForInput = (date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+
+    const result = await Swal.fire({
+      title: 'Excel 내보내기',
+      html: `
+        <div style="display: flex; flex-direction: column; gap: 15px; text-align: left;">
+          <div>
+            <label for="startDate" style="display: block; margin-bottom: 5px; font-weight: 500;">시작일</label>
+            <input 
+              type="date" 
+              id="startDate" 
+              class="swal2-input" 
+              value="${formatDateForInput(firstDay)}"
+              style="width: 100%; margin: 0; padding: 10px;"
+            />
+          </div>
+          <div>
+            <label for="endDate" style="display: block; margin-bottom: 5px; font-weight: 500;">종료일</label>
+            <input 
+              type="date" 
+              id="endDate" 
+              class="swal2-input" 
+              value="${formatDateForInput(lastDay)}"
+              style="width: 100%; margin: 0; padding: 10px;"
+            />
+          </div>
+        </div>
+      `,
+      showCancelButton: true,
+      confirmButtonText: '내보내기',
+      cancelButtonText: '취소',
+      focusConfirm: false,
+      preConfirm: () => {
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        
+        // Validate both dates are selected
+        if (!startDate || !endDate) {
+          Swal.showValidationMessage('날짜를 선택해주세요');
+          return false;
+        }
+        
+        // Validate startDate is not after endDate
+        if (startDate > endDate) {
+          Swal.showValidationMessage('시작일은 종료일보다 이전이어야 합니다');
+          return false;
+        }
+        
+        return { startDate, endDate };
+      }
+    });
+
+    return result;
+  };
+
   const renderContent = () => {
     if (isUpdatingProfile) {
       return (
@@ -1276,7 +1343,7 @@ function TodoContainer() {
           <>
             <button 
               className="btn btn-outline-success" 
-              onClick={() => {/* TODO: Implement Excel export handler */}}
+              onClick={showDateRangeModal}
               aria-label="Excel 내보내기"
             >
               <i className="bi bi-file-earmark-spreadsheet"></i>
