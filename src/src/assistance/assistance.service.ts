@@ -11,7 +11,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { KeychainUtil } from '../utils/keychainUtil';
 import { TodoService } from '../todo/todo.service';
-import { CreateTodoDto } from '../todo/todo.dto';
+import { CreateTodoDto, UpdateTodoDto } from '../todo/todo.dto';
 import { UserEntity } from '../user/user.entity';
 
 @Injectable()
@@ -327,6 +327,82 @@ export class AssistanceService {
       return {
         success: false,
         error: 'Failed to create TODO item. Please try again.',
+      };
+    }
+  }
+
+  /**
+   * Updates an existing TODO item for the user
+   * @param userSeq - User sequence number identifying the user
+   * @param ip - Client IP address for audit logging
+   * @param todoSeq - TODO sequence number identifying the TODO to update
+   * @param updateData - Object containing optional fields to update (partial update)
+   * @returns Structured response with success status and updated TODO data
+   */
+  private async updateTodo(
+    userSeq: number,
+    ip: string,
+    todoSeq: number,
+    updateData: {
+      todoContent?: string;
+      completeDtm?: string | null;
+      todoNote?: string;
+    },
+  ): Promise<any> {
+    try {
+      // Construct user object (userId can be empty string for function calls)
+      // Only userSeq is actually used by TodoService, but we need to satisfy the type
+      const user = {
+        userSeq,
+        userId: '',
+        userName: '',
+        userEmail: '',
+        userDescription: '',
+        userProfileImageFileGroupNo: null,
+        adminYn: 'N',
+        auditColumns: null,
+      } as Omit<UserEntity, 'userPassword'>;
+
+      // Create UpdateTodoDto with only provided fields (partial update)
+      const updateTodoDto: any = {};
+      if (updateData.todoContent !== undefined) {
+        updateTodoDto.todoContent = updateData.todoContent;
+      }
+      if (updateData.completeDtm !== undefined) {
+        updateTodoDto.completeDtm = updateData.completeDtm;
+      }
+      if (updateData.todoNote !== undefined) {
+        updateTodoDto.todoNote = updateData.todoNote;
+      }
+
+      // Call TodoService to update the TODO
+      const updatedTodo = await this.todoService.update(todoSeq, user, ip, updateTodoDto);
+
+      // Handle "not found" case explicitly
+      if (!updatedTodo) {
+        return {
+          success: false,
+          error: 'TODO item not found or access denied',
+        };
+      }
+
+      // Return structured success response with updated TODO data
+      return {
+        success: true,
+        data: {
+          todoSeq: updatedTodo.todoSeq,
+          todoContent: updatedTodo.todoContent,
+          todoDate: updatedTodo.todoDate,
+          todoNote: updatedTodo.todoNote,
+          completeDtm: updatedTodo.completeDtm,
+          updatedAt: updatedTodo.auditColumns.updDtm.toISOString(),
+        },
+      };
+    } catch (error) {
+      this.logger.error('Failed to update TODO item', error);
+      return {
+        success: false,
+        error: 'Failed to update TODO item. Please try again.',
       };
     }
   }
