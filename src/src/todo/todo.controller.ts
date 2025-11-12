@@ -15,7 +15,11 @@ import {
   Ip,
   UseInterceptors,
   UploadedFiles,
+  Res,
+  BadRequestException,
+  InternalServerErrorException,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { TodoService } from './todo.service';
 import { SessionData } from 'express-session';
@@ -49,6 +53,44 @@ export class TodoController {
   @Get()
   findAll(@Session() session: SessionData, @Query('date') date: string) {
     return this.todoService.findAll(session.user.userSeq, date);
+  }
+
+  // ToDo 항목을 Excel 파일로 내보냅니다.
+  @Get('excel')
+  async exportToExcel(
+    @Session() session: SessionData,
+    @Query('startDate') startDate: string,
+    @Query('endDate') endDate: string,
+    @Res() res: Response,
+  ) {
+    try {
+      // 세션에서 userSeq 추출
+      const userSeq = session.user.userSeq;
+
+      // Excel 파일 생성 (검증은 서비스 레이어에서 수행)
+      const buffer = await this.todoService.exportToExcel(userSeq, startDate, endDate);
+
+      // 응답 헤더 설정
+      res.setHeader(
+        'Content-Type',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      );
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="todos_${startDate}_to_${endDate}.xlsx"`,
+      );
+
+      // Excel 버퍼를 응답으로 전송
+      res.send(buffer);
+    } catch (error) {
+      this.logger.error('Excel export failed', {
+        userId: session.user.userSeq,
+        startDate,
+        endDate,
+        error: error.message,
+      });
+      throw error;
+    }
   }
 
   // 특정 ToDo 항목을 수정합니다.

@@ -39,22 +39,22 @@
     - Return buffer for controller to send as response
     - _Requirements: 1.5_
 
-- [ ] 3. Implement backend Excel export controller endpoint
-  - [ ] 3.1 Add exportToExcel endpoint to TodoController
+- [x] 3. Implement backend Excel export controller endpoint
+  - [x] 3.1 Add exportToExcel endpoint to TodoController
     - Create GET endpoint at /api/todo/excel
     - Apply AuthenticatedGuard for authentication
     - Extract startDate and endDate from query parameters
     - Extract userSeq from session
     - _Requirements: 1.1, 1.2_
   
-  - [ ] 3.2 Add input validation and error handling
+  - [x] 3.2 Add input validation and error handling
     - Validate startDate and endDate are provided
     - Validate date format (YYYY-MM-DD)
     - Return 400 Bad Request for invalid inputs
     - Handle service errors and return 500 Internal Server Error
     - _Requirements: 1.1, 1.2_
   
-  - [ ] 3.3 Configure response headers and send file
+  - [x] 3.3 Configure response headers and send file
     - Set Content-Type to 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     - Set Content-Disposition with filename pattern "todos_YYYY-MM-DD_to_YYYY-MM-DD.xlsx"
     - Send Excel buffer as response

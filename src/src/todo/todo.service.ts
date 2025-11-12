@@ -395,6 +395,17 @@ export class TodoService {
     startDate: string,
     endDate: string,
   ): Promise<Buffer> {
+    // 입력 검증: startDate와 endDate가 제공되었는지 확인
+    if (!startDate || !endDate) {
+      throw new Error('startDate and endDate are required');
+    }
+
+    // 날짜 형식 검증 (YYYY-MM-DD)
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(startDate) || !dateRegex.test(endDate)) {
+      throw new Error('Invalid date format. Use YYYY-MM-DD');
+    }
+
     // 날짜 범위 내의 삭제되지 않은 TODO 항목을 조회합니다.
     const todos = await this.todoRepository.find({
       where: {
