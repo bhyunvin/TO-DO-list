@@ -33,12 +33,13 @@ This feature enables users to export their todo items to an Excel (.xlsx) file f
 
 #### Acceptance Criteria
 
-1. THE Todo System SHALL create an Excel workbook with Column A left empty
+1. THE Todo System SHALL create an Excel workbook with Column A left empty with width 4
 2. THE Todo System SHALL create an Excel workbook with Row 1 left empty
 3. THE Todo System SHALL place header labels in cells B2 through E2 with values "번호", "내용", "완료일시", and "비고" respectively
 4. THE Todo System SHALL apply a light gray background fill to the header range B2:E2
 5. THE Todo System SHALL apply borders to all sides of cells in the header range B2:E2
-6. THE Todo System SHALL set column widths as follows: Column B to 4, Column C to 80, Column D to 15, and Column E to 90
+6. THE Todo System SHALL set column widths as follows: Column A to 4, Column B to 6, Column C to 80, Column D to 17, and Column E to 90
+7. THE Todo System SHALL set row height to 15 for Row 1, Row 2, and all data rows containing todo items
 
 ### Requirement 3: Excel Data Population
 

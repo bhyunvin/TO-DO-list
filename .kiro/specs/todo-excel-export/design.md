@@ -75,11 +75,20 @@ async exportToExcel(
 **Column Configuration:**
 ```typescript
 {
-  A: { width: 0 },      // Hidden/empty
-  B: { width: 4 },      // 번호 (No.)
+  A: { width: 4 },      // Empty (visible but no content)
+  B: { width: 6 },      // 번호 (No.)
   C: { width: 80 },     // 내용 (Content)
-  D: { width: 15 },     // 완료일시 (Completion DateTime)
+  D: { width: 17 },     // 완료일시 (Completion DateTime)
   E: { width: 90 }      // 비고 (Note)
+}
+```
+
+**Row Configuration:**
+```typescript
+{
+  Row 1: { height: 15 },     // Empty row
+  Row 2: { height: 15 },     // Header row
+  Row 3+: { height: 15 }     // Data rows (for each todo item)
 }
 ```
 

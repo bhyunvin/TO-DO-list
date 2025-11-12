@@ -423,17 +423,23 @@ export class TodoService {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Todos');
 
+    // Excel 행 높이 상수
+    const ROW_HEIGHT = 15;
+
     // 열 너비를 설정합니다.
-    worksheet.getColumn('A').width = 0;  // Column A는 비어있음
-    worksheet.getColumn('B').width = 4;  // 번호
+    worksheet.getColumn('A').width = 4;  // Column A는 비어있음 (visible but empty)
+    worksheet.getColumn('B').width = 6;  // 번호
     worksheet.getColumn('C').width = 80; // 내용
-    worksheet.getColumn('D').width = 15; // 완료일시
+    worksheet.getColumn('D').width = 17; // 완료일시
     worksheet.getColumn('E').width = 90; // 비고
 
     // Row 1은 비워둡니다 (이미 기본적으로 비어있음)
+    // Row 1의 높이를 설정합니다.
+    worksheet.getRow(1).height = ROW_HEIGHT;
 
     // Row 2에 헤더를 추가합니다.
     const headerRow = worksheet.getRow(2);
+    headerRow.height = ROW_HEIGHT; // 헤더 행의 높이를 설정합니다.
     headerRow.getCell('B').value = '번호';
     headerRow.getCell('C').value = '내용';
     headerRow.getCell('D').value = '완료일시';
@@ -466,14 +472,23 @@ export class TodoService {
     todos.forEach((todo, index) => {
       const rowNumber = index + 3;
       const dataRow = worksheet.getRow(rowNumber);
+      dataRow.height = ROW_HEIGHT; // 데이터 행의 높이를 설정합니다.
 
       dataRow.getCell('B').value = todo.todoSeq;
+      dataRow.getCell('B').alignment = {
+        horizontal: 'center',
+        vertical: 'middle',
+      };
       dataRow.getCell('C').value = todo.todoContent || '';
       
       // completeDtm을 "YYYY-MM-DD HH:mm" 형식으로 포맷합니다.
       if (todo.completeDtm) {
         const completeDtm = new Date(todo.completeDtm);
         dataRow.getCell('D').value = format(completeDtm, 'yyyy-MM-dd HH:mm');
+        dataRow.getCell('D').alignment = {
+          horizontal: 'center',
+          vertical: 'middle',
+        };
       } else {
         dataRow.getCell('D').value = '';
       }
