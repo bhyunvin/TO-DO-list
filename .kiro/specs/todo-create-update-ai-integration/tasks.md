@@ -1,13 +1,13 @@
 # Implementation Plan
 
-- [ ] 1. Update system prompt to block deletion requests
+- [x] 1. Update system prompt to block deletion requests
   - Add [DELETION_RESTRICTION] section to assistance.systemPrompt.txt with explicit rules against deletion
   - Include Korean language refusal message for deletion requests
   - Specify supported operations (create, read, update) and unsupported operations (delete, del_yn modification)
   - _Requirements: 3.1, 3.2, 3.3, 3.5_
 
-- [ ] 2. Add Gemini function declarations for create and update operations
-  - [ ] 2.1 Create createTodo function declaration in AssistanceService
+- [x] 2. Add Gemini function declarations for create and update operations
+  - [x] 2.1 Create createTodo function declaration in AssistanceService
     - Define function name, description in Korean
     - Add todoContent parameter (STRING, required) with clear description
     - Add todoDate parameter (STRING, required) with YYYY-MM-DD format specification
@@ -15,7 +15,7 @@
     - Set required fields array to ['todoContent', 'todoDate']
     - _Requirements: 4.1, 4.2, 4.5_
   
-  - [ ] 2.2 Create updateTodo function declaration in AssistanceService
+  - [x] 2.2 Create updateTodo function declaration in AssistanceService
     - Define function name, description in Korean
     - Add todoSeq parameter (NUMBER, required) for TODO identification
     - Add todoContent parameter (STRING, optional) for content updates
@@ -24,7 +24,7 @@
     - Set required fields array to ['todoSeq']
     - _Requirements: 4.3, 4.4, 4.5_
   
-  - [ ] 2.3 Update tools array in getGeminiResponse to include all three function declarations
+  - [x] 2.3 Update tools array in getGeminiResponse to include all three function declarations
     - Combine getTodosTool, createTodoTool, and updateTodoTool in tools array
     - _Requirements: 1.1, 2.1_
 

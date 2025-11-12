@@ -36,6 +36,60 @@ export class AssistanceService {
     }],
   };
 
+  private readonly createTodoTool = {
+    functionDeclarations: [{
+      name: 'createTodo',
+      description: '사용자의 새로운 할 일을 생성합니다. 할 일 내용과 날짜는 필수입니다.',
+      parameters: {
+        type: 'OBJECT',
+        properties: {
+          todoContent: {
+            type: 'STRING',
+            description: '할 일의 내용 (필수). 사용자가 수행해야 할 작업을 명확하게 설명합니다.',
+          },
+          todoDate: {
+            type: 'STRING',
+            description: '할 일의 목표 날짜 (필수). YYYY-MM-DD 형식. 사용자가 날짜를 명시하지 않으면 오늘 날짜를 사용합니다.',
+          },
+          todoNote: {
+            type: 'STRING',
+            description: '할 일에 대한 추가 메모나 설명 (선택 사항).',
+          },
+        },
+        required: ['todoContent', 'todoDate'],
+      },
+    }],
+  };
+
+  private readonly updateTodoTool = {
+    functionDeclarations: [{
+      name: 'updateTodo',
+      description: '기존 할 일을 수정합니다. 할 일 ID는 필수이며, 수정할 필드만 포함합니다.',
+      parameters: {
+        type: 'OBJECT',
+        properties: {
+          todoSeq: {
+            type: 'NUMBER',
+            description: '수정할 할 일의 고유 ID (필수). 사용자가 참조한 할 일의 ID를 사용합니다.',
+          },
+          todoContent: {
+            type: 'STRING',
+            description: '수정할 할 일의 내용 (선택 사항).',
+          },
+          completeDtm: {
+            type: 'STRING',
+            description: '완료 일시 (선택 사항). 완료 처리 시 현재 시각의 ISO 8601 형식 문자열, 미완료 처리 시 null.',
+          },
+          todoNote: {
+            type: 'STRING',
+            description: '수정할 메모 내용 (선택 사항).',
+          },
+        },
+        required: ['todoSeq'],
+      },
+    }],
+  };
+
   constructor(
     private readonly httpService: HttpService,
     private readonly keychainUtil: KeychainUtil,
@@ -75,7 +129,7 @@ export class AssistanceService {
           ],
         },
       ],
-      tools: [this.getTodosTool],
+      tools: [this.getTodosTool, this.createTodoTool, this.updateTodoTool],
     };
 
     try {
