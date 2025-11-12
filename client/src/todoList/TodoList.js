@@ -1244,6 +1244,81 @@ function TodoContainer() {
     return result;
   };
 
+  // Handle Excel export with date range selection, API call, and file download
+  const handleExcelExport = async () => {
+    // Trigger date range modal
+    const result = await showDateRangeModal();
+    
+    // If user cancelled the modal, return early
+    if (!result.isConfirmed) {
+      return;
+    }
+
+    const { startDate, endDate } = result.value;
+
+    try {
+      // Call backend API with selected date range
+      const response = await api(
+        `/api/todo/excel?startDate=${startDate}&endDate=${endDate}`,
+        {
+          method: 'GET',
+          credentials: 'include',
+        }
+      );
+
+      if (response.ok) {
+        // Convert response to blob
+        const blob = await response.blob();
+        
+        // Create object URL from blob
+        const url = window.URL.createObjectURL(blob);
+        
+        // Create temporary anchor element for download
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `todos_${startDate}_to_${endDate}.xlsx`;
+        
+        // Append to body, trigger download, and cleanup
+        document.body.appendChild(a);
+        a.click();
+        
+        // Cleanup resources
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        
+        // Display success message
+        Swal.fire('성공', 'Excel 파일이 다운로드되었습니다.', 'success');
+      } else {
+        // Handle API errors (400, 401, 500)
+        const errorData = await response.json().catch(() => ({}));
+        let errorMessage = 'Excel 내보내기에 실패했습니다.';
+        
+        if (response.status === 400) {
+          errorMessage = errorData.message || '잘못된 요청입니다. 날짜 형식을 확인해주세요.';
+        } else if (response.status === 401) {
+          errorMessage = '인증이 필요합니다. 다시 로그인해주세요.';
+        } else if (response.status === 500) {
+          errorMessage = '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+        }
+        
+        Swal.fire('오류', errorMessage, 'error');
+      }
+    } catch (error) {
+      // Handle network errors
+      console.error('Excel export error:', error);
+      
+      let errorMessage = 'Excel 내보내기에 실패했습니다.';
+      
+      if (error.name === 'TypeError' && error.message.includes('fetch')) {
+        errorMessage = '네트워크 연결을 확인해주세요.';
+      } else if (error.name === 'AbortError') {
+        errorMessage = '요청 시간이 초과되었습니다. 다시 시도해주세요.';
+      }
+      
+      Swal.fire('오류', errorMessage, 'error');
+    }
+  };
+
   const renderContent = () => {
     if (isUpdatingProfile) {
       return (
@@ -1343,7 +1418,7 @@ function TodoContainer() {
           <>
             <button 
               className="btn btn-outline-success" 
-              onClick={showDateRangeModal}
+              onClick={handleExcelExport}
               aria-label="Excel 내보내기"
             >
               <i className="bi bi-file-earmark-spreadsheet"></i>
