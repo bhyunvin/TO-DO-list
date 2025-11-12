@@ -192,7 +192,6 @@
 }
 
 .todo-list tbody tr.completed td {
-    text-decoration: line-through;
     color: #6c757d;
 }
 

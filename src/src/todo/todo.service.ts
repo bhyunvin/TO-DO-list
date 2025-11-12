@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, In, LessThanOrEqual, IsNull, Not, Between } from 'typeorm';
+import { Repository, LessThanOrEqual, IsNull, Not, Between, MoreThanOrEqual, LessThan } from 'typeorm';
 import { TodoEntity } from './todo.entity';
 import { 
   CreateTodoDto, 
@@ -15,7 +15,7 @@ import { UserEntity } from '../user/user.entity';
 import { FileInfoEntity } from '../fileUpload/file.entity';
 import { FileUploadUtil } from '../fileUpload/fileUploadUtil';
 import * as ExcelJS from 'exceljs';
-import { format } from 'date-fns';
+import { format, addDays } from 'date-fns';
 
 @Injectable()
 export class TodoService {
@@ -32,6 +32,11 @@ export class TodoService {
 
   // 특정 사용자의 특정 날짜의 모든 ToDo 항목을 조회합니다.
   async findAll(userSeq: number, todoDate: string): Promise<TodoEntity[]> {
+    // completeDtm이 todoDate 범위 내에 있는지 확인하기 위한 날짜 범위 계산
+    // >= startOfDay AND < nextDay 방식 사용 (더 정확한 범위 체크)
+    const startOfDay = `${todoDate} 00:00:00`;
+    const nextDayStr = format(addDays(new Date(todoDate), 1), 'yyyy-MM-dd') + ' 00:00:00';
+
     return this.todoRepository.find({
       where: [
         // 1. 완료되지 않은 항목: 조회일(todoDate) 이전에 생성된 모든 미완료 항목을 포함합니다.
@@ -46,6 +51,13 @@ export class TodoService {
           userSeq,
           todoDate: todoDate,
           completeDtm: Not(IsNull()),
+          delYn: 'N',
+        },
+        // 3. 완료 시각이 조회일에 해당하는 항목: todoDate와 관계없이 completeDtm이 조회일 범위 내에 있는 항목을 포함합니다.
+        // >= startOfDay AND < nextDay 방식으로 정확한 범위 체크
+        {
+          userSeq,
+          completeDtm: MoreThanOrEqual(startOfDay) && LessThan(nextDayStr),
           delYn: 'N',
         },
       ],
