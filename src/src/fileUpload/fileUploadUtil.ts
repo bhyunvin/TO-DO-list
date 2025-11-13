@@ -7,9 +7,7 @@ import { Repository } from 'typeorm';
 import { FileInfoEntity } from './file.entity';
 import { FileValidationService } from './validation/file-validation.service';
 import { FileCategory } from './validation/file-validation.interfaces';
-import {
-  FILE_UPLOAD_POLICY,
-} from './validation/file-validation.constants';
+import { FILE_UPLOAD_POLICY } from './validation/file-validation.constants';
 
 import { AuditSettings, setAuditColumn } from '../utils/auditColumns';
 
