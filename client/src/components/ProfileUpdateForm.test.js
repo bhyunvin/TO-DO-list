@@ -1,5 +1,6 @@
+/* eslint-disable testing-library/no-wait-for-multiple-assertions */
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ProfileUpdateForm from './ProfileUpdateForm';
 
@@ -125,8 +126,8 @@ describe('ProfileUpdateForm', () => {
 
     await waitFor(() => {
       expect(screen.getByText('이름은 200자 이내로 입력해주세요.')).toBeInTheDocument();
-      expect(submitButton).toBeDisabled();
     });
+    expect(submitButton).toBeDisabled();
   });
 
   test('validates email length limit', async () => {
@@ -151,8 +152,8 @@ describe('ProfileUpdateForm', () => {
 
     await waitFor(() => {
       expect(screen.getByText('이메일은 100자 이내로 입력해주세요.')).toBeInTheDocument();
-      expect(submitButton).toBeDisabled();
     });
+    expect(submitButton).toBeDisabled();
   });
 
   test('handles profile image file selection', async () => {
@@ -313,7 +314,7 @@ describe('ProfileUpdateForm', () => {
     const submitButton = screen.getByRole('button', { name: /저장 중.../ });
     expect(submitButton).toBeDisabled();
     expect(screen.getByText('저장 중...')).toBeInTheDocument();
-    expect(submitButton.querySelector('.spinner-border')).toBeInTheDocument();
+    expect(within(submitButton).getByRole('status', { hidden: true })).toBeInTheDocument();
   });
 
   test('trims whitespace from form inputs', async () => {
