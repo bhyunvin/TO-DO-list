@@ -110,14 +110,18 @@ All 38 existing tests continue to pass, ensuring backward compatibility.
 
 1. **client/src/todoList/TodoList.js**
    - Added optimisticUpdates state
-   - Added helper functions (updateTodoOptimistically, rollbackTodoUpdate, getErrorMessage)
+   - Added helper functions (sortTodos, updateTodoOptimistically, rollbackTodoUpdate, getErrorMessage)
    - Refactored handleToggleComplete with optimistic UI pattern
    - Updated error notifications to use toast style
+   - **Added automatic sorting**: Completed items move to bottom, incomplete items stay at top
 
 2. **client/src/todoList/TodoList.optimistic.test.js** (NEW)
    - Comprehensive test suite for optimistic UI functionality
 
-3. **.kiro/specs/todo-optimistic-ui/tasks.md**
+3. **client/src/todoList/TodoList.sorting.test.js** (NEW)
+   - Test suite for sorting behavior after toggle operations
+
+4. **.kiro/specs/todo-optimistic-ui/tasks.md**
    - All tasks marked as completed
 
 ## Additional Enhancement: Clickable Checkbox Cell
@@ -140,11 +144,42 @@ Created additional test suite `TodoList.cellclick.test.js` with 5 tests:
 4. ✅ Checkbox has pointer-events: none to prevent direct clicks
 5. ✅ Cell click does not trigger when todo is being toggled
 
-### Total Test Results (Updated)
-- **Test Suites**: 5 passed
-- **Tests**: 66 passed (38 existing + 8 optimistic + 15 other + 5 cell click)
-- **Coverage**: All requirements met plus enhanced UX
+### Total Test Results (Final)
+- **Test Suites**: 6 passed
+- **Tests**: 69 passed (38 existing + 8 optimistic + 15 other + 5 cell click + 3 sorting)
+- **Coverage**: All requirements met plus enhanced UX and sorting
+
+## Bug Fix: Sorting After Toggle
+
+### Issue
+After implementing optimistic UI, completed todos were not moving to the bottom of the list as they did before. This was because the optimistic update removed the `fetchTodos()` call that would re-fetch and re-sort the list from the server.
+
+### Solution
+Added a `sortTodos()` helper function that replicates the server's sorting logic:
+- Incomplete items (completeDtm === null) appear first
+- Within each group, items are sorted by todoSeq in descending order (newest first)
+- The sorting is applied after both optimistic updates and rollbacks
+
+### Implementation
+```javascript
+const sortTodos = (todosArray) => {
+  return [...todosArray].sort((a, b) => {
+    // 1. completeDtm이 null인 항목(미완료)을 먼저 (nulls first)
+    if (a.completeDtm === null && b.completeDtm !== null) return -1;
+    if (a.completeDtm !== null && b.completeDtm === null) return 1;
+    
+    // 2. 둘 다 완료되었거나 둘 다 미완료인 경우, todoSeq 내림차순 (최신 항목이 위로)
+    return b.todoSeq - a.todoSeq;
+  });
+};
+```
+
+### Test Coverage
+Added 3 new tests in `TodoList.sorting.test.js`:
+1. ✅ Completed todo moves to bottom after toggle
+2. ✅ Uncompleted todo moves to top after toggle
+3. ✅ Sorting maintains order on rollback
 
 ## Conclusion
 
-The optimistic UI implementation successfully improves the user experience by providing instant feedback while maintaining data integrity through automatic rollback on errors. The additional clickable cell enhancement further improves usability by providing a larger, more accessible click target. All requirements have been met, and comprehensive test coverage ensures reliability.
+The optimistic UI implementation successfully improves the user experience by providing instant feedback while maintaining data integrity through automatic rollback on errors. The sorting bug has been fixed to ensure completed items automatically move to the bottom of the list, matching the original behavior. The additional clickable cell enhancement further improves usability by providing a larger, more accessible click target. All requirements have been met, and comprehensive test coverage ensures reliability.

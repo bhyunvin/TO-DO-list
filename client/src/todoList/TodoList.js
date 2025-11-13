@@ -730,26 +730,42 @@ function TodoContainer() {
     }
   }
 
+  // todos 배열을 서버와 동일한 방식으로 정렬하는 헬퍼 함수
+  const sortTodos = (todosArray) => {
+    return [...todosArray].sort((a, b) => {
+      // 1. completeDtm이 null인 항목(미완료)을 먼저 (nulls first)
+      if (a.completeDtm === null && b.completeDtm !== null) return -1;
+      if (a.completeDtm !== null && b.completeDtm === null) return 1;
+      
+      // 2. 둘 다 완료되었거나 둘 다 미완료인 경우, todoSeq 내림차순 (최신 항목이 위로)
+      return b.todoSeq - a.todoSeq;
+    });
+  };
+
   // 낙관적 업데이트를 위한 헬퍼 함수
   const updateTodoOptimistically = (todoSeq, newCompleteDtm) => {
-    setTodos(prevTodos => 
-      prevTodos.map(todo => 
+    setTodos(prevTodos => {
+      const updatedTodos = prevTodos.map(todo => 
         todo.todoSeq === todoSeq 
           ? { ...todo, completeDtm: newCompleteDtm }
           : todo
-      )
-    );
+      );
+      // 업데이트 후 정렬
+      return sortTodos(updatedTodos);
+    });
   };
 
   // 롤백을 위한 헬퍼 함수
   const rollbackTodoUpdate = (todoSeq, originalCompleteDtm) => {
-    setTodos(prevTodos => 
-      prevTodos.map(todo => 
+    setTodos(prevTodos => {
+      const rolledBackTodos = prevTodos.map(todo => 
         todo.todoSeq === todoSeq 
           ? { ...todo, completeDtm: originalCompleteDtm }
           : todo
-      )
-    );
+      );
+      // 롤백 후 정렬
+      return sortTodos(rolledBackTodos);
+    });
   };
 
   // 에러 메시지 생성 헬퍼 함수
@@ -798,13 +814,6 @@ function TodoContainer() {
     
     setTogglingTodoSeq(todoSeq);
 
-    console.log('Optimistic update applied:', {
-      todoSeq,
-      originalState: originalCompleteDtm,
-      newState: newCompleteDtm,
-      timestamp: new Date().toISOString()
-    });
-
     // 30초 타임아웃을 위한 AbortController
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 30000);
@@ -828,11 +837,6 @@ function TodoContainer() {
           const newMap = new Map(prev);
           newMap.delete(todoSeq);
           return newMap;
-        });
-        
-        console.log('Todo toggle succeeded:', {
-          todoSeq,
-          timestamp: new Date().toISOString()
         });
       } else {
         // 실패: 롤백
