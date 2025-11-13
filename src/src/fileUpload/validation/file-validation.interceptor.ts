@@ -9,7 +9,6 @@ import {
 import { Observable } from 'rxjs';
 import { FileValidationService } from './file-validation.service';
 import { FileCategory } from './file-validation.interfaces';
-import { FILE_VALIDATION_ERRORS } from './file-validation.constants';
 import { FileUploadErrorService } from './file-upload-error.service';
 
 /**

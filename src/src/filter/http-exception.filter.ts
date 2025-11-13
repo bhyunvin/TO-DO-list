@@ -44,7 +44,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
     // request.body가 객체인 경우에만 분해 할당을 통해 userPassword를 제외하고 덮어씁니다.
     if (bodyToLog && typeof bodyToLog === 'object') {
-      const { userPassword, ...rest } = bodyToLog;
+      const { userPassword: _, ...rest } = bodyToLog;
       bodyToLog = rest;
     }
     logEntity.requestBody = JSON.stringify(bodyToLog);

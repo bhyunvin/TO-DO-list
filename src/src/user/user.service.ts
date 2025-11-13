@@ -46,7 +46,7 @@ export class UserService {
       throw new UnauthorizedException('아이디나 비밀번호가 다릅니다.');
     }
 
-    const { userPassword, ...userToStore } = selectedUser;
+    const { userPassword: _, ...userToStore } = selectedUser;
     return userToStore;
   }
 
@@ -191,10 +191,7 @@ export class UserService {
       }
 
       // Validate and sanitize input data
-      const sanitizedDto = this.validateAndSanitizeUpdateData(
-        updateUserDto,
-        currentUser,
-      );
+      const sanitizedDto = this.validateAndSanitizeUpdateData(updateUserDto);
 
       // Enhanced email uniqueness check with additional validation
       if (
@@ -377,7 +374,7 @@ export class UserService {
       });
 
       // Return user without password
-      const { userPassword, ...userToReturn } = savedUser;
+      const { userPassword: _, ...userToReturn } = savedUser;
       return userToReturn;
     });
   }
@@ -387,7 +384,6 @@ export class UserService {
    */
   private validateAndSanitizeUpdateData(
     updateUserDto: UpdateUserDto,
-    currentUser: UserEntity,
   ): UpdateUserDto {
     const sanitized: UpdateUserDto = {};
 

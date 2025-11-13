@@ -1,5 +1,3 @@
-import { FileInfoEntity } from '../fileUpload/file.entity';
-
 // ToDo 항목 생성을 위한 DTO (Data Transfer Object)
 export class CreateTodoDto {
   todoContent: string; // 할 일 내용

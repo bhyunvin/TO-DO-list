@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken, getDataSourceToken } from '@nestjs/typeorm';
-import { Repository, DataSource, EntityManager } from 'typeorm';
-import { BadRequestException, ForbiddenException } from '@nestjs/common';
+import { DataSource, EntityManager } from 'typeorm';
+import { ForbiddenException } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UserEntity } from './user.entity';
 import { UpdateUserDto } from './user.dto';
@@ -11,10 +11,7 @@ import { InputSanitizerService } from '../utils/inputSanitizer';
 
 describe('UserService - Profile Update', () => {
   let service: UserService;
-  let userRepository: Repository<UserEntity>;
   let dataSource: DataSource;
-  let fileUploadUtil: FileUploadUtil;
-  let fileValidationService: FileValidationService;
   let inputSanitizer: InputSanitizerService;
   let mockEntityManager: EntityManager;
 
@@ -84,14 +81,7 @@ describe('UserService - Profile Update', () => {
     }).compile();
 
     service = module.get<UserService>(UserService);
-    userRepository = module.get<Repository<UserEntity>>(
-      getRepositoryToken(UserEntity),
-    );
     dataSource = module.get<DataSource>(getDataSourceToken());
-    fileUploadUtil = module.get<FileUploadUtil>(FileUploadUtil);
-    fileValidationService = module.get<FileValidationService>(
-      FileValidationService,
-    );
     inputSanitizer = module.get<InputSanitizerService>(InputSanitizerService);
   });
 

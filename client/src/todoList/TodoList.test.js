@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
+import { render, screen, waitFor, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import TodoContainer from './TodoList';
 
@@ -1106,7 +1106,7 @@ describe('TodoContainer Password Change Integration', () => {
     await user.click(userMenuIcon);
 
     const changePasswordButton = screen.getByRole('button', { name: /비밀번호 변경/ });
-    const updateProfileButton = screen.getByRole('button', { name: /프로필 수정/ });
+    screen.getByRole('button', { name: /프로필 수정/ });
     
     await user.click(changePasswordButton);
 

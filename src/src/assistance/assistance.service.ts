@@ -11,7 +11,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { KeychainUtil } from '../utils/keychainUtil';
 import { TodoService } from '../todo/todo.service';
-import { CreateTodoDto, UpdateTodoDto } from '../todo/todo.dto';
+import { CreateTodoDto } from '../todo/todo.dto';
 import { UserEntity } from '../user/user.entity';
 
 @Injectable()

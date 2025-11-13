@@ -3,8 +3,6 @@ import { FileValidationService } from './file-validation.service';
 import {
   FILE_VALIDATION_ERRORS,
   FILE_VALIDATION_MESSAGES,
-  FILE_UPLOAD_POLICY,
-  BLOCKED_EXTENSIONS,
 } from './file-validation.constants';
 
 describe('FileValidationService', () => {

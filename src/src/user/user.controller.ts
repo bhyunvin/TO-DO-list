@@ -130,7 +130,7 @@ export class UserController {
   @Post('logout')
   @HttpCode(HttpStatus.NO_CONTENT)
   logout(@Session() session: SessionInterface): void {
-    session.destroy((err) => {
+    session.destroy(() => {
       // 로그아웃 처리 중 에러 발생 시 처리 로직을 추가할 수 있습니다.
     });
   }

@@ -99,15 +99,14 @@ export class FileUploadErrorService {
     }
 
     if (errors.length === 1) {
-      const error = errors[0];
-      return `File "${error.fileName}": ${this.getUserFriendlyMessage(error)}`;
+      return `File "${errors[0].fileName}": ${this.getUserFriendlyMessage(errors[0])}`;
     }
 
     // Multiple errors - group by error type
     const errorGroups = this.groupErrorsByType(errors);
     const messages: string[] = [];
 
-    for (const [errorCode, fileErrors] of Object.entries(errorGroups)) {
+    for (const [, fileErrors] of Object.entries(errorGroups)) {
       if (fileErrors.length === 1) {
         messages.push(
           `"${fileErrors[0].fileName}": ${this.getUserFriendlyMessage(fileErrors[0])}`,
@@ -183,8 +182,6 @@ export class FileUploadErrorService {
     }
 
     securityErrors.forEach((error) => {
-      const file = files.find((f) => f.originalname === error.fileName);
-
       this.logger.warn(`SECURITY ALERT: Blocked file type upload attempt`, {
         fileName: error.fileName,
         fileType: error.fileType,

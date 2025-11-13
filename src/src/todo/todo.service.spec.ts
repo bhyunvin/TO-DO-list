@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { TodoService } from './todo.service';
 import { TodoEntity } from './todo.entity';
 import { FileInfoEntity } from '../fileUpload/file.entity';
@@ -9,7 +8,6 @@ import * as ExcelJS from 'exceljs';
 
 describe('TodoService - Excel Export', () => {
   let service: TodoService;
-  let todoRepository: Repository<TodoEntity>;
 
   const mockTodoRepository = {
     find: jest.fn(),
@@ -48,9 +46,6 @@ describe('TodoService - Excel Export', () => {
     }).compile();
 
     service = module.get<TodoService>(TodoService);
-    todoRepository = module.get<Repository<TodoEntity>>(
-      getRepositoryToken(TodoEntity),
-    );
   });
 
   afterEach(() => {
