@@ -6,10 +6,13 @@ This is a full-stack TO-DO List application built with modern web technologies. 
 
 - User registration and authentication with session management
 - Date-based todo organization and management
-- File upload functionality
-- AI assistance integration using Google Gemini
+- File upload functionality with progress tracking
+- AI chat assistant using Google Gemini with function calling (can read, create, and update todos)
+- User profile management with profile image support
+- Password change functionality
 - Comprehensive audit logging for all operations
 - Secure password encryption and keychain integration
+- Markdown rendering with XSS protection
 
 ## Target Users
 

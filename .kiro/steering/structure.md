@@ -44,7 +44,10 @@ myTodoApp/
 ### Feature Components
 - `src/loginForm/` - Authentication forms (login/signup)
 - `src/todoList/` - Todo management interface
+- `src/components/` - Reusable UI components (chat, file upload, profile, floating action button)
 - `src/authStore/` - Zustand authentication state management
+- `src/stores/` - Additional Zustand stores (chat)
+- `src/hooks/` - Custom React hooks (scroll lock, file upload)
 
 ### Configuration
 - `src/setupProxy.js` - Development proxy configuration for API calls

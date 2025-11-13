@@ -6,16 +6,18 @@
 - **Database**: PostgreSQL with TypeORM
 - **Authentication**: Express sessions with bcrypt password hashing
 - **Security**: Keychain integration for secure credential storage
-- **AI Integration**: Google Gemini via @langchain/google-genai
+- **AI Integration**: Google Gemini API via @nestjs/axios with function calling
 - **File Upload**: Multer for multipart form handling
+- **Markdown Processing**: marked for markdown parsing, sanitize-html for XSS protection
 
 ## Frontend (React)
 - **Framework**: React 19 with Create React App
 - **UI Library**: React Bootstrap 2.10+ with Bootstrap 5.3+
-- **State Management**: Zustand for global state
+- **State Management**: Zustand for global state (auth and chat)
 - **HTTP Client**: Axios (configured via setupProxy.js)
 - **Notifications**: SweetAlert2
 - **Date Handling**: date-fns and react-datepicker
+- **Security**: DOMPurify for HTML sanitization
 
 ## Development Tools
 - **Package Manager**: npm with workspaces
