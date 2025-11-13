@@ -160,8 +160,8 @@ export class FileValidationService {
 
         errors.push({
           fileName,
-          errorCode: result.errorCode!,
-          errorMessage: result.errorMessage!,
+          errorCode: result.errorCode || 'UNKNOWN_ERROR',
+          errorMessage: result.errorMessage || 'Unknown validation error',
           fileSize,
           fileType,
         });

@@ -299,8 +299,8 @@ export class FileUploadErrorService {
       if (!result.isValid) {
         errors.push({
           fileName: file.originalname,
-          errorCode: result.errorCode!,
-          errorMessage: result.errorMessage!,
+          errorCode: result.errorCode || 'UNKNOWN_ERROR',
+          errorMessage: result.errorMessage || 'Unknown validation error',
           fileSize: file.size,
           fileType: extname(file.originalname).toLowerCase(),
         });
