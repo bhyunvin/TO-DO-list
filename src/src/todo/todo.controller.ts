@@ -16,8 +16,6 @@ import {
   UseInterceptors,
   UploadedFiles,
   Res,
-  BadRequestException,
-  InternalServerErrorException,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { FilesInterceptor } from '@nestjs/platform-express';
@@ -26,7 +24,6 @@ import { SessionData } from 'express-session';
 import {
   CreateTodoDto,
   UpdateTodoDto,
-  DeleteTodoDto,
   CreateTodoWithFilesDto,
 } from './todo.dto';
 import { AuthenticatedGuard } from '../../types/express/auth.guard';

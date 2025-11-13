@@ -9,7 +9,6 @@ import { FileValidationService } from './validation/file-validation.service';
 import { FileCategory } from './validation/file-validation.interfaces';
 import {
   FILE_UPLOAD_POLICY,
-  FILE_VALIDATION_ERRORS,
 } from './validation/file-validation.constants';
 
 import { AuditSettings, setAuditColumn } from '../utils/auditColumns';
