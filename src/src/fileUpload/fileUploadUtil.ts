@@ -88,7 +88,11 @@ export class FileUploadUtil {
 
 // Enhanced file filter function with validation
 export const createFileFilter = (category: FileCategory) => {
-  return (req: any, file: Express.Multer.File, callback: Function) => {
+  return (
+    req: any,
+    file: Express.Multer.File,
+    callback: (error: Error | null, acceptFile?: boolean) => void,
+  ) => {
     const fileValidationService = new FileValidationService();
     const validationResults = fileValidationService.validateFilesByCategory(
       [file],
