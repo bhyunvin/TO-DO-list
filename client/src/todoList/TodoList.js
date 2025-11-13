@@ -242,6 +242,7 @@ function CreateTodoForm(props) {
 function TodoList(props) {
   const {
     todos,
+    isLoadingTodos,
     onToggleComplete,
     onDeleteTodo,
     onEditTodo,
@@ -298,7 +299,16 @@ function TodoList(props) {
             </tr>
           </thead>
           <tbody>
-            {todos.length > 0 ? (
+            {isLoadingTodos ? (
+              <tr>
+                <td colSpan={6} className="text-center">
+                  <div className="d-flex justify-content-center align-items-center" style={{ padding: '2rem' }}>
+                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    <span>불러오는 중...</span>
+                  </div>
+                </td>
+              </tr>
+            ) : todos.length > 0 ? (
               todos.map((todo, index) => (
                 <tr
                   key={todo.todoSeq}
@@ -358,7 +368,7 @@ function TodoList(props) {
               ))
             ) : (
               <tr>
-                <td colSpan={6}>할 일이 없습니다.</td>
+                <td colSpan={6} className="text-center">할 일이 없습니다.</td>
               </tr>
             )}
           </tbody>
@@ -607,6 +617,7 @@ function TodoContainer() {
   } = useChatStore();
   
   const [todos, setTodos] = useState([]);
+  const [isLoadingTodos, setIsLoadingTodos] = useState(true); // 할 일 목록 로딩 상태
   const [isCreating, setIsCreating] = useState(false);
   const [editingTodo, setEditingTodo] = useState(null); // 수정 중인 ToDo 항목 전체를 저장
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false); // 프로필 수정 상태
@@ -622,6 +633,7 @@ function TodoContainer() {
 
   // 선택된 날짜에 해당하는 ToDo 목록을 서버에서 가져오는 함수
   const fetchTodos = useCallback(async () => {
+    setIsLoadingTodos(true);
     try {
       const formattedDate = formatDate(selectedDate);
       const response = await api(`/api/todo?date=${formattedDate}`, {
@@ -639,6 +651,8 @@ function TodoContainer() {
     } catch (error) {
       console.error('Fetch Todos Error:', error);
       Swal.fire('오류', '서버와의 통신 중 문제가 발생했습니다.', 'error');
+    } finally {
+      setIsLoadingTodos(false);
     }
   }, [api, selectedDate]);
 
@@ -1521,6 +1535,7 @@ function TodoContainer() {
     return (
       <TodoList
         todos={todos}
+        isLoadingTodos={isLoadingTodos}
         onToggleComplete={handleToggleComplete}
         onDeleteTodo={handleDeleteTodo}
         onEditTodo={handleEditTodo}
