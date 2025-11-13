@@ -19,77 +19,91 @@ export class AssistanceService {
   private readonly logger = new Logger(AssistanceService.name);
 
   private readonly getTodosTool = {
-    functionDeclarations: [{
-      name: 'getTodos',
-      description: '사용자의 할 일 목록을 DB에서 조회합니다.',
-      parameters: {
-        type: 'OBJECT',
-        properties: {
-          status: {
-            type: 'STRING',
-            description: "조회할 할 일의 상태. 'completed' (완료), 'incomplete' (미완료), 'overdue' (지연). 지정하지 않으면 모든 상태.",
-          },
-          days: {
-            type: 'NUMBER',
-            description: '조회할 기간(일). (예: 7은 지난 7일, -7은 향후 7일). 지정하지 않으면 전체 기간.',
+    functionDeclarations: [
+      {
+        name: 'getTodos',
+        description: '사용자의 할 일 목록을 DB에서 조회합니다.',
+        parameters: {
+          type: 'OBJECT',
+          properties: {
+            status: {
+              type: 'STRING',
+              description:
+                "조회할 할 일의 상태. 'completed' (완료), 'incomplete' (미완료), 'overdue' (지연). 지정하지 않으면 모든 상태.",
+            },
+            days: {
+              type: 'NUMBER',
+              description:
+                '조회할 기간(일). (예: 7은 지난 7일, -7은 향후 7일). 지정하지 않으면 전체 기간.',
+            },
           },
         },
       },
-    }],
+    ],
   };
 
   private readonly createTodoTool = {
-    functionDeclarations: [{
-      name: 'createTodo',
-      description: '사용자의 새로운 할 일을 생성합니다. 할 일 내용과 날짜는 필수입니다.',
-      parameters: {
-        type: 'OBJECT',
-        properties: {
-          todoContent: {
-            type: 'STRING',
-            description: '할 일의 내용 (필수). 사용자가 수행해야 할 작업을 명확하게 설명합니다.',
+    functionDeclarations: [
+      {
+        name: 'createTodo',
+        description:
+          '사용자의 새로운 할 일을 생성합니다. 할 일 내용과 날짜는 필수입니다.',
+        parameters: {
+          type: 'OBJECT',
+          properties: {
+            todoContent: {
+              type: 'STRING',
+              description:
+                '할 일의 내용 (필수). 사용자가 수행해야 할 작업을 명확하게 설명합니다.',
+            },
+            todoDate: {
+              type: 'STRING',
+              description:
+                '할 일의 목표 날짜 (필수). YYYY-MM-DD 형식. 사용자가 날짜를 명시하지 않으면 오늘 날짜를 사용합니다.',
+            },
+            todoNote: {
+              type: 'STRING',
+              description: '할 일에 대한 추가 메모나 설명 (선택 사항).',
+            },
           },
-          todoDate: {
-            type: 'STRING',
-            description: '할 일의 목표 날짜 (필수). YYYY-MM-DD 형식. 사용자가 날짜를 명시하지 않으면 오늘 날짜를 사용합니다.',
-          },
-          todoNote: {
-            type: 'STRING',
-            description: '할 일에 대한 추가 메모나 설명 (선택 사항).',
-          },
+          required: ['todoContent', 'todoDate'],
         },
-        required: ['todoContent', 'todoDate'],
       },
-    }],
+    ],
   };
 
   private readonly updateTodoTool = {
-    functionDeclarations: [{
-      name: 'updateTodo',
-      description: '기존 할 일을 수정합니다. 할 일 ID는 필수이며, 수정할 필드만 포함합니다.',
-      parameters: {
-        type: 'OBJECT',
-        properties: {
-          todoSeq: {
-            type: 'NUMBER',
-            description: '수정할 할 일의 고유 ID (필수). 사용자가 참조한 할 일의 ID를 사용합니다.',
+    functionDeclarations: [
+      {
+        name: 'updateTodo',
+        description:
+          '기존 할 일을 수정합니다. 할 일 ID는 필수이며, 수정할 필드만 포함합니다.',
+        parameters: {
+          type: 'OBJECT',
+          properties: {
+            todoSeq: {
+              type: 'NUMBER',
+              description:
+                '수정할 할 일의 고유 ID (필수). 사용자가 참조한 할 일의 ID를 사용합니다.',
+            },
+            todoContent: {
+              type: 'STRING',
+              description: '수정할 할 일의 내용 (선택 사항).',
+            },
+            completeDtm: {
+              type: 'STRING',
+              description:
+                '완료 일시 (선택 사항). 완료 처리 시 현재 시각의 ISO 8601 형식 문자열, 미완료 처리 시 null.',
+            },
+            todoNote: {
+              type: 'STRING',
+              description: '수정할 메모 내용 (선택 사항).',
+            },
           },
-          todoContent: {
-            type: 'STRING',
-            description: '수정할 할 일의 내용 (선택 사항).',
-          },
-          completeDtm: {
-            type: 'STRING',
-            description: '완료 일시 (선택 사항). 완료 처리 시 현재 시각의 ISO 8601 형식 문자열, 미완료 처리 시 null.',
-          },
-          todoNote: {
-            type: 'STRING',
-            description: '수정할 메모 내용 (선택 사항).',
-          },
+          required: ['todoSeq'],
         },
-        required: ['todoSeq'],
       },
-    }],
+    ],
   };
 
   constructor(
@@ -154,21 +168,25 @@ export class AssistanceService {
 
       const candidate = response.data.candidates[0];
       const firstPart = candidate.content.parts[0] as any;
-      
+
       // Check if Gemini wants to call a function
       if (firstPart.functionCall) {
         const functionCall = firstPart.functionCall;
         const args = functionCall.args || {};
         let functionResult: any;
-        
+
         // Execute the appropriate function based on function name
         switch (functionCall.name) {
           case 'getTodos':
             if (userSeq) {
-              functionResult = await this.getTodos(userSeq, args.status, args.days);
+              functionResult = await this.getTodos(
+                userSeq,
+                args.status,
+                args.days,
+              );
             }
             break;
-            
+
           case 'createTodo':
             if (userSeq && ip) {
               functionResult = await this.createTodo(
@@ -180,7 +198,7 @@ export class AssistanceService {
               );
             }
             break;
-            
+
           case 'updateTodo':
             if (userSeq && ip) {
               functionResult = await this.updateTodo(
@@ -195,28 +213,30 @@ export class AssistanceService {
               );
             }
             break;
-            
+
           default:
             this.logger.warn(`Unknown function call: ${functionCall.name}`);
         }
-        
+
         // If a function was executed, add the call and response to conversation
         if (functionResult !== undefined) {
           // Add function call to conversation
           requestData.contents.push({
             parts: [candidate.content.parts[0] as any],
           });
-          
+
           // Add function response to conversation
           requestData.contents.push({
-            parts: [{
-              functionResponse: {
-                name: functionCall.name,
-                response: {
-                  content: functionResult,
+            parts: [
+              {
+                functionResponse: {
+                  name: functionCall.name,
+                  response: {
+                    content: functionResult,
+                  },
                 },
-              },
-            } as any],
+              } as any,
+            ],
           });
 
           // Make second API call with function result
@@ -244,12 +264,16 @@ export class AssistanceService {
     }
   }
 
-  private async getTodos(userSeq: number, status?: string, days?: number): Promise<any> {
+  private async getTodos(
+    userSeq: number,
+    status?: string,
+    days?: number,
+  ): Promise<any> {
     try {
       // Calculate date range based on days parameter
       let targetDate: string;
       const today = new Date();
-      
+
       if (days !== undefined) {
         const targetDateObj = new Date(today);
         targetDateObj.setDate(today.getDate() + days);
@@ -260,17 +284,17 @@ export class AssistanceService {
 
       // Get todos using existing TodoService method
       const todos = await this.todoService.findAll(userSeq, targetDate);
-      
+
       // Filter todos based on status parameter
       let filteredTodos = todos;
       const currentDate = new Date();
-      
+
       if (status) {
-        filteredTodos = todos.filter(todo => {
+        filteredTodos = todos.filter((todo) => {
           const todoDate = new Date(todo.todoDate);
           const isCompleted = todo.completeDtm !== null;
           const isOverdue = !isCompleted && todoDate < currentDate;
-          
+
           switch (status) {
             case 'completed':
               return isCompleted;
@@ -287,14 +311,15 @@ export class AssistanceService {
       // Return structured data suitable for AI context
       return {
         totalCount: filteredTodos.length,
-        todos: filteredTodos.map(todo => ({
+        todos: filteredTodos.map((todo) => ({
           todoSeq: todo.todoSeq,
           todoContent: todo.todoContent,
           todoDate: todo.todoDate,
           todoNote: todo.todoNote,
           completeDtm: todo.completeDtm,
           isCompleted: todo.completeDtm !== null,
-          isOverdue: todo.completeDtm === null && new Date(todo.todoDate) < currentDate,
+          isOverdue:
+            todo.completeDtm === null && new Date(todo.todoDate) < currentDate,
         })),
         queryParams: {
           status,
@@ -330,7 +355,8 @@ export class AssistanceService {
       if (!dateRegex.test(todoDate)) {
         return {
           success: false,
-          error: 'Invalid date format. Please use YYYY-MM-DD format (e.g., 2024-12-31)',
+          error:
+            'Invalid date format. Please use YYYY-MM-DD format (e.g., 2024-12-31)',
         };
       }
 
@@ -355,7 +381,11 @@ export class AssistanceService {
       };
 
       // Call TodoService to create the TODO
-      const createdTodo = await this.todoService.create(user, ip, createTodoDto);
+      const createdTodo = await this.todoService.create(
+        user,
+        ip,
+        createTodoDto,
+      );
 
       // Return structured success response
       return {
@@ -423,7 +453,12 @@ export class AssistanceService {
       }
 
       // Call TodoService to update the TODO
-      const updatedTodo = await this.todoService.update(todoSeq, user, ip, updateTodoDto);
+      const updatedTodo = await this.todoService.update(
+        todoSeq,
+        user,
+        ip,
+        updateTodoDto,
+      );
 
       // Handle "not found" case explicitly
       if (!updatedTodo) {

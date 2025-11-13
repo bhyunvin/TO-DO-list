@@ -2,13 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Brackets, Repository, Between } from 'typeorm';
 import { TodoEntity } from './todo.entity';
-import { 
-  CreateTodoDto, 
-  UpdateTodoDto, 
+import {
+  CreateTodoDto,
+  UpdateTodoDto,
   CreateTodoWithFilesDto,
   TodoWithFilesResponseDto,
   FileAttachmentResponseDto,
-  FileUploadResponseDto
+  FileUploadResponseDto,
 } from './todo.dto';
 import { setAuditColumn, AuditSettings } from '../utils/auditColumns';
 import { UserEntity } from '../user/user.entity';
@@ -34,40 +34,55 @@ export class TodoService {
   async findAll(userSeq: number, todoDate: string): Promise<TodoEntity[]> {
     // 날짜 범위 계산
     const startOfDay = `${todoDate} 00:00:00`;
-    const nextDayStr = format(addDays(new Date(todoDate), 1), 'yyyy-MM-dd') + ' 00:00:00';
+    const nextDayStr =
+      format(addDays(new Date(todoDate), 1), 'yyyy-MM-dd') + ' 00:00:00';
 
     // 1. 쿼리 빌더 생성
     const qb = this.todoRepository.createQueryBuilder('todo');
 
     // 2. 기본 WHERE 조건 설정 (공통 조건)
-    qb.where('todo.delYn = :delYn', { delYn: 'N' })
-      .andWhere('todo.userSeq = :userSeq', { userSeq });
+    qb.where('todo.delYn = :delYn', { delYn: 'N' }).andWhere(
+      'todo.userSeq = :userSeq',
+      { userSeq },
+    );
 
     // 3. 세 가지 OR 조건을 괄호(Brackets)로 묶기
-    qb.andWhere(new Brackets(subQuery => {
-      
-      // 조건 1: 미완료 항목 (todoDate <= :todoDate AND completeDtm IS NULL)
-      subQuery.where(new Brackets(c1 => {
-        c1.where('todo.todoDate <= :todoDate', { todoDate })
-          .andWhere('todo.completeDtm IS NULL');
-      }));
+    qb.andWhere(
+      new Brackets((subQuery) => {
+        // 조건 1: 미완료 항목 (todoDate <= :todoDate AND completeDtm IS NULL)
+        subQuery.where(
+          new Brackets((c1) => {
+            c1.where('todo.todoDate <= :todoDate', { todoDate }).andWhere(
+              'todo.completeDtm IS NULL',
+            );
+          }),
+        );
 
-      // 조건 2: 완료 항목 (todoDate = :todoDate AND completeDtm IS NOT NULL)
-      subQuery.orWhere(new Brackets(c2 => {
-        c2.where('todo.todoDate = :todoDate', { todoDate })
-          .andWhere('todo.completeDtm IS NOT NULL');
-      }));
+        // 조건 2: 완료 항목 (todoDate = :todoDate AND completeDtm IS NOT NULL)
+        subQuery.orWhere(
+          new Brackets((c2) => {
+            c2.where('todo.todoDate = :todoDate', { todoDate }).andWhere(
+              'todo.completeDtm IS NOT NULL',
+            );
+          }),
+        );
 
-      // 조건 3: 오늘 완료한 항목 (completeDtm >= :startOfDay AND completeDtm < :nextDayStr)
-      subQuery.orWhere(new Brackets(c3 => {
-        c3.where('todo.completeDtm >= :startOfDay', { startOfDay })
-          .andWhere('todo.completeDtm < :nextDayStr', { nextDayStr });
-      }));
-    }));
+        // 조건 3: 오늘 완료한 항목 (completeDtm >= :startOfDay AND completeDtm < :nextDayStr)
+        subQuery.orWhere(
+          new Brackets((c3) => {
+            c3.where('todo.completeDtm >= :startOfDay', {
+              startOfDay,
+            }).andWhere('todo.completeDtm < :nextDayStr', { nextDayStr });
+          }),
+        );
+      }),
+    );
 
     // 4. 정렬 순서 적용
-    qb.orderBy('todo.completeDtm', 'DESC', 'NULLS FIRST')
-      .addOrderBy('todo.todoSeq', 'DESC');
+    qb.orderBy('todo.completeDtm', 'DESC', 'NULLS FIRST').addOrderBy(
+      'todo.todoSeq',
+      'DESC',
+    );
 
     // 5. 쿼리 실행
     return qb.getMany();
@@ -167,20 +182,23 @@ export class TodoService {
     };
 
     try {
-      const { savedFiles, fileGroupNo } = await this.fileUploadUtil.saveFileInfo(
-        files,
-        auditSettings,
-        'todo_attachment',
-      );
+      const { savedFiles, fileGroupNo } =
+        await this.fileUploadUtil.saveFileInfo(
+          files,
+          auditSettings,
+          'todo_attachment',
+        );
 
-      const attachmentResponses: FileAttachmentResponseDto[] = savedFiles.map(file => ({
-        fileNo: file.fileNo,
-        originalFileName: file.originalFileName,
-        fileSize: file.fileSize,
-        fileExt: file.fileExt,
-        uploadDate: file.auditColumns.regDtm.toISOString(),
-        validationStatus: file.validationStatus,
-      }));
+      const attachmentResponses: FileAttachmentResponseDto[] = savedFiles.map(
+        (file) => ({
+          fileNo: file.fileNo,
+          originalFileName: file.originalFileName,
+          fileSize: file.fileSize,
+          fileExt: file.fileExt,
+          uploadDate: file.auditColumns.regDtm.toISOString(),
+          validationStatus: file.validationStatus,
+        }),
+      );
 
       return {
         success: true,
@@ -219,11 +237,12 @@ export class TodoService {
       };
 
       try {
-        const { savedFiles, fileGroupNo: uploadedFileGroupNo } = await this.fileUploadUtil.saveFileInfo(
-          files,
-          auditSettings,
-          'todo_attachment',
-        );
+        const { savedFiles, fileGroupNo: uploadedFileGroupNo } =
+          await this.fileUploadUtil.saveFileInfo(
+            files,
+            auditSettings,
+            'todo_attachment',
+          );
 
         fileGroupNo = uploadedFileGroupNo;
 
@@ -231,7 +250,7 @@ export class TodoService {
         newTodo.todoFileGroupNo = fileGroupNo;
         await this.todoRepository.save(newTodo);
 
-        attachments = savedFiles.map(file => ({
+        attachments = savedFiles.map((file) => ({
           fileNo: file.fileNo,
           originalFileName: file.originalFileName,
           fileSize: file.fileSize,
@@ -295,24 +314,27 @@ export class TodoService {
 
       // TODO에 기존 파일 그룹이 없는 경우 새로 생성
       if (!fileGroupNo) {
-        const { savedFiles, fileGroupNo: newFileGroupNo } = await this.fileUploadUtil.saveFileInfo(
-          files,
-          auditSettings,
-          'todo_attachment',
-        );
+        const { savedFiles, fileGroupNo: newFileGroupNo } =
+          await this.fileUploadUtil.saveFileInfo(
+            files,
+            auditSettings,
+            'todo_attachment',
+          );
 
         fileGroupNo = newFileGroupNo;
         todo.todoFileGroupNo = fileGroupNo;
         await this.todoRepository.save(todo);
 
-        const attachmentResponses: FileAttachmentResponseDto[] = savedFiles.map(file => ({
-          fileNo: file.fileNo,
-          originalFileName: file.originalFileName,
-          fileSize: file.fileSize,
-          fileExt: file.fileExt,
-          uploadDate: file.auditColumns.regDtm.toISOString(),
-          validationStatus: file.validationStatus,
-        }));
+        const attachmentResponses: FileAttachmentResponseDto[] = savedFiles.map(
+          (file) => ({
+            fileNo: file.fileNo,
+            originalFileName: file.originalFileName,
+            fileSize: file.fileSize,
+            fileExt: file.fileExt,
+            uploadDate: file.auditColumns.regDtm.toISOString(),
+            validationStatus: file.validationStatus,
+          }),
+        );
 
         return {
           success: true,
@@ -343,14 +365,16 @@ export class TodoService {
           savedFiles.push(savedFile);
         }
 
-        const attachmentResponses: FileAttachmentResponseDto[] = savedFiles.map(file => ({
-          fileNo: file.fileNo,
-          originalFileName: file.originalFileName,
-          fileSize: file.fileSize,
-          fileExt: file.fileExt,
-          uploadDate: file.auditColumns.regDtm.toISOString(),
-          validationStatus: file.validationStatus,
-        }));
+        const attachmentResponses: FileAttachmentResponseDto[] = savedFiles.map(
+          (file) => ({
+            fileNo: file.fileNo,
+            originalFileName: file.originalFileName,
+            fileSize: file.fileSize,
+            fileExt: file.fileExt,
+            uploadDate: file.auditColumns.regDtm.toISOString(),
+            validationStatus: file.validationStatus,
+          }),
+        );
 
         return {
           success: true,
@@ -384,14 +408,14 @@ export class TodoService {
 
     // 파일 그룹에 속한 모든 파일을 조회합니다.
     const files = await this.fileInfoRepository.find({
-      where: { 
+      where: {
         fileGroupNo: todo.todoFileGroupNo,
         fileCategory: 'todo_attachment',
       },
       order: { fileNo: 'ASC' },
     });
 
-    return files.map(file => ({
+    return files.map((file) => ({
       fileNo: file.fileNo,
       originalFileName: file.originalFileName,
       fileSize: file.fileSize,
@@ -439,8 +463,8 @@ export class TodoService {
     const ROW_HEIGHT = 15;
 
     // 열 너비를 설정합니다.
-    worksheet.getColumn('A').width = 4;  // Column A는 비어있음 (visible but empty)
-    worksheet.getColumn('B').width = 6;  // 번호
+    worksheet.getColumn('A').width = 4; // Column A는 비어있음 (visible but empty)
+    worksheet.getColumn('B').width = 6; // 번호
     worksheet.getColumn('C').width = 80; // 내용
     worksheet.getColumn('D').width = 17; // 완료일시
     worksheet.getColumn('E').width = 90; // 비고
@@ -458,7 +482,7 @@ export class TodoService {
     headerRow.getCell('E').value = '비고';
 
     // 헤더 스타일을 적용합니다.
-    ['B', 'C', 'D', 'E'].forEach(col => {
+    ['B', 'C', 'D', 'E'].forEach((col) => {
       const cell = headerRow.getCell(col);
       cell.fill = {
         type: 'pattern',
@@ -492,7 +516,7 @@ export class TodoService {
         vertical: 'middle',
       };
       dataRow.getCell('C').value = todo.todoContent || '';
-      
+
       // completeDtm을 "YYYY-MM-DD HH:mm" 형식으로 포맷합니다.
       if (todo.completeDtm) {
         const completeDtm = new Date(todo.completeDtm);
@@ -504,7 +528,7 @@ export class TodoService {
       } else {
         dataRow.getCell('D').value = '';
       }
-      
+
       dataRow.getCell('E').value = todo.todoNote || '';
     });
 

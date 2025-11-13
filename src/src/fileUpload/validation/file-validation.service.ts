@@ -26,12 +26,13 @@ export class FileValidationService {
     maxSize: number,
   ): ValidationResult {
     const fileSize = file.size;
-    
+
     if (fileSize > maxSize) {
       return {
         isValid: false,
         errorCode: FILE_VALIDATION_ERRORS.FILE_TOO_LARGE,
-        errorMessage: FILE_VALIDATION_MESSAGES[FILE_VALIDATION_ERRORS.FILE_TOO_LARGE],
+        errorMessage:
+          FILE_VALIDATION_MESSAGES[FILE_VALIDATION_ERRORS.FILE_TOO_LARGE],
       };
     }
 
@@ -54,7 +55,8 @@ export class FileValidationService {
       return {
         isValid: false,
         errorCode: FILE_VALIDATION_ERRORS.BLOCKED_FILE_TYPE,
-        errorMessage: FILE_VALIDATION_MESSAGES[FILE_VALIDATION_ERRORS.BLOCKED_FILE_TYPE],
+        errorMessage:
+          FILE_VALIDATION_MESSAGES[FILE_VALIDATION_ERRORS.BLOCKED_FILE_TYPE],
       };
     }
 
@@ -63,7 +65,8 @@ export class FileValidationService {
       return {
         isValid: false,
         errorCode: FILE_VALIDATION_ERRORS.INVALID_FILE_TYPE,
-        errorMessage: FILE_VALIDATION_MESSAGES[FILE_VALIDATION_ERRORS.INVALID_FILE_TYPE],
+        errorMessage:
+          FILE_VALIDATION_MESSAGES[FILE_VALIDATION_ERRORS.INVALID_FILE_TYPE],
       };
     }
 
@@ -84,7 +87,8 @@ export class FileValidationService {
       return files.map(() => ({
         isValid: false,
         errorCode: FILE_VALIDATION_ERRORS.TOO_MANY_FILES,
-        errorMessage: FILE_VALIDATION_MESSAGES[FILE_VALIDATION_ERRORS.TOO_MANY_FILES],
+        errorMessage:
+          FILE_VALIDATION_MESSAGES[FILE_VALIDATION_ERRORS.TOO_MANY_FILES],
       }));
     }
 
@@ -115,19 +119,21 @@ export class FileValidationService {
     category: FileCategory,
   ): ValidationResult[] {
     // Map snake_case category to camelCase policy key
-    const policyKey = category === 'profile_image' ? 'profileImage' : 'todoAttachment';
+    const policyKey =
+      category === 'profile_image' ? 'profileImage' : 'todoAttachment';
     const policyConfig = FILE_UPLOAD_POLICY[policyKey];
-    
+
     if (!policyConfig) {
       throw new Error(`Invalid file category: ${category}`);
     }
-    
+
     const validationConfig: ValidationConfig = {
       maxFileSize: policyConfig.maxSize,
       allowedExtensions: policyConfig.allowedTypes,
-      blockedExtensions: category === 'todo_attachment' 
-        ? (policyConfig as any).blockedTypes || BLOCKED_EXTENSIONS 
-        : BLOCKED_EXTENSIONS,
+      blockedExtensions:
+        category === 'todo_attachment'
+          ? (policyConfig as any).blockedTypes || BLOCKED_EXTENSIONS
+          : BLOCKED_EXTENSIONS,
       maxFileCount: policyConfig.maxCount,
     };
 

@@ -46,7 +46,9 @@ describe('FileValidationService', () => {
 
       expect(result.isValid).toBe(false);
       expect(result.errorCode).toBe(FILE_VALIDATION_ERRORS.FILE_TOO_LARGE);
-      expect(result.errorMessage).toBe(FILE_VALIDATION_MESSAGES[FILE_VALIDATION_ERRORS.FILE_TOO_LARGE]);
+      expect(result.errorMessage).toBe(
+        FILE_VALIDATION_MESSAGES[FILE_VALIDATION_ERRORS.FILE_TOO_LARGE],
+      );
     });
 
     it('should handle zero-size files', () => {
@@ -91,7 +93,11 @@ describe('FileValidationService', () => {
         size: 1024,
       } as Express.Multer.File;
 
-      const result = service.validateFileType(mockFile, ['.exe', '.pdf'], ['.exe']);
+      const result = service.validateFileType(
+        mockFile,
+        ['.exe', '.pdf'],
+        ['.exe'],
+      );
 
       expect(result.isValid).toBe(false);
       expect(result.errorCode).toBe(FILE_VALIDATION_ERRORS.BLOCKED_FILE_TYPE);
@@ -159,7 +165,7 @@ describe('FileValidationService', () => {
       const results = service.validateMultipleFiles(mockFiles, config);
 
       expect(results).toHaveLength(3);
-      results.forEach(result => {
+      results.forEach((result) => {
         expect(result.isValid).toBe(false);
         expect(result.errorCode).toBe(FILE_VALIDATION_ERRORS.TOO_MANY_FILES);
       });
@@ -186,7 +192,9 @@ describe('FileValidationService', () => {
       expect(results[1].isValid).toBe(false);
       expect(results[1].errorCode).toBe(FILE_VALIDATION_ERRORS.FILE_TOO_LARGE);
       expect(results[2].isValid).toBe(false);
-      expect(results[2].errorCode).toBe(FILE_VALIDATION_ERRORS.BLOCKED_FILE_TYPE);
+      expect(results[2].errorCode).toBe(
+        FILE_VALIDATION_ERRORS.BLOCKED_FILE_TYPE,
+      );
     });
   });
 
@@ -196,7 +204,10 @@ describe('FileValidationService', () => {
         { originalname: 'profile.jpg', size: 2 * 1024 * 1024 },
       ] as Express.Multer.File[];
 
-      const results = service.validateFilesByCategory(mockFiles, 'profile_image');
+      const results = service.validateFilesByCategory(
+        mockFiles,
+        'profile_image',
+      );
 
       expect(results).toHaveLength(1);
       expect(results[0].isValid).toBe(true);
@@ -207,11 +218,16 @@ describe('FileValidationService', () => {
         { originalname: 'document.pdf', size: 1024 },
       ] as Express.Multer.File[];
 
-      const results = service.validateFilesByCategory(mockFiles, 'profile_image');
+      const results = service.validateFilesByCategory(
+        mockFiles,
+        'profile_image',
+      );
 
       expect(results).toHaveLength(1);
       expect(results[0].isValid).toBe(false);
-      expect(results[0].errorCode).toBe(FILE_VALIDATION_ERRORS.INVALID_FILE_TYPE);
+      expect(results[0].errorCode).toBe(
+        FILE_VALIDATION_ERRORS.INVALID_FILE_TYPE,
+      );
     });
 
     it('should validate todo attachment files correctly', () => {
@@ -220,7 +236,10 @@ describe('FileValidationService', () => {
         { originalname: 'spreadsheet.xlsx', size: 2048 },
       ] as Express.Multer.File[];
 
-      const results = service.validateFilesByCategory(mockFiles, 'todo_attachment');
+      const results = service.validateFilesByCategory(
+        mockFiles,
+        'todo_attachment',
+      );
 
       expect(results).toHaveLength(2);
       expect(results[0].isValid).toBe(true);
@@ -232,11 +251,16 @@ describe('FileValidationService', () => {
         { originalname: 'script.js', size: 1024 },
       ] as Express.Multer.File[];
 
-      const results = service.validateFilesByCategory(mockFiles, 'todo_attachment');
+      const results = service.validateFilesByCategory(
+        mockFiles,
+        'todo_attachment',
+      );
 
       expect(results).toHaveLength(1);
       expect(results[0].isValid).toBe(false);
-      expect(results[0].errorCode).toBe(FILE_VALIDATION_ERRORS.BLOCKED_FILE_TYPE);
+      expect(results[0].errorCode).toBe(
+        FILE_VALIDATION_ERRORS.BLOCKED_FILE_TYPE,
+      );
     });
   });
 
@@ -249,10 +273,10 @@ describe('FileValidationService', () => {
 
       const validationResults = [
         { isValid: true },
-        { 
-          isValid: false, 
+        {
+          isValid: false,
           errorCode: FILE_VALIDATION_ERRORS.BLOCKED_FILE_TYPE,
-          errorMessage: 'File type is blocked'
+          errorMessage: 'File type is blocked',
         },
       ];
 
@@ -260,7 +284,9 @@ describe('FileValidationService', () => {
 
       expect(errors).toHaveLength(1);
       expect(errors[0].fileName).toBe('invalid.exe');
-      expect(errors[0].errorCode).toBe(FILE_VALIDATION_ERRORS.BLOCKED_FILE_TYPE);
+      expect(errors[0].errorCode).toBe(
+        FILE_VALIDATION_ERRORS.BLOCKED_FILE_TYPE,
+      );
       expect(errors[0].fileSize).toBe(2048);
       expect(errors[0].fileType).toBe('.exe');
     });
@@ -271,10 +297,7 @@ describe('FileValidationService', () => {
         { originalname: 'valid2.docx', size: 2048 },
       ] as Express.Multer.File[];
 
-      const validationResults = [
-        { isValid: true },
-        { isValid: true },
-      ];
+      const validationResults = [{ isValid: true }, { isValid: true }];
 
       const errors = service.getValidationErrors(mockFiles, validationResults);
 
@@ -299,8 +322,12 @@ describe('FileValidationService', () => {
       const validFiles = service.getValidFiles(mockFiles, validationResults);
 
       expect(validFiles).toHaveLength(2);
-      expect((validFiles[0] as Express.Multer.File).originalname).toBe('valid.pdf');
-      expect((validFiles[1] as Express.Multer.File).originalname).toBe('alsovalid.docx');
+      expect((validFiles[0] as Express.Multer.File).originalname).toBe(
+        'valid.pdf',
+      );
+      expect((validFiles[1] as Express.Multer.File).originalname).toBe(
+        'alsovalid.docx',
+      );
     });
 
     it('should return empty array when no files are valid', () => {
@@ -336,17 +363,29 @@ describe('FileValidationService', () => {
 
   describe('isValidFileType', () => {
     it('should return true for allowed file types', () => {
-      const result = service.isValidFileType('document.pdf', ['.pdf', '.docx'], []);
+      const result = service.isValidFileType(
+        'document.pdf',
+        ['.pdf', '.docx'],
+        [],
+      );
       expect(result).toBe(true);
     });
 
     it('should return false for blocked file types', () => {
-      const result = service.isValidFileType('script.exe', ['.exe', '.pdf'], ['.exe']);
+      const result = service.isValidFileType(
+        'script.exe',
+        ['.exe', '.pdf'],
+        ['.exe'],
+      );
       expect(result).toBe(false);
     });
 
     it('should return false for disallowed file types', () => {
-      const result = service.isValidFileType('image.jpg', ['.pdf', '.docx'], []);
+      const result = service.isValidFileType(
+        'image.jpg',
+        ['.pdf', '.docx'],
+        [],
+      );
       expect(result).toBe(false);
     });
 

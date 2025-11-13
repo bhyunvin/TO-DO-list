@@ -25,23 +25,25 @@ export class UserProfileValidationPipe implements PipeTransform<any> {
 
     // Sanitize input before validation
     const sanitizedValue = this.sanitizeInput(value);
-    
+
     // Transform to class instance
     const object = plainToClass(metatype, sanitizedValue);
-    
+
     // Validate using class-validator decorators
     const errors = await validate(object);
-    
+
     if (errors.length > 0) {
-      const errorMessages = errors.map(error => {
-        return Object.values(error.constraints || {}).join(', ');
-      }).join('; ');
-      
+      const errorMessages = errors
+        .map((error) => {
+          return Object.values(error.constraints || {}).join(', ');
+        })
+        .join('; ');
+
       this.logger.warn('Profile update validation failed', {
         errors: errorMessages,
         sanitizedValue: this.logSafeValue(sanitizedValue),
       });
-      
+
       throw new BadRequestException({
         message: 'Validation failed',
         error: errorMessages,
@@ -73,11 +75,15 @@ export class UserProfileValidationPipe implements PipeTransform<any> {
     }
 
     if (sanitized.userEmail) {
-      sanitized.userEmail = this.inputSanitizer.sanitizeEmail(sanitized.userEmail);
+      sanitized.userEmail = this.inputSanitizer.sanitizeEmail(
+        sanitized.userEmail,
+      );
     }
 
     if (sanitized.userDescription) {
-      sanitized.userDescription = this.inputSanitizer.sanitizeDescription(sanitized.userDescription);
+      sanitized.userDescription = this.inputSanitizer.sanitizeDescription(
+        sanitized.userDescription,
+      );
     }
 
     return sanitized;
@@ -94,7 +100,7 @@ export class UserProfileValidationPipe implements PipeTransform<any> {
 
     const checkValue = (fieldValue: string, fieldName: string) => {
       if (!fieldValue) return;
-      
+
       for (const pattern of sqlInjectionPatterns) {
         if (pattern.test(fieldValue)) {
           this.logger.error('Potential SQL injection attempt detected', {
@@ -102,7 +108,7 @@ export class UserProfileValidationPipe implements PipeTransform<any> {
             pattern: pattern.toString(),
             value: fieldValue.substring(0, 50) + '...', // Log only first 50 chars
           });
-          
+
           throw new BadRequestException({
             message: 'Invalid input detected',
             error: `${fieldName} contains invalid characters`,
@@ -116,31 +122,34 @@ export class UserProfileValidationPipe implements PipeTransform<any> {
     if (value.userName) {
       checkValue(value.userName, 'userName');
     }
-    
+
     if (value.userEmail) {
       checkValue(value.userEmail, 'userEmail');
     }
-    
+
     if (value.userDescription) {
       checkValue(value.userDescription, 'userDescription');
     }
 
     // Check for excessive special characters that might indicate an attack
     const specialCharPattern = /[<>{}[\]\\\/\$\^]/g;
-    
+
     Object.entries(value).forEach(([key, val]) => {
       if (typeof val === 'string') {
         const specialCharCount = (val.match(specialCharPattern) || []).length;
         const totalLength = val.length;
-        
+
         // If more than 10% of characters are special characters, flag as suspicious
-        if (totalLength > 0 && (specialCharCount / totalLength) > 0.1) {
-          this.logger.warn('Suspicious input with high special character ratio', {
-            field: key,
-            specialCharRatio: specialCharCount / totalLength,
-            value: val.substring(0, 50) + '...',
-          });
-          
+        if (totalLength > 0 && specialCharCount / totalLength > 0.1) {
+          this.logger.warn(
+            'Suspicious input with high special character ratio',
+            {
+              field: key,
+              specialCharRatio: specialCharCount / totalLength,
+              value: val.substring(0, 50) + '...',
+            },
+          );
+
           throw new BadRequestException({
             message: 'Invalid input format',
             error: `${key} contains too many special characters`,
@@ -158,7 +167,7 @@ export class UserProfileValidationPipe implements PipeTransform<any> {
     }
 
     const safe = { ...value };
-    Object.keys(safe).forEach(key => {
+    Object.keys(safe).forEach((key) => {
       if (typeof safe[key] === 'string' && safe[key].length > 100) {
         safe[key] = safe[key].substring(0, 100) + '...';
       }

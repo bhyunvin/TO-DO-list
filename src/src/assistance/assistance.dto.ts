@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsOptional, IsBoolean } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
 
 export class RequestAssistanceDto {
   userSeq: number; // 사용자번호
@@ -18,7 +18,7 @@ export class ChatResponseDto {
   response: string; // AI 응답 (HTML 형식)
   timestamp: string; // 응답 시간
   success: boolean; // 성공 여부
-  
+
   @IsOptional()
   error?: string; // 오류 메시지 (실패 시)
 }

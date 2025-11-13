@@ -17,7 +17,7 @@ export class InputSanitizerService {
       allowHtml?: boolean;
       maxLength?: number;
       trimWhitespace?: boolean;
-    } = {}
+    } = {},
   ): string {
     if (!input || typeof input !== 'string') {
       return '';
@@ -62,13 +62,13 @@ export class InputSanitizerService {
 
     // Basic email sanitization - remove dangerous characters but preserve email format
     let sanitized = email.trim().toLowerCase();
-    
+
     // Remove characters that are never valid in emails and could be dangerous
     sanitized = sanitized.replace(/['"\\;()<>]/g, '');
-    
+
     // Remove script-related content
     sanitized = sanitized.replace(/javascript:/gi, '');
-    
+
     return sanitized;
   }
 
@@ -83,18 +83,18 @@ export class InputSanitizerService {
     }
 
     let sanitized = name.trim();
-    
+
     // Allow letters, numbers, spaces, hyphens, apostrophes, and periods for names
     sanitized = sanitized.replace(/[^a-zA-Z0-9\s\-'.]/g, '');
-    
+
     // Remove multiple consecutive spaces
     sanitized = sanitized.replace(/\s+/g, ' ');
-    
+
     // Limit length for names
     if (sanitized.length > 200) {
       sanitized = sanitized.substring(0, 200);
     }
-    
+
     return sanitized;
   }
 
@@ -109,21 +109,21 @@ export class InputSanitizerService {
     }
 
     let sanitized = description.trim();
-    
+
     // Remove script tags and dangerous HTML
     sanitized = sanitized.replace(/<script[^>]*>.*?<\/script>/gi, '');
     sanitized = sanitized.replace(/<iframe[^>]*>.*?<\/iframe>/gi, '');
     sanitized = sanitized.replace(/javascript:/gi, '');
     sanitized = sanitized.replace(/on\w+\s*=/gi, '');
-    
+
     // Remove SQL injection attempts
     sanitized = sanitized.replace(/['"\\;]/g, '');
-    
+
     // Limit length for descriptions
     if (sanitized.length > 4000) {
       sanitized = sanitized.substring(0, 4000);
     }
-    
+
     return sanitized;
   }
 
@@ -153,7 +153,9 @@ export class InputSanitizerService {
    */
   sanitizeObject<T extends Record<string, any>>(
     obj: T,
-    fieldRules: Partial<Record<keyof T, 'string' | 'email' | 'name' | 'description'>> = {}
+    fieldRules: Partial<
+      Record<keyof T, 'string' | 'email' | 'name' | 'description'>
+    > = {},
   ): T {
     if (!obj || typeof obj !== 'object') {
       return obj;
@@ -164,7 +166,7 @@ export class InputSanitizerService {
     for (const [key, value] of Object.entries(sanitized)) {
       if (typeof value === 'string') {
         const rule = fieldRules[key as keyof T];
-        
+
         switch (rule) {
           case 'email':
             sanitized[key] = this.sanitizeEmail(value);

@@ -4,7 +4,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { FileInfoEntity } from './file.entity';
 import { FileUploadUtil } from './fileUploadUtil';
-import { 
+import {
   FileValidationService,
   FileUploadErrorService,
   ProfileImageValidationInterceptor,
@@ -14,14 +14,14 @@ import {
 @Module({
   imports: [TypeOrmModule.forFeature([FileInfoEntity])],
   providers: [
-    FileUploadUtil, 
+    FileUploadUtil,
     FileValidationService,
     FileUploadErrorService,
     ProfileImageValidationInterceptor,
     TodoAttachmentValidationInterceptor,
   ],
   exports: [
-    FileUploadUtil, 
+    FileUploadUtil,
     FileValidationService,
     FileUploadErrorService,
     ProfileImageValidationInterceptor,

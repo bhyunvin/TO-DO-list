@@ -1,4 +1,10 @@
-import { Injectable, Logger, UnauthorizedException, BadRequestException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  UnauthorizedException,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { InjectRepository, InjectDataSource } from '@nestjs/typeorm';
 import { Repository, DataSource, Not } from 'typeorm';
 import { UserEntity } from './user.entity';
@@ -21,7 +27,7 @@ export class UserService {
     private inputSanitizer: InputSanitizerService,
     @InjectDataSource()
     private readonly dataSource: DataSource,
-  ) { }
+  ) {}
 
   // 로그인 로직 (컨트롤러에서 세션 처리)
   async login(userDto: UserDto): Promise<Omit<UserEntity, 'userPassword'>> {
@@ -60,9 +66,12 @@ export class UserService {
   ): Promise<UserDto> {
     return this.dataSource.transaction(async (transactionalEntityManager) => {
       // Check email uniqueness
-      const existingUserWithEmail = await transactionalEntityManager.findOne(UserEntity, {
-        where: { userEmail: userDto.userEmail },
-      });
+      const existingUserWithEmail = await transactionalEntityManager.findOne(
+        UserEntity,
+        {
+          where: { userEmail: userDto.userEmail },
+        },
+      );
 
       if (existingUserWithEmail) {
         throw new BadRequestException('이미 사용 중인 이메일 주소입니다.');
@@ -82,10 +91,11 @@ export class UserService {
       if (profileImageFile) {
         try {
           // Validate profile image file
-          const validationResults = this.fileValidationService.validateFilesByCategory(
-            [profileImageFile],
-            'profile_image',
-          );
+          const validationResults =
+            this.fileValidationService.validateFilesByCategory(
+              [profileImageFile],
+              'profile_image',
+            );
 
           const validationResult = validationResults[0];
           if (!validationResult.isValid) {
@@ -122,7 +132,6 @@ export class UserService {
             fileName: profileImageFile.originalname,
             fileGroupNo: fileUploadResult.fileGroupNo,
           });
-
         } catch (error) {
           this.logger.error('Profile image upload failed', {
             userId: userDto.userId,
@@ -176,14 +185,22 @@ export class UserService {
           userId: currentUser.userId,
           ip,
         });
-        throw new ForbiddenException('계정이 일시 정지되어 프로필을 수정할 수 없습니다.');
+        throw new ForbiddenException(
+          '계정이 일시 정지되어 프로필을 수정할 수 없습니다.',
+        );
       }
 
       // Validate and sanitize input data
-      const sanitizedDto = this.validateAndSanitizeUpdateData(updateUserDto, currentUser);
+      const sanitizedDto = this.validateAndSanitizeUpdateData(
+        updateUserDto,
+        currentUser,
+      );
 
       // Enhanced email uniqueness check with additional validation
-      if (sanitizedDto.userEmail && sanitizedDto.userEmail !== currentUser.userEmail) {
+      if (
+        sanitizedDto.userEmail &&
+        sanitizedDto.userEmail !== currentUser.userEmail
+      ) {
         // Additional email format validation
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(sanitizedDto.userEmail)) {
@@ -195,12 +212,15 @@ export class UserService {
         }
 
         // Check for email uniqueness
-        const existingUser = await transactionalEntityManager.findOne(UserEntity, {
-          where: {
-            userEmail: sanitizedDto.userEmail,
-            userSeq: Not(userSeq) // Exclude current user
+        const existingUser = await transactionalEntityManager.findOne(
+          UserEntity,
+          {
+            where: {
+              userEmail: sanitizedDto.userEmail,
+              userSeq: Not(userSeq), // Exclude current user
+            },
           },
-        });
+        );
 
         if (existingUser) {
           this.logger.warn('Profile update attempted with duplicate email', {
@@ -221,7 +241,10 @@ export class UserService {
       const updatedFields: string[] = [];
 
       // Update user fields with additional validation
-      if (sanitizedDto.userName !== undefined && sanitizedDto.userName !== currentUser.userName) {
+      if (
+        sanitizedDto.userName !== undefined &&
+        sanitizedDto.userName !== currentUser.userName
+      ) {
         // userName이 undefined가 아니고 실제로 값이 있을 때만 업데이트
         if (sanitizedDto.userName && sanitizedDto.userName.trim().length > 0) {
           currentUser.userName = sanitizedDto.userName;
@@ -229,15 +252,24 @@ export class UserService {
         }
       }
 
-      if (sanitizedDto.userEmail !== undefined && sanitizedDto.userEmail !== currentUser.userEmail) {
+      if (
+        sanitizedDto.userEmail !== undefined &&
+        sanitizedDto.userEmail !== currentUser.userEmail
+      ) {
         // userEmail이 undefined가 아니고 실제로 값이 있을 때만 업데이트
-        if (sanitizedDto.userEmail && sanitizedDto.userEmail.trim().length > 0) {
+        if (
+          sanitizedDto.userEmail &&
+          sanitizedDto.userEmail.trim().length > 0
+        ) {
           currentUser.userEmail = sanitizedDto.userEmail;
           updatedFields.push('userEmail');
         }
       }
 
-      if (sanitizedDto.userDescription !== undefined && sanitizedDto.userDescription !== currentUser.userDescription) {
+      if (
+        sanitizedDto.userDescription !== undefined &&
+        sanitizedDto.userDescription !== currentUser.userDescription
+      ) {
         currentUser.userDescription = sanitizedDto.userDescription;
         updatedFields.push('userDescription');
       }
@@ -249,10 +281,11 @@ export class UserService {
           this.validateProfileImageSecurity(profileImageFile, userSeq, ip);
 
           // Validate profile image file
-          const validationResults = this.fileValidationService.validateFilesByCategory(
-            [profileImageFile],
-            'profile_image',
-          );
+          const validationResults =
+            this.fileValidationService.validateFilesByCategory(
+              [profileImageFile],
+              'profile_image',
+            );
 
           const validationResult = validationResults[0];
           if (!validationResult.isValid) {
@@ -279,7 +312,8 @@ export class UserService {
             'profile_image',
           );
 
-          currentUser.userProfileImageFileGroupNo = fileUploadResult.fileGroupNo;
+          currentUser.userProfileImageFileGroupNo =
+            fileUploadResult.fileGroupNo;
           updatedFields.push('profileImage');
 
           this.logger.log('Profile image updated successfully', {
@@ -289,7 +323,6 @@ export class UserService {
             fileGroupNo: fileUploadResult.fileGroupNo,
             ip,
           });
-
         } catch (error) {
           this.logger.error('Profile image upload failed during update', {
             userSeq,
@@ -326,11 +359,14 @@ export class UserService {
       const updatedUser = setAuditColumn({
         entity: currentUser,
         id: currentUser.userId,
-        ip
+        ip,
       });
 
       // Save updated user
-      const savedUser = await transactionalEntityManager.save(UserEntity, updatedUser);
+      const savedUser = await transactionalEntityManager.save(
+        UserEntity,
+        updatedUser,
+      );
 
       // Log successful update
       this.logger.log('Profile update completed successfully', {
@@ -357,8 +393,10 @@ export class UserService {
 
     // Sanitize name
     if (updateUserDto.userName !== undefined) {
-      sanitized.userName = this.inputSanitizer.sanitizeName(updateUserDto.userName);
-      
+      sanitized.userName = this.inputSanitizer.sanitizeName(
+        updateUserDto.userName,
+      );
+
       // Additional name validation
       if (sanitized.userName && sanitized.userName.length > 200) {
         throw new BadRequestException({
@@ -371,8 +409,10 @@ export class UserService {
 
     // Sanitize email
     if (updateUserDto.userEmail !== undefined) {
-      sanitized.userEmail = this.inputSanitizer.sanitizeEmail(updateUserDto.userEmail);
-      
+      sanitized.userEmail = this.inputSanitizer.sanitizeEmail(
+        updateUserDto.userEmail,
+      );
+
       // Additional email validation
       if (sanitized.userEmail && sanitized.userEmail.length > 100) {
         throw new BadRequestException({
@@ -385,10 +425,15 @@ export class UserService {
 
     // Sanitize description
     if (updateUserDto.userDescription !== undefined) {
-      sanitized.userDescription = this.inputSanitizer.sanitizeDescription(updateUserDto.userDescription);
-      
+      sanitized.userDescription = this.inputSanitizer.sanitizeDescription(
+        updateUserDto.userDescription,
+      );
+
       // Additional description validation
-      if (sanitized.userDescription && sanitized.userDescription.length > 4000) {
+      if (
+        sanitized.userDescription &&
+        sanitized.userDescription.length > 4000
+      ) {
         throw new BadRequestException({
           message: 'Description too long',
           error: '사용자설명이 너무 깁니다.',
@@ -424,7 +469,7 @@ export class UserService {
           pattern: pattern.toString(),
           ip,
         });
-        
+
         throw new BadRequestException({
           message: 'Invalid filename',
           error: '파일명에 허용되지 않는 문자가 포함되어 있습니다.',
@@ -443,7 +488,7 @@ export class UserService {
         maxSize,
         ip,
       });
-      
+
       throw new BadRequestException({
         message: 'File too large',
         error: '파일 크기가 너무 큽니다.',
@@ -452,7 +497,12 @@ export class UserService {
     }
 
     // Check MIME type matches file extension
-    const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    const allowedMimeTypes = [
+      'image/jpeg',
+      'image/png',
+      'image/gif',
+      'image/webp',
+    ];
     if (!allowedMimeTypes.includes(profileImageFile.mimetype)) {
       this.logger.error('Invalid profile image MIME type', {
         userSeq,
@@ -460,7 +510,7 @@ export class UserService {
         mimeType: profileImageFile.mimetype,
         ip,
       });
-      
+
       throw new BadRequestException({
         message: 'Invalid file type',
         error: '지원되지 않는 파일 형식입니다.',
@@ -496,7 +546,9 @@ export class UserService {
           userId: currentUser.userId,
           ip,
         });
-        throw new ForbiddenException('계정이 일시 정지되어 비밀번호를 변경할 수 없습니다.');
+        throw new ForbiddenException(
+          '계정이 일시 정지되어 비밀번호를 변경할 수 없습니다.',
+        );
       }
 
       // Validate current password
@@ -506,17 +558,22 @@ export class UserService {
       );
 
       if (!isCurrentPasswordValid) {
-        this.logger.warn('Password change attempted with incorrect current password', {
-          userSeq,
-          userId: currentUser.userId,
-          ip,
-        });
+        this.logger.warn(
+          'Password change attempted with incorrect current password',
+          {
+            userSeq,
+            userId: currentUser.userId,
+            ip,
+          },
+        );
         throw new UnauthorizedException('현재 비밀번호가 올바르지 않습니다.');
       }
 
       // Validate new password confirmation
       if (changePasswordDto.newPassword !== changePasswordDto.confirmPassword) {
-        throw new BadRequestException('새 비밀번호와 비밀번호 확인이 일치하지 않습니다.');
+        throw new BadRequestException(
+          '새 비밀번호와 비밀번호 확인이 일치하지 않습니다.',
+        );
       }
 
       // Check if new password is different from current password
@@ -526,7 +583,9 @@ export class UserService {
       );
 
       if (isSamePassword) {
-        throw new BadRequestException('새 비밀번호는 현재 비밀번호와 달라야 합니다.');
+        throw new BadRequestException(
+          '새 비밀번호는 현재 비밀번호와 달라야 합니다.',
+        );
       }
 
       // Encrypt new password
@@ -539,7 +598,7 @@ export class UserService {
       const updatedUser = setAuditColumn({
         entity: currentUser,
         id: currentUser.userId,
-        ip
+        ip,
       });
 
       // Save updated user

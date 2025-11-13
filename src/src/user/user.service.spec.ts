@@ -84,10 +84,14 @@ describe('UserService - Profile Update', () => {
     }).compile();
 
     service = module.get<UserService>(UserService);
-    userRepository = module.get<Repository<UserEntity>>(getRepositoryToken(UserEntity));
+    userRepository = module.get<Repository<UserEntity>>(
+      getRepositoryToken(UserEntity),
+    );
     dataSource = module.get<DataSource>(getDataSourceToken());
     fileUploadUtil = module.get<FileUploadUtil>(FileUploadUtil);
-    fileValidationService = module.get<FileValidationService>(FileValidationService);
+    fileValidationService = module.get<FileValidationService>(
+      FileValidationService,
+    );
     inputSanitizer = module.get<InputSanitizerService>(InputSanitizerService);
   });
 
@@ -104,14 +108,17 @@ describe('UserService - Profile Update', () => {
       const suspendedUser = { ...mockUser, adminYn: 'SUSPENDED' };
       const updateDto: UpdateUserDto = { userName: 'New Name' };
 
-      jest.spyOn(dataSource, 'transaction').mockImplementation(async (callback: any) => {
-        return callback(mockEntityManager);
-      });
+      jest
+        .spyOn(dataSource, 'transaction')
+        .mockImplementation(async (callback: any) => {
+          return callback(mockEntityManager);
+        });
 
       jest.spyOn(mockEntityManager, 'findOne').mockResolvedValue(suspendedUser);
 
-      await expect(service.updateProfile(1, updateDto, null, '127.0.0.1'))
-        .rejects.toThrow(ForbiddenException);
+      await expect(
+        service.updateProfile(1, updateDto, null, '127.0.0.1'),
+      ).rejects.toThrow(ForbiddenException);
     });
 
     it('should sanitize input data before processing', async () => {
@@ -120,31 +127,47 @@ describe('UserService - Profile Update', () => {
         userEmail: '  JOHN@EXAMPLE.COM  ',
         userDescription: '  Test description  ',
       };
-      const updatedUser = { 
-        ...mockUser, 
-        userName: 'John Doe', 
-        userEmail: 'john@example.com', 
-        userDescription: 'Test description' 
+      const updatedUser = {
+        ...mockUser,
+        userName: 'John Doe',
+        userEmail: 'john@example.com',
+        userDescription: 'Test description',
       };
 
-      jest.spyOn(dataSource, 'transaction').mockImplementation(async (callback: any) => {
-        return callback(mockEntityManager);
-      });
+      jest
+        .spyOn(dataSource, 'transaction')
+        .mockImplementation(async (callback: any) => {
+          return callback(mockEntityManager);
+        });
 
-      jest.spyOn(mockEntityManager, 'findOne')
+      jest
+        .spyOn(mockEntityManager, 'findOne')
         .mockResolvedValueOnce(mockUser)
         .mockResolvedValueOnce(null);
       jest.spyOn(mockEntityManager, 'save').mockResolvedValue(updatedUser);
 
       jest.spyOn(inputSanitizer, 'sanitizeName').mockReturnValue('John Doe');
-      jest.spyOn(inputSanitizer, 'sanitizeEmail').mockReturnValue('john@example.com');
-      jest.spyOn(inputSanitizer, 'sanitizeDescription').mockReturnValue('Test description');
+      jest
+        .spyOn(inputSanitizer, 'sanitizeEmail')
+        .mockReturnValue('john@example.com');
+      jest
+        .spyOn(inputSanitizer, 'sanitizeDescription')
+        .mockReturnValue('Test description');
 
-      const result = await service.updateProfile(1, updateDto, null, '127.0.0.1');
+      const result = await service.updateProfile(
+        1,
+        updateDto,
+        null,
+        '127.0.0.1',
+      );
 
       expect(inputSanitizer.sanitizeName).toHaveBeenCalledWith('  John Doe  ');
-      expect(inputSanitizer.sanitizeEmail).toHaveBeenCalledWith('  JOHN@EXAMPLE.COM  ');
-      expect(inputSanitizer.sanitizeDescription).toHaveBeenCalledWith('  Test description  ');
+      expect(inputSanitizer.sanitizeEmail).toHaveBeenCalledWith(
+        '  JOHN@EXAMPLE.COM  ',
+      );
+      expect(inputSanitizer.sanitizeDescription).toHaveBeenCalledWith(
+        '  Test description  ',
+      );
       expect(result.userName).toBe('John Doe');
       expect(result.userEmail).toBe('john@example.com');
     });

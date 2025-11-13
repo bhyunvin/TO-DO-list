@@ -89,9 +89,18 @@ describe('TodoController - Excel Export', () => {
 
       const res = mockResponse();
 
-      await controller.exportToExcel(mockSession as any, startDate, endDate, res);
+      await controller.exportToExcel(
+        mockSession as any,
+        startDate,
+        endDate,
+        res,
+      );
 
-      expect(todoService.exportToExcel).toHaveBeenCalledWith(1, startDate, endDate);
+      expect(todoService.exportToExcel).toHaveBeenCalledWith(
+        1,
+        startDate,
+        endDate,
+      );
       expect(res.setHeader).toHaveBeenCalledWith(
         'Content-Type',
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -147,10 +156,19 @@ describe('TodoController - Excel Export', () => {
       const res = mockResponse();
 
       await expect(
-        controller.exportToExcel(mockSession as any, '2024/01/01', endDate, res),
+        controller.exportToExcel(
+          mockSession as any,
+          '2024/01/01',
+          endDate,
+          res,
+        ),
       ).rejects.toThrow('Invalid date format. Use YYYY-MM-DD');
 
-      expect(todoService.exportToExcel).toHaveBeenCalledWith(1, '2024/01/01', endDate);
+      expect(todoService.exportToExcel).toHaveBeenCalledWith(
+        1,
+        '2024/01/01',
+        endDate,
+      );
     });
 
     it('should handle service errors', async () => {
@@ -163,7 +181,11 @@ describe('TodoController - Excel Export', () => {
         controller.exportToExcel(mockSession as any, startDate, endDate, res),
       ).rejects.toThrow(errorMessage);
 
-      expect(todoService.exportToExcel).toHaveBeenCalledWith(1, startDate, endDate);
+      expect(todoService.exportToExcel).toHaveBeenCalledWith(
+        1,
+        startDate,
+        endDate,
+      );
     });
 
     it('should extract userSeq from session', async () => {
@@ -181,9 +203,18 @@ describe('TodoController - Excel Export', () => {
 
       const res = mockResponse();
 
-      await controller.exportToExcel(customSession as any, startDate, endDate, res);
+      await controller.exportToExcel(
+        customSession as any,
+        startDate,
+        endDate,
+        res,
+      );
 
-      expect(todoService.exportToExcel).toHaveBeenCalledWith(999, startDate, endDate);
+      expect(todoService.exportToExcel).toHaveBeenCalledWith(
+        999,
+        startDate,
+        endDate,
+      );
     });
 
     it('should set correct filename in Content-Disposition header', async () => {
@@ -195,7 +226,12 @@ describe('TodoController - Excel Export', () => {
 
       const res = mockResponse();
 
-      await controller.exportToExcel(mockSession as any, customStartDate, customEndDate, res);
+      await controller.exportToExcel(
+        mockSession as any,
+        customStartDate,
+        customEndDate,
+        res,
+      );
 
       expect(res.setHeader).toHaveBeenCalledWith(
         'Content-Disposition',
@@ -209,7 +245,12 @@ describe('TodoController - Excel Export', () => {
 
       const res = mockResponse();
 
-      await controller.exportToExcel(mockSession as any, startDate, endDate, res);
+      await controller.exportToExcel(
+        mockSession as any,
+        startDate,
+        endDate,
+        res,
+      );
 
       expect(res.send).toHaveBeenCalledWith(mockBuffer);
       expect(res.send).toHaveBeenCalledTimes(1);

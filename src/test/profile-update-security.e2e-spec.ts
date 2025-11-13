@@ -59,14 +59,16 @@ describe('Profile Update Security (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    
+
     // Enable validation pipes like in production
-    app.useGlobalPipes(new ValidationPipe({ 
-      transform: true, 
-      whitelist: true, 
-      forbidNonWhitelisted: true 
-    }));
-    
+    app.useGlobalPipes(
+      new ValidationPipe({
+        transform: true,
+        whitelist: true,
+        forbidNonWhitelisted: true,
+      }),
+    );
+
     await app.init();
 
     dataSource = app.get<DataSource>(DataSource);
@@ -74,10 +76,12 @@ describe('Profile Update Security (e2e)', () => {
 
   beforeEach(async () => {
     // Clean up and create test user
-    await dataSource.query('DELETE FROM nj_user_info WHERE user_id = $1', ['securitytestuser']);
-    
+    await dataSource.query('DELETE FROM nj_user_info WHERE user_id = $1', [
+      'securitytestuser',
+    ]);
+
     const hashedPassword = await encrypt('testpassword123');
-    
+
     testUser = await dataSource.manager.save(UserEntity, {
       userId: 'securitytestuser',
       userName: 'Security Test User',
@@ -110,7 +114,9 @@ describe('Profile Update Security (e2e)', () => {
   afterEach(async () => {
     // Clean up test data
     if (testUser) {
-      await dataSource.query('DELETE FROM nj_user_info WHERE user_seq = $1', [testUser.userSeq]);
+      await dataSource.query('DELETE FROM nj_user_info WHERE user_seq = $1', [
+        testUser.userSeq,
+      ]);
     }
   });
 
@@ -194,7 +200,7 @@ describe('Profile Update Security (e2e)', () => {
       const maliciousInputs = [
         "'; DROP TABLE nj_user_info; --",
         "' OR 1=1 --",
-        "UNION SELECT * FROM nj_user_info",
+        'UNION SELECT * FROM nj_user_info',
         "<script>alert('xss')</script>",
       ];
 
@@ -207,7 +213,9 @@ describe('Profile Update Security (e2e)', () => {
           })
           .expect(400);
 
-        expect(response.body.errorCode).toMatch(/SECURITY_VIOLATION|VALIDATION_ERROR/);
+        expect(response.body.errorCode).toMatch(
+          /SECURITY_VIOLATION|VALIDATION_ERROR/,
+        );
       }
     });
 
@@ -227,7 +235,9 @@ describe('Profile Update Security (e2e)', () => {
           })
           .expect(400);
 
-        expect(response.body.errorCode).toMatch(/SECURITY_VIOLATION|VALIDATION_ERROR|INVALID_EMAIL_FORMAT/);
+        expect(response.body.errorCode).toMatch(
+          /SECURITY_VIOLATION|VALIDATION_ERROR|INVALID_EMAIL_FORMAT/,
+        );
       }
     });
 
@@ -248,7 +258,9 @@ describe('Profile Update Security (e2e)', () => {
           })
           .expect(400);
 
-        expect(response.body.errorCode).toMatch(/SECURITY_VIOLATION|VALIDATION_ERROR/);
+        expect(response.body.errorCode).toMatch(
+          /SECURITY_VIOLATION|VALIDATION_ERROR/,
+        );
       }
     });
 
@@ -265,12 +277,14 @@ describe('Profile Update Security (e2e)', () => {
 
       expect(response.body.userName).toBe('John Doe');
       expect(response.body.userEmail).toBe('john@example.com');
-      expect(response.body.userDescription).toBe('This is a safe description with normal text.');
+      expect(response.body.userDescription).toBe(
+        'This is a safe description with normal text.',
+      );
     });
 
     it('should reject input with excessive special characters', async () => {
       const suspiciousInput = '<>{}[]\\/$^<>{}[]\\/$^<>{}[]\\/$^<>{}[]\\/$^';
-      
+
       const response = await request(app.getHttpServer())
         .patch('/user/profile')
         .set('Cookie', sessionCookie)
@@ -330,7 +344,9 @@ describe('Profile Update Security (e2e)', () => {
           })
           .expect(400);
 
-        expect(response.body.message).toContain('올바른 이메일 형식이 아닙니다');
+        expect(response.body.message).toContain(
+          '올바른 이메일 형식이 아닙니다',
+        );
       }
     });
 
@@ -343,7 +359,9 @@ describe('Profile Update Security (e2e)', () => {
         })
         .expect(400);
 
-      expect(response.body.message).toContain('사용자명은 비어있을 수 없습니다');
+      expect(response.body.message).toContain(
+        '사용자명은 비어있을 수 없습니다',
+      );
     });
   });
 
@@ -367,7 +385,9 @@ describe('Profile Update Security (e2e)', () => {
         })
         .expect(403);
 
-      expect(response.body.message).toContain('프로필 업데이트가 너무 빈번합니다');
+      expect(response.body.message).toContain(
+        '프로필 업데이트가 너무 빈번합니다',
+      );
     });
   });
 
@@ -377,7 +397,7 @@ describe('Profile Update Security (e2e)', () => {
     beforeEach(async () => {
       // Create a second user for uniqueness testing
       const hashedPassword = await encrypt('testpassword123');
-      
+
       secondUser = await dataSource.manager.save(UserEntity, {
         userId: 'seconduser',
         userName: 'Second User',
@@ -398,7 +418,9 @@ describe('Profile Update Security (e2e)', () => {
 
     afterEach(async () => {
       if (secondUser) {
-        await dataSource.query('DELETE FROM nj_user_info WHERE user_seq = $1', [secondUser.userSeq]);
+        await dataSource.query('DELETE FROM nj_user_info WHERE user_seq = $1', [
+          secondUser.userSeq,
+        ]);
       }
     });
 
@@ -458,7 +480,9 @@ describe('Profile Update Security (e2e)', () => {
           .attach('profileImage', Buffer.from('fake image data'), fileName)
           .expect(400);
 
-        expect(response.body.errorCode).toMatch(/INVALID_FILENAME|INVALID_FILE_TYPE|BLOCKED_FILE_TYPE/);
+        expect(response.body.errorCode).toMatch(
+          /INVALID_FILENAME|INVALID_FILE_TYPE|BLOCKED_FILE_TYPE/,
+        );
       }
     });
 
@@ -472,12 +496,14 @@ describe('Profile Update Security (e2e)', () => {
         })
         .expect(400);
 
-      expect(response.body.errorCode).toMatch(/INVALID_FILE_TYPE|FILE_VALIDATION_ERROR/);
+      expect(response.body.errorCode).toMatch(
+        /INVALID_FILE_TYPE|FILE_VALIDATION_ERROR/,
+      );
     });
 
     it('should reject oversized files', async () => {
       const largeBuffer = Buffer.alloc(6 * 1024 * 1024); // 6MB, exceeds 5MB limit
-      
+
       const response = await request(app.getHttpServer())
         .patch('/user/profile')
         .set('Cookie', sessionCookie)
@@ -487,15 +513,29 @@ describe('Profile Update Security (e2e)', () => {
         })
         .expect(400);
 
-      expect(response.body.errorCode).toMatch(/FILE_TOO_LARGE|FILE_VALIDATION_ERROR/);
+      expect(response.body.errorCode).toMatch(
+        /FILE_TOO_LARGE|FILE_VALIDATION_ERROR/,
+      );
     });
 
     it('should accept valid image files', async () => {
       // Create a small valid image buffer (minimal JPEG header)
       const validImageBuffer = Buffer.from([
-        0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46, 0x49, 0x46, 0x00, 0x01,
+        0xff,
+        0xd8,
+        0xff,
+        0xe0,
+        0x00,
+        0x10,
+        0x4a,
+        0x46,
+        0x49,
+        0x46,
+        0x00,
+        0x01,
         // ... minimal JPEG data
-        0xFF, 0xD9 // JPEG end marker
+        0xff,
+        0xd9, // JPEG end marker
       ]);
 
       const response = await request(app.getHttpServer())
@@ -537,7 +577,7 @@ describe('Profile Update Security (e2e)', () => {
     it('should validate session integrity', async () => {
       // Test with malformed session cookie
       const malformedCookie = sessionCookie.replace(/[a-zA-Z0-9]/g, 'X');
-      
+
       const response = await request(app.getHttpServer())
         .patch('/user/profile')
         .set('Cookie', malformedCookie)
@@ -563,7 +603,7 @@ describe('Profile Update Security (e2e)', () => {
         .expect(400);
 
       expect(response.body.errorCode).toBe('SECURITY_VIOLATION');
-      
+
       // In a real scenario, you would verify that the security violation
       // was logged to your audit system
     });
@@ -578,7 +618,7 @@ describe('Profile Update Security (e2e)', () => {
         .expect(200);
 
       expect(response.body.userName).toBe('Audit Test Update');
-      
+
       // In a real scenario, you would verify that the successful update
       // was logged to your audit system with appropriate details
     });

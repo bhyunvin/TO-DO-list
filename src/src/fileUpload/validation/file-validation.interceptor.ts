@@ -38,20 +38,24 @@ export class FileValidationInterceptor implements NestInterceptor {
     }
 
     // Perform server-side validation
-    const validationResults = this.fileValidationService.validateFilesByCategory(
-      filesToValidate,
-      this.fileCategory,
-    );
+    const validationResults =
+      this.fileValidationService.validateFilesByCategory(
+        filesToValidate,
+        this.fileCategory,
+      );
 
     // Check for validation failures
-    const failedValidations = validationResults.filter(result => !result.isValid);
+    const failedValidations = validationResults.filter(
+      (result) => !result.isValid,
+    );
 
     if (failedValidations.length > 0) {
       // Get detailed error information
-      const validationErrors = this.fileUploadErrorService.mapValidationResultsToErrors(
-        filesToValidate,
-        validationResults,
-      );
+      const validationErrors =
+        this.fileUploadErrorService.mapValidationResultsToErrors(
+          filesToValidate,
+          validationResults,
+        );
 
       // Extract error context for logging
       const errorContext = this.fileUploadErrorService.extractErrorContext(
@@ -61,8 +65,16 @@ export class FileValidationInterceptor implements NestInterceptor {
       );
 
       // Log security events and validation errors
-      this.fileUploadErrorService.logSecurityEvent(filesToValidate, validationErrors, errorContext);
-      this.fileUploadErrorService.logValidationErrors(filesToValidate, validationErrors, errorContext);
+      this.fileUploadErrorService.logSecurityEvent(
+        filesToValidate,
+        validationErrors,
+        errorContext,
+      );
+      this.fileUploadErrorService.logValidationErrors(
+        filesToValidate,
+        validationErrors,
+        errorContext,
+      );
 
       // Create standardized error response
       const errorResponse = this.fileUploadErrorService.createErrorResponse(
@@ -82,11 +94,7 @@ export class FileValidationInterceptor implements NestInterceptor {
 
     return next.handle();
   }
-
-
 }
-
-
 
 /**
  * Profile image validation interceptor

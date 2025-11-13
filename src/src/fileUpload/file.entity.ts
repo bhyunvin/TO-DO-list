@@ -32,7 +32,12 @@ export class FileInfoEntity {
   @Column({ name: 'file_category', type: 'varchar', length: 50 })
   fileCategory: string; // 'profile_image' | 'todo_attachment'
 
-  @Column({ name: 'validation_status', type: 'varchar', length: 20, default: 'pending' })
+  @Column({
+    name: 'validation_status',
+    type: 'varchar',
+    length: 20,
+    default: 'pending',
+  })
   validationStatus: string; // 'pending' | 'validated' | 'rejected'
 
   @Column({ name: 'rejection_reason', type: 'text', nullable: true })

@@ -80,22 +80,37 @@ export class UserController {
     @Ip() ip: string,
   ): Promise<UserDto | null> {
     try {
-      const result = await this.userService.signup(userDto, profileImageFile, ip);
-      
+      const result = await this.userService.signup(
+        userDto,
+        profileImageFile,
+        ip,
+      );
+
       // Log successful signup with file upload
       if (profileImageFile) {
         const errorContext = this.fileUploadErrorService.extractErrorContext(
-          { ip, get: () => '', headers: {}, method: 'POST', path: '/user/signup' } as any,
+          {
+            ip,
+            get: () => '',
+            headers: {},
+            method: 'POST',
+            path: '/user/signup',
+          } as any,
           'profile_image',
           result?.userSeq,
         );
-        
+
         this.fileUploadErrorService.logSuccessfulUpload(
-          [{ originalFileName: profileImageFile.originalname, fileSize: profileImageFile.size }],
+          [
+            {
+              originalFileName: profileImageFile.originalname,
+              fileSize: profileImageFile.size,
+            },
+          ],
           errorContext,
         );
       }
-      
+
       return result;
     } catch (error) {
       this.logger.error('Profile image upload failed during signup', {
@@ -104,7 +119,7 @@ export class UserController {
         fileName: profileImageFile?.originalname,
         fileSize: profileImageFile?.size,
       });
-      
+
       // Re-throw the error to be handled by global exception filter
       throw error;
     }
@@ -127,7 +142,13 @@ export class UserController {
     FileInterceptor('profileImage', profileImageMulterOptions),
     ProfileImageValidationInterceptor,
   )
-  @UsePipes(new ValidationPipe({ transform: true, whitelist: true, forbidNonWhitelisted: true }))
+  @UsePipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    }),
+  )
   async updateProfile(
     @Session() session: SessionInterface & SessionData,
     @Body(UserProfileValidationPipe) updateUserDto: UpdateUserDto,
@@ -142,22 +163,29 @@ export class UserController {
           sessionId: session.id,
           ip,
         });
-        throw new UnauthorizedException('유효한 세션이 없습니다. 다시 로그인해주세요.');
+        throw new UnauthorizedException(
+          '유효한 세션이 없습니다. 다시 로그인해주세요.',
+        );
       }
 
       // Additional session validation - check if session is still valid
       if (!session.user.userId) {
-        this.logger.warn('Profile update attempted with incomplete session data', {
-          userSeq: currentUser.userSeq,
-          sessionId: session.id,
-          ip,
-        });
-        throw new UnauthorizedException('세션 데이터가 불완전합니다. 다시 로그인해주세요.');
+        this.logger.warn(
+          'Profile update attempted with incomplete session data',
+          {
+            userSeq: currentUser.userSeq,
+            sessionId: session.id,
+            ip,
+          },
+        );
+        throw new UnauthorizedException(
+          '세션 데이터가 불완전합니다. 다시 로그인해주세요.',
+        );
       }
 
       // Verify user can only update their own profile
       const userSeq = currentUser.userSeq;
-      
+
       // Log profile update attempt for audit purposes
       this.logger.log('Profile update attempt', {
         userSeq,
@@ -173,14 +201,16 @@ export class UserController {
       const now = Date.now();
       const minUpdateInterval = 60000; // 1 minute minimum between updates
 
-      if (lastUpdateTime && (now - lastUpdateTime) < minUpdateInterval) {
+      if (lastUpdateTime && now - lastUpdateTime < minUpdateInterval) {
         this.logger.warn('Profile update rate limit exceeded', {
           userSeq,
           lastUpdate: new Date(lastUpdateTime),
           timeSinceLastUpdate: now - lastUpdateTime,
           ip,
         });
-        throw new ForbiddenException('프로필 업데이트가 너무 빈번합니다. 잠시 후 다시 시도해주세요.');
+        throw new ForbiddenException(
+          '프로필 업데이트가 너무 빈번합니다. 잠시 후 다시 시도해주세요.',
+        );
       }
 
       const updatedUser = await this.userService.updateProfile(
@@ -236,7 +266,13 @@ export class UserController {
   @UseGuards(AuthenticatedGuard)
   @Patch('password')
   @HttpCode(HttpStatus.OK)
-  @UsePipes(new ValidationPipe({ transform: true, whitelist: true, forbidNonWhitelisted: true }))
+  @UsePipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    }),
+  )
   async changePassword(
     @Session() session: SessionInterface & SessionData,
     @Body() changePasswordDto: ChangePasswordDto,
@@ -250,21 +286,28 @@ export class UserController {
           sessionId: session.id,
           ip,
         });
-        throw new UnauthorizedException('유효한 세션이 없습니다. 다시 로그인해주세요.');
+        throw new UnauthorizedException(
+          '유효한 세션이 없습니다. 다시 로그인해주세요.',
+        );
       }
 
       // Additional session validation
       if (!session.user.userId) {
-        this.logger.warn('Password change attempted with incomplete session data', {
-          userSeq: currentUser.userSeq,
-          sessionId: session.id,
-          ip,
-        });
-        throw new UnauthorizedException('세션 데이터가 불완전합니다. 다시 로그인해주세요.');
+        this.logger.warn(
+          'Password change attempted with incomplete session data',
+          {
+            userSeq: currentUser.userSeq,
+            sessionId: session.id,
+            ip,
+          },
+        );
+        throw new UnauthorizedException(
+          '세션 데이터가 불완전합니다. 다시 로그인해주세요.',
+        );
       }
 
       const userSeq = currentUser.userSeq;
-      
+
       // Log password change attempt for audit purposes
       this.logger.log('Password change attempt', {
         userSeq,
@@ -278,14 +321,16 @@ export class UserController {
       const now = Date.now();
       const minChangeInterval = 300000; // 5 minutes minimum between password changes
 
-      if (lastPasswordChange && (now - lastPasswordChange) < minChangeInterval) {
+      if (lastPasswordChange && now - lastPasswordChange < minChangeInterval) {
         this.logger.warn('Password change rate limit exceeded', {
           userSeq,
           lastChange: new Date(lastPasswordChange),
           timeSinceLastChange: now - lastPasswordChange,
           ip,
         });
-        throw new ForbiddenException('비밀번호 변경이 너무 빈번합니다. 5분 후 다시 시도해주세요.');
+        throw new ForbiddenException(
+          '비밀번호 변경이 너무 빈번합니다. 5분 후 다시 시도해주세요.',
+        );
       }
 
       await this.userService.changePassword(userSeq, changePasswordDto, ip);

@@ -48,7 +48,9 @@ describe('TodoService - Excel Export', () => {
     }).compile();
 
     service = module.get<TodoService>(TodoService);
-    todoRepository = module.get<Repository<TodoEntity>>(getRepositoryToken(TodoEntity));
+    todoRepository = module.get<Repository<TodoEntity>>(
+      getRepositoryToken(TodoEntity),
+    );
   });
 
   afterEach(() => {
@@ -300,21 +302,25 @@ describe('TodoService - Excel Export', () => {
     });
 
     it('should throw error when startDate is missing', async () => {
-      await expect(service.exportToExcel(userSeq, '', endDate))
-        .rejects.toThrow('startDate and endDate are required');
+      await expect(service.exportToExcel(userSeq, '', endDate)).rejects.toThrow(
+        'startDate and endDate are required',
+      );
     });
 
     it('should throw error when endDate is missing', async () => {
-      await expect(service.exportToExcel(userSeq, startDate, ''))
-        .rejects.toThrow('startDate and endDate are required');
+      await expect(
+        service.exportToExcel(userSeq, startDate, ''),
+      ).rejects.toThrow('startDate and endDate are required');
     });
 
     it('should throw error for invalid date format', async () => {
-      await expect(service.exportToExcel(userSeq, '2024/01/01', endDate))
-        .rejects.toThrow('Invalid date format. Use YYYY-MM-DD');
+      await expect(
+        service.exportToExcel(userSeq, '2024/01/01', endDate),
+      ).rejects.toThrow('Invalid date format. Use YYYY-MM-DD');
 
-      await expect(service.exportToExcel(userSeq, startDate, '01-31-2024'))
-        .rejects.toThrow('Invalid date format. Use YYYY-MM-DD');
+      await expect(
+        service.exportToExcel(userSeq, startDate, '01-31-2024'),
+      ).rejects.toThrow('Invalid date format. Use YYYY-MM-DD');
     });
 
     it('should apply header styling correctly', async () => {

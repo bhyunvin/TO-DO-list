@@ -7,7 +7,10 @@ import { Repository } from 'typeorm';
 import { FileInfoEntity } from './file.entity';
 import { FileValidationService } from './validation/file-validation.service';
 import { FileCategory } from './validation/file-validation.interfaces';
-import { FILE_UPLOAD_POLICY, FILE_VALIDATION_ERRORS } from './validation/file-validation.constants';
+import {
+  FILE_UPLOAD_POLICY,
+  FILE_VALIDATION_ERRORS,
+} from './validation/file-validation.constants';
 
 import { AuditSettings, setAuditColumn } from '../utils/auditColumns';
 
@@ -90,7 +93,10 @@ export class FileUploadUtil {
 export const createFileFilter = (category: FileCategory) => {
   return (req: any, file: Express.Multer.File, callback: Function) => {
     const fileValidationService = new FileValidationService();
-    const validationResults = fileValidationService.validateFilesByCategory([file], category);
+    const validationResults = fileValidationService.validateFilesByCategory(
+      [file],
+      category,
+    );
     const result = validationResults[0];
 
     if (!result.isValid) {

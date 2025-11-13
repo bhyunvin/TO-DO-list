@@ -1,11 +1,11 @@
-import { 
-  IsOptional, 
-  IsString, 
-  IsEmail, 
-  MaxLength, 
+import {
+  IsOptional,
+  IsString,
+  IsEmail,
+  MaxLength,
   MinLength,
   Matches,
-  IsNotEmpty
+  IsNotEmpty,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
 
@@ -32,8 +32,9 @@ export class UpdateUserDto {
   @IsString({ message: '사용자명은 문자열이어야 합니다.' })
   @MinLength(1, { message: '사용자명은 최소 1자 이상이어야 합니다.' })
   @MaxLength(200, { message: '사용자명은 최대 200자까지 입력 가능합니다.' })
-  @Matches(/^[a-zA-Z0-9\s\-'.가-힣]+$/, { 
-    message: '사용자명에는 문자, 숫자, 공백, 하이픈, 아포스트로피, 마침표만 사용할 수 있습니다.' 
+  @Matches(/^[a-zA-Z0-9\s\-'.가-힣]+$/, {
+    message:
+      '사용자명에는 문자, 숫자, 공백, 하이픈, 아포스트로피, 마침표만 사용할 수 있습니다.',
   })
   @Transform(({ value }) => {
     if (typeof value === 'string') {
@@ -62,7 +63,7 @@ export class UpdateUserDto {
   @IsOptional()
   @IsString({ message: '사용자설명은 문자열이어야 합니다.' })
   @MaxLength(4000, { message: '사용자설명은 최대 4000자까지 입력 가능합니다.' })
-  @Transform(({ value }) => typeof value === 'string' ? value.trim() : value)
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   userDescription?: string; //사용자설명
 }
 
@@ -76,7 +77,8 @@ export class ChangePasswordDto {
   @MinLength(8, { message: '새 비밀번호는 최소 8자 이상이어야 합니다.' })
   @MaxLength(100, { message: '새 비밀번호는 최대 100자까지 입력 가능합니다.' })
   @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, {
-    message: '새 비밀번호는 대문자, 소문자, 숫자, 특수문자를 각각 하나 이상 포함해야 합니다.'
+    message:
+      '새 비밀번호는 대문자, 소문자, 숫자, 특수문자를 각각 하나 이상 포함해야 합니다.',
   })
   newPassword: string; //새 비밀번호
 
