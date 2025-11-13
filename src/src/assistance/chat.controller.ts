@@ -47,6 +47,7 @@ export class ChatController {
           requestDto,
           session.user.userSeq,
           ip,
+          session.user.userName,
         );
 
         // Return structured response

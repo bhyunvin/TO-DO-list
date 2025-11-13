@@ -143,12 +143,14 @@ export class AssistanceService implements OnModuleInit {
    * @param requestAssistanceDto - The request containing user prompt and conversation history
    * @param userSeq - Optional user sequence number for authenticated operations
    * @param ip - Optional client IP address for audit logging
+   * @param userName - Optional user name for personalized responses
    * @returns Response DTO with AI-generated response
    */
   async getGeminiResponse(
     requestAssistanceDto: RequestAssistanceDto,
     userSeq?: number,
     ip?: string,
+    userName?: string,
   ): Promise<RequestAssistanceDto> {
     if (!this.geminiApiKey) {
       this.logger.error(
@@ -168,6 +170,11 @@ export class AssistanceService implements OnModuleInit {
         process.env.SYSTEM_PROMPT_PATH ||
         './src/assistance/assistance.systemPrompt.txt';
       systemPrompt = fs.readFileSync(path.resolve(promptPath), 'utf-8').trim();
+      
+      // Replace [사용자 이름] placeholder with actual user name
+      if (userName) {
+        systemPrompt = systemPrompt.replace(/\[사용자 이름\]/g, userName);
+      }
     } catch (error) {
       this.logger.error('시스템 프롬프트를 불러오는 중 오류 발생:', error);
       systemPrompt = `[ROLE] 당신은 친절한 한국어 비서입니다. 존댓말로 할 일 목록에 관해서만 답변하세요.`;
