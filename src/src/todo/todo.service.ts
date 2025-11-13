@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, LessThanOrEqual, IsNull, Not, Between, MoreThanOrEqual, LessThan } from 'typeorm';
+import { Brackets, Repository, Between } from 'typeorm';
 import { TodoEntity } from './todo.entity';
 import { 
   CreateTodoDto, 
@@ -32,45 +32,45 @@ export class TodoService {
 
   // 특정 사용자의 특정 날짜의 모든 ToDo 항목을 조회합니다.
   async findAll(userSeq: number, todoDate: string): Promise<TodoEntity[]> {
-    // completeDtm이 todoDate 범위 내에 있는지 확인하기 위한 날짜 범위 계산
-    // >= startOfDay AND < nextDay 방식 사용 (더 정확한 범위 체크)
+    // 날짜 범위 계산
     const startOfDay = `${todoDate} 00:00:00`;
     const nextDayStr = format(addDays(new Date(todoDate), 1), 'yyyy-MM-dd') + ' 00:00:00';
 
-    return this.todoRepository.find({
-      where: [
-        // 1. 완료되지 않은 항목: 조회일(todoDate) 이전에 생성된 모든 미완료 항목을 포함합니다.
-        {
-          userSeq,
-          todoDate: LessThanOrEqual(todoDate),
-          completeDtm: IsNull(),
-          delYn: 'N',
-        },
-        // 2. 완료된 항목: 정확히 조회일(todoDate)에 해당하는 완료된 항목만 포함합니다.
-        {
-          userSeq,
-          todoDate: todoDate,
-          completeDtm: Not(IsNull()),
-          delYn: 'N',
-        },
-        // 3. 완료 시각이 조회일에 해당하는 항목: todoDate와 관계없이 completeDtm이 조회일 범위 내에 있는 항목을 포함합니다.
-        // >= startOfDay AND < nextDay 방식으로 정확한 범위 체크
-        {
-          userSeq,
-          completeDtm: MoreThanOrEqual(startOfDay) && LessThan(nextDayStr),
-          delYn: 'N',
-        },
-      ],
-      order: {
-        // 완료되지 않은 항목(completeDtm이 null)을 먼저, 그 다음 완료된 항목을 오름차순으로 정렬합니다.
-        completeDtm: {
-          direction: 'DESC',
-          nulls: 'FIRST',
-        },
-        // 같은 조건 내에서는 최신 항목(todoSeq가 큰 값)이 위로 오도록 내림차순 정렬합니다.
-        todoSeq: 'DESC',
-      },
-    });
+    // 1. 쿼리 빌더 생성
+    const qb = this.todoRepository.createQueryBuilder('todo');
+
+    // 2. 기본 WHERE 조건 설정 (공통 조건)
+    qb.where('todo.delYn = :delYn', { delYn: 'N' })
+      .andWhere('todo.userSeq = :userSeq', { userSeq });
+
+    // 3. 세 가지 OR 조건을 괄호(Brackets)로 묶기
+    qb.andWhere(new Brackets(subQuery => {
+      
+      // 조건 1: 미완료 항목 (todoDate <= :todoDate AND completeDtm IS NULL)
+      subQuery.where(new Brackets(c1 => {
+        c1.where('todo.todoDate <= :todoDate', { todoDate })
+          .andWhere('todo.completeDtm IS NULL');
+      }));
+
+      // 조건 2: 완료 항목 (todoDate = :todoDate AND completeDtm IS NOT NULL)
+      subQuery.orWhere(new Brackets(c2 => {
+        c2.where('todo.todoDate = :todoDate', { todoDate })
+          .andWhere('todo.completeDtm IS NOT NULL');
+      }));
+
+      // 조건 3: 오늘 완료한 항목 (completeDtm >= :startOfDay AND completeDtm < :nextDayStr)
+      subQuery.orWhere(new Brackets(c3 => {
+        c3.where('todo.completeDtm >= :startOfDay', { startOfDay })
+          .andWhere('todo.completeDtm < :nextDayStr', { nextDayStr });
+      }));
+    }));
+
+    // 4. 정렬 순서 적용
+    qb.orderBy('todo.completeDtm', 'DESC', 'NULLS FIRST')
+      .addOrderBy('todo.todoSeq', 'DESC');
+
+    // 5. 쿼리 실행
+    return qb.getMany();
   }
 
   // 새로운 ToDo 항목을 생성합니다.
