@@ -1603,6 +1603,7 @@ function TodoContainer() {
             showMonthDropdown // 월 선택 드롭다운 활성화
             showYearDropdown // 연도 선택 드롭다운 활성화
             dropdownMode="select" // 드롭다운 모드를 select로 설정
+            withPortal
           />
           <button onClick={handleNextDay} className="date-nav-btn">&gt;</button>
           <button onClick={handleToday} className="date-today-btn">오늘</button>
