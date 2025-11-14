@@ -91,6 +91,20 @@ This specification defines enhancements to the existing AI Assistant Chat Interf
 12. THE setAuditColumn utility function SHALL initialize both reg_* and upd_* columns on create operations
 13. THE setAuditColumn utility function SHALL only update upd_* columns on update operations
 
+### Requirement 6: Frontend Auto-Refresh After AI Operations
+
+**User Story:** As a user, I want the main todo list UI to automatically refresh when I create or update a task via the AI chat, so that I can see my changes immediately without manually refreshing the page.
+
+#### Acceptance Criteria
+
+1. WHEN the ChatModal receives a successful API response from the AI assistant, THE System SHALL trigger a refresh event
+2. THE TodoListComponent SHALL listen for the refresh event
+3. WHEN the TodoListComponent receives the refresh event, THE System SHALL call its data-fetching function to reload the todo list
+4. THE refresh mechanism SHALL use the existing Zustand state management architecture
+5. THE refresh SHALL occur automatically without requiring user interaction
+6. THE refresh SHALL not interfere with the current selected date in the todo list
+7. THE System SHALL trigger refresh for all successful AI chat responses to ensure consistency
+
 ## Security Considerations
 
 ### Session Enforcement

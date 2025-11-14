@@ -172,27 +172,57 @@
   - On update operations (isUpdate=true), only set upd_* columns
   - _Requirements: 5.12, 5.13_
 
-- [x] 6. Integration testing and validation
-  - Test all five enhancements working together
+- [x] 6. Implement frontend auto-refresh after AI operations
+  - Add refresh trigger to Zustand chatStore
+  - Update TodoContainer to listen for refresh events
+  - Trigger refresh on successful AI chat responses
+  - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7_
+
+- [x] 6.1 Add refresh trigger to chatStore
+  - Add todoRefreshTrigger state (counter) to chatStore
+  - Add triggerTodoRefresh() action to increment the counter
+  - _Requirements: 6.1, 6.4_
+
+- [x] 6.2 Update TodoContainer to listen for refresh events
+  - Import todoRefreshTrigger and triggerTodoRefresh from chatStore
+  - Add useEffect to watch todoRefreshTrigger changes
+  - Call fetchTodos() when trigger changes
+  - _Requirements: 6.2, 6.3, 6.6_
+
+- [x] 6.3 Trigger refresh on successful AI responses
+  - Update handleSendMessage to call triggerTodoRefresh() on success
+  - Ensure refresh happens for all successful AI responses
+  - _Requirements: 6.1, 6.5, 6.7_
+
+- [x] 7. Integration testing and validation
+  - Test all six enhancements working together
   - Verify no regressions in existing AI assistant functionality
   - Test error handling and edge cases
-  - _Requirements: 1.1-1.5, 2.1-2.5, 3.1-3.5, 4.1-4.7, 5.1-5.13_
+  - _Requirements: 1.1-1.5, 2.1-2.5, 3.1-3.5, 4.1-4.7, 5.1-5.13, 6.1-6.7_
 
-- [ ]* 6.1 End-to-end integration tests
-  - Test: "create task for tomorrow" → correct date + refreshed list
-  - Test: "update 'Buy Milk' and mark complete" → content search + update + list
+- [ ]* 7.1 End-to-end integration tests
+  - Test: "create task for tomorrow" → correct date + refreshed list in chat AND main UI
+  - Test: "update 'Buy Milk' and mark complete" → content search + update + list + main UI refresh
   - Test: "show me overdue tasks" → date-aware query
   - Test: ambiguous content match → AI asks for clarification
-  - Test: multiple write operations in sequence
-  - _Requirements: 1.1-1.5, 2.1-2.5, 3.1-3.5_
+  - Test: multiple write operations in sequence → main UI refreshes each time
+  - _Requirements: 1.1-1.5, 2.1-2.5, 3.1-3.5, 6.1-6.7_
 
-- [ ]* 6.2 Audit column verification tests
+- [ ]* 7.2 Frontend auto-refresh tests
+  - Test: AI creates todo → main todo list automatically refreshes
+  - Test: AI updates todo → main todo list automatically refreshes
+  - Test: AI completes todo → main todo list automatically refreshes
+  - Test: refresh preserves selected date
+  - Test: refresh works with different date selections
+  - _Requirements: 6.1-6.7_
+
+- [ ]* 7.3 Audit column verification tests
   - Test: create todo → verify reg_id, reg_ip, reg_dtm, upd_id, upd_ip, upd_dtm are all populated
   - Test: update todo → verify upd_id, upd_ip, upd_dtm are updated, reg_* unchanged
   - Test: audit columns contain correct userId from session
   - _Requirements: 5.1-5.13_
 
-- [ ]* 6.3 Error handling and edge case tests
+- [ ]* 7.4 Error handling and edge case tests
   - Test: invalid date formats
   - Test: content search with special characters
   - Test: empty todo list refresh
@@ -200,10 +230,11 @@
   - Test: concurrent write operations
   - _Requirements: 1.1-1.5, 2.1-2.5, 3.1-3.5, 4.1-4.7_
 
-- [ ]* 6.4 Regression testing
+- [ ]* 7.5 Regression testing
   - Test: existing ID-based updates still work
   - Test: existing getTodos functionality unchanged
   - Test: AI still refuses non-todo requests
   - Test: formatting rules still applied correctly
   - Test: error messages still in Korean
-  - _Requirements: 1.1-1.5, 2.1-2.5, 3.1-3.5, 4.1-4.7, 5.1-5.13_
+  - Test: manual todo create/update still works
+  - _Requirements: 1.1-1.5, 2.1-2.5, 3.1-3.5, 4.1-4.7, 5.1-5.13, 6.1-6.7_

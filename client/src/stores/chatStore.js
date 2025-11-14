@@ -150,6 +150,12 @@ export const useChatStore = create(
         const { messages } = get();
         return messages.slice(-count);
       },
+
+      // Todo list refresh trigger
+      todoRefreshTrigger: 0,
+      triggerTodoRefresh: () => set((state) => ({ 
+        todoRefreshTrigger: state.todoRefreshTrigger + 1 
+      })),
     }),
     {
       name: 'chat-storage', // sessionStorage 키 이름

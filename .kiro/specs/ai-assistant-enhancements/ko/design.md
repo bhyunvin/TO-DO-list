@@ -546,6 +546,107 @@ export function setAuditColumn(setting: AuditSettings) {
 - 더 쉬운 디버깅 및 문제 해결
 - 모든 엔티티에서 일관된 감사 컬럼 채우기
 
+### 6. AI 작업 후 프론트엔드 자동 새로고침
+
+#### 구현 위치
+- **파일**: `client/src/stores/chatStore.js`
+- **파일**: `client/src/todoList/TodoList.js`
+
+#### 설계 세부사항
+
+**문제 설명:**
+사용자가 AI 채팅을 통해 할 일을 생성하거나 업데이트할 때 메인 할 일 목록 UI가 자동으로 새로고침되지 않아 사용자가 페이지를 수동으로 새로고침하거나 날짜를 다시 선택해야 변경 사항을 볼 수 있습니다.
+
+**해결책:**
+
+**1. Zustand 스토어 향상:**
+```javascript
+// chatStore.js에서
+export const useChatStore = create(
+  persist(
+    (set, get) => ({
+      // ... 기존 상태 ...
+
+      // 할 일 목록 새로고침 트리거
+      todoRefreshTrigger: 0,
+      triggerTodoRefresh: () => set((state) => ({ 
+        todoRefreshTrigger: state.todoRefreshTrigger + 1 
+      })),
+    }),
+    // ... persist 설정 ...
+  )
+);
+```
+
+**2. TodoContainer 리스너:**
+```javascript
+// TodoList.js - TodoContainer 컴포넌트에서
+const { 
+  // ... 기존 imports ...
+  todoRefreshTrigger,
+  triggerTodoRefresh
+} = useChatStore();
+
+// AI 트리거 새로고침 이벤트 수신
+useEffect(() => {
+  if (todoRefreshTrigger > 0) {
+    fetchTodos();
+  }
+}, [todoRefreshTrigger, fetchTodos]);
+```
+
+**3. 성공적인 AI 응답 시 새로고침 트리거:**
+```javascript
+// TodoList.js - handleSendMessage 함수에서
+if (response.ok) {
+  const data = await response.json();
+  
+  if (data.success !== false) {
+    // AI 응답 추가
+    addMessage({
+      content: data.response,
+      isUser: false,
+      isHtml: true,
+    });
+    
+    // 성공 시 재시도 상태 초기화
+    resetRetryState();
+    
+    // ✨ 새로운 기능: 성공적인 AI 응답 후 할 일 목록 새로고침 트리거
+    triggerTodoRefresh();
+  }
+}
+```
+
+**이벤트 흐름:**
+
+```mermaid
+sequenceDiagram
+    participant U as 사용자
+    participant CM as ChatModal
+    participant CS as ChatStore
+    participant TC as TodoContainer
+    participant API as 백엔드 API
+
+    U->>CM: 메시지 전송 (할 일 생성/업데이트)
+    CM->>API: POST /api/assistance/chat
+    API->>CM: 성공 응답
+    CM->>CS: triggerTodoRefresh()
+    CS->>CS: todoRefreshTrigger 증가
+    CS->>TC: 상태 변경 알림
+    TC->>TC: useEffect가 변경 감지
+    TC->>API: GET /api/todo?date=...
+    API->>TC: 업데이트된 할 일 목록
+    TC->>U: 새로고침된 목록 표시
+```
+
+**이점:**
+- 원활한 UX - 사용자가 변경 사항을 즉시 확인
+- 수동 페이지 새로고침 불필요
+- 기존 Zustand 아키텍처 활용
+- 간단하고 유지보수 가능한 구현
+- 모든 AI 작업(생성, 업데이트, 완료)에 대해 작동
+
 ## 데이터 모델
 
 ### 향상된 함수 응답 모델

@@ -547,6 +547,107 @@ export function setAuditColumn(setting: AuditSettings) {
 - Easier debugging and troubleshooting
 - Consistent audit column population across all entities
 
+### 6. Frontend Auto-Refresh After AI Operations
+
+#### Implementation Location
+- **File**: `client/src/stores/chatStore.js`
+- **File**: `client/src/todoList/TodoList.js`
+
+#### Design Details
+
+**Problem Statement:**
+When users create or update todos via the AI chat, the main todo list UI does not automatically refresh, forcing users to manually refresh the page or re-select a date to see their changes.
+
+**Solution:**
+
+**1. Zustand Store Enhancement:**
+```javascript
+// In chatStore.js
+export const useChatStore = create(
+  persist(
+    (set, get) => ({
+      // ... existing state ...
+
+      // Todo list refresh trigger
+      todoRefreshTrigger: 0,
+      triggerTodoRefresh: () => set((state) => ({ 
+        todoRefreshTrigger: state.todoRefreshTrigger + 1 
+      })),
+    }),
+    // ... persist config ...
+  )
+);
+```
+
+**2. TodoContainer Listener:**
+```javascript
+// In TodoList.js - TodoContainer component
+const { 
+  // ... existing imports ...
+  todoRefreshTrigger,
+  triggerTodoRefresh
+} = useChatStore();
+
+// Listen for AI-triggered refresh events
+useEffect(() => {
+  if (todoRefreshTrigger > 0) {
+    fetchTodos();
+  }
+}, [todoRefreshTrigger, fetchTodos]);
+```
+
+**3. Trigger Refresh on Successful AI Response:**
+```javascript
+// In TodoList.js - handleSendMessage function
+if (response.ok) {
+  const data = await response.json();
+  
+  if (data.success !== false) {
+    // Add AI response
+    addMessage({
+      content: data.response,
+      isUser: false,
+      isHtml: true,
+    });
+    
+    // Reset retry state on success
+    resetRetryState();
+    
+    // ✨ NEW: Trigger todo list refresh after successful AI response
+    triggerTodoRefresh();
+  }
+}
+```
+
+**Event Flow:**
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant CM as ChatModal
+    participant CS as ChatStore
+    participant TC as TodoContainer
+    participant API as Backend API
+
+    U->>CM: Send message (create/update todo)
+    CM->>API: POST /api/assistance/chat
+    API->>CM: Success response
+    CM->>CS: triggerTodoRefresh()
+    CS->>CS: Increment todoRefreshTrigger
+    CS->>TC: State change notification
+    TC->>TC: useEffect detects change
+    TC->>API: GET /api/todo?date=...
+    API->>TC: Updated todo list
+    TC->>U: Display refreshed list
+```
+
+**Benefits:**
+- Seamless UX - users see changes immediately
+- No manual page refresh required
+- Leverages existing Zustand architecture
+- Simple and maintainable implementation
+- Works for all AI operations (create, update, complete)
+
 ## Data Models
 
 ### Enhanced Function Response Models

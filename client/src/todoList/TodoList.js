@@ -613,7 +613,9 @@ function TodoContainer() {
     setRetryMessage,
     getRetryMessage,
     resetRetryState,
-    canSendRequest
+    canSendRequest,
+    todoRefreshTrigger,
+    triggerTodoRefresh
   } = useChatStore();
   
   const [todos, setTodos] = useState([]);
@@ -660,6 +662,13 @@ function TodoContainer() {
   useEffect(() => {
     fetchTodos();
   }, [fetchTodos]);
+
+  // AI 채팅에서 todo 생성/업데이트 시 자동 새로고침
+  useEffect(() => {
+    if (todoRefreshTrigger > 0) {
+      fetchTodos();
+    }
+  }, [todoRefreshTrigger, fetchTodos]);
 
   // 사용자 메뉴 외부 클릭 시 닫기 처리
   useEffect(() => {
@@ -1292,6 +1301,10 @@ function TodoContainer() {
           
           // Reset retry state on success
           resetRetryState();
+          
+          // Trigger todo list refresh after successful AI chat response
+          // This ensures the main todo list updates when AI creates/updates todos
+          triggerTodoRefresh();
         } else {
           // Handle API error response
           const { shouldRetry } = handleApiError(new Error(data.error || 'API Error'), response);

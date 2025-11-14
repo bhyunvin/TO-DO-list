@@ -91,6 +91,20 @@
 12. THE setAuditColumn 유틸리티 함수 SHALL 생성 작업 시 reg_* 및 upd_* 컬럼을 모두 초기화한다
 13. THE setAuditColumn 유틸리티 함수 SHALL 업데이트 작업 시 upd_* 컬럼만 업데이트한다
 
+### 요구사항 6: AI 작업 후 프론트엔드 자동 새로고침
+
+**사용자 스토리:** 사용자로서, AI 채팅을 통해 작업을 생성하거나 업데이트할 때 메인 할 일 목록 UI가 자동으로 새로고침되기를 원하므로, 페이지를 수동으로 새로고침하지 않고도 변경 사항을 즉시 볼 수 있습니다.
+
+#### 인수 기준
+
+1. WHEN ChatModal이 AI 어시스턴트로부터 성공적인 API 응답을 받을 때, THE System SHALL 새로고침 이벤트를 트리거한다
+2. THE TodoListComponent SHALL 새로고침 이벤트를 수신한다
+3. WHEN TodoListComponent가 새로고침 이벤트를 받을 때, THE System SHALL 할 일 목록을 다시 로드하기 위해 데이터 가져오기 함수를 호출한다
+4. THE 새로고침 메커니즘 SHALL 기존 Zustand 상태 관리 아키텍처를 사용한다
+5. THE 새로고침 SHALL 사용자 상호작용 없이 자동으로 발생한다
+6. THE 새로고침 SHALL 할 일 목록에서 현재 선택된 날짜를 방해하지 않는다
+7. THE System SHALL 일관성을 보장하기 위해 모든 성공적인 AI 채팅 응답에 대해 새로고침을 트리거한다
+
 ## 보안 고려사항
 
 ### 세션 강제
