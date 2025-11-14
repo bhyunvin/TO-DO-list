@@ -7,8 +7,8 @@ import FileUploadProgress from '../components/FileUploadProgress';
 
 import './loginForm.css';
 
-function SignupForm({ onSignupComplete }) {
-  const { api } = useAuthStore(); // api 함수 가져오기
+const SignupForm = ({ onSignupComplete }) => {
+  const { api } = useAuthStore();
   const { 
     validateFiles, 
     formatFileSize, 
@@ -22,28 +22,25 @@ function SignupForm({ onSignupComplete }) {
     resetUploadState,
   } = useFileUploadProgress();
   
-  // Validation 메세지 state
   const [idError, setIdError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
   const [emailError, setEmailError] = useState('');
   const [profileImageError, setProfileImageError] = useState('');
-
   const [profileImage, setProfileImage] = useState(null);
   const [profileImageFile, setProfileImageFile] = useState(null);
   const [profileImageValidation, setProfileImageValidation] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  function handleImageChange(e) {
+
+  const handleImageChange = (e) => {
     const file = e.target.files[0];
     
-    // 이전 상태 초기화
     setProfileImage(null);
     setProfileImageFile(null);
     setProfileImageValidation(null);
     setProfileImageError('');
     
     if (file) {
-      // 파일 유효성 검사
       const validationResults = validateFiles([file], 'profileImage');
       const validation = validationResults[0];
       
@@ -53,24 +50,23 @@ function SignupForm({ onSignupComplete }) {
         setProfileImageFile(file);
         setProfileImageError('');
         
-        // 미리보기 생성
         const reader = new FileReader();
-        reader.onloadend = function () {
+        reader.onloadend = () => {
           setProfileImage(reader.result);
         };
         reader.readAsDataURL(file);
       } else {
         setProfileImageError(validation.errorMessage);
-        // 파일 입력 초기화
         e.target.value = '';
       }
     }
-  }
+  };
 
-  //아이디 입력 handler
   const [userId, setUserId] = useState('');
-  function userIdChangeHandler(e) {
-    //아이디 변경시 아이디 중복체크 관련 초기화
+  const [isIdDuplicated, setIsIdDuplicated] = useState(false);
+  const [idDuplicatedResult, setIdDuplicatedResult] = useState('');
+
+  const userIdChangeHandler = (e) => {
     setIsIdDuplicated(false);
     setIdDuplicatedResult('');
 
@@ -83,12 +79,9 @@ function SignupForm({ onSignupComplete }) {
       setIdError('아이디를 확인해주세요.');
       setUserId('');
     }
-  }
+  };
 
-  //아이디 중복체크 버튼 클릭
-  const [isIdDuplicated, setIsIdDuplicated] = useState(false);
-  const [idDuplicatedResult, setIdDuplicatedResult] = useState('');
-  async function checkIdDuplicated() {
+  const checkIdDuplicated = async () => {
     if (!userId) {
       setIdError('ID를 입력해주세요.');
       return;
@@ -110,32 +103,31 @@ function SignupForm({ onSignupComplete }) {
         setIsIdDuplicated(data);
 
         if (!data) {
-          //중복된 아이디 없음
           setIdDuplicatedResult('사용하실 수 있는 아이디입니다.');
         } else {
           setIdDuplicatedResult('중복된 아이디가 있습니다.');
         }
       } else {
-        // 비정상 응답 처리
         Swal.fire('아이디 중복체크 실패', '서버 오류가 발생했습니다.', 'error');
       }
     } catch (error) {
-      // 네트워크 오류 처리
       console.error('SignupForm Error : ', error);
       Swal.fire('오류 발생', '서버와의 연결에 문제가 발생했습니다.', 'error');
     }
-  }
+  };
 
-  //비밀번호 입력 handler
   const [userPassword, setUserPassword] = useState('');
-  function userPasswordChangeHandler(e) {
+  const [confirmUserPassword, setConfirmUserPassword] = useState('');
+  const [userName, setUserName] = useState('');
+  const [userEmail, setUserEmail] = useState('');
+  const [userDescription, setUserDescription] = useState('');
+
+  const userPasswordChangeHandler = (e) => {
     const passwordValue = e.target.value;
     setUserPassword(passwordValue);
-  }
+  };
 
-  //비밀번호 확인 입력 handler
-  const [confirmUserPassword, setConfirmUserPassword] = useState('');
-  function confirmUserPasswordChangeHandler(e) {
+  const confirmUserPasswordChangeHandler = (e) => {
     const confirmPasswordValue = e.target.value;
 
     if (userPassword !== confirmPasswordValue) {
@@ -145,18 +137,14 @@ function SignupForm({ onSignupComplete }) {
       setConfirmPasswordError('');
       setConfirmUserPassword(confirmPasswordValue);
     }
-  }
+  };
 
-  //이름 입력 handler
-  const [userName, setUserName] = useState('');
-  function userNameChangeHandler(e) {
+  const userNameChangeHandler = (e) => {
     const nameValue = e.target.value;
     setUserName(nameValue);
-  }
+  };
 
-  //이메일 입력 handler
-  const [userEmail, setUserEmail] = useState('');
-  function emailChangeHandler(e) {
+  const emailChangeHandler = (e) => {
     const emailValue = e.target.value;
 
     if (!emailValue || !/[a-z0-9]+@[a-z]+\.[a-z]{2,3}/.test(emailValue)) {
@@ -166,34 +154,29 @@ function SignupForm({ onSignupComplete }) {
       setEmailError('');
       setUserEmail(emailValue);
     }
-  }
+  };
 
-  //추가설명 입력 handler
-  const [userDescription, setUserDescription] = useState('');
-  function userDescriptionChangeHandler(e) {
+  const userDescriptionChangeHandler = (e) => {
     const descriptionValue = e.target.value;
     setUserDescription(descriptionValue);
-  }
+  };
 
-  //회원가입 form submit
-  async function submitSignupHandler(e) {
+  const submitSignupHandler = async (e) => {
     e.preventDefault();
 
-    const validationResult = validateSignupForm(); //유효성체크
+    const validationResult = validateSignupForm();
 
     if (validationResult) {
       setIsSubmitting(true);
       try {
-        await submitSignup(); //회원가입 정보 전송
+        await submitSignup();
       } finally {
         setIsSubmitting(false);
       }
     }
-  }
+  };
 
-  //회원가입 form validation
-  function validateSignupForm() {
-    //아이디
+  const validateSignupForm = () => {
     if (!userId || userId.length > 40) {
       setIdError('아이디를 확인해주세요.');
       return false;
@@ -223,17 +206,15 @@ function SignupForm({ onSignupComplete }) {
       return false;
     }
 
-    // 프로필 이미지가 제공된 경우 유효성 검사
     if (profileImageFile && profileImageValidation && !profileImageValidation.isValid) {
       setProfileImageError(profileImageValidation.errorMessage);
       return false;
     }
 
     return true;
-  }
+  };
 
-  //회원가입 정보 전송
-  async function submitSignup() {
+  const submitSignup = async () => {
     const signupFormData = new FormData();
 
     signupFormData.append('userId', userId);
@@ -274,11 +255,10 @@ function SignupForm({ onSignupComplete }) {
           Swal.fire('', '회원가입에 실패했습니다.', 'error');
         }
       } else {
-        // 서버 유효성 검사 오류 처리
         const errorData = await response.json().catch(() => ({}));
         
         if (errorData.errors && Array.isArray(errorData.errors)) {
-          const errorMessages = errorData.errors.map(err => 
+          const errorMessages = errorData.errors.map((err) => 
             `${err.fileName}: ${err.errorMessage}`
           ).join('<br>');
           
@@ -292,14 +272,12 @@ function SignupForm({ onSignupComplete }) {
         }
       }
     } catch (error) {
-      // 네트워크 오류 처리
       console.error('SignupForm Error : ', error);
       Swal.fire('오류 발생', '서버와의 연결에 문제가 발생했습니다.', 'error');
     }
-  }
+  };
 
-  // 취소 시
-  function onCancel() {
+  const onCancel = () => {
     Swal.fire({
       title: '정말 취소하시겠습니까?',
       text: '작성중인 내용이 사라집니다.',
@@ -312,11 +290,10 @@ function SignupForm({ onSignupComplete }) {
       cancelButtonText: '취소',
     }).then((result) => {
       if (result.isConfirmed) {
-        // 로그인 화면으로
         onSignupComplete();
       }
     });
-  }
+  };
 
   return (
     <div className="signup-container">
@@ -571,6 +548,6 @@ function SignupForm({ onSignupComplete }) {
       </form>
     </div>
   );
-}
+};
 
 export default SignupForm;

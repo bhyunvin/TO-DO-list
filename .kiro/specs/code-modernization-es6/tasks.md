@@ -14,7 +14,7 @@
   - Apply same ES6+ refactoring rules
   - _Requirements: 1.1, 1.2, 1.3, 2.1, 2.2, 3.1, 3.2, 3.3, 3.4, 3.5, 4.1, 4.2_
 
-- [ ] 3. Refactor frontend login forms
+- [x] 3. Refactor frontend login forms
   - Refactor LoginForm.js, SignupForm.js in loginForm/ directory
   - Apply same ES6+ refactoring rules
   - _Requirements: 1.1, 1.2, 1.3, 2.1, 2.2, 3.1, 3.2, 3.3, 3.4, 3.5, 4.1, 4.2_
