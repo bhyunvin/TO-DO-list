@@ -21,15 +21,11 @@ export class LoggingInterceptor implements NestInterceptor {
   ): Observable<any> {
     const ctx = context.switchToHttp();
     const request = ctx.getRequest();
-    const method = request.method;
-    const url = request.url;
-    const user = request.session.user;
+    const { method, url, session, body, connection, headers } = request;
+    const { user } = session;
     const userSeq = user ? Number(user.userSeq) : undefined;
     const userId = user ? user.userId : undefined;
-    const ip =
-      request.connection.remoteAddress ||
-      request.headers['x-forwarded-for'] ||
-      '';
+    const ip = connection.remoteAddress || headers['x-forwarded-for'] || '';
 
     this.logger.log(
       `Incoming request: ${method} ${url}. userSeq : ${isNaN(userSeq) ? 'anonymous user' : userSeq}`,
@@ -43,7 +39,7 @@ export class LoggingInterceptor implements NestInterceptor {
         logEntity.method = method;
 
         // bodyToLog를 request.body로 우선 기본 할당합니다.
-        let bodyToLog = request.body;
+        let bodyToLog = body;
         // request.body가 객체인 경우에만 분해 할당을 통해 userPassword를 제외하고 덮어씁니다.
         if (bodyToLog && typeof bodyToLog === 'object') {
           const { userPassword: _, ...rest } = bodyToLog;

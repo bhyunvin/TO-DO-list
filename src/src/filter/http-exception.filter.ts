@@ -21,15 +21,12 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
     const request = ctx.getRequest();
-    const url = request.url;
+    const { url, method, session, body, headers, connection } = request;
     const status = exception.getStatus();
     const message = exception.message || 'Internal server error';
-    const userSeq = Number(request.session.userSeq);
-    const userId = request.session.userId;
-    const ip =
-      request.headers['x-forwarded-for'] ||
-      request.connection.remoteAddress ||
-      '';
+    const userSeq = Number(session.userSeq);
+    const userId = session.userId;
+    const ip = headers['x-forwarded-for'] || connection.remoteAddress || '';
 
     this.logger.error(`HTTP Exception: ${message}`, exception.stack);
 
@@ -37,10 +34,10 @@ export class HttpExceptionFilter implements ExceptionFilter {
     logEntity.userSeq = userSeq || null;
     logEntity.connectUrl = url;
     logEntity.errorContent = exception.stack;
-    logEntity.method = request.method;
+    logEntity.method = method;
 
     // bodyToLog를 request.body로 우선 기본 할당합니다.
-    let bodyToLog = request.body;
+    let bodyToLog = body;
 
     // request.body가 객체인 경우에만 분해 할당을 통해 userPassword를 제외하고 덮어씁니다.
     if (bodyToLog && typeof bodyToLog === 'object') {

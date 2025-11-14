@@ -53,9 +53,6 @@ export class KeychainUtil {
   private sanitizeInput(input: string): string {
     // 정규식을 사용하여 영문, 숫자, 하이픈(-), 언더스코어(_)만 허용
     const regex = /^[a-zA-Z0-9_-]+$/;
-    if (regex.test(input)) {
-      return input;
-    }
-    return '';
+    return regex.test(input) ? input : '';
   }
 }

@@ -53,7 +53,7 @@
   - Apply ES6+ syntax considering TypeScript characteristics
   - _Requirements: 1.1, 1.2, 1.3, 2.1, 2.2, 3.1, 3.2, 3.3, 3.4, 3.5, 4.2_
 
-- [ ] 9. Refactor backend utilities and common modules
+- [x] 9. Refactor backend utilities and common modules
   - Refactor all utility files in src/utils/ directory
   - Refactor src/filter/, src/interceptor/, src/logging/ directories
   - Refactor src/types/express/ directory

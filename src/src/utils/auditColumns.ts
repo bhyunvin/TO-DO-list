@@ -27,7 +27,7 @@ export interface AuditSettings {
   isUpdate?: boolean;
 }
 
-export function setAuditColumn(setting: AuditSettings) {
+export const setAuditColumn = (setting: AuditSettings) => {
   const { entity, id, ip, isUpdate = false } = setting;
 
   if (isUpdate) {
@@ -43,4 +43,4 @@ export function setAuditColumn(setting: AuditSettings) {
   }
 
   return entity;
-}
+};
