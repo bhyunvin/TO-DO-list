@@ -20,36 +20,27 @@ import { format, addDays } from 'date-fns';
 @Injectable()
 export class TodoService {
   constructor(
-    // TodoEntity의 Repository를 주입합니다.
     @InjectRepository(TodoEntity)
     private todoRepository: Repository<TodoEntity>,
-    // FileInfoEntity의 Repository를 주입합니다.
     @InjectRepository(FileInfoEntity)
     private fileInfoRepository: Repository<FileInfoEntity>,
-    // FileUploadUtil을 주입합니다.
     private fileUploadUtil: FileUploadUtil,
   ) {}
 
-  // 특정 사용자의 특정 날짜의 모든 ToDo 항목을 조회합니다.
   async findAll(userSeq: number, todoDate: string): Promise<TodoEntity[]> {
-    // 날짜 범위 계산
     const startOfDay = `${todoDate} 00:00:00`;
     const nextDayStr =
       format(addDays(new Date(todoDate), 1), 'yyyy-MM-dd') + ' 00:00:00';
 
-    // 1. 쿼리 빌더 생성
     const qb = this.todoRepository.createQueryBuilder('todo');
 
-    // 2. 기본 WHERE 조건 설정 (공통 조건)
     qb.where('todo.delYn = :delYn', { delYn: 'N' }).andWhere(
       'todo.userSeq = :userSeq',
       { userSeq },
     );
 
-    // 3. 세 가지 OR 조건을 괄호(Brackets)로 묶기
     qb.andWhere(
       new Brackets((subQuery) => {
-        // 조건 1: 미완료 항목 (todoDate <= :todoDate AND completeDtm IS NULL)
         subQuery.where(
           new Brackets((c1) => {
             c1.where('todo.todoDate <= :todoDate', { todoDate }).andWhere(
@@ -58,7 +49,6 @@ export class TodoService {
           }),
         );
 
-        // 조건 2: 완료 항목 (todoDate = :todoDate AND completeDtm IS NOT NULL)
         subQuery.orWhere(
           new Brackets((c2) => {
             c2.where('todo.todoDate = :todoDate', { todoDate }).andWhere(
@@ -67,7 +57,6 @@ export class TodoService {
           }),
         );
 
-        // 조건 3: 오늘 완료한 항목 (completeDtm >= :startOfDay AND completeDtm < :nextDayStr)
         subQuery.orWhere(
           new Brackets((c3) => {
             c3.where('todo.completeDtm >= :startOfDay', {
@@ -78,17 +67,14 @@ export class TodoService {
       }),
     );
 
-    // 4. 정렬 순서 적용
     qb.orderBy('todo.completeDtm', 'DESC', 'NULLS FIRST').addOrderBy(
       'todo.todoSeq',
       'DESC',
     );
 
-    // 5. 쿼리 실행
     return qb.getMany();
   }
 
-  // 새로운 ToDo 항목을 생성합니다.
   async create(
     user: Omit<UserEntity, 'userPassword'>,
     ip: string,
@@ -96,7 +82,7 @@ export class TodoService {
   ): Promise<TodoEntity> {
     const newTodo = this.todoRepository.create({
       ...createTodoDto,
-      userSeq: user.userSeq, // 사용자 번호를 설정합니다.
+      userSeq: user.userSeq,
     });
     const auditSettings: AuditSettings = {
       ip,
@@ -108,7 +94,6 @@ export class TodoService {
     return this.todoRepository.save(newTodo);
   }
 
-  // 특정 ToDo 항목을 수정합니다.
   async update(
     id: number,
     user: Omit<UserEntity, 'userPassword'>,
@@ -119,11 +104,9 @@ export class TodoService {
       where: { todoSeq: id, userSeq: user.userSeq },
     });
     if (!todo) {
-      // ToDo 항목이 없으면 null을 반환합니다.
       return null;
     }
 
-    // 수정된 내용을 적용합니다.
     Object.assign(todo, updateTodoDto);
     const auditSettings: AuditSettings = {
       ip,
@@ -136,7 +119,6 @@ export class TodoService {
     return this.todoRepository.save(todo);
   }
 
-  // 특정 ToDo 항목을 삭제 (soft delete)합니다.
   async delete(
     user: Omit<UserEntity, 'userPassword'>,
     ip: string,
@@ -161,7 +143,6 @@ export class TodoService {
     }
   }
 
-  // 파일 첨부만 업로드합니다 (독립적인 파일 업로드)
   async uploadAttachments(
     user: Omit<UserEntity, 'userPassword'>,
     ip: string,
@@ -177,7 +158,7 @@ export class TodoService {
 
     const auditSettings: AuditSettings = {
       ip,
-      entity: null, // Will be set in saveFileInfo
+      entity: null,
       id: user.userId,
     };
 
@@ -215,24 +196,21 @@ export class TodoService {
     }
   }
 
-  // 파일과 함께 새로운 TODO 항목을 생성합니다.
   async createWithFiles(
     user: Omit<UserEntity, 'userPassword'>,
     ip: string,
     createTodoDto: CreateTodoWithFilesDto,
     files: Express.Multer.File[],
   ): Promise<TodoWithFilesResponseDto> {
-    // 먼저 TODO 항목을 생성합니다.
     const newTodo = await this.create(user, ip, createTodoDto);
 
     let attachments: FileAttachmentResponseDto[] = [];
     let fileGroupNo: number | null = null;
 
-    // 파일이 있는 경우 파일을 업로드하고 TODO와 연결합니다.
     if (files && files.length > 0) {
       const auditSettings: AuditSettings = {
         ip,
-        entity: null, // saveFileInfo에서 설정됨
+        entity: null,
         id: user.userId,
       };
 
@@ -246,7 +224,6 @@ export class TodoService {
 
         fileGroupNo = uploadedFileGroupNo;
 
-        // TODO 항목에 파일 그룹 번호를 연결합니다.
         newTodo.todoFileGroupNo = fileGroupNo;
         await this.todoRepository.save(newTodo);
 
@@ -259,7 +236,6 @@ export class TodoService {
           validationStatus: file.validationStatus,
         }));
       } catch (error) {
-        // 파일 업로드 실패 시에도 TODO는 생성된 상태로 유지
         console.error('File upload failed during TODO creation:', error);
       }
     }
@@ -275,14 +251,12 @@ export class TodoService {
     };
   }
 
-  // 기존 TODO 항목에 파일을 추가합니다.
   async addAttachments(
     todoId: number,
     user: Omit<UserEntity, 'userPassword'>,
     ip: string,
     files: Express.Multer.File[],
   ): Promise<FileUploadResponseDto> {
-    // TODO 항목이 존재하고 사용자 소유인지 확인합니다.
     const todo = await this.todoRepository.findOne({
       where: { todoSeq: todoId, userSeq: user.userSeq, delYn: 'N' },
     });
@@ -305,14 +279,13 @@ export class TodoService {
 
     const auditSettings: AuditSettings = {
       ip,
-      entity: null, // Will be set in saveFileInfo
+      entity: null,
       id: user.userId,
     };
 
     try {
       let fileGroupNo = todo.todoFileGroupNo;
 
-      // TODO에 기존 파일 그룹이 없는 경우 새로 생성
       if (!fileGroupNo) {
         const { savedFiles, fileGroupNo: newFileGroupNo } =
           await this.fileUploadUtil.saveFileInfo(

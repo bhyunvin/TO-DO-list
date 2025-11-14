@@ -1,45 +1,33 @@
 import { Module, NestModule, MiddlewareConsumer, Logger } from '@nestjs/common';
 
-//DB
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-//interceptor
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { LoggingInterceptor } from './interceptor/logging.interceptor';
 
-//filter
 import { APP_FILTER } from '@nestjs/core';
 import { HttpExceptionFilter } from './filter/http-exception.filter';
 
-//logging
 import { LoggingModule } from './logging/logging.module';
 
-//로그인
 import { UserModule } from './user/user.module';
 
-//session
 import session from 'express-session';
 
-//file upload
 import { FileUploadModule } from './fileUpload/fileUpload.module';
 
-// ai assistance
 import { AssistanceModule } from './assistance/assistance.module';
 
 import { TodoModule } from './todo/todo.module';
 
-// keychain
 import { KeychainModule } from './utils/keychain.module';
 import { KeychainUtil } from './utils/keychainUtil';
 
-// auth
 import { AuthModule } from '../types/express/auth.module';
 
-// DB 관련
 import { CustomNamingStrategy } from './utils/customNamingStrategy';
 import { decrypt } from './utils/cryptUtil';
 
-// config
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
@@ -50,8 +38,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     }),
     AuthModule,
     TypeOrmModule.forRootAsync({
-      imports: [ConfigModule, KeychainModule], // KeychainService를 사용하기 위해 KeychainModule 임포트
-      inject: [ConfigService, KeychainUtil], // useFactory에 KeychainService 주입
+      imports: [ConfigModule, KeychainModule],
+      inject: [ConfigService, KeychainUtil],
       useFactory: async (
         configService: ConfigService,
         keychainUtil: KeychainUtil,
@@ -101,7 +89,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 export class AppModule implements NestModule {
   private readonly logger = new Logger(AppModule.name);
 
-  // 생성자에서 KeychainService를 주입받습니다.
   constructor(private readonly keychainService: KeychainUtil) {}
 
   async configure(consumer: MiddlewareConsumer) {
@@ -120,17 +107,16 @@ export class AppModule implements NestModule {
     consumer
       .apply(
         session({
-          name: 'todo-session-id', // 세션 쿠키 이름 지정
+          name: 'todo-session-id',
           secret: sessionSecret,
           resave: false,
           saveUninitialized: false,
           cookie: {
-            secure: false, // HTTPS에서 secure: true로 설정
+            secure: false,
             httpOnly: true,
-            // domain: 'localhost', // 이 줄을 주석 처리하거나 삭제합니다.
           },
         }),
       )
-      .forRoutes('*'); // 모든 라우트에 세션 미들웨어 적용
+      .forRoutes('*');
   }
 }
