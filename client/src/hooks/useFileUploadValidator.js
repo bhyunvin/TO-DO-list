@@ -17,20 +17,20 @@ const FILE_VALIDATION_ERRORS = {
 };
 
 const FILE_VALIDATION_MESSAGES = {
-  [FILE_VALIDATION_ERRORS.FILE_TOO_LARGE]: 'File size exceeds the maximum limit of 10MB',
-  [FILE_VALIDATION_ERRORS.INVALID_FILE_TYPE]: 'File type is not allowed',
-  [FILE_VALIDATION_ERRORS.BLOCKED_FILE_TYPE]: 'File type is blocked for security reasons',
-  [FILE_VALIDATION_ERRORS.TOO_MANY_FILES]: 'Too many files selected',
+  [FILE_VALIDATION_ERRORS.FILE_TOO_LARGE]: '파일 크기가 최대 제한인 10MB를 초과합니다',
+  [FILE_VALIDATION_ERRORS.INVALID_FILE_TYPE]: '허용되지 않는 파일 형식입니다',
+  [FILE_VALIDATION_ERRORS.BLOCKED_FILE_TYPE]: '보안상의 이유로 차단된 파일 형식입니다',
+  [FILE_VALIDATION_ERRORS.TOO_MANY_FILES]: '너무 많은 파일이 선택되었습니다',
 };
 
 /**
  * 추가 컨텍스트가 포함된 사용자 친화적 오류 메시지
  */
 const USER_FRIENDLY_MESSAGES = {
-  [FILE_VALIDATION_ERRORS.FILE_TOO_LARGE]: 'This file is too large. Please choose a file smaller than 10MB.',
-  [FILE_VALIDATION_ERRORS.INVALID_FILE_TYPE]: 'This file type is not supported. Please choose a different file.',
-  [FILE_VALIDATION_ERRORS.BLOCKED_FILE_TYPE]: 'This file type is not allowed for security reasons. Please choose a different file.',
-  [FILE_VALIDATION_ERRORS.TOO_MANY_FILES]: 'You have selected too many files. Please reduce the number of files.',
+  [FILE_VALIDATION_ERRORS.FILE_TOO_LARGE]: '파일이 너무 큽니다. 10MB보다 작은 파일을 선택해주세요.',
+  [FILE_VALIDATION_ERRORS.INVALID_FILE_TYPE]: '지원되지 않는 파일 형식입니다. 다른 파일을 선택해주세요.',
+  [FILE_VALIDATION_ERRORS.BLOCKED_FILE_TYPE]: '보안상의 이유로 허용되지 않는 파일 형식입니다. 다른 파일을 선택해주세요.',
+  [FILE_VALIDATION_ERRORS.TOO_MANY_FILES]: '너무 많은 파일을 선택했습니다. 파일 수를 줄여주세요.',
 };
 
 const FILE_UPLOAD_POLICY = {
@@ -269,11 +269,11 @@ export const useFileUploadValidator = () => {
     
     switch (error.errorCode) {
       case FILE_VALIDATION_ERRORS.FILE_TOO_LARGE:
-        return `${baseMessage} (Current size: ${formatFileSize(error.fileSize || 0)})`;
+        return `${baseMessage} (현재 크기: ${formatFileSize(error.fileSize || 0)})`;
       
       case FILE_VALIDATION_ERRORS.INVALID_FILE_TYPE:
       case FILE_VALIDATION_ERRORS.BLOCKED_FILE_TYPE:
-        return `${baseMessage} (File type: ${error.fileType || 'unknown'})`;
+        return `${baseMessage} (파일 형식: ${error.fileType || 'unknown'})`;
       
       default:
         return baseMessage;
@@ -341,7 +341,7 @@ export const useFileUploadValidator = () => {
     return [{
       fileName: 'Unknown',
       errorCode: 'UPLOAD_FAILED',
-      errorMessage: 'An unexpected error occurred during file upload',
+      errorMessage: '파일 업로드 중 예기치 않은 오류가 발생했습니다',
     }];
   }, []);
 

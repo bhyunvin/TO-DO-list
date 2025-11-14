@@ -65,14 +65,14 @@ describe('TodoContainer Sorting Behavior', () => {
   test('completed todo moves to bottom after toggle', async () => {
     const user = userEvent.setup();
 
-    // Initial todos: all incomplete
+    // 초기 todos: 모두 미완료
     const initialTodos = [
       { todoSeq: 3, todoContent: 'Todo 3', completeDtm: null, todoNote: '', todoDate: '2025-11-13' },
       { todoSeq: 2, todoContent: 'Todo 2', completeDtm: null, todoNote: '', todoDate: '2025-11-13' },
       { todoSeq: 1, todoContent: 'Todo 1', completeDtm: null, todoNote: '', todoDate: '2025-11-13' },
     ];
 
-    // Mock initial fetch
+    // 초기 fetch 모킹
     mockApi.mockResolvedValueOnce({
       ok: true,
       json: async () => initialTodos,
@@ -80,54 +80,54 @@ describe('TodoContainer Sorting Behavior', () => {
 
     render(<TodoList />);
 
-    // Wait for initial todos to load
+    // 초기 todos 로드 대기
     await waitFor(() => {
       expect(screen.getByText('Todo 3')).toBeInTheDocument();
     });
 
-    // Verify initial order (all incomplete, sorted by todoSeq DESC)
+    // 초기 순서 확인 (모두 미완료, todoSeq DESC로 정렬)
     const rows = screen.getAllByRole('row');
-    expect(rows[1]).toHaveTextContent('Todo 3'); // First data row
+    expect(rows[1]).toHaveTextContent('Todo 3'); // 첫 번째 데이터 행
     expect(rows[2]).toHaveTextContent('Todo 2');
     expect(rows[3]).toHaveTextContent('Todo 1');
 
-    // Mock successful toggle response
+    // 성공적인 토글 응답 모킹
     mockApi.mockResolvedValueOnce({
       ok: true,
       json: async () => ({}),
     });
 
-    // Toggle Todo 3 (first item) to complete - click the cell, not the checkbox
+    // Todo 3 (첫 번째 항목)을 완료로 토글 - 체크박스가 아닌 셀 클릭
     const checkboxCells = screen.getAllByRole('cell').filter(cell => 
       cell.classList.contains('checkbox-cell')
     );
     await user.click(checkboxCells[0]);
 
-    // Wait for optimistic update and sorting
+    // 낙관적 업데이트 및 정렬 대기
     await waitFor(() => {
       const updatedRows = screen.getAllByRole('row');
-      // Todo 3 should now be at the bottom (completed items go last)
-      expect(updatedRows[1]).toHaveTextContent('Todo 2'); // Now first
-      expect(updatedRows[2]).toHaveTextContent('Todo 1'); // Now second
-      expect(updatedRows[3]).toHaveTextContent('Todo 3'); // Now last (completed)
+      // Todo 3은 이제 하단에 있어야 함 (완료된 항목은 마지막으로)
+      expect(updatedRows[1]).toHaveTextContent('Todo 2'); // 이제 첫 번째
+      expect(updatedRows[2]).toHaveTextContent('Todo 1'); // 이제 두 번째
+      expect(updatedRows[3]).toHaveTextContent('Todo 3'); // 이제 마지막 (완료됨)
     });
 
-    // Verify Todo 3 checkbox is checked
+    // Todo 3 체크박스가 체크되었는지 확인
     const updatedCheckboxes = screen.getAllByRole('checkbox');
-    expect(updatedCheckboxes[2]).toBeChecked(); // Todo 3 is now at index 2
+    expect(updatedCheckboxes[2]).toBeChecked(); // Todo 3은 이제 인덱스 2에 있음
   });
 
   test('uncompleted todo moves to top after toggle', async () => {
     const user = userEvent.setup();
 
-    // Initial todos: one completed, two incomplete
+    // 초기 todos: 하나는 완료, 두 개는 미완료
     const initialTodos = [
       { todoSeq: 3, todoContent: 'Todo 3', completeDtm: null, todoNote: '', todoDate: '2025-11-13' },
       { todoSeq: 2, todoContent: 'Todo 2', completeDtm: null, todoNote: '', todoDate: '2025-11-13' },
       { todoSeq: 1, todoContent: 'Todo 1', completeDtm: '2025-11-13T10:00:00Z', todoNote: '', todoDate: '2025-11-13' },
     ];
 
-    // Mock initial fetch
+    // 초기 fetch 모킹
     mockApi.mockResolvedValueOnce({
       ok: true,
       json: async () => initialTodos,
@@ -135,39 +135,39 @@ describe('TodoContainer Sorting Behavior', () => {
 
     render(<TodoList />);
 
-    // Wait for initial todos to load
+    // 초기 todos 로드 대기
     await waitFor(() => {
       expect(screen.getByText('Todo 1')).toBeInTheDocument();
     });
 
-    // Verify initial order (incomplete first, then completed)
+    // 초기 순서 확인 (미완료가 먼저, 그 다음 완료)
     const rows = screen.getAllByRole('row');
-    expect(rows[1]).toHaveTextContent('Todo 3'); // Incomplete
-    expect(rows[2]).toHaveTextContent('Todo 2'); // Incomplete
-    expect(rows[3]).toHaveTextContent('Todo 1'); // Completed (at bottom)
+    expect(rows[1]).toHaveTextContent('Todo 3'); // 미완료
+    expect(rows[2]).toHaveTextContent('Todo 2'); // 미완료
+    expect(rows[3]).toHaveTextContent('Todo 1'); // 완료됨 (하단에)
 
-    // Mock successful toggle response
+    // 성공적인 토글 응답 모킹
     mockApi.mockResolvedValueOnce({
       ok: true,
       json: async () => ({}),
     });
 
-    // Toggle Todo 1 (last item) to incomplete - click the cell
+    // Todo 1 (마지막 항목)을 미완료로 토글 - 셀 클릭
     const checkboxCells = screen.getAllByRole('cell').filter(cell => 
       cell.classList.contains('checkbox-cell')
     );
-    await user.click(checkboxCells[2]); // Todo 1 checkbox cell
+    await user.click(checkboxCells[2]); // Todo 1 체크박스 셀
 
-    // Wait for optimistic update and sorting
+    // 낙관적 업데이트 및 정렬 대기
     await waitFor(() => {
       const updatedRows = screen.getAllByRole('row');
-      // Todo 1 should now be at the top (incomplete items go first, sorted by seq DESC)
-      expect(updatedRows[1]).toHaveTextContent('Todo 3'); // Still first (seq 3)
-      expect(updatedRows[2]).toHaveTextContent('Todo 2'); // Still second (seq 2)
-      expect(updatedRows[3]).toHaveTextContent('Todo 1'); // Still last (seq 1, but now incomplete)
+      // Todo 1은 이제 상단에 있어야 함 (미완료 항목이 먼저, seq DESC로 정렬)
+      expect(updatedRows[1]).toHaveTextContent('Todo 3'); // 여전히 첫 번째 (seq 3)
+      expect(updatedRows[2]).toHaveTextContent('Todo 2'); // 여전히 두 번째 (seq 2)
+      expect(updatedRows[3]).toHaveTextContent('Todo 1'); // 여전히 마지막 (seq 1, 하지만 이제 미완료)
     });
 
-    // Verify Todo 1 checkbox is unchecked
+    // Todo 1 체크박스가 체크 해제되었는지 확인
     const updatedCheckboxes = screen.getAllByRole('checkbox');
     expect(updatedCheckboxes[2]).not.toBeChecked();
   });
@@ -175,13 +175,13 @@ describe('TodoContainer Sorting Behavior', () => {
   test('sorting maintains order on rollback', async () => {
     const user = userEvent.setup();
 
-    // Initial todos
+    // 초기 todos
     const initialTodos = [
       { todoSeq: 2, todoContent: 'Todo 2', completeDtm: null, todoNote: '', todoDate: '2025-11-13' },
       { todoSeq: 1, todoContent: 'Todo 1', completeDtm: null, todoNote: '', todoDate: '2025-11-13' },
     ];
 
-    // Mock initial fetch
+    // 초기 fetch 모킹
     mockApi.mockResolvedValueOnce({
       ok: true,
       json: async () => initialTodos,
@@ -193,33 +193,33 @@ describe('TodoContainer Sorting Behavior', () => {
       expect(screen.getByText('Todo 2')).toBeInTheDocument();
     });
 
-    // Verify initial order
+    // 초기 순서 확인
     let rows = screen.getAllByRole('row');
     expect(rows[1]).toHaveTextContent('Todo 2');
     expect(rows[2]).toHaveTextContent('Todo 1');
 
-    // Mock failed toggle response
+    // 실패한 토글 응답 모킹
     mockApi.mockResolvedValueOnce({
       ok: false,
       status: 500,
       json: async () => ({ message: 'Server error' }),
     });
 
-    // Try to toggle Todo 2 - click the cell
+    // Todo 2 토글 시도 - 셀 클릭
     const checkboxCells = screen.getAllByRole('cell').filter(cell => 
       cell.classList.contains('checkbox-cell')
     );
     await user.click(checkboxCells[0]);
 
-    // Wait for rollback
+    // 롤백 대기
     await waitFor(() => {
       const updatedRows = screen.getAllByRole('row');
-      // Order should be restored to original
+      // 순서가 원래대로 복원되어야 함
       expect(updatedRows[1]).toHaveTextContent('Todo 2');
       expect(updatedRows[2]).toHaveTextContent('Todo 1');
     });
 
-    // Verify Todo 2 checkbox is unchecked (rolled back)
+    // Todo 2 체크박스가 체크 해제되었는지 확인 (롤백됨)
     const updatedCheckboxes = screen.getAllByRole('checkbox');
     expect(updatedCheckboxes[0]).not.toBeChecked();
   });

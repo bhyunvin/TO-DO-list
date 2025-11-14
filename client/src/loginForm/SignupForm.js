@@ -36,14 +36,14 @@ function SignupForm({ onSignupComplete }) {
   function handleImageChange(e) {
     const file = e.target.files[0];
     
-    // Clear previous state
+    // 이전 상태 초기화
     setProfileImage(null);
     setProfileImageFile(null);
     setProfileImageValidation(null);
     setProfileImageError('');
     
     if (file) {
-      // Validate the file
+      // 파일 유효성 검사
       const validationResults = validateFiles([file], 'profileImage');
       const validation = validationResults[0];
       
@@ -53,7 +53,7 @@ function SignupForm({ onSignupComplete }) {
         setProfileImageFile(file);
         setProfileImageError('');
         
-        // Create preview
+        // 미리보기 생성
         const reader = new FileReader();
         reader.onloadend = function () {
           setProfileImage(reader.result);
@@ -61,7 +61,7 @@ function SignupForm({ onSignupComplete }) {
         reader.readAsDataURL(file);
       } else {
         setProfileImageError(validation.errorMessage);
-        // Clear the file input
+        // 파일 입력 초기화
         e.target.value = '';
       }
     }
@@ -223,7 +223,7 @@ function SignupForm({ onSignupComplete }) {
       return false;
     }
 
-    // Validate profile image if provided
+    // 프로필 이미지가 제공된 경우 유효성 검사
     if (profileImageFile && profileImageValidation && !profileImageValidation.isValid) {
       setProfileImageError(profileImageValidation.errorMessage);
       return false;
@@ -274,7 +274,7 @@ function SignupForm({ onSignupComplete }) {
           Swal.fire('', '회원가입에 실패했습니다.', 'error');
         }
       } else {
-        // Handle server validation errors
+        // 서버 유효성 검사 오류 처리
         const errorData = await response.json().catch(() => ({}));
         
         if (errorData.errors && Array.isArray(errorData.errors)) {
@@ -497,7 +497,7 @@ function SignupForm({ onSignupComplete }) {
           </div>
         )}
 
-        {/* Enhanced upload progress for profile image */}
+        {/* 프로필 이미지를 위한 향상된 업로드 진행 상황 */}
         {profileImageFile && (uploadStatus !== 'idle' || isSubmitting) && (
           <div className="form-group row mb-3">
             <label className="col-3 col-form-label">업로드 상태</label>
@@ -512,7 +512,7 @@ function SignupForm({ onSignupComplete }) {
                 showProgress={true}
                 showDetailedStatus={true}
                 onRetryUpload={async (failedFiles) => {
-                  // For profile image, just reset the validation
+                  // 프로필 이미지의 경우 유효성 검사만 재설정
                   if (failedFiles.length > 0) {
                     const file = failedFiles[0];
                     const validationResults = validateFiles([file], 'profileImage');

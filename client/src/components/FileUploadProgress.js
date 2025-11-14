@@ -3,7 +3,7 @@ import { ProgressBar, Alert, Badge, ListGroup } from 'react-bootstrap';
 import { useFileUploadValidator } from '../hooks/useFileUploadValidator';
 
 /**
- * File upload progress and status component
+ * 파일 업로드 진행 상황 및 상태 컴포넌트
  */
 const FileUploadProgress = ({
   files = [],
@@ -17,12 +17,12 @@ const FileUploadProgress = ({
   showValidation = true,
   showProgress = true,
   showDetailedStatus = false,
-  compact = false, // New prop for compact display
+  compact = false, // 간결한 표시를 위한 새 prop
 }) => {
   const { formatFileSize, getUserFriendlyMessage } = useFileUploadValidator();
 
   /**
-   * Get status variant for Bootstrap components
+   * Bootstrap 컴포넌트를 위한 상태 variant 가져오기
    */
   const getStatusVariant = (status) => {
     switch (status) {
@@ -41,17 +41,17 @@ const FileUploadProgress = ({
   };
 
   /**
-   * Get individual file upload status
+   * 개별 파일 업로드 상태 가져오기
    */
   const getFileUploadStatus = (file) => {
     const fileName = file.name;
     
-    // Check if file was successfully uploaded
+    // 파일이 성공적으로 업로드되었는지 확인
     const wasUploaded = uploadedFiles.some(uploaded => 
       uploaded.originalFileName === fileName || uploaded.fileName === fileName
     );
     
-    // Check if file has upload error
+    // 파일에 업로드 오류가 있는지 확인
     const hasError = uploadErrors.some(error => 
       error.fileName === fileName
     );
@@ -70,7 +70,7 @@ const FileUploadProgress = ({
   };
 
   /**
-   * Get file validation status
+   * 파일 유효성 검사 상태 가져오기
    */
   const getFileValidationStatus = (file, index) => {
     const result = validationResults[index];
@@ -83,14 +83,14 @@ const FileUploadProgress = ({
   };
 
   /**
-   * Get file upload progress
+   * 파일 업로드 진행률 가져오기
    */
   const getFileProgress = (fileName) => {
     return uploadProgress[fileName] || 0;
   };
 
   /**
-   * Render file validation status badge
+   * 파일 유효성 검사 상태 배지 렌더링
    */
   // const renderValidationBadge = (file, index) => {
   //   const status = getFileValidationStatus(file, index);
@@ -103,7 +103,7 @@ const FileUploadProgress = ({
   // };
 
   /**
-   * Render file progress bar with enhanced visual feedback and real-time status
+   * 향상된 시각적 피드백 및 실시간 상태와 함께 파일 진행률 표시줄 렌더링
    */
   const renderProgressBar = (file) => {
     const progress = getFileProgress(file.name);
@@ -156,7 +156,7 @@ const FileUploadProgress = ({
           striped={uploadStatus === 'validating'}
         />
         
-        {/* Enhanced upload feedback with detailed information */}
+        {/* 상세 정보가 포함된 향상된 업로드 피드백 */}
         {uploadStatus === 'uploading' && progress > 0 && progress < 100 && (
           <div className="mt-1 d-flex justify-content-between align-items-center">
             <small className="text-primary">
@@ -174,7 +174,7 @@ const FileUploadProgress = ({
           </div>
         )}
 
-        {/* Validation feedback */}
+        {/* 유효성 검사 피드백 */}
         {uploadStatus === 'validating' && (
           <div className="mt-1">
             <small className="text-info">
@@ -184,7 +184,7 @@ const FileUploadProgress = ({
           </div>
         )}
 
-        {/* Success feedback with timestamp */}
+        {/* 타임스탬프가 포함된 성공 피드백 */}
         {fileStatus.status === 'success' && (
           <div className="mt-1">
             <small className="text-success">
@@ -194,7 +194,7 @@ const FileUploadProgress = ({
           </div>
         )}
 
-        {/* Error feedback with retry suggestion */}
+        {/* 재시도 제안이 포함된 오류 피드백 */}
         {fileStatus.status === 'error' && (
           <div className="mt-1">
             <small className="text-danger">
@@ -204,7 +204,7 @@ const FileUploadProgress = ({
           </div>
         )}
 
-        {/* Waiting status */}
+        {/* 대기 상태 */}
         {uploadStatus === 'uploading' && progress === 0 && (
           <div className="mt-1">
             <small className="text-muted">
@@ -218,7 +218,7 @@ const FileUploadProgress = ({
   };
 
   /**
-   * Calculate overall upload progress
+   * 전체 업로드 진행률 계산
    */
   const calculateOverallProgress = () => {
     if (files.length === 0) return 0;
@@ -231,7 +231,7 @@ const FileUploadProgress = ({
   };
 
   /**
-   * Render overall upload status with enhanced feedback
+   * 향상된 피드백과 함께 전체 업로드 상태 렌더링
    */
   const renderUploadStatus = () => {
     if (uploadStatus === 'idle') return null;
@@ -247,13 +247,13 @@ const FileUploadProgress = ({
     const variant = getStatusVariant(uploadStatus);
     const message = statusMessages[uploadStatus] || '';
 
-    // Calculate upload statistics for detailed status
+    // 상세 상태를 위한 업로드 통계 계산
     const totalFiles = files.length;
     const successfulUploads = uploadedFiles.length;
     const failedUploads = uploadErrors.length;
     const overallProgress = calculateOverallProgress();
 
-    // Calculate upload speed and ETA for active uploads
+    // 활성 업로드를 위한 업로드 속도 및 예상 시간 계산
     const totalSize = files.reduce((sum, file) => sum + file.size, 0);
     const uploadedSize = uploadedFiles.reduce((sum, file) => sum + (file.fileSize || 0), 0);
     const remainingSize = totalSize - uploadedSize;
@@ -277,7 +277,7 @@ const FileUploadProgress = ({
                 )}
               </div>
               
-              {/* Enhanced overall progress bar for uploading status */}
+              {/* 업로드 상태를 위한 향상된 전체 진행률 표시줄 */}
               {uploadStatus === 'uploading' && (
                 <div className="mt-2">
                   <div className="d-flex justify-content-between align-items-center mb-1">
@@ -293,7 +293,7 @@ const FileUploadProgress = ({
                     style={{ height: '8px' }}
                     animated
                   />
-                  {/* Upload statistics */}
+                  {/* 업로드 통계 */}
                   <div className="mt-1 d-flex justify-content-between">
                     <small className="text-muted">
                       <i className="bi bi-files me-1"></i>
@@ -309,7 +309,7 @@ const FileUploadProgress = ({
                 </div>
               )}
               
-              {/* Enhanced success details with file summary */}
+              {/* 파일 요약이 포함된 향상된 성공 세부 정보 */}
               {uploadStatus === 'success' && showDetailedStatus && (
                 <div className="mt-2 p-2 bg-light rounded">
                   <div className="text-success mb-2">
@@ -326,7 +326,7 @@ const FileUploadProgress = ({
                       총 용량: {formatFileSize(totalSize)}
                     </div>
                   </div>
-                  {/* Show uploaded file names */}
+                  {/* 업로드된 파일 이름 표시 */}
                   {uploadedFiles.length > 0 && (
                     <div className="mt-2">
                       <small className="text-muted">업로드된 파일:</small>
@@ -348,7 +348,7 @@ const FileUploadProgress = ({
                 </div>
               )}
 
-              {/* Enhanced partial success details */}
+              {/* 향상된 부분 성공 세부 정보 */}
               {uploadStatus === 'partial_success' && showDetailedStatus && (
                 <div className="mt-2 p-2 bg-light rounded">
                   <div className="row">
@@ -406,7 +406,7 @@ const FileUploadProgress = ({
           )}
         </div>
         
-        {/* Enhanced retry section for partial failures */}
+        {/* 부분 실패를 위한 향상된 재시도 섹션 */}
         {uploadStatus === 'partial_success' && onRetryUpload && failedUploads > 0 && (
           <div className="mt-3 pt-2 border-top">
             <div className="d-flex justify-content-between align-items-center">
@@ -438,7 +438,7 @@ const FileUploadProgress = ({
           </div>
         )}
         
-        {/* Enhanced error section with troubleshooting tips */}
+        {/* 문제 해결 팁이 포함된 향상된 오류 섹션 */}
         {uploadStatus === 'error' && failedUploads > 0 && (
           <div className="mt-3 pt-2 border-top">
             <div className="text-danger mb-2">
@@ -470,7 +470,7 @@ const FileUploadProgress = ({
   };
 
   /**
-   * Render upload errors
+   * 업로드 오류 렌더링
    */
   const renderUploadErrors = () => {
     if (uploadErrors.length === 0) return null;
@@ -490,7 +490,7 @@ const FileUploadProgress = ({
   };
 
   /**
-   * Render file list with enhanced status and validation feedback
+   * 향상된 상태 및 유효성 검사 피드백과 함께 파일 목록 렌더링
    */
   const renderFileList = () => {
     if (files.length === 0) return null;
@@ -501,7 +501,7 @@ const FileUploadProgress = ({
           const validationStatus = getFileValidationStatus(file, index);
           const uploadFileStatus = getFileUploadStatus(file);
           
-          // Determine the overall file status for styling
+          // 스타일링을 위한 전체 파일 상태 결정
           const hasValidationError = !validationStatus.isValid;
           const hasUploadError = uploadFileStatus.status === 'error';
           const isSuccess = uploadFileStatus.status === 'success';
@@ -518,7 +518,7 @@ const FileUploadProgress = ({
             >
               <div className="flex-grow-1">
                 <div className="d-flex align-items-center flex-wrap">
-                  {/* File icon based on type */}
+                  {/* 유형에 따른 파일 아이콘 */}
                   <i className={`bi ${
                     file.type?.startsWith('image/') ? 'bi-file-earmark-image' :
                     file.type?.includes('pdf') ? 'bi-file-earmark-pdf' :
@@ -534,7 +534,7 @@ const FileUploadProgress = ({
                       <span className="text-muted ms-2">({formatFileSize(file.size)})</span>
                     </div>
                     
-                    {/* File type and last modified info */}
+                    {/* 파일 유형 및 마지막 수정 정보 */}
                     <div className="small text-muted mt-1">
                       <i className="bi bi-info-circle me-1"></i>
                       타입: {file.type || 'Unknown'}
@@ -549,7 +549,7 @@ const FileUploadProgress = ({
                   </div>
                   
                   <div className="d-flex align-items-center ms-2">
-                    {/* Enhanced validation status badge */}
+                    {/* 향상된 유효성 검사 상태 배지 */}
                     {showValidation && (
                       <div className="me-2">
                         {validationStatus.isValid ? (
@@ -566,7 +566,7 @@ const FileUploadProgress = ({
                       </div>
                     )}
                     
-                    {/* Enhanced upload status badge */}
+                    {/* 향상된 업로드 상태 배지 */}
                     {(uploadStatus !== 'idle' && uploadStatus !== 'validating') && (
                       <div className="me-2">
                         <Badge 
@@ -605,7 +605,7 @@ const FileUploadProgress = ({
                       </div>
                     )}
                     
-                    {/* Remove button */}
+                    {/* 제거 버튼 */}
                     {onRemoveFile && uploadStatus !== 'uploading' && (
                       <button
                         type="button"
@@ -620,7 +620,7 @@ const FileUploadProgress = ({
                   </div>
                 </div>
                 
-                {/* Enhanced validation error message with suggestions */}
+                {/* 제안이 포함된 향상된 유효성 검사 오류 메시지 */}
                 {!validationStatus.isValid && (
                   <div className="alert alert-danger small mt-2 mb-0 py-2">
                     <i className="bi bi-exclamation-triangle-fill me-1"></i>
@@ -631,7 +631,7 @@ const FileUploadProgress = ({
                   </div>
                 )}
                 
-                {/* Enhanced upload error message with retry option */}
+                {/* 재시도 옵션이 포함된 향상된 업로드 오류 메시지 */}
                 {uploadFileStatus.status === 'error' && (
                   <div className="alert alert-danger small mt-2 mb-0 py-2">
                     <i className="bi bi-exclamation-triangle-fill me-1"></i>
@@ -642,7 +642,7 @@ const FileUploadProgress = ({
                   </div>
                 )}
                 
-                {/* Enhanced success message with detailed information */}
+                {/* 상세 정보가 포함된 향상된 성공 메시지 */}
                 {uploadFileStatus.status === 'success' && showDetailedStatus && (
                   <div className="alert alert-success small mt-2 mb-0 py-2">
                     <i className="bi bi-check-circle-fill me-1"></i>
@@ -657,7 +657,7 @@ const FileUploadProgress = ({
                         크기: {formatFileSize(file.size)}
                       </div>
                     </div>
-                    {/* Show server file info if available */}
+                    {/* 사용 가능한 경우 서버 파일 정보 표시 */}
                     {uploadedFiles.find(uploaded => 
                       uploaded.originalFileName === file.name || uploaded.fileName === file.name
                     ) && (
@@ -669,7 +669,7 @@ const FileUploadProgress = ({
                   </div>
                 )}
                 
-                {/* Enhanced upload status for active uploads */}
+                {/* 활성 업로드를 위한 향상된 업로드 상태 */}
                 {uploadFileStatus.status === 'uploading' && (
                   <div className="alert alert-primary small mt-2 mb-0 py-2">
                     <div className="d-flex align-items-center">
@@ -687,7 +687,7 @@ const FileUploadProgress = ({
                   </div>
                 )}
 
-                {/* Waiting status */}
+                {/* 대기 상태 */}
                 {uploadFileStatus.status === 'pending' && uploadStatus === 'uploading' && (
                   <div className="alert alert-info small mt-2 mb-0 py-2">
                     <i className="bi bi-hourglass me-1"></i>
@@ -698,7 +698,7 @@ const FileUploadProgress = ({
                   </div>
                 )}
                 
-                {/* Enhanced progress bar */}
+                {/* 향상된 진행률 표시줄 */}
                 {showProgress && (uploadStatus === 'uploading' || uploadStatus === 'validating') && validationStatus.isValid && (
                   renderProgressBar(file)
                 )}
@@ -711,7 +711,7 @@ const FileUploadProgress = ({
   };
 
   /**
-   * Render compact progress summary
+   * 간결한 진행 상황 요약 렌더링
    */
   const renderCompactSummary = () => {
     if (files.length === 0) return null;

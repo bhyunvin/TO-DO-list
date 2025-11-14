@@ -5,8 +5,8 @@ import { useFileUploadProgress } from '../hooks/useFileUploadProgress';
 import FileUploadProgress from './FileUploadProgress';
 
 /**
- * ProfileUpdateForm Component
- * Allows users to update their profile information including name, email, description, and profile image
+ * ProfileUpdateForm 컴포넌트
+ * 사용자가 이름, 이메일, 설명 및 프로필 이미지를 포함한 프로필 정보를 업데이트할 수 있도록 합니다
  */
 function ProfileUpdateForm({ user, onSave, onCancel, isSubmitting = false }) {
   const { 
@@ -22,22 +22,22 @@ function ProfileUpdateForm({ user, onSave, onCancel, isSubmitting = false }) {
     resetUploadState,
   } = useFileUploadProgress();
 
-  // Form state
+  // 폼 상태
   const [userName, setUserName] = useState(user?.userName || '');
   const [userEmail, setUserEmail] = useState(user?.userEmail || '');
   const [userDescription, setUserDescription] = useState(user?.userDescription || '');
   
-  // Profile image state
+  // 프로필 이미지 상태
   const [profileImage, setProfileImage] = useState(null);
   const [profileImageFile, setProfileImageFile] = useState(null);
   const [profileImageValidation, setProfileImageValidation] = useState(null);
   
-  // Validation error states
+  // 유효성 검사 오류 상태
   const [nameError, setNameError] = useState('');
   const [emailError, setEmailError] = useState('');
   const [profileImageError, setProfileImageError] = useState('');
 
-  // Initialize form with user data when user prop changes
+  // user prop이 변경될 때 폼을 사용자 데이터로 초기화
   useEffect(() => {
     if (user) {
       setUserName(user.userName || '');
@@ -47,19 +47,19 @@ function ProfileUpdateForm({ user, onSave, onCancel, isSubmitting = false }) {
   }, [user]);
 
   /**
-   * Handle profile image file selection and validation
+   * 프로필 이미지 파일 선택 및 유효성 검사 처리
    */
   function handleImageChange(e) {
     const file = e.target.files[0];
     
-    // Clear previous state
+    // 이전 상태 초기화
     setProfileImage(null);
     setProfileImageFile(null);
     setProfileImageValidation(null);
     setProfileImageError('');
     
     if (file) {
-      // Validate the file
+      // 파일 유효성 검사
       const validationResults = validateFiles([file], 'profileImage');
       const validation = validationResults[0];
       
@@ -69,7 +69,7 @@ function ProfileUpdateForm({ user, onSave, onCancel, isSubmitting = false }) {
         setProfileImageFile(file);
         setProfileImageError('');
         
-        // Create preview
+        // 미리보기 생성
         const reader = new FileReader();
         reader.onloadend = function () {
           setProfileImage(reader.result);
@@ -77,20 +77,20 @@ function ProfileUpdateForm({ user, onSave, onCancel, isSubmitting = false }) {
         reader.readAsDataURL(file);
       } else {
         setProfileImageError(validation.errorMessage);
-        // Clear the file input
+        // 파일 입력 초기화
         e.target.value = '';
       }
     }
   }
 
   /**
-   * Handle name input change with validation
+   * 유효성 검사와 함께 이름 입력 변경 처리
    */
   function handleNameChange(e) {
     const nameValue = e.target.value;
     setUserName(nameValue);
     
-    // Real-time validation
+    // 실시간 유효성 검사
     if (!nameValue.trim()) {
       setNameError('이름을 입력해주세요.');
     } else if (nameValue.length > 200) {
@@ -101,13 +101,13 @@ function ProfileUpdateForm({ user, onSave, onCancel, isSubmitting = false }) {
   }
 
   /**
-   * Handle email input change with validation
+   * 유효성 검사와 함께 이메일 입력 변경 처리
    */
   function handleEmailChange(e) {
     const emailValue = e.target.value;
     setUserEmail(emailValue);
     
-    // Real-time validation
+    // 실시간 유효성 검사
     if (!emailValue.trim()) {
       setEmailError('이메일을 입력해주세요.');
     } else if (emailValue.length > 100) {
@@ -120,7 +120,7 @@ function ProfileUpdateForm({ user, onSave, onCancel, isSubmitting = false }) {
   }
 
   /**
-   * Handle description input change
+   * 설명 입력 변경 처리
    */
   function handleDescriptionChange(e) {
     const descriptionValue = e.target.value;
@@ -128,12 +128,12 @@ function ProfileUpdateForm({ user, onSave, onCancel, isSubmitting = false }) {
   }
 
   /**
-   * Validate the entire form before submission
+   * 제출 전 전체 폼 유효성 검사
    */
   function validateForm() {
     let isValid = true;
 
-    // Validate name
+    // 이름 유효성 검사
     if (!userName.trim()) {
       setNameError('이름을 입력해주세요.');
       isValid = false;
@@ -144,7 +144,7 @@ function ProfileUpdateForm({ user, onSave, onCancel, isSubmitting = false }) {
       setNameError('');
     }
 
-    // Validate email
+    // 이메일 유효성 검사
     if (!userEmail.trim()) {
       setEmailError('이메일을 입력해주세요.');
       isValid = false;
@@ -158,13 +158,13 @@ function ProfileUpdateForm({ user, onSave, onCancel, isSubmitting = false }) {
       setEmailError('');
     }
 
-    // Validate profile image if provided
+    // 프로필 이미지가 제공된 경우 유효성 검사
     if (profileImageFile && profileImageValidation && !profileImageValidation.isValid) {
       setProfileImageError(profileImageValidation.errorMessage);
       isValid = false;
     }
 
-    // Validate description length
+    // 설명 길이 유효성 검사
     if (userDescription && userDescription.length > 4000) {
       isValid = false;
     }
@@ -173,49 +173,49 @@ function ProfileUpdateForm({ user, onSave, onCancel, isSubmitting = false }) {
   }
 
   /**
-   * Handle form submission with API integration
+   * API 통합과 함께 폼 제출 처리
    */
   async function handleSubmit(e) {
     e.preventDefault();
 
-    // Validate form
+    // 폼 유효성 검사
     if (!validateForm()) {
       return;
     }
 
-    // Prepare form data for multipart upload
+    // multipart 업로드를 위한 폼 데이터 준비
     const formData = new FormData();
     formData.append('userName', userName.trim());
     formData.append('userEmail', userEmail.trim());
     formData.append('userDescription', userDescription.trim());
     
-    // Add profile image if selected
+    // 선택된 경우 프로필 이미지 추가
     if (profileImageFile) {
       formData.append('profileImage', profileImageFile);
     }
 
-    // Prepare profile data object for callback
+    // 콜백을 위한 프로필 데이터 객체 준비
     const profileData = {
       userName: userName.trim(),
       userEmail: userEmail.trim(),
       userDescription: userDescription.trim(),
       profileImageFile,
-      formData // Include FormData for API call
+      formData // API 호출을 위한 FormData 포함
     };
 
     try {
       await onSave(profileData);
     } catch (error) {
       console.error('Profile update error:', error);
-      // Error handling is done in the parent component
+      // 오류 처리는 부모 컴포넌트에서 수행됨
     }
   }
 
   /**
-   * Handle cancel action with confirmation
+   * 확인과 함께 취소 동작 처리
    */
   function handleCancel() {
-    // Check if form has been modified
+    // 폼이 수정되었는지 확인
     const hasChanges = 
       userName !== (user?.userName || '') ||
       userEmail !== (user?.userEmail || '') ||
@@ -366,7 +366,7 @@ function ProfileUpdateForm({ user, onSave, onCancel, isSubmitting = false }) {
                 showProgress={true}
                 showDetailedStatus={true}
                 onRetryUpload={async (failedFiles) => {
-                  // For profile image, just reset the validation
+                  // 프로필 이미지의 경우 유효성 검사만 재설정
                   if (failedFiles.length > 0) {
                     const file = failedFiles[0];
                     const validationResults = validateFiles([file], 'profileImage');

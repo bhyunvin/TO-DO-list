@@ -2,33 +2,33 @@ import React, { useState } from 'react';
 import Swal from 'sweetalert2';
 
 /**
- * PasswordChangeForm Component
- * Allows users to change their password
+ * PasswordChangeForm 컴포넌트
+ * 사용자가 비밀번호를 변경할 수 있도록 합니다
  */
 function PasswordChangeForm({ onSave, onCancel, isSubmitting = false }) {
-  // Form state
+  // 폼 상태
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   
-  // Validation error states
+  // 유효성 검사 오류 상태
   const [currentPasswordError, setCurrentPasswordError] = useState('');
   const [newPasswordError, setNewPasswordError] = useState('');
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
 
-  // Password visibility states
+  // 비밀번호 표시 상태
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   /**
-   * Handle current password input change with validation
+   * 유효성 검사와 함께 현재 비밀번호 입력 변경 처리
    */
   function handleCurrentPasswordChange(e) {
     const passwordValue = e.target.value;
     setCurrentPassword(passwordValue);
     
-    // Real-time validation
+    // 실시간 유효성 검사
     if (!passwordValue.trim()) {
       setCurrentPasswordError('현재 비밀번호를 입력해주세요.');
     } else {
@@ -37,13 +37,13 @@ function PasswordChangeForm({ onSave, onCancel, isSubmitting = false }) {
   }
 
   /**
-   * Handle new password input change with validation
+   * 유효성 검사와 함께 새 비밀번호 입력 변경 처리
    */
   function handleNewPasswordChange(e) {
     const passwordValue = e.target.value;
     setNewPassword(passwordValue);
     
-    // Real-time validation
+    // 실시간 유효성 검사
     if (!passwordValue.trim()) {
       setNewPasswordError('새 비밀번호를 입력해주세요.');
     } else if (passwordValue.length < 8) {
@@ -58,7 +58,7 @@ function PasswordChangeForm({ onSave, onCancel, isSubmitting = false }) {
       setNewPasswordError('');
     }
 
-    // Re-validate confirm password if it's already entered
+    // 이미 입력된 경우 비밀번호 확인 재검증
     if (confirmPassword) {
       if (passwordValue !== confirmPassword) {
         setConfirmPasswordError('새 비밀번호와 비밀번호 확인이 일치하지 않습니다.');
@@ -69,13 +69,13 @@ function PasswordChangeForm({ onSave, onCancel, isSubmitting = false }) {
   }
 
   /**
-   * Handle confirm password input change with validation
+   * 유효성 검사와 함께 비밀번호 확인 입력 변경 처리
    */
   function handleConfirmPasswordChange(e) {
     const passwordValue = e.target.value;
     setConfirmPassword(passwordValue);
     
-    // Real-time validation
+    // 실시간 유효성 검사
     if (!passwordValue.trim()) {
       setConfirmPasswordError('새 비밀번호 확인을 입력해주세요.');
     } else if (passwordValue !== newPassword) {
@@ -86,12 +86,12 @@ function PasswordChangeForm({ onSave, onCancel, isSubmitting = false }) {
   }
 
   /**
-   * Validate the entire form before submission
+   * 제출 전 전체 폼 유효성 검사
    */
   function validateForm() {
     let isValid = true;
 
-    // Validate current password
+    // 현재 비밀번호 유효성 검사
     if (!currentPassword.trim()) {
       setCurrentPasswordError('현재 비밀번호를 입력해주세요.');
       isValid = false;
@@ -99,7 +99,7 @@ function PasswordChangeForm({ onSave, onCancel, isSubmitting = false }) {
       setCurrentPasswordError('');
     }
 
-    // Validate new password
+    // 새 비밀번호 유효성 검사
     if (!newPassword.trim()) {
       setNewPasswordError('새 비밀번호를 입력해주세요.');
       isValid = false;
@@ -119,7 +119,7 @@ function PasswordChangeForm({ onSave, onCancel, isSubmitting = false }) {
       setNewPasswordError('');
     }
 
-    // Validate confirm password
+    // 비밀번호 확인 유효성 검사
     if (!confirmPassword.trim()) {
       setConfirmPasswordError('새 비밀번호 확인을 입력해주세요.');
       isValid = false;
@@ -134,17 +134,17 @@ function PasswordChangeForm({ onSave, onCancel, isSubmitting = false }) {
   }
 
   /**
-   * Handle form submission
+   * 폼 제출 처리
    */
   async function handleSubmit(e) {
     e.preventDefault();
 
-    // Validate form
+    // 폼 유효성 검사
     if (!validateForm()) {
       return;
     }
 
-    // Prepare password data
+    // 비밀번호 데이터 준비
     const passwordData = {
       currentPassword: currentPassword.trim(),
       newPassword: newPassword.trim(),
@@ -155,15 +155,15 @@ function PasswordChangeForm({ onSave, onCancel, isSubmitting = false }) {
       await onSave(passwordData);
     } catch (error) {
       console.error('Password change error:', error);
-      // Error handling is done in the parent component
+      // 오류 처리는 부모 컴포넌트에서 수행됨
     }
   }
 
   /**
-   * Handle cancel action with confirmation
+   * 확인과 함께 취소 동작 처리
    */
   function handleCancel() {
-    // Check if form has been modified
+    // 폼이 수정되었는지 확인
     const hasChanges = currentPassword || newPassword || confirmPassword;
 
     if (hasChanges) {
@@ -188,19 +188,19 @@ function PasswordChangeForm({ onSave, onCancel, isSubmitting = false }) {
   }
 
   /**
-   * Get password strength indicator
+   * 비밀번호 강도 표시기 가져오기
    */
   function getPasswordStrength(password) {
     if (!password) return { strength: 0, text: '', color: '' };
     
     let strength = 0;
     const checks = [
-      /[a-z]/.test(password), // lowercase
-      /[A-Z]/.test(password), // uppercase
-      /\d/.test(password),    // numbers
-      /[@$!%*?&]/.test(password), // special chars
-      password.length >= 8,   // length
-      password.length >= 12   // good length
+      /[a-z]/.test(password), // 소문자
+      /[A-Z]/.test(password), // 대문자
+      /\d/.test(password),    // 숫자
+      /[@$!%*?&]/.test(password), // 특수문자
+      password.length >= 8,   // 길이
+      password.length >= 12   // 적절한 길이
     ];
     
     strength = checks.filter(Boolean).length;
@@ -216,7 +216,7 @@ function PasswordChangeForm({ onSave, onCancel, isSubmitting = false }) {
     <div className="password-change-form">
       <h2>비밀번호 변경</h2>
       <form onSubmit={handleSubmit}>
-        {/* Current Password Field */}
+        {/* 현재 비밀번호 필드 */}
         <div className="form-group row mb-3">
           <label htmlFor="currentPassword" className="col-3 col-form-label">
             현재 비밀번호 <span className="text-danger">*</span>
@@ -245,7 +245,7 @@ function PasswordChangeForm({ onSave, onCancel, isSubmitting = false }) {
           </div>
         </div>
 
-        {/* New Password Field */}
+        {/* 새 비밀번호 필드 */}
         <div className="form-group row mb-3">
           <label htmlFor="newPassword" className="col-3 col-form-label">
             새 비밀번호 <span className="text-danger">*</span>
@@ -291,7 +291,7 @@ function PasswordChangeForm({ onSave, onCancel, isSubmitting = false }) {
           </div>
         </div>
 
-        {/* Confirm Password Field */}
+        {/* 비밀번호 확인 필드 */}
         <div className="form-group row mb-3">
           <label htmlFor="confirmPassword" className="col-3 col-form-label">
             새 비밀번호 확인 <span className="text-danger">*</span>
@@ -326,7 +326,7 @@ function PasswordChangeForm({ onSave, onCancel, isSubmitting = false }) {
           </div>
         </div>
 
-        {/* Security Notice */}
+        {/* 보안 안내 */}
         <div className="alert alert-info mb-3">
           <h6 className="alert-heading">🔒 보안 안내</h6>
           <ul className="mb-0">
@@ -336,7 +336,7 @@ function PasswordChangeForm({ onSave, onCancel, isSubmitting = false }) {
           </ul>
         </div>
 
-        {/* Form Actions */}
+        {/* 폼 액션 */}
         <div className="row">
           <div className="col-3">
             <button 

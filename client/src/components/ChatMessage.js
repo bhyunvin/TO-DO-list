@@ -27,10 +27,10 @@ const ChatMessage = ({ message, isUser }) => {
 
   const renderContent = () => {
     if (isUser) {
-      // User messages are plain text
+      // 사용자 메시지는 일반 텍스트
       return <div className="message-text">{message.content}</div>;
     } else {
-      // AI messages may contain HTML, sanitize before rendering
+      // AI 메시지는 HTML을 포함할 수 있으므로 렌더링 전에 새니타이즈
       const sanitizedContent = DOMPurify.sanitize(message.content, {
         ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'],
         ALLOWED_ATTR: []

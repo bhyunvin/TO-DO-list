@@ -81,7 +81,7 @@ describe('TodoContainer Checkbox Cell Click Functionality', () => {
     const Swal = require('sweetalert2');
     Swal.fire.mockResolvedValue({ isConfirmed: true });
     
-    // Mock initial todos fetch
+    // 초기 todos fetch 모킹
     mockApi.mockResolvedValue({
       ok: true,
       json: () => Promise.resolve([
@@ -113,7 +113,7 @@ describe('TodoContainer Checkbox Cell Click Functionality', () => {
 
     render(<TodoContainer />);
 
-    // Wait for initial todos to load
+    // 초기 todos 로드 대기
     await waitFor(() => {
       expect(screen.getByText('Test todo 1')).toBeInTheDocument();
     });
@@ -124,15 +124,15 @@ describe('TodoContainer Checkbox Cell Click Functionality', () => {
     expect(checkbox).not.toBeChecked();
     expect(checkboxCell).toHaveClass('checkbox-cell');
 
-    // Click the cell (not the checkbox)
+    // 셀 클릭 (체크박스가 아님)
     await user.click(checkboxCell);
 
-    // Checkbox should be checked
+    // 체크박스가 체크되어야 함
     await waitFor(() => {
       expect(checkbox).toBeChecked();
     });
 
-    // API should have been called
+    // API가 호출되어야 함
     expect(mockApi).toHaveBeenCalledWith(
       '/api/todo/1',
       expect.objectContaining({
@@ -151,14 +151,14 @@ describe('TodoContainer Checkbox Cell Click Functionality', () => {
     const checkbox = screen.getAllByRole('checkbox')[0];
     const checkboxCell = checkbox.closest('td');
 
-    // Cell should have pointer cursor
+    // 셀은 pointer 커서를 가져야 함
     expect(checkboxCell).toHaveStyle({ cursor: 'pointer' });
   });
 
   test('checkbox cell has not-allowed cursor when disabled', async () => {
     const user = userEvent.setup();
     
-    // Mock slow API response
+    // 느린 API 응답 모킹
     let resolveApiCall;
     const apiPromise = new Promise((resolve) => {
       resolveApiCall = resolve;
@@ -182,19 +182,19 @@ describe('TodoContainer Checkbox Cell Click Functionality', () => {
     const checkbox = screen.getAllByRole('checkbox')[0];
     const checkboxCell = checkbox.closest('td');
 
-    // Click the cell
+    // 셀 클릭
     await user.click(checkboxCell);
 
-    // Cell should have not-allowed cursor during pending request
+    // 대기 중인 요청 동안 셀은 not-allowed 커서를 가져야 함
     expect(checkboxCell).toHaveStyle({ cursor: 'not-allowed' });
 
-    // Resolve API call
+    // API 호출 해결
     resolveApiCall({
       ok: true,
       json: () => Promise.resolve({})
     });
 
-    // Cell should have pointer cursor again
+    // 셀은 다시 pointer 커서를 가져야 함
     await waitFor(() => {
       expect(checkboxCell).toHaveStyle({ cursor: 'pointer' });
     });
@@ -216,7 +216,7 @@ describe('TodoContainer Checkbox Cell Click Functionality', () => {
   test('cell click does not trigger when todo is being toggled', async () => {
     const user = userEvent.setup();
     
-    // Mock slow API response
+    // 느린 API 응답 모킹
     let resolveApiCall;
     const apiPromise = new Promise((resolve) => {
       resolveApiCall = resolve;
@@ -240,17 +240,17 @@ describe('TodoContainer Checkbox Cell Click Functionality', () => {
     const checkbox = screen.getAllByRole('checkbox')[0];
     const checkboxCell = checkbox.closest('td');
 
-    // Click the cell first time
+    // 첫 번째 셀 클릭
     await user.click(checkboxCell);
 
-    // Try to click again while request is pending
+    // 요청이 대기 중일 때 다시 클릭 시도
     await user.click(checkboxCell);
     await user.click(checkboxCell);
 
-    // API should only be called once (initial fetch + one toggle)
+    // API는 한 번만 호출되어야 함 (초기 fetch + 한 번의 토글)
     expect(mockApi).toHaveBeenCalledTimes(2);
 
-    // Resolve API call
+    // API 호출 해결
     resolveApiCall({
       ok: true,
       json: () => Promise.resolve({})
