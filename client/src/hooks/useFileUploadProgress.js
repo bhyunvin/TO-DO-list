@@ -99,8 +99,9 @@ export const useFileUploadProgress = () => {
       const formData = new FormData();
       
       Array.from(files).forEach((file) => {
+        const { name } = file;
         formData.append('files', file);
-        updateFileProgress(file.name, 0);
+        updateFileProgress(name, 0);
       });
 
       Object.keys(additionalData).forEach(key => {
@@ -113,15 +114,16 @@ export const useFileUploadProgress = () => {
         },
         cancelToken: cancelTokenRef.current.token,
         onUploadProgress: (progressEvent) => {
-          const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          const { loaded, total } = progressEvent;
+          const progress = Math.round((loaded * 100) / total);
           
-          Array.from(files).forEach((file) => {
-            updateFileProgress(file.name, progress);
+          Array.from(files).forEach(({ name }) => {
+            updateFileProgress(name, progress);
           });
         },
       });
 
-      const uploadedFilesList = response.data.uploadedFiles || [];
+      const { uploadedFiles: uploadedFilesList = [] } = response.data;
       setUploadedFiles(uploadedFilesList);
       
       const totalFiles = Array.from(files).length;
@@ -131,13 +133,13 @@ export const useFileUploadProgress = () => {
         setUploadStatus('success');
       } else if (successfulUploads > 0) {
         setUploadStatus('partial_success');
-        const failedFiles = Array.from(files).filter(file => 
-          !uploadedFilesList.some(uploaded => 
-            uploaded.originalFileName === file.name || uploaded.fileName === file.name
+        const failedFiles = Array.from(files).filter(({ name }) => 
+          !uploadedFilesList.some(({ originalFileName, fileName }) => 
+            originalFileName === name || fileName === name
           )
         );
-        const failedErrors = failedFiles.map(file => ({
-          fileName: file.name,
+        const failedErrors = failedFiles.map(({ name }) => ({
+          fileName: name,
           errorCode: 'UPLOAD_FAILED',
           errorMessage: 'File was not uploaded successfully',
         }));
@@ -241,7 +243,7 @@ export const useFileUploadProgress = () => {
    */
   const getUploadSummary = useCallback(() => {
     const totalFiles = validationResults.length;
-    const validFiles = validationResults.filter(r => r.isValid).length;
+    const validFiles = validationResults.filter(({ isValid }) => isValid).length;
     const invalidFiles = totalFiles - validFiles;
     const uploadedCount = uploadedFiles.length;
     const failedCount = uploadErrors.length;
@@ -249,12 +251,12 @@ export const useFileUploadProgress = () => {
     const overallProgress = totalFiles > 0 ? 
       Object.values(uploadProgress).reduce((sum, progress) => sum + progress, 0) / totalFiles : 0;
     
-    const totalSize = validationResults.reduce((sum, result) => {
-      return sum + (result.file?.size || 0);
+    const totalSize = validationResults.reduce((sum, { file }) => {
+      return sum + (file?.size || 0);
     }, 0);
     
-    const uploadedSize = uploadedFiles.reduce((sum, file) => {
-      return sum + (file.fileSize || 0);
+    const uploadedSize = uploadedFiles.reduce((sum, { fileSize = 0 }) => {
+      return sum + fileSize;
     }, 0);
     
     return {

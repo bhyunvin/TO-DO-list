@@ -19,7 +19,7 @@
   - Apply same ES6+ refactoring rules
   - _Requirements: 1.1, 1.2, 1.3, 2.1, 2.2, 3.1, 3.2, 3.3, 3.4, 3.5, 4.1, 4.2_
 
-- [ ] 4. Refactor frontend TodoList and hooks
+- [x] 4. Refactor frontend TodoList and hooks
   - Refactor todoList/TodoList.js (caution: large file)
   - Refactor all custom hooks in hooks/ directory
   - Apply same ES6+ refactoring rules

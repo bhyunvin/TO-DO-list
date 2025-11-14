@@ -150,37 +150,37 @@ export const useFileUploadValidator = () => {
    * @returns {Object} 파일 정보가 포함된 유효성 검사 결과
    */
   const validateSingleFile = useCallback((file, config) => {
-    const sizeValidation = validateFileSize(file, config.maxSize);
+    const { maxSize, allowedTypes = [], blockedTypes = [] } = config;
+    const { name, size } = file;
+    const fileType = getFileExtension(name);
+    
+    const sizeValidation = validateFileSize(file, maxSize);
     if (!sizeValidation.isValid) {
       return {
         file,
-        fileName: file.name,
-        fileSize: file.size,
-        fileType: getFileExtension(file.name),
+        fileName: name,
+        fileSize: size,
+        fileType,
         ...sizeValidation,
       };
     }
 
-    const typeValidation = validateFileType(
-      file,
-      config.allowedTypes || [],
-      config.blockedTypes || []
-    );
+    const typeValidation = validateFileType(file, allowedTypes, blockedTypes);
     if (!typeValidation.isValid) {
       return {
         file,
-        fileName: file.name,
-        fileSize: file.size,
-        fileType: getFileExtension(file.name),
+        fileName: name,
+        fileSize: size,
+        fileType,
         ...typeValidation,
       };
     }
 
     return {
       file,
-      fileName: file.name,
-      fileSize: file.size,
-      fileType: getFileExtension(file.name),
+      fileName: name,
+      fileSize: size,
+      fileType,
       isValid: true,
     };
   }, [validateFileSize, validateFileType, getFileExtension]);
@@ -198,16 +198,20 @@ export const useFileUploadValidator = () => {
     }
 
     const fileArray = Array.from(files);
+    const { maxCount } = config;
     
-    const countValidation = validateFileCount(fileArray, config.maxCount);
+    const countValidation = validateFileCount(fileArray, maxCount);
     if (!countValidation.isValid) {
-      return fileArray.map(file => ({
-        file,
-        fileName: file.name,
-        fileSize: file.size,
-        fileType: getFileExtension(file.name),
-        ...countValidation,
-      }));
+      return fileArray.map(file => {
+        const { name, size } = file;
+        return {
+          file,
+          fileName: name,
+          fileSize: size,
+          fileType: getFileExtension(name),
+          ...countValidation,
+        };
+      });
     }
 
     const results = fileArray.map(file => validateSingleFile(file, config));
@@ -265,15 +269,16 @@ export const useFileUploadValidator = () => {
    * @returns {string} 사용자 친화적 오류 메시지
    */
   const getUserFriendlyMessage = useCallback((error) => {
-    const baseMessage = USER_FRIENDLY_MESSAGES[error.errorCode] || error.errorMessage;
+    const { errorCode, errorMessage, fileSize = 0, fileType = 'unknown' } = error;
+    const baseMessage = USER_FRIENDLY_MESSAGES[errorCode] || errorMessage;
     
-    switch (error.errorCode) {
+    switch (errorCode) {
       case FILE_VALIDATION_ERRORS.FILE_TOO_LARGE:
-        return `${baseMessage} (현재 크기: ${formatFileSize(error.fileSize || 0)})`;
+        return `${baseMessage} (현재 크기: ${formatFileSize(fileSize)})`;
       
       case FILE_VALIDATION_ERRORS.INVALID_FILE_TYPE:
       case FILE_VALIDATION_ERRORS.BLOCKED_FILE_TYPE:
-        return `${baseMessage} (파일 형식: ${error.fileType || 'unknown'})`;
+        return `${baseMessage} (파일 형식: ${fileType})`;
       
       default:
         return baseMessage;
@@ -291,24 +296,26 @@ export const useFileUploadValidator = () => {
     }
 
     if (errors.length === 1) {
-      return `"${errors[0].fileName}": ${getUserFriendlyMessage(errors[0])}`;
+      const { fileName } = errors[0];
+      return `"${fileName}": ${getUserFriendlyMessage(errors[0])}`;
     }
 
     const errorGroups = errors.reduce((groups, error) => {
-      const key = error.errorCode;
-      if (!groups[key]) {
-        groups[key] = [];
+      const { errorCode } = error;
+      if (!groups[errorCode]) {
+        groups[errorCode] = [];
       }
-      groups[key].push(error);
+      groups[errorCode].push(error);
       return groups;
     }, {});
 
     const messages = [];
-    for (const [fileErrors] of Object.entries(errorGroups)) {
+    for (const [, fileErrors] of Object.entries(errorGroups)) {
       if (fileErrors.length === 1) {
-        messages.push(`"${fileErrors[0].fileName}": ${getUserFriendlyMessage(fileErrors[0])}`);
+        const { fileName } = fileErrors[0];
+        messages.push(`"${fileName}": ${getUserFriendlyMessage(fileErrors[0])}`);
       } else {
-        const fileNames = fileErrors.map(e => `"${e.fileName}"`).join(', ');
+        const fileNames = fileErrors.map(({ fileName }) => `"${fileName}"`).join(', ');
         messages.push(`${fileNames}: ${getUserFriendlyMessage(fileErrors[0])}`);
       }
     }

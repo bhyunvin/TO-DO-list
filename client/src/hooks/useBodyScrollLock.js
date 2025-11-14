@@ -7,8 +7,7 @@ import { useEffect } from 'react';
 export const useBodyScrollLock = (isLocked) => {
   useEffect(() => {
     if (isLocked) {
-      const originalOverflow = document.body.style.overflow;
-      const originalPaddingRight = document.body.style.paddingRight;
+      const { overflow: originalOverflow, paddingRight: originalPaddingRight } = document.body.style;
       
       const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
       
