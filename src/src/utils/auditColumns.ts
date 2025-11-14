@@ -31,11 +31,11 @@ export function setAuditColumn(setting: AuditSettings) {
   const { entity, id, ip, isUpdate = false } = setting;
 
   if (isUpdate) {
-    // Update operation: only set upd_id and upd_ip
+    // 업데이트 작업: upd_id와 upd_ip만 설정
     entity.auditColumns.updId = id;
     entity.auditColumns.updIp = ip;
   } else {
-    // Create operation: set both reg_* and upd_* columns
+    // 생성 작업: reg_*와 upd_* 컬럼 모두 설정
     entity.auditColumns.regId = id;
     entity.auditColumns.regIp = ip;
     entity.auditColumns.updId = id;

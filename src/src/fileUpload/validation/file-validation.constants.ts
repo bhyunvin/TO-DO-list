@@ -4,10 +4,10 @@ import { FileUploadPolicyConfig } from './file-validation.interfaces';
  * File validation constants and configuration
  */
 
-// Maximum file size: 10MB in bytes
+// 최대 파일 크기: 10MB (바이트 단위)
 export const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
-// Allowed image extensions for profile images
+// 프로필 이미지에 허용되는 이미지 확장자
 export const ALLOWED_IMAGE_EXTENSIONS = [
   '.jpg',
   '.jpeg',
@@ -16,7 +16,7 @@ export const ALLOWED_IMAGE_EXTENSIONS = [
   '.webp',
 ];
 
-// Allowed document extensions for TODO attachments
+// TODO 첨부 파일에 허용되는 문서 확장자
 export const ALLOWED_DOCUMENT_EXTENSIONS = [
   '.xlsx',
   '.pptx',
@@ -26,7 +26,7 @@ export const ALLOWED_DOCUMENT_EXTENSIONS = [
   '.txt',
 ];
 
-// Blocked executable and script extensions for security
+// 보안을 위해 차단된 실행 파일 및 스크립트 확장자
 export const BLOCKED_EXTENSIONS = [
   '.exe',
   '.js',
@@ -37,7 +37,7 @@ export const BLOCKED_EXTENSIONS = [
   '.vbs',
 ];
 
-// Error codes for validation failures
+// 검증 실패에 대한 오류 코드
 export const FILE_VALIDATION_ERRORS = {
   FILE_TOO_LARGE: 'FILE_TOO_LARGE',
   INVALID_FILE_TYPE: 'INVALID_FILE_TYPE',
@@ -47,7 +47,7 @@ export const FILE_VALIDATION_ERRORS = {
   STORAGE_ERROR: 'STORAGE_ERROR',
 } as const;
 
-// Error messages for validation failures
+// 검증 실패에 대한 오류 메시지
 export const FILE_VALIDATION_MESSAGES = {
   [FILE_VALIDATION_ERRORS.FILE_TOO_LARGE]:
     'File size exceeds the maximum limit of 10MB',
@@ -59,7 +59,7 @@ export const FILE_VALIDATION_MESSAGES = {
   [FILE_VALIDATION_ERRORS.STORAGE_ERROR]: 'File storage error occurred',
 } as const;
 
-// File upload policy configuration
+// 파일 업로드 정책 설정
 export const FILE_UPLOAD_POLICY: FileUploadPolicyConfig = {
   profileImage: {
     maxSize: MAX_FILE_SIZE,

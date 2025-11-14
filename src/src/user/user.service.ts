@@ -139,12 +139,12 @@ export class UserService {
             error: error.message,
           });
 
-          // If it's already a BadRequestException, re-throw it
+          // 이미 BadRequestException인 경우, 재발생
           if (error instanceof BadRequestException) {
             throw error;
           }
 
-          // For other errors, wrap in BadRequestException
+          // 다른 오류의 경우, BadRequestException으로 래핑
           throw new BadRequestException({
             message: 'Profile image upload failed',
             error: error.message,
@@ -329,12 +329,12 @@ export class UserService {
             ip,
           });
 
-          // If it's already a BadRequestException, re-throw it
+          // 이미 BadRequestException인 경우, 재발생
           if (error instanceof BadRequestException) {
             throw error;
           }
 
-          // For other errors, wrap in BadRequestException
+          // 다른 오류의 경우, BadRequestException으로 래핑
           throw new BadRequestException({
             message: 'Profile image upload failed',
             error: error.message,

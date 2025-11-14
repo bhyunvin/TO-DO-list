@@ -120,7 +120,7 @@ export class UserController {
         fileSize: profileImageFile?.size,
       });
 
-      // Re-throw the error to be handled by global exception filter
+      // 전역 예외 필터에서 처리하도록 오류 재발생
       throw error;
     }
   }
@@ -257,7 +257,7 @@ export class UserController {
         sessionId: session.id,
       });
 
-      // Re-throw the error to be handled by global exception filter
+      // 전역 예외 필터에서 처리하도록 오류 재발생
       throw error;
     }
   }
@@ -367,7 +367,7 @@ export class UserController {
         sessionId: session.id,
       });
 
-      // Re-throw the error to be handled by global exception filter
+      // 전역 예외 필터에서 처리하도록 오류 재발생
       throw error;
     }
   }

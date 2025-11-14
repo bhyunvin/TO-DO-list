@@ -102,7 +102,7 @@ export class FileUploadErrorService {
       return `File "${errors[0].fileName}": ${this.getUserFriendlyMessage(errors[0])}`;
     }
 
-    // Multiple errors - group by error type
+    // 여러 오류 - 오류 유형별로 그룹화
     const errorGroups = this.groupErrorsByType(errors);
     const messages: string[] = [];
 

@@ -86,7 +86,7 @@ export class FileUploadUtil {
   }
 }
 
-// Enhanced file filter function with validation
+// 검증 기능이 향상된 파일 필터 함수
 export const createFileFilter = (category: FileCategory) => {
   return (
     req: any,
@@ -110,7 +110,7 @@ export const createFileFilter = (category: FileCategory) => {
   };
 };
 
-// Enhanced multer configuration for profile images
+// 프로필 이미지를 위한 향상된 multer 설정
 export const profileImageMulterOptions = {
   storage: diskStorage({
     destination: uploadFileDirectory,
@@ -128,7 +128,7 @@ export const profileImageMulterOptions = {
   },
 };
 
-// Enhanced multer configuration for TODO attachments
+// TODO 첨부 파일을 위한 향상된 multer 설정
 export const todoAttachmentMulterOptions = {
   storage: diskStorage({
     destination: uploadFileDirectory,
@@ -144,17 +144,4 @@ export const todoAttachmentMulterOptions = {
     fileSize: FILE_UPLOAD_POLICY.todoAttachment.maxSize,
     files: FILE_UPLOAD_POLICY.todoAttachment.maxCount,
   },
-};
-
-// Legacy multer options (for backward compatibility)
-export const multerOptions = {
-  storage: diskStorage({
-    destination: uploadFileDirectory,
-    filename: (req, file, callback) => {
-      const uniqueSuffix = Date.now() + '_' + Math.round(Math.random() * 1e9);
-      const ext = extname(file.originalname);
-      const filename = `${file.fieldname}_${uniqueSuffix}${ext}`;
-      callback(null, filename);
-    },
-  }),
 };

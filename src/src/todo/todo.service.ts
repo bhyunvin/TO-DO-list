@@ -436,17 +436,17 @@ export class TodoService {
     const ROW_HEIGHT = 15;
 
     // 열 너비를 설정합니다.
-    worksheet.getColumn('A').width = 4; // Column A는 비어있음 (보이지만 비어있음)
+    worksheet.getColumn('A').width = 4; // A 열은 비어있음 (보이지만 비어있음)
     worksheet.getColumn('B').width = 6; // 번호
     worksheet.getColumn('C').width = 80; // 내용
     worksheet.getColumn('D').width = 17; // 완료일시
     worksheet.getColumn('E').width = 90; // 비고
 
-    // Row 1은 비워둡니다 (이미 기본적으로 비어있음)
-    // Row 1의 높이를 설정합니다.
+    // 1행은 비워둡니다 (이미 기본적으로 비어있음)
+    // 1행의 높이를 설정합니다.
     worksheet.getRow(1).height = ROW_HEIGHT;
 
-    // Row 2에 헤더를 추가합니다.
+    // 2행에 헤더를 추가합니다.
     const headerRow = worksheet.getRow(2);
     headerRow.height = ROW_HEIGHT; // 헤더 행의 높이를 설정합니다.
     headerRow.getCell('B').value = '번호';
@@ -477,7 +477,7 @@ export class TodoService {
       };
     });
 
-    // Row 3부터 데이터를 채웁니다.
+    // 3행부터 데이터를 채웁니다.
     todos.forEach((todo, index) => {
       const rowNumber = index + 3;
       const dataRow = worksheet.getRow(rowNumber);

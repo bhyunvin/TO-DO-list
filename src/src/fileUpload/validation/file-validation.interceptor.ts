@@ -29,7 +29,7 @@ export class FileValidationInterceptor implements NestInterceptor {
     const files: Express.Multer.File[] = request.files || [];
     const singleFile: Express.Multer.File = request.file;
 
-    // Handle both single file and multiple files
+    // 단일 파일과 여러 파일 모두 처리
     const filesToValidate = singleFile ? [singleFile] : files;
 
     if (filesToValidate.length === 0) {
@@ -43,7 +43,7 @@ export class FileValidationInterceptor implements NestInterceptor {
         this.fileCategory,
       );
 
-    // Check for validation failures
+    // 검증 실패 확인
     const failedValidations = validationResults.filter(
       (result) => !result.isValid,
     );
@@ -56,14 +56,14 @@ export class FileValidationInterceptor implements NestInterceptor {
           validationResults,
         );
 
-      // Extract error context for logging
+      // 로깅을 위한 오류 컨텍스트 추출
       const errorContext = this.fileUploadErrorService.extractErrorContext(
         request,
         this.fileCategory,
         request.user?.userSeq,
       );
 
-      // Log security events and validation errors
+      // 보안 이벤트 및 검증 오류 로깅
       this.fileUploadErrorService.logSecurityEvent(
         filesToValidate,
         validationErrors,

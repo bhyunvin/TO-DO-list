@@ -139,7 +139,7 @@ export class TodoController {
         files,
       );
 
-      // Log successful upload
+      // 성공적인 업로드 로그 기록
       const errorContext = this.fileUploadErrorService.extractErrorContext(
         {
           ip,
@@ -195,7 +195,7 @@ export class TodoController {
         files,
       );
 
-      // Log successful creation with files
+      // 파일과 함께 성공적인 생성 로그 기록
       if (files && files.length > 0) {
         const errorContext = this.fileUploadErrorService.extractErrorContext(
           {
@@ -249,7 +249,7 @@ export class TodoController {
         files,
       );
 
-      // Log successful attachment addition
+      // 성공적인 첨부 파일 추가 로그 기록
       const errorContext = this.fileUploadErrorService.extractErrorContext(
         {
           ip,

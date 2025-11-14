@@ -27,7 +27,7 @@ export class ChatController {
     @Ip() ip: string,
   ): Promise<ChatResponseDto> {
     const maxRetries = 3;
-    const baseDelay = 1000; // 1 second base delay
+    const baseDelay = 1000; // 1초 기본 지연 시간
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
@@ -35,14 +35,14 @@ export class ChatController {
           `Chat request from user ${session.user.userSeq} (attempt ${attempt}): ${chatRequestDto.prompt.substring(0, 50)}...`,
         );
 
-        // Create request DTO for the existing service
+        // 기존 서비스를 위한 요청 DTO 생성
         const requestDto = {
           userSeq: session.user.userSeq,
           prompt: chatRequestDto.prompt,
-          response: '', // Will be filled by the service
+          response: '', // 서비스에서 채워질 예정
         };
 
-        // Call the enhanced AssistanceService with user context
+        // 사용자 컨텍스트와 함께 향상된 AssistanceService 호출
         const result = await this.assistanceService.getGeminiResponse(
           requestDto,
           session.user.userSeq,
@@ -51,7 +51,7 @@ export class ChatController {
           session.user.userId,
         );
 
-        // Return structured response
+        // 구조화된 응답 반환
         const response: ChatResponseDto = {
           response: result.response,
           timestamp: new Date().toISOString(),
@@ -76,7 +76,7 @@ export class ChatController {
           },
         );
 
-        // If it's a rate limit error and not the last attempt, wait and retry
+        // 속도 제한 오류이고 마지막 시도가 아닌 경우, 대기 후 재시도
         if (isRateLimited && !isLastAttempt) {
           const delay = this.calculateRetryDelay(attempt, baseDelay, error);
           this.logger.log(
@@ -86,7 +86,7 @@ export class ChatController {
           continue;
         }
 
-        // If it's the last attempt or not a retryable error, return error response
+        // 마지막 시도이거나 재시도 불가능한 오류인 경우, 오류 응답 반환
         const errorResponse: ChatResponseDto = {
           response: '',
           timestamp: new Date().toISOString(),
@@ -109,17 +109,17 @@ export class ChatController {
     baseDelay: number,
     error: any,
   ): number {
-    // Check if the API provides a Retry-After header
+    // API가 Retry-After 헤더를 제공하는지 확인
     const retryAfter = error.response?.headers?.['retry-after'];
     if (retryAfter) {
-      const retryAfterMs = parseInt(retryAfter) * 1000; // Convert seconds to milliseconds
-      return Math.min(retryAfterMs, 30000); // Cap at 30 seconds
+      const retryAfterMs = parseInt(retryAfter) * 1000; // 초를 밀리초로 변환
+      return Math.min(retryAfterMs, 30000); // 최대 30초로 제한
     }
 
-    // Exponential backoff: baseDelay * (2^(attempt-1)) with jitter
+    // 지수 백오프: baseDelay * (2^(attempt-1)) + 지터
     const exponentialDelay = baseDelay * Math.pow(2, attempt - 1);
-    const jitter = Math.random() * 1000; // Add up to 1 second of jitter
-    return Math.min(exponentialDelay + jitter, 30000); // Cap at 30 seconds
+    const jitter = Math.random() * 1000; // 최대 1초의 지터 추가
+    return Math.min(exponentialDelay + jitter, 30000); // 최대 30초로 제한
   }
 
   private sleep(ms: number): Promise<void> {
@@ -133,12 +133,12 @@ export class ChatController {
   ): string {
     const status = error.response?.status || error.status;
 
-    // Authentication errors
+    // 인증 오류
     if (status === 401) {
       return '로그인이 필요합니다.';
     }
 
-    // Rate limiting errors
+    // 속도 제한 오류
     if (status === 429 || status === HttpStatus.TOO_MANY_REQUESTS) {
       if (attempt && maxRetries && attempt >= maxRetries) {
         return 'AI 서비스가 현재 과부하 상태입니다. 잠시 후 다시 시도해주세요.';
@@ -146,17 +146,17 @@ export class ChatController {
       return 'AI 서비스 요청 한도를 초과했습니다. 잠시 후 다시 시도해주세요.';
     }
 
-    // API quota exceeded (different from rate limiting)
+    // API 할당량 초과 (속도 제한과 다름)
     if (status === 403 && error.message?.includes('quota')) {
       return 'AI 서비스 사용량이 한도를 초과했습니다. 관리자에게 문의해주세요.';
     }
 
-    // Server errors
+    // 서버 오류
     if (status >= 500) {
       return 'AI 서비스에 일시적인 문제가 발생했습니다. 잠시 후 다시 시도해주세요.';
     }
 
-    // Network errors
+    // 네트워크 오류
     if (
       error.message?.includes('network') ||
       error.code === 'ECONNREFUSED' ||
@@ -165,12 +165,12 @@ export class ChatController {
       return '네트워크 연결을 확인해주세요.';
     }
 
-    // API request failed (generic API error)
+    // API 요청 실패 (일반 API 오류)
     if (error.message?.includes('API request failed')) {
       return 'AI 서비스 요청이 실패했습니다. 잠시 후 다시 시도해주세요.';
     }
 
-    // Generic error message
+    // 일반 오류 메시지
     return '문제가 발생했습니다. 다시 시도해주세요.';
   }
 }
