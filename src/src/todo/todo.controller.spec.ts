@@ -41,7 +41,7 @@ describe('TodoController - Excel Export', () => {
     },
   };
 
-  const mockResponse = () => {
+  const mockResponse = (): Response => {
     const res: Partial<Response> = {
       setHeader: jest.fn(),
       send: jest.fn(),

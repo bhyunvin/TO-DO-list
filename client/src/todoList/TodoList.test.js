@@ -50,74 +50,70 @@ jest.mock('../hooks/useFileUploadProgress', () => ({
 
 // Mock components
 jest.mock('../components/FileUploadProgress', () => {
-  return function MockFileUploadProgress() {
-    return <div data-testid="file-upload-progress">File Upload Progress</div>;
-  };
+  const MockFileUploadProgress = () => <div data-testid="file-upload-progress">File Upload Progress</div>;
+  return MockFileUploadProgress;
 });
 
 jest.mock('../components/ProfileUpdateForm', () => {
-  return function MockProfileUpdateForm({ user, onSave, onCancel }) {
-    return (
-      <div data-testid="profile-update-form">
-        <h3>프로필 수정</h3>
-        <p>User: {user.userName}</p>
-        <button onClick={() => {
-          const mockFormData = {
-            append: jest.fn(),
-            get: jest.fn(),
-            getAll: jest.fn(),
-            has: jest.fn(),
-            set: jest.fn(),
-            delete: jest.fn(),
-            keys: jest.fn(),
-            values: jest.fn(),
-            entries: jest.fn(),
-            forEach: jest.fn()
-          };
-          onSave({ 
-            userName: 'Updated Name',
-            userEmail: 'updated@example.com',
-            userDescription: 'Updated description',
-            formData: mockFormData
-          });
-        }}>
-          Save Profile
-        </button>
-        <button onClick={onCancel}>Cancel Profile</button>
-      </div>
-    );
-  };
+  const MockProfileUpdateForm = ({ user, onSave, onCancel }) => (
+    <div data-testid="profile-update-form">
+      <h3>프로필 수정</h3>
+      <p>User: {user.userName}</p>
+      <button onClick={() => {
+        const mockFormData = {
+          append: jest.fn(),
+          get: jest.fn(),
+          getAll: jest.fn(),
+          has: jest.fn(),
+          set: jest.fn(),
+          delete: jest.fn(),
+          keys: jest.fn(),
+          values: jest.fn(),
+          entries: jest.fn(),
+          forEach: jest.fn()
+        };
+        onSave({ 
+          userName: 'Updated Name',
+          userEmail: 'updated@example.com',
+          userDescription: 'Updated description',
+          formData: mockFormData
+        });
+      }}>
+        Save Profile
+      </button>
+      <button onClick={onCancel}>Cancel Profile</button>
+    </div>
+  );
+  return MockProfileUpdateForm;
 });
 
 jest.mock('../components/PasswordChangeForm', () => {
-  return function MockPasswordChangeForm({ onSave, onCancel }) {
-    return (
-      <div data-testid="password-change-form">
-        <h3>비밀번호 변경</h3>
-        <button onClick={() => onSave({ 
-          currentPassword: 'current123',
-          newPassword: 'new123',
-          confirmPassword: 'new123'
-        })}>
-          Save Password
-        </button>
-        <button onClick={onCancel}>Cancel Password</button>
-      </div>
-    );
-  };
+  const MockPasswordChangeForm = ({ onSave, onCancel }) => (
+    <div data-testid="password-change-form">
+      <h3>비밀번호 변경</h3>
+      <button onClick={() => onSave({ 
+        currentPassword: 'current123',
+        newPassword: 'new123',
+        confirmPassword: 'new123'
+      })}>
+        Save Password
+      </button>
+      <button onClick={onCancel}>Cancel Password</button>
+    </div>
+  );
+  return MockPasswordChangeForm;
 });
 
 // Mock DatePicker
 jest.mock('react-datepicker', () => {
-  return function MockDatePicker({ selected, onChange }) {
-    return (
-      <input
-        data-testid="date-picker"
-        value={selected.toISOString().split('T')[0]}
-        onChange={(e) => onChange(new Date(e.target.value))}
-      />
-    );
-  };
+  const MockDatePicker = ({ selected, onChange }) => (
+    <input
+      data-testid="date-picker"
+      value={selected.toISOString().split('T')[0]}
+      onChange={(e) => onChange(new Date(e.target.value))}
+    />
+  );
+  return MockDatePicker;
 });
 
 describe('TodoContainer Profile Update Integration', () => {

@@ -23,11 +23,11 @@ describe('FileValidationService', () => {
   describe('validateFileSize', () => {
     it('should pass validation for file within size limit', () => {
       const mockFile = {
-        size: 5 * 1024 * 1024, // 5MB
+        size: 5 * 1024 * 1024,
         originalname: 'test.jpg',
       } as Express.Multer.File;
 
-      const result = service.validateFileSize(mockFile, 10 * 1024 * 1024); // 10MB limit
+      const result = service.validateFileSize(mockFile, 10 * 1024 * 1024);
 
       expect(result.isValid).toBe(true);
       expect(result.errorCode).toBeUndefined();
@@ -36,11 +36,11 @@ describe('FileValidationService', () => {
 
     it('should fail validation for file exceeding size limit', () => {
       const mockFile = {
-        size: 15 * 1024 * 1024, // 15MB
+        size: 15 * 1024 * 1024,
         originalname: 'large-file.jpg',
       } as Express.Multer.File;
 
-      const result = service.validateFileSize(mockFile, 10 * 1024 * 1024); // 10MB limit
+      const result = service.validateFileSize(mockFile, 10 * 1024 * 1024);
 
       expect(result.isValid).toBe(false);
       expect(result.errorCode).toBe(FILE_VALIDATION_ERRORS.FILE_TOO_LARGE);

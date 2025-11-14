@@ -60,32 +60,32 @@
   - Apply ES6+ syntax considering TypeScript characteristics
   - _Requirements: 1.1, 1.2, 1.3, 2.1, 2.2, 3.1, 3.2, 3.3, 3.4, 3.5, 4.2_
 
-- [ ] 10. Refactor backend main and module files
+- [x] 10. Refactor backend main and module files
   - Refactor src/main.ts
   - Refactor src/app.module.ts
   - Refactor *.module.ts files in each module
   - Apply ES6+ syntax considering TypeScript characteristics
   - _Requirements: 1.1, 1.2, 1.3, 2.1, 2.2, 3.1, 3.2, 3.3, 3.4, 3.5, 4.2_
 
-- [ ] 11. Refactor frontend test files
+- [x] 11. Refactor frontend test files
   - Refactor client/src/**/*.test.js files
   - Process TodoList.test.js, TodoList.optimistic.test.js, TodoList.sorting.test.js, etc.
   - Apply same ES6+ refactoring rules
   - _Requirements: 1.1, 1.2, 1.3, 2.1, 2.2, 3.1, 3.2, 3.3, 3.4, 3.5, 4.1, 4.2_
 
-- [ ] 12. Refactor backend test files
+- [x] 12. Refactor backend test files
   - Refactor src/src/**/*.spec.ts files
   - Refactor src/test/**/*.e2e-spec.ts files
   - Apply ES6+ syntax considering TypeScript characteristics
   - _Requirements: 1.1, 1.2, 1.3, 2.1, 2.2, 3.1, 3.2, 3.3, 3.4, 3.5, 4.2_
 
-- [ ] 13. Run and verify frontend full test suite
+- [x] 13. Run and verify frontend full test suite
   - Run frontend test suite
   - Verify all tests pass
   - Analyze and fix any failed tests
   - _Requirements: 5.1, 5.3_
 
-- [ ] 14. Run and verify backend full test suite
+- [x] 14. Run and verify backend full test suite
   - Run backend test suite
   - Verify all tests pass
   - Analyze and fix any failed tests

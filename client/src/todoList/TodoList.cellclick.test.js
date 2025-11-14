@@ -46,33 +46,33 @@ jest.mock('../hooks/useFileUploadProgress', () => ({
 
 // Mock components
 jest.mock('../components/FileUploadProgress', () => {
-  return function MockFileUploadProgress() {
-    return <div data-testid="file-upload-progress">File Upload Progress</div>;
-  };
+  const MockFileUploadProgress = () => <div data-testid="file-upload-progress">File Upload Progress</div>;
+  return MockFileUploadProgress;
 });
 
 jest.mock('../components/ProfileUpdateForm', () => {
-  return function MockProfileUpdateForm({ onCancel }) {
-    return <div data-testid="profile-update-form"><button onClick={onCancel}>Cancel</button></div>;
-  };
+  const MockProfileUpdateForm = ({ onCancel }) => (
+    <div data-testid="profile-update-form"><button onClick={onCancel}>Cancel</button></div>
+  );
+  return MockProfileUpdateForm;
 });
 
 jest.mock('../components/PasswordChangeForm', () => {
-  return function MockPasswordChangeForm({ onCancel }) {
-    return <div data-testid="password-change-form"><button onClick={onCancel}>Cancel</button></div>;
-  };
+  const MockPasswordChangeForm = ({ onCancel }) => (
+    <div data-testid="password-change-form"><button onClick={onCancel}>Cancel</button></div>
+  );
+  return MockPasswordChangeForm;
 });
 
 jest.mock('react-datepicker', () => {
-  return function MockDatePicker({ selected, onChange }) {
-    return (
-      <input
-        data-testid="date-picker"
-        value={selected.toISOString().split('T')[0]}
-        onChange={(e) => onChange(new Date(e.target.value))}
-      />
-    );
-  };
+  const MockDatePicker = ({ selected, onChange }) => (
+    <input
+      data-testid="date-picker"
+      value={selected.toISOString().split('T')[0]}
+      onChange={(e) => onChange(new Date(e.target.value))}
+    />
+  );
+  return MockDatePicker;
 });
 
 describe('TodoContainer Checkbox Cell Click Functionality', () => {

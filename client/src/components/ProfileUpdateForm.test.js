@@ -31,9 +31,8 @@ jest.mock('../hooks/useFileUploadProgress', () => ({
 
 // FileUploadProgress 컴포넌트 모킹
 jest.mock('./FileUploadProgress', () => {
-  return function MockFileUploadProgress() {
-    return <div data-testid="file-upload-progress">File Upload Progress</div>;
-  };
+  const MockFileUploadProgress = () => <div data-testid="file-upload-progress">File Upload Progress</div>;
+  return MockFileUploadProgress;
 });
 
 describe('ProfileUpdateForm', () => {

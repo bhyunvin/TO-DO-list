@@ -5,47 +5,6 @@ import { AppModule } from '../src/app.module';
 import { DataSource } from 'typeorm';
 import { UserEntity } from '../src/user/user.entity';
 import { encrypt } from '../src/utils/cryptUtil';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { describe } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { describe } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { describe } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { afterEach } from 'node:test';
-import { beforeEach } from 'node:test';
-import { describe } from 'node:test';
-import { it } from 'node:test';
-import { describe } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { describe } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { describe } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { it } from 'node:test';
-import { describe } from 'node:test';
-import { afterEach } from 'node:test';
-import { beforeEach } from 'node:test';
-import { describe } from 'node:test';
-
-// Ensure Jest types are available
-/// <reference types="jest" />
 
 describe('Profile Update Security (e2e)', () => {
   let app: INestApplication;
@@ -81,21 +40,24 @@ describe('Profile Update Security (e2e)', () => {
     ]);
 
     const hashedPassword = await encrypt('testpassword123');
+    const userId = 'securitytestuser';
+    const regIp = '127.0.0.1';
+    const updIp = '127.0.0.1';
 
     testUser = await dataSource.manager.save(UserEntity, {
-      userId: 'securitytestuser',
+      userId,
       userName: 'Security Test User',
       userEmail: 'security@test.com',
       userDescription: 'Test user for security testing',
       userPassword: hashedPassword,
       adminYn: 'N',
       auditColumns: {
-        regId: 'securitytestuser',
+        regId: userId,
         regDtm: new Date(),
-        updId: 'securitytestuser',
+        updId: userId,
         updDtm: new Date(),
-        regIp: '127.0.0.1',
-        updIp: '127.0.0.1',
+        regIp,
+        updIp,
       },
     });
 
@@ -103,7 +65,7 @@ describe('Profile Update Security (e2e)', () => {
     const loginResponse = await request(app.getHttpServer())
       .post('/user/login')
       .send({
-        userId: 'securitytestuser',
+        userId,
         userPassword: 'testpassword123',
       })
       .expect(200);
@@ -397,21 +359,24 @@ describe('Profile Update Security (e2e)', () => {
     beforeEach(async () => {
       // Create a second user for uniqueness testing
       const hashedPassword = await encrypt('testpassword123');
+      const userId = 'seconduser';
+      const regIp = '127.0.0.1';
+      const updIp = '127.0.0.1';
 
       secondUser = await dataSource.manager.save(UserEntity, {
-        userId: 'seconduser',
+        userId,
         userName: 'Second User',
         userEmail: 'second@test.com',
         userDescription: 'Second test user',
         userPassword: hashedPassword,
         adminYn: 'N',
         auditColumns: {
-          regId: 'seconduser',
+          regId: userId,
           regDtm: new Date(),
-          updId: 'seconduser',
+          updId: userId,
           updDtm: new Date(),
-          regIp: '127.0.0.1',
-          updIp: '127.0.0.1',
+          regIp,
+          updIp,
         },
       });
     });

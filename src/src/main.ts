@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ExpressAdapter } from '@nestjs/platform-express';
 
-async function bootstrap() {
+const bootstrap = async () => {
   const app = await NestFactory.create(AppModule, new ExpressAdapter());
 
   app.enableCors({
@@ -12,6 +12,6 @@ async function bootstrap() {
   });
 
   await app.listen(3001);
-}
+};
 
 bootstrap();

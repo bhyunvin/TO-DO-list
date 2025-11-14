@@ -100,9 +100,7 @@ describe('UserService - Profile Update', () => {
 
       jest
         .spyOn(dataSource, 'transaction')
-        .mockImplementation(async (callback: any) => {
-          return callback(mockEntityManager);
-        });
+        .mockImplementation(async (callback: any) => callback(mockEntityManager));
 
       jest.spyOn(mockEntityManager, 'findOne').mockResolvedValue(suspendedUser);
 
@@ -126,9 +124,7 @@ describe('UserService - Profile Update', () => {
 
       jest
         .spyOn(dataSource, 'transaction')
-        .mockImplementation(async (callback: any) => {
-          return callback(mockEntityManager);
-        });
+        .mockImplementation(async (callback: any) => callback(mockEntityManager));
 
       jest
         .spyOn(mockEntityManager, 'findOne')
