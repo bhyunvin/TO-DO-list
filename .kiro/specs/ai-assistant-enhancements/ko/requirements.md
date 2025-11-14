@@ -71,6 +71,26 @@
 6. IF 할 일이 세션 userSeq에 속하지 않으면, THE Todo_Service SHALL 다른 사용자의 데이터를 노출하지 않고 오류 또는 빈 결과를 반환한다
 7. THE 함수 도구 정의 SHALL Gemini가 지정할 수 있는 매개변수로 userSeq를 포함하지 않는다
 
+### 요구사항 5: 데이터베이스 작업에 대한 완전한 감사 추적
+
+**사용자 스토리:** 시스템 관리자로서, 모든 할 일 생성 및 업데이트 작업이 완전한 감사 컬럼(reg_id, reg_ip, reg_dtm, upd_id, upd_ip, upd_dtm)을 채우기를 원하므로, 규정 준수 및 디버깅 목적으로 각 레코드를 생성하고 수정한 사람을 추적할 수 있습니다.
+
+#### 인수 기준
+
+1. THE ChatController SHALL 세션에서 인증된 사용자의 userId를 AI_Assistant_Service에 전달한다
+2. THE AI_Assistant_Service SHALL userId 매개변수를 createTodo 및 updateTodo 함수에 전달한다
+3. WHEN 새 할 일을 생성할 때, THE System SHALL reg_id를 세션 userId로 채운다
+4. WHEN 새 할 일을 생성할 때, THE System SHALL reg_ip를 클라이언트 IP 주소로 채운다
+5. WHEN 새 할 일을 생성할 때, THE System SHALL reg_dtm을 현재 서버 타임스탬프로 채운다
+6. WHEN 새 할 일을 생성할 때, THE System SHALL upd_id도 세션 userId로 채운다
+7. WHEN 새 할 일을 생성할 때, THE System SHALL upd_ip도 클라이언트 IP 주소로 채운다
+8. WHEN 새 할 일을 생성할 때, THE System SHALL upd_dtm도 현재 서버 타임스탬프로 채운다
+9. WHEN 기존 할 일을 업데이트할 때, THE System SHALL upd_id를 세션 userId로 채운다
+10. WHEN 기존 할 일을 업데이트할 때, THE System SHALL upd_ip를 클라이언트 IP 주소로 채운다
+11. WHEN 기존 할 일을 업데이트할 때, THE System SHALL upd_dtm을 현재 서버 타임스탬프로 채운다
+12. THE setAuditColumn 유틸리티 함수 SHALL 생성 작업 시 reg_* 및 upd_* 컬럼을 모두 초기화한다
+13. THE setAuditColumn 유틸리티 함수 SHALL 업데이트 작업 시 upd_* 컬럼만 업데이트한다
+
 ## 보안 고려사항
 
 ### 세션 강제

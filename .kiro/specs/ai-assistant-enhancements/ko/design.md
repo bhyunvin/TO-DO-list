@@ -433,6 +433,119 @@ async update(todoSeq: number, user: UserEntity, ip: string, updateTodoDto: Updat
 - ✅ TodoService 메서드는 userSeq로 필터링함
 - ✅ 업데이트/삭제 작업은 진행하기 전에 소유권을 확인함
 
+### 5. 데이터베이스 작업에 대한 완전한 감사 추적
+
+#### 구현 위치
+- **파일**: `src/src/assistance/chat.controller.ts`
+- **파일**: `src/src/assistance/assistance.service.ts`
+- **파일**: `src/src/utils/auditColumns.ts`
+
+#### 설계 세부사항
+
+**문제 설명:**
+이전에는 감사 컬럼(reg_id, upd_id, upd_ip)이 올바르게 채워지지 않았습니다:
+- 생성 작업 시: reg_id가 비어 있었고, upd_id/upd_ip가 초기화되지 않았음
+- userId가 ChatController에서 AssistanceService로 전달되지 않았음
+
+**해결책:**
+
+**1. ChatController 향상:**
+```typescript
+// 세션에서 AssistanceService로 userId 전달
+const result = await this.assistanceService.getGeminiResponse(
+  requestDto,
+  session.user.userSeq,
+  ip,
+  session.user.userName,
+  session.user.userId,  // ✨ 새로운 기능: 감사 로깅을 위한 userId 전달
+);
+```
+
+**2. AssistanceService 메서드 시그니처:**
+```typescript
+// getGeminiResponse에 userId 매개변수 추가
+async getGeminiResponse(
+  requestAssistanceDto: RequestAssistanceDto,
+  userSeq?: number,
+  ip?: string,
+  userName?: string,
+  userId?: string,  // ✨ 새로운 기능: 감사 로깅용
+): Promise<RequestAssistanceDto>
+
+// createTodo에 userId 매개변수 추가
+private async createTodo(
+  userSeq: number,
+  userId: string,  // ✨ 새로운 기능: 감사 로깅용
+  ip: string,
+  todoContent: string,
+  todoDate: string,
+  todoNote?: string,
+): Promise<any>
+
+// updateTodo에 userId 매개변수 추가
+private async updateTodo(
+  userSeq: number,
+  userId: string,  // ✨ 새로운 기능: 감사 로깅용
+  ip: string,
+  todoSeq?: number,
+  todoContentToFind?: string,
+  updateData?: {
+    todoContent?: string;
+    isCompleted?: boolean;
+    todoNote?: string;
+  },
+): Promise<any>
+```
+
+**3. 사용자 객체 구성:**
+```typescript
+// createTodo 및 updateTodo 메서드에서
+const user = {
+  userSeq,
+  userId,  // ✨ 수정됨: 이제 세션의 실제 userId 사용
+  userName: '',
+  userEmail: '',
+  userDescription: '',
+  userProfileImageFileGroupNo: null,
+  adminYn: 'N',
+  auditColumns: null,
+} as Omit<UserEntity, 'userPassword'>;
+```
+
+**4. 향상된 setAuditColumn 함수:**
+```typescript
+export function setAuditColumn(setting: AuditSettings) {
+  const { entity, id, ip, isUpdate = false } = setting;
+
+  if (isUpdate) {
+    // 업데이트 작업: upd_id와 upd_ip만 설정
+    entity.auditColumns.updId = id;
+    entity.auditColumns.updIp = ip;
+  } else {
+    // ✨ 수정됨: 생성 작업 시 이제 reg_* 및 upd_* 컬럼 모두 설정
+    entity.auditColumns.regId = id;
+    entity.auditColumns.regIp = ip;
+    entity.auditColumns.updId = id;  // 생성 시 upd_id 초기화
+    entity.auditColumns.updIp = ip;  // 생성 시 upd_ip 초기화
+  }
+
+  return entity;
+}
+```
+
+**감사 컬럼 채우기:**
+
+| 작업 | reg_id | reg_ip | reg_dtm | upd_id | upd_ip | upd_dtm |
+|------|--------|--------|---------|--------|--------|---------|
+| **생성** | userId | 클라이언트 IP | NOW() | userId | 클라이언트 IP | NOW() |
+| **업데이트** | (변경 없음) | (변경 없음) | (변경 없음) | userId | 클라이언트 IP | NOW() |
+
+**이점:**
+- 모든 할 일 작업에 대한 완전한 감사 추적
+- 데이터 거버넌스 요구사항 준수
+- 더 쉬운 디버깅 및 문제 해결
+- 모든 엔티티에서 일관된 감사 컬럼 채우기
+
 ## 데이터 모델
 
 ### 향상된 함수 응답 모델

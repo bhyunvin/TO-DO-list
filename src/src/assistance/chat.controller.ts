@@ -48,6 +48,7 @@ export class ChatController {
           session.user.userSeq,
           ip,
           session.user.userName,
+          session.user.userId,
         );
 
         // Return structured response

@@ -434,6 +434,119 @@ async update(todoSeq: number, user: UserEntity, ip: string, updateTodoDto: Updat
 - ✅ TodoService methods filter by userSeq
 - ✅ Update/delete operations verify ownership before proceeding
 
+### 5. Complete Audit Trail for Database Operations
+
+#### Implementation Location
+- **File**: `src/src/assistance/chat.controller.ts`
+- **File**: `src/src/assistance/assistance.service.ts`
+- **File**: `src/src/utils/auditColumns.ts`
+
+#### Design Details
+
+**Problem Statement:**
+Previously, the audit columns (reg_id, upd_id, upd_ip) were not being populated correctly:
+- On create operations: reg_id was empty, and upd_id/upd_ip were not initialized
+- The userId was not being passed from ChatController to AssistanceService
+
+**Solution:**
+
+**1. ChatController Enhancement:**
+```typescript
+// Pass userId from session to AssistanceService
+const result = await this.assistanceService.getGeminiResponse(
+  requestDto,
+  session.user.userSeq,
+  ip,
+  session.user.userName,
+  session.user.userId,  // ✨ NEW: Pass userId for audit logging
+);
+```
+
+**2. AssistanceService Method Signatures:**
+```typescript
+// Add userId parameter to getGeminiResponse
+async getGeminiResponse(
+  requestAssistanceDto: RequestAssistanceDto,
+  userSeq?: number,
+  ip?: string,
+  userName?: string,
+  userId?: string,  // ✨ NEW: For audit logging
+): Promise<RequestAssistanceDto>
+
+// Add userId parameter to createTodo
+private async createTodo(
+  userSeq: number,
+  userId: string,  // ✨ NEW: For audit logging
+  ip: string,
+  todoContent: string,
+  todoDate: string,
+  todoNote?: string,
+): Promise<any>
+
+// Add userId parameter to updateTodo
+private async updateTodo(
+  userSeq: number,
+  userId: string,  // ✨ NEW: For audit logging
+  ip: string,
+  todoSeq?: number,
+  todoContentToFind?: string,
+  updateData?: {
+    todoContent?: string;
+    isCompleted?: boolean;
+    todoNote?: string;
+  },
+): Promise<any>
+```
+
+**3. User Object Construction:**
+```typescript
+// In createTodo and updateTodo methods
+const user = {
+  userSeq,
+  userId,  // ✨ FIXED: Now uses actual userId from session
+  userName: '',
+  userEmail: '',
+  userDescription: '',
+  userProfileImageFileGroupNo: null,
+  adminYn: 'N',
+  auditColumns: null,
+} as Omit<UserEntity, 'userPassword'>;
+```
+
+**4. Enhanced setAuditColumn Function:**
+```typescript
+export function setAuditColumn(setting: AuditSettings) {
+  const { entity, id, ip, isUpdate = false } = setting;
+
+  if (isUpdate) {
+    // Update operation: only set upd_id and upd_ip
+    entity.auditColumns.updId = id;
+    entity.auditColumns.updIp = ip;
+  } else {
+    // ✨ FIXED: Create operation now sets both reg_* and upd_* columns
+    entity.auditColumns.regId = id;
+    entity.auditColumns.regIp = ip;
+    entity.auditColumns.updId = id;  // Initialize upd_id on creation
+    entity.auditColumns.updIp = ip;  // Initialize upd_ip on creation
+  }
+
+  return entity;
+}
+```
+
+**Audit Column Population:**
+
+| Operation | reg_id | reg_ip | reg_dtm | upd_id | upd_ip | upd_dtm |
+|-----------|--------|--------|---------|--------|--------|---------|
+| **Create** | userId | client IP | NOW() | userId | client IP | NOW() |
+| **Update** | (unchanged) | (unchanged) | (unchanged) | userId | client IP | NOW() |
+
+**Benefits:**
+- Complete audit trail for all todo operations
+- Compliance with data governance requirements
+- Easier debugging and troubleshooting
+- Consistent audit column population across all entities
+
 ## Data Models
 
 ### Enhanced Function Response Models

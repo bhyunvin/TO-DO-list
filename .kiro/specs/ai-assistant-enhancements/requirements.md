@@ -71,6 +71,26 @@ This specification defines enhancements to the existing AI Assistant Chat Interf
 6. IF a todo does not belong to the session userSeq, THE Todo_Service SHALL return an error or empty result without exposing other users' data
 7. THE function tool definitions SHALL NOT include userSeq as a parameter that Gemini can specify
 
+### Requirement 5: Complete Audit Trail for Database Operations
+
+**User Story:** As a system administrator, I want all todo create and update operations to populate complete audit columns (reg_id, reg_ip, reg_dtm, upd_id, upd_ip, upd_dtm), so that I can track who created and modified each record for compliance and debugging purposes.
+
+#### Acceptance Criteria
+
+1. THE ChatController SHALL pass the authenticated user's userId from the session to the AI_Assistant_Service
+2. THE AI_Assistant_Service SHALL pass the userId parameter to createTodo and updateTodo functions
+3. WHEN creating a new todo, THE System SHALL populate reg_id with the session userId
+4. WHEN creating a new todo, THE System SHALL populate reg_ip with the client IP address
+5. WHEN creating a new todo, THE System SHALL populate reg_dtm with the current server timestamp
+6. WHEN creating a new todo, THE System SHALL also populate upd_id with the session userId
+7. WHEN creating a new todo, THE System SHALL also populate upd_ip with the client IP address
+8. WHEN creating a new todo, THE System SHALL also populate upd_dtm with the current server timestamp
+9. WHEN updating an existing todo, THE System SHALL populate upd_id with the session userId
+10. WHEN updating an existing todo, THE System SHALL populate upd_ip with the client IP address
+11. WHEN updating an existing todo, THE System SHALL populate upd_dtm with the current server timestamp
+12. THE setAuditColumn utility function SHALL initialize both reg_* and upd_* columns on create operations
+13. THE setAuditColumn utility function SHALL only update upd_* columns on update operations
+
 ## Security Considerations
 
 ### Session Enforcement

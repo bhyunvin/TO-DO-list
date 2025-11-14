@@ -79,30 +79,34 @@ export class AssistanceService implements OnModuleInit {
       {
         name: 'updateTodo',
         description:
-          '기존 할 일을 수정합니다. 할 일 ID는 필수이며, 수정할 필드만 포함합니다.',
+          '기존 할 일을 수정합니다. todoSeq 또는 todoContentToFind로 식별할 수 있습니다.',
         parameters: {
           type: 'OBJECT',
           properties: {
             todoSeq: {
               type: 'NUMBER',
               description:
-                '수정할 할 일의 고유 ID (필수). 사용자가 참조한 할 일의 ID를 사용합니다.',
+                '수정할 할 일의 고유 ID (선택 사항 - todoContentToFind가 제공되지 않은 경우 필수).',
+            },
+            todoContentToFind: {
+              type: 'STRING',
+              description:
+                '수정할 할 일을 찾기 위한 내용 검색어 (선택 사항 - todoSeq가 제공되지 않은 경우 필수).',
             },
             todoContent: {
               type: 'STRING',
-              description: '수정할 할 일의 내용 (선택 사항).',
+              description: '수정할 할 일의 새로운 내용 (선택 사항).',
             },
-            completeDtm: {
-              type: 'STRING',
+            isCompleted: {
+              type: 'BOOLEAN',
               description:
-                '완료 일시 (선택 사항). 완료 처리 시 현재 시각의 ISO 8601 형식 문자열, 미완료 처리 시 null.',
+                '완료 상태 (선택 사항). true로 설정하면 작업을 완료로 표시하고, false로 설정하면 미완료로 표시합니다.',
             },
             todoNote: {
               type: 'STRING',
               description: '수정할 메모 내용 (선택 사항).',
             },
           },
-          required: ['todoSeq'],
         },
       },
     ],
@@ -113,6 +117,56 @@ export class AssistanceService implements OnModuleInit {
     private readonly keychainUtil: KeychainUtil,
     private readonly todoService: TodoService,
   ) {}
+
+  /**
+   * Get current date in KST (Korea Standard Time, UTC+9) timezone
+   * @returns Current date in YYYY-MM-DD format
+   */
+  private getCurrentKSTDate(): string {
+    const now = new Date();
+    const kstOffset = 9 * 60; // KST is UTC+9 in minutes
+    const kstTime = new Date(now.getTime() + kstOffset * 60 * 1000);
+    return kstTime.toISOString().split('T')[0]; // YYYY-MM-DD
+  }
+
+  /**
+   * Find a todo by its content (case-insensitive search)
+   * @param userSeq - User sequence number to filter todos
+   * @param contentToFind - Content text to search for
+   * @returns Result object with success status, todoSeq if found, or error message
+   */
+  private async findTodoByContent(
+    userSeq: number,
+    contentToFind: string,
+  ): Promise<{ success: boolean; todoSeq?: number; matches?: number; error?: string }> {
+    try {
+      // Get all user's todos
+      const currentDate = new Date().toISOString().split('T')[0];
+      const allTodos = await this.todoService.findAll(userSeq, currentDate);
+      
+      // Case-insensitive search
+      const matches = allTodos.filter(todo => 
+        todo.todoContent.toLowerCase().includes(contentToFind.toLowerCase())
+      );
+      
+      if (matches.length === 0) {
+        return { success: false, error: '일치하는 할 일을 찾을 수 없습니다.' };
+      }
+      
+      if (matches.length > 1) {
+        return { 
+          success: false, 
+          matches: matches.length,
+          error: `"${contentToFind}"와 일치하는 할 일이 ${matches.length}개 있습니다. 더 구체적으로 지정해주세요.` 
+        };
+      }
+      
+      return { success: true, todoSeq: matches[0].todoSeq };
+    } catch (error) {
+      this.logger.error('[findTodoByContent] 검색 중 오류 발생', error);
+      return { success: false, error: '할 일 검색에 실패했습니다.' };
+    }
+  }
 
   /**
    * 모듈이 초기화될 때 딱 한 번 실행됩니다.
@@ -144,6 +198,7 @@ export class AssistanceService implements OnModuleInit {
    * @param userSeq - 인증된 작업을 위한 선택적 사용자 시퀀스 번호
    * @param ip - 감사 로깅을 위한 선택적 클라이언트 IP 주소
    * @param userName - 개인화된 응답을 위한 선택적 사용자 이름
+   * @param userId - 감사 로깅을 위한 선택적 사용자 ID
    * @returns AI가 생성한 응답을 포함하는 응답 DTO
    */
   async getGeminiResponse(
@@ -151,6 +206,7 @@ export class AssistanceService implements OnModuleInit {
     userSeq?: number,
     ip?: string,
     userName?: string,
+    userId?: string,
   ): Promise<RequestAssistanceDto> {
     if (!this.geminiApiKey) {
       this.logger.error(
@@ -175,6 +231,11 @@ export class AssistanceService implements OnModuleInit {
       if (userName) {
         systemPrompt = systemPrompt.replace(/\[사용자 이름\]/g, userName);
       }
+
+      // Add current date context to system prompt
+      const currentDate = this.getCurrentKSTDate();
+      const dateContext = `\n\n[CURRENT_DATE]\n오늘 날짜: ${currentDate} (YYYY-MM-DD 형식)\n이 날짜를 기준으로 "오늘", "내일", "다음 주" 등의 상대적 날짜를 계산하세요.`;
+      systemPrompt = systemPrompt + dateContext;
     } catch (error) {
       this.logger.error('시스템 프롬프트를 불러오는 중 오류 발생:', error);
       systemPrompt = `[ROLE] 당신은 친절한 한국어 비서입니다. 존댓말로 할 일 목록에 관해서만 답변하세요.`;
@@ -266,12 +327,13 @@ export class AssistanceService implements OnModuleInit {
             break;
 
           case 'createTodo':
-            if (userSeq && ip) {
+            if (userSeq && ip && userId) {
               this.logger.log(
-                `[Function Execution] createTodo 실행 시작 (userSeq: ${userSeq}, ip: ${ip})`,
+                `[Function Execution] createTodo 실행 시작 (userSeq: ${userSeq}, userId: ${userId}, ip: ${ip})`,
               );
               functionResult = await this.createTodo(
                 userSeq,
+                userId,
                 ip,
                 args.todoContent,
                 args.todoDate,
@@ -279,29 +341,31 @@ export class AssistanceService implements OnModuleInit {
               );
             } else {
               this.logger.warn(
-                `[Function Execution] createTodo 실행 불가 - userSeq: ${userSeq}, ip: ${ip}`,
+                `[Function Execution] createTodo 실행 불가 - userSeq: ${userSeq}, userId: ${userId}, ip: ${ip}`,
               );
             }
             break;
 
           case 'updateTodo':
-            if (userSeq && ip) {
+            if (userSeq && ip && userId) {
               this.logger.log(
-                `[Function Execution] updateTodo 실행 시작 (userSeq: ${userSeq}, ip: ${ip}, todoSeq: ${args.todoSeq})`,
+                `[Function Execution] updateTodo 실행 시작 (userSeq: ${userSeq}, userId: ${userId}, ip: ${ip}, todoSeq: ${args.todoSeq}, todoContentToFind: ${args.todoContentToFind})`,
               );
               functionResult = await this.updateTodo(
                 userSeq,
+                userId,
                 ip,
                 args.todoSeq,
+                args.todoContentToFind,
                 {
                   todoContent: args.todoContent,
-                  completeDtm: args.completeDtm,
+                  isCompleted: args.isCompleted,
                   todoNote: args.todoNote,
                 },
               );
             } else {
               this.logger.warn(
-                `[Function Execution] updateTodo 실행 불가 - userSeq: ${userSeq}, ip: ${ip}`,
+                `[Function Execution] updateTodo 실행 불가 - userSeq: ${userSeq}, userId: ${userId}, ip: ${ip}`,
               );
             }
             break;
@@ -550,6 +614,7 @@ export class AssistanceService implements OnModuleInit {
   /**
    * 사용자를 위한 새로운 TODO 항목을 생성합니다
    * @param userSeq - 사용자를 식별하는 사용자 시퀀스 번호
+   * @param userId - 감사 로깅을 위한 사용자 ID
    * @param ip - 감사 로깅을 위한 클라이언트 IP 주소
    * @param todoContent - TODO 항목의 내용/설명
    * @param todoDate - YYYY-MM-DD 형식의 TODO 목표 날짜
@@ -558,6 +623,7 @@ export class AssistanceService implements OnModuleInit {
    */
   private async createTodo(
     userSeq: number,
+    userId: string,
     ip: string,
     todoContent: string,
     todoDate: string,
@@ -565,7 +631,7 @@ export class AssistanceService implements OnModuleInit {
   ): Promise<any> {
     // ⬇️ [로그 추가] createTodo 함수 시작
     this.logger.log(
-      `[createTodo] 함수 시작. userSeq: ${userSeq}, todoContent: "${todoContent}", todoDate: ${todoDate}, todoNote: ${todoNote}`,
+      `[createTodo] 함수 시작. userSeq: ${userSeq}, userId: ${userId}, todoContent: "${todoContent}", todoDate: ${todoDate}, todoNote: ${todoNote}`,
     );
 
     try {
@@ -582,11 +648,10 @@ export class AssistanceService implements OnModuleInit {
         };
       }
 
-      // 사용자 객체 생성 (함수 호출의 경우 userId는 빈 문자열일 수 있음)
-      // TodoService에서는 실제로 userSeq만 사용하지만, 타입을 만족시켜야 함
+      // 사용자 객체 생성 - userId는 감사 로깅에 필수
       const user = {
         userSeq,
-        userId: '',
+        userId,
         userName: '',
         userEmail: '',
         userDescription: '',
@@ -615,6 +680,9 @@ export class AssistanceService implements OnModuleInit {
         `[createTodo] Todo 생성 성공. todoSeq: ${createdTodo.todoSeq}`,
       );
 
+      // Auto-refresh list after creation (±7 days)
+      const refreshedList = await this.getTodos(userSeq, undefined, 7);
+
       // 구조화된 성공 응답 반환
       const result = {
         success: true,
@@ -626,6 +694,7 @@ export class AssistanceService implements OnModuleInit {
           completeDtm: createdTodo.completeDtm,
           createdAt: createdTodo.auditColumns.regDtm.toISOString(),
         },
+        refreshedList: refreshedList,
       };
 
       this.logger.log(
@@ -644,32 +713,49 @@ export class AssistanceService implements OnModuleInit {
   /**
    * 사용자를 위한 기존 TODO 항목을 업데이트합니다
    * @param userSeq - 사용자를 식별하는 사용자 시퀀스 번호
+   * @param userId - 감사 로깅을 위한 사용자 ID
    * @param ip - 감사 로깅을 위한 클라이언트 IP 주소
-   * @param todoSeq - 업데이트할 TODO를 식별하는 TODO 시퀀스 번호
+   * @param todoSeq - 업데이트할 TODO를 식별하는 TODO 시퀀스 번호 (선택 사항 - todoContentToFind가 제공되지 않은 경우 필수)
+   * @param todoContentToFind - 업데이트할 TODO를 찾기 위한 내용 검색어 (선택 사항 - todoSeq가 제공되지 않은 경우 필수)
    * @param updateData - 업데이트할 선택적 필드를 포함하는 객체 (부분 업데이트)
    * @returns 성공 상태와 업데이트된 TODO 데이터를 포함하는 구조화된 응답
    */
   private async updateTodo(
     userSeq: number,
+    userId: string,
     ip: string,
-    todoSeq: number,
-    updateData: {
+    todoSeq?: number,
+    todoContentToFind?: string,
+    updateData?: {
       todoContent?: string;
-      completeDtm?: string | null;
+      isCompleted?: boolean;
       todoNote?: string;
     },
   ): Promise<any> {
     // ⬇️ [로그 추가] updateTodo 함수 시작
     this.logger.log(
-      `[updateTodo] 함수 시작. userSeq: ${userSeq}, todoSeq: ${todoSeq}, updateData: ${JSON.stringify(updateData)}`,
+      `[updateTodo] 함수 시작. userSeq: ${userSeq}, userId: ${userId}, todoSeq: ${todoSeq}, todoContentToFind: ${todoContentToFind}, updateData: ${JSON.stringify(updateData)}`,
     );
 
     try {
-      // 사용자 객체 생성 (함수 호출의 경우 userId는 빈 문자열일 수 있음)
-      // TodoService에서는 실제로 userSeq만 사용하지만, 타입을 만족시켜야 함
+      let targetTodoSeq = todoSeq;
+      
+      // If no todoSeq provided, search by content
+      if (!targetTodoSeq && todoContentToFind) {
+        const searchResult = await this.findTodoByContent(userSeq, todoContentToFind);
+        if (!searchResult.success) {
+          return searchResult; // Return error to AI
+        }
+        targetTodoSeq = searchResult.todoSeq;
+      }
+      
+      if (!targetTodoSeq) {
+        return { success: false, error: 'todoSeq 또는 todoContentToFind가 필요합니다.' };
+      }
+      // 사용자 객체 생성 - userId는 감사 로깅에 필수
       const user = {
         userSeq,
-        userId: '',
+        userId,
         userName: '',
         userEmail: '',
         userDescription: '',
@@ -680,13 +766,14 @@ export class AssistanceService implements OnModuleInit {
 
       // 제공된 필드만으로 UpdateTodoDto 생성 (부분 업데이트)
       const updateTodoDto: any = {};
-      if (updateData.todoContent !== undefined) {
+      if (updateData?.todoContent !== undefined) {
         updateTodoDto.todoContent = updateData.todoContent;
       }
-      if (updateData.completeDtm !== undefined) {
-        updateTodoDto.completeDtm = updateData.completeDtm;
+      if (updateData?.isCompleted !== undefined) {
+        // Convert boolean to completeDtm: true = NOW(), false = null
+        updateTodoDto.completeDtm = updateData.isCompleted ? 'NOW()' : null;
       }
-      if (updateData.todoNote !== undefined) {
+      if (updateData?.todoNote !== undefined) {
         updateTodoDto.todoNote = updateData.todoNote;
       }
 
@@ -698,7 +785,7 @@ export class AssistanceService implements OnModuleInit {
       // TodoService를 호출하여 TODO 업데이트
       this.logger.log(`[updateTodo] todoService.update 호출 중...`);
       const updatedTodo = await this.todoService.update(
-        todoSeq,
+        targetTodoSeq,
         user,
         ip,
         updateTodoDto,
@@ -720,6 +807,9 @@ export class AssistanceService implements OnModuleInit {
         `[updateTodo] Todo 수정 성공. todoSeq: ${updatedTodo.todoSeq}`,
       );
 
+      // Auto-refresh list after update (±7 days)
+      const refreshedList = await this.getTodos(userSeq, undefined, 7);
+
       // 업데이트된 TODO 데이터와 함께 구조화된 성공 응답 반환
       const result = {
         success: true,
@@ -731,6 +821,7 @@ export class AssistanceService implements OnModuleInit {
           completeDtm: updatedTodo.completeDtm,
           updatedAt: updatedTodo.auditColumns.updDtm.toISOString(),
         },
+        refreshedList: refreshedList,
       };
 
       this.logger.log(
