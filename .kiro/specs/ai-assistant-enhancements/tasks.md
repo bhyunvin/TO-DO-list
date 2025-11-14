@@ -238,3 +238,46 @@
   - Test: error messages still in Korean
   - Test: manual todo create/update still works
   - _Requirements: 1.1-1.5, 2.1-2.5, 3.1-3.5, 4.1-4.7, 5.1-5.13, 6.1-6.7_
+
+
+- [x] 8. Implement automatic welcome message for new chat sessions
+  - Add welcome message injection when chat session initializes
+  - Display predefined Korean guidance message with usage examples
+  - Ensure message persists in chat history
+  - Suppress message if chat already contains messages
+  - _New Feature: User Onboarding Enhancement_
+
+- [x] 8.1 Add welcome message action to chatStore
+  - Create addWelcomeMessage() function in chatStore
+  - Check if messages array is empty before injection
+  - Format welcome content as HTML with proper structure
+  - Include usage examples for adding, viewing, and updating todos
+  - _Implementation: client/src/stores/chatStore.js_
+
+- [x] 8.2 Integrate welcome message with chat modal
+  - Update handleChatToggle() to call addWelcomeMessage() on open
+  - Add addWelcomeMessage to useChatStore destructuring
+  - Ensure welcome message only appears when messages.length === 0
+  - _Implementation: client/src/todoList/TodoList.js_
+
+- [x] 8.3 Remove old static welcome placeholder
+  - Remove conditional rendering of old welcome message
+  - Simplify ChatModal to always render messages from store
+  - Ensure proper HTML rendering via ChatMessage component
+  - _Implementation: client/src/components/ChatModal.js_
+
+- [x] 8.4 Handle welcome message on clear messages
+  - Update clearMessages() to re-inject welcome message after clearing
+  - Ensure users always see guidance when starting fresh
+  - Maintain consistency with initial chat open behavior
+  - _Implementation: client/src/stores/chatStore.js_
+
+- [ ]* 8.5 Test welcome message functionality
+  - Test: new user login → welcome message appears on first chat open
+  - Test: clear chat → welcome message reappears
+  - Test: existing chat → welcome message does not duplicate
+  - Test: page refresh → welcome message persists in sessionStorage
+  - Test: logout/login → new welcome message on first chat open
+  - Test: HTML rendering → proper formatting with emojis and lists
+  - _Verification: Manual testing and user acceptance_
+  

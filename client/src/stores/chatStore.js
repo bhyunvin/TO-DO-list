@@ -52,6 +52,51 @@ export const useChatStore = create(
         }));
       },
 
+      // 환영 메시지 추가 (채팅 세션 시작 시)
+      addWelcomeMessage: () => {
+        const { messages } = get();
+        
+        // 이미 메시지가 있으면 환영 메시지를 추가하지 않음
+        if (messages.length > 0) {
+          return;
+        }
+
+        const welcomeContent = `<p>안녕하세요! 🤖 AI 비서입니다.</p>
+<p>무엇을 도와드릴까요?</p>
+<p>편하게 말씀만 하시면 제가 할 일 관리를 도와드릴게요.</p>
+<hr>
+<h2>💡 이렇게 말씀해보세요!</h2>
+<p><strong>✅ 할 일 추가하기</strong></p>
+<ul>
+<li>"내일 10시까지 '기획안 작성' 추가해 줘."</li>
+<li>"'우유 사기'라고 메모해 줘."</li>
+</ul>
+<p><strong>📋 할 일 확인하기</strong></p>
+<ul>
+<li>"오늘 내 할 일 목록 보여줘."</li>
+<li>"이번 주 일정이 어떻게 되지?"</li>
+</ul>
+<p><strong>🔄 할 일 수정/완료하기</strong></p>
+<ul>
+<li>"'기획안 작성' 완료했어."</li>
+<li>"'팀 회식' 시간을 저녁 7시로 변경해 줘."</li>
+</ul>
+<hr>
+<p>언제든지 편하게 요청해주세요!</p>`;
+
+        const welcomeMessage = {
+          id: `welcome-${Date.now()}`,
+          content: welcomeContent,
+          isUser: false,
+          timestamp: new Date(),
+          isHtml: true, // HTML로 렌더링
+        };
+
+        set((state) => ({
+          messages: [welcomeMessage],
+        }));
+      },
+
       setLoading: (loading) => {
         const lastRequestTime = loading ? Date.now() : undefined;
         set((state) => ({ 
@@ -69,14 +114,20 @@ export const useChatStore = create(
         });
       },
 
-      clearMessages: () => set({ 
-        messages: [], 
-        error: null, 
-        retryCount: 0, 
-        lastFailedMessage: null,
-        requestInProgress: false,
-        lastRequestTime: 0
-      }),
+      clearMessages: () => {
+        set({ 
+          messages: [], 
+          error: null, 
+          retryCount: 0, 
+          lastFailedMessage: null,
+          requestInProgress: false,
+          lastRequestTime: 0
+        });
+        
+        // 메시지를 지운 후 환영 메시지 다시 추가
+        const { addWelcomeMessage } = get();
+        addWelcomeMessage();
+      },
 
       clearError: () => set({ error: null }),
 

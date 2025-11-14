@@ -827,3 +827,9 @@ interface UpdateTodoData {
 - Verify tool definitions have no userSeq parameters
 - Test cross-user access attempts
 - Security penetration testing
+
+### Phase 5: Welcome Message (Low Risk)
+- Implement addWelcomeMessage action in chatStore
+- Integrate with chat modal open event
+- Test message persistence and suppression logic
+- Monitor user engagement with examples

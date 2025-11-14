@@ -611,7 +611,8 @@ function TodoContainer() {
     messages, 
     isLoading, 
     error, 
-    addMessage, 
+    addMessage,
+    addWelcomeMessage,
     setLoading, 
     clearError,
     handleApiError,
@@ -1248,7 +1249,14 @@ function TodoContainer() {
 
   // 채팅 관련 핸들러
   const handleChatToggle = () => {
-    setIsChatOpen(!isChatOpen);
+    const willOpen = !isChatOpen;
+    setIsChatOpen(willOpen);
+    
+    // 채팅을 열 때 환영 메시지 추가 (메시지가 없는 경우에만)
+    if (willOpen && messages.length === 0) {
+      addWelcomeMessage();
+    }
+    
     if (error) {
       clearError();
     }

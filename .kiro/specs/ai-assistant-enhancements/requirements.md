@@ -105,6 +105,21 @@ This specification defines enhancements to the existing AI Assistant Chat Interf
 6. THE refresh SHALL not interfere with the current selected date in the todo list
 7. THE System SHALL trigger refresh for all successful AI chat responses to ensure consistency
 
+### Requirement 7: Automatic Welcome Message for New Chat Sessions
+
+**User Story:** As a user, I want to see a helpful welcome message with usage examples when I start a new chat session, so that I understand how to interact with the AI assistant.
+
+#### Acceptance Criteria
+
+1. WHEN a user opens the chat modal for the first time in a session, THE System SHALL display a welcome message as the first message
+2. THE welcome message SHALL include a greeting and introduction to the AI assistant
+3. THE welcome message SHALL provide concrete usage examples for adding, viewing, and updating todos
+4. THE welcome message SHALL be formatted in Korean with proper HTML structure including emojis, headings, and lists
+5. THE welcome message SHALL be stored in chat history like a regular assistant message
+6. THE welcome message SHALL persist in sessionStorage across page refreshes within the same session
+7. WHEN a user clears the chat history, THE System SHALL automatically re-inject the welcome message
+8. THE welcome message SHALL NOT appear if the chat session already contains messages from previous interactions
+
 ## Security Considerations
 
 ### Session Enforcement

@@ -128,20 +128,13 @@ const ChatModal = ({ isOpen, onClose, user, messages, onSendMessage, isLoading, 
           aria-label="채팅 메시지"
           aria-atomic="false"
         >
-          {messages.length === 0 ? (
-            <div className="welcome-message" role="status">
-              <i className="bi bi-chat-heart mb-3" aria-hidden="true"></i>
-              <p>안녕하세요! 할 일 관리에 대해 무엇이든 물어보세요.</p>
-            </div>
-          ) : (
-            messages.map(message => (
-              <ChatMessage
-                key={message.id}
-                message={message}
-                isUser={message.isUser}
-              />
-            ))
-          )}
+          {messages.map(message => (
+            <ChatMessage
+              key={message.id}
+              message={message}
+              isUser={message.isUser}
+            />
+          ))}
           {isLoading && (
             <div className="typing-indicator" role="status" aria-live="polite">
               <div className="typing-dots" aria-hidden="true">
