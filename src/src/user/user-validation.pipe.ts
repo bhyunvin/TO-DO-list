@@ -75,7 +75,8 @@ export class UserProfileValidationPipe implements PipeTransform<any> {
     }
 
     if (userDescription) {
-      sanitized.userDescription = this.inputSanitizer.sanitizeDescription(userDescription);
+      sanitized.userDescription =
+        this.inputSanitizer.sanitizeDescription(userDescription);
     }
 
     return sanitized;

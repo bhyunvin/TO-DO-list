@@ -80,7 +80,8 @@ export class FileValidationService {
     files: File[] | Express.Multer.File[],
     config: ValidationConfig,
   ): ValidationResult[] {
-    const { maxFileCount, maxFileSize, allowedExtensions, blockedExtensions } = config;
+    const { maxFileCount, maxFileSize, allowedExtensions, blockedExtensions } =
+      config;
 
     // 파일 개수 제한 확인
     if (maxFileCount && files.length > maxFileCount) {
@@ -111,7 +112,8 @@ export class FileValidationService {
     category: FileCategory,
   ): ValidationResult[] {
     // snake_case 카테고리를 camelCase 정책 키로 매핑
-    const policyKey = category === 'profile_image' ? 'profileImage' : 'todoAttachment';
+    const policyKey =
+      category === 'profile_image' ? 'profileImage' : 'todoAttachment';
     const policyConfig = FILE_UPLOAD_POLICY[policyKey];
 
     if (!policyConfig) {
@@ -121,9 +123,10 @@ export class FileValidationService {
     const validationConfig: ValidationConfig = {
       maxFileSize: policyConfig.maxSize,
       allowedExtensions: policyConfig.allowedTypes,
-      blockedExtensions: category === 'todo_attachment'
-        ? (policyConfig as any).blockedTypes || BLOCKED_EXTENSIONS
-        : BLOCKED_EXTENSIONS,
+      blockedExtensions:
+        category === 'todo_attachment'
+          ? (policyConfig as any).blockedTypes || BLOCKED_EXTENSIONS
+          : BLOCKED_EXTENSIONS,
       maxFileCount: policyConfig.maxCount,
     };
 

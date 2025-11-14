@@ -82,7 +82,8 @@ export class FileUploadErrorService {
   ): FileUploadSuccessResponse {
     return {
       success: true,
-      message: message || `Successfully uploaded ${uploadedFiles.length} file(s)`,
+      message:
+        message || `Successfully uploaded ${uploadedFiles.length} file(s)`,
       uploadedFiles,
       timestamp: new Date().toISOString(),
       requestId,
@@ -113,7 +114,9 @@ export class FileUploadErrorService {
           `"${error.fileName}": ${this.getUserFriendlyMessage(error)}`,
         );
       } else {
-        const fileNames = fileErrors.map(({ fileName }) => `"${fileName}"`).join(', ');
+        const fileNames = fileErrors
+          .map(({ fileName }) => `"${fileName}"`)
+          .join(', ');
         const [firstError] = fileErrors;
         messages.push(
           `${fileNames}: ${this.getUserFriendlyMessage(firstError)}`,
@@ -156,14 +159,17 @@ export class FileUploadErrorService {
   private groupErrorsByType(
     errors: FileValidationError[],
   ): Record<string, FileValidationError[]> {
-    return errors.reduce((groups, error) => {
-      const { errorCode } = error;
-      if (!groups[errorCode]) {
-        groups[errorCode] = [];
-      }
-      groups[errorCode].push(error);
-      return groups;
-    }, {} as Record<string, FileValidationError[]>);
+    return errors.reduce(
+      (groups, error) => {
+        const { errorCode } = error;
+        if (!groups[errorCode]) {
+          groups[errorCode] = [];
+        }
+        groups[errorCode].push(error);
+        return groups;
+      },
+      {} as Record<string, FileValidationError[]>,
+    );
   }
 
   /**
@@ -217,12 +223,14 @@ export class FileUploadErrorService {
     this.logger.warn(
       `File validation failed for ${nonSecurityErrors.length} file(s)`,
       {
-        errors: nonSecurityErrors.map(({ fileName, errorCode, fileSize, fileType }) => ({
-          fileName,
-          errorCode,
-          fileSize,
-          fileType,
-        })),
+        errors: nonSecurityErrors.map(
+          ({ fileName, errorCode, fileSize, fileType }) => ({
+            fileName,
+            errorCode,
+            fileSize,
+            fileType,
+          }),
+        ),
         clientIp: context.clientIp,
         userAgent: context.userAgent,
         userId: context.userId,
@@ -316,9 +324,10 @@ export class FileUploadErrorService {
     errors: FileValidationError[],
     requestId?: string,
   ): FileUploadErrorResponse {
-    const message = errors.length > 0
-      ? `Partial upload success: ${uploadedFiles.length} file(s) uploaded, ${errors.length} failed`
-      : `Successfully uploaded ${uploadedFiles.length} file(s)`;
+    const message =
+      errors.length > 0
+        ? `Partial upload success: ${uploadedFiles.length} file(s) uploaded, ${errors.length} failed`
+        : `Successfully uploaded ${uploadedFiles.length} file(s)`;
 
     return {
       success: false,

@@ -21,4 +21,5 @@ try {
 // 테스트 환경 변수 기본값 설정
 process.env.NODE_ENV = process.env.NODE_ENV || 'test';
 process.env.TEST_DB_PASSWORD = process.env.TEST_DB_PASSWORD || 'test_password';
-process.env.TEST_SESSION_SECRET = process.env.TEST_SESSION_SECRET || 'test_session_secret_key_for_e2e_testing';
+process.env.TEST_SESSION_SECRET =
+  process.env.TEST_SESSION_SECRET || 'test_session_secret_key_for_e2e_testing';

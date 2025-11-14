@@ -154,7 +154,7 @@ export class AssistanceService implements OnModuleInit {
       const currentDate = new Date().toISOString().split('T')[0];
       const allTodos = await this.todoService.findAll(userSeq, currentDate);
 
-      const matches = allTodos.filter(todo =>
+      const matches = allTodos.filter((todo) =>
         todo.todoContent.toLowerCase().includes(contentToFind.toLowerCase()),
       );
 
@@ -516,7 +516,7 @@ export class AssistanceService implements OnModuleInit {
       );
 
       if (status) {
-        filteredTodos = todos.filter(todo => {
+        filteredTodos = todos.filter((todo) => {
           const todoDate = new Date(todo.todoDate);
           const isCompleted = todo.completeDtm !== null;
 
@@ -544,7 +544,7 @@ export class AssistanceService implements OnModuleInit {
 
       const result = {
         totalCount: filteredTodos.length,
-        todos: filteredTodos.map(todo => ({
+        todos: filteredTodos.map((todo) => ({
           todoSeq: todo.todoSeq,
           todoContent: todo.todoContent,
           todoDate: todo.todoDate,

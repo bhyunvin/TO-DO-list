@@ -22,10 +22,10 @@ import session from 'express-session';
 
 /**
  * Profile Update Security E2E Tests
- * 
+ *
  * NOTE: These tests include rate limiting checks which may cause some tests to fail
  * if run in quick succession. The application's rate limiting feature is working correctly.
- * 
+ *
  * To run these tests successfully:
  * 1. Run tests individually or in small groups
  * 2. Increase the delay in afterEach if needed
@@ -84,7 +84,9 @@ describe('Profile Update Security (e2e)', () => {
     );
 
     // 세션 미들웨어 설정
-    const sessionSecret = await mockKeychainUtil.getPassword('encrypt-session-key');
+    const sessionSecret = await mockKeychainUtil.getPassword(
+      'encrypt-session-key',
+    );
     app.use(
       session({
         name: 'todo-session-id',
@@ -293,7 +295,7 @@ describe('Profile Update Security (e2e)', () => {
         // Application sanitizes XSS but may accept it after sanitization or reject with rate limiting
         // Check if it's rejected (400, 403) or sanitized and accepted (200)
         expect([200, 400, 403]).toContain(response.status);
-        
+
         if (response.status === 400 || response.status === 403) {
           expect(response.body.message).toBeDefined();
         }
@@ -592,7 +594,7 @@ describe('Profile Update Security (e2e)', () => {
       // Due to database schema issue with file upload, this may fail
       // Accept either success or failure due to database constraints
       expect([200, 400]).toContain(response.status);
-      
+
       if (response.status === 200) {
         expect(response.body.userName).toBe('Emma Wilson');
       }

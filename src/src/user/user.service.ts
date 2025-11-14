@@ -35,7 +35,7 @@ export class UserService {
     const selectedUser = await this.userRepository.findOne({
       where: { userId },
     });
-    
+
     if (!selectedUser) {
       throw new UnauthorizedException('아이디나 비밀번호가 다릅니다.');
     }
@@ -44,7 +44,7 @@ export class UserService {
       userDto.userPassword,
       selectedUser.userPassword,
     );
-    
+
     if (!isPasswordMatch) {
       throw new UnauthorizedException('아이디나 비밀번호가 다릅니다.');
     }
@@ -103,7 +103,7 @@ export class UserService {
 
           const [validationResult] = validationResults;
           const { isValid, errorCode, errorMessage } = validationResult;
-          
+
           if (!isValid) {
             const { originalname } = profileImageFile;
             this.logger.error('Profile image validation failed', {
@@ -187,7 +187,7 @@ export class UserService {
       }
 
       const { adminYn, userId: currentUserId } = currentUser;
-      
+
       // 추가 보안 검사 - 사용자가 활성 상태인지 확인 (해당 필드가 있는 경우)
       // 향후 사용자 상태 검사를 위한 플레이스홀더
       if (adminYn === 'SUSPENDED') {
@@ -207,7 +207,7 @@ export class UserService {
       // 추가 검증을 포함한 향상된 이메일 고유성 검사
       const { userEmail: newEmail } = sanitizedDto;
       const { userEmail: currentEmail } = currentUser;
-      
+
       if (newEmail && newEmail !== currentEmail) {
         // 추가 이메일 형식 검증
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -250,9 +250,17 @@ export class UserService {
       const updatedFields: string[] = [];
 
       // 추가 검증과 함께 사용자 필드 업데이트
-      const { userName: newName, userEmail: newUserEmail, userDescription: newDescription } = sanitizedDto;
-      const { userName: currentName, userEmail: currentUserEmail, userDescription: currentDescription } = currentUser;
-      
+      const {
+        userName: newName,
+        userEmail: newUserEmail,
+        userDescription: newDescription,
+      } = sanitizedDto;
+      const {
+        userName: currentName,
+        userEmail: currentUserEmail,
+        userDescription: currentDescription,
+      } = currentUser;
+
       if (newName !== undefined && newName !== currentName) {
         // userName이 undefined가 아니고 실제로 값이 있을 때만 업데이트
         if (newName && newName.trim().length > 0) {
@@ -269,7 +277,10 @@ export class UserService {
         }
       }
 
-      if (newDescription !== undefined && newDescription !== currentDescription) {
+      if (
+        newDescription !== undefined &&
+        newDescription !== currentDescription
+      ) {
         currentUser.userDescription = newDescription;
         updatedFields.push('userDescription');
       }
@@ -290,7 +301,7 @@ export class UserService {
           const [validationResult] = validationResults;
           const { isValid, errorCode, errorMessage } = validationResult;
           const { originalname, size } = profileImageFile;
-          
+
           if (!isValid) {
             this.logger.error('Profile image validation failed during update', {
               userSeq,
@@ -373,7 +384,7 @@ export class UserService {
       );
 
       const { userId: savedUserId } = savedUser;
-      
+
       // 성공적인 업데이트 로깅
       this.logger.log('Profile update completed successfully', {
         userSeq,
@@ -427,10 +438,14 @@ export class UserService {
 
     // 설명 새니타이즈
     if (userDescription !== undefined) {
-      sanitized.userDescription = this.inputSanitizer.sanitizeDescription(userDescription);
+      sanitized.userDescription =
+        this.inputSanitizer.sanitizeDescription(userDescription);
 
       // 추가 설명 검증
-      if (sanitized.userDescription && sanitized.userDescription.length > 4000) {
+      if (
+        sanitized.userDescription &&
+        sanitized.userDescription.length > 4000
+      ) {
         throw new BadRequestException({
           message: 'Description too long',
           error: '사용자설명이 너무 깁니다.',
@@ -451,7 +466,7 @@ export class UserService {
     ip: string,
   ): void {
     const { originalname, size, mimetype } = profileImageFile;
-    
+
     // 의심스러운 패턴에 대한 파일 이름 검사
     const suspiciousPatterns = [
       /\.(php|jsp|asp|aspx|exe|bat|cmd|sh)$/i,
@@ -502,7 +517,7 @@ export class UserService {
       'image/gif',
       'image/webp',
     ];
-    
+
     if (!allowedMimeTypes.includes(mimetype)) {
       this.logger.error('Invalid profile image MIME type', {
         userSeq,
@@ -540,7 +555,7 @@ export class UserService {
       }
 
       const { adminYn, userId, userPassword } = currentUser;
-      
+
       // 추가 보안 검사 - 사용자가 활성 상태인지 확인
       if (adminYn === 'SUSPENDED') {
         this.logger.warn('Password change attempted by suspended user', {
@@ -553,8 +568,9 @@ export class UserService {
         );
       }
 
-      const { currentPassword, newPassword, confirmPassword } = changePasswordDto;
-      
+      const { currentPassword, newPassword, confirmPassword } =
+        changePasswordDto;
+
       // 현재 비밀번호 검증
       const isCurrentPasswordValid = await isHashValid(
         currentPassword,
@@ -581,10 +597,7 @@ export class UserService {
       }
 
       // 새 비밀번호가 현재 비밀번호와 다른지 확인
-      const isSamePassword = await isHashValid(
-        newPassword,
-        userPassword,
-      );
+      const isSamePassword = await isHashValid(newPassword, userPassword);
 
       if (isSamePassword) {
         throw new BadRequestException(

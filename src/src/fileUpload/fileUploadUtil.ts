@@ -87,26 +87,28 @@ export class FileUploadUtil {
 }
 
 // 검증 기능이 향상된 파일 필터 함수
-export const createFileFilter = (category: FileCategory) => (
-  req: any,
-  file: Express.Multer.File,
-  callback: (error: Error | null, acceptFile?: boolean) => void,
-) => {
-  const fileValidationService = new FileValidationService();
-  const validationResults = fileValidationService.validateFilesByCategory(
-    [file],
-    category,
-  );
-  const [result] = validationResults;
+export const createFileFilter =
+  (category: FileCategory) =>
+  (
+    req: any,
+    file: Express.Multer.File,
+    callback: (error: Error | null, acceptFile?: boolean) => void,
+  ) => {
+    const fileValidationService = new FileValidationService();
+    const validationResults = fileValidationService.validateFilesByCategory(
+      [file],
+      category,
+    );
+    const [result] = validationResults;
 
-  if (!result.isValid) {
-    const error = new Error(result.errorMessage);
-    (error as any).code = result.errorCode;
-    return callback(error, false);
-  }
+    if (!result.isValid) {
+      const error = new Error(result.errorMessage);
+      (error as any).code = result.errorCode;
+      return callback(error, false);
+    }
 
-  callback(null, true);
-};
+    callback(null, true);
+  };
 
 // 프로필 이미지를 위한 향상된 multer 설정
 export const profileImageMulterOptions = {

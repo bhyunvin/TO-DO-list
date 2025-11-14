@@ -224,15 +224,18 @@ npm run format
 ## 문제 해결
 
 ### 데이터베이스 연결 오류
+
 - PostgreSQL이 실행 중인지 확인
 - `.env` 파일의 데이터베이스 자격 증명 확인
 - Keychain에 저장된 비밀번호 확인
 
 ### 세션 오류
+
 - `SESSION_SECRET`이 설정되어 있는지 확인
 - 세션 스토어가 올바르게 구성되어 있는지 확인
 
 ### Keychain 오류
+
 - macOS Keychain Access 앱에서 항목 확인
 - `KeychainUtil`이 올바르게 초기화되었는지 확인
 
@@ -468,15 +471,18 @@ For detailed API specifications, please refer to the separate API documentation.
 ## Troubleshooting
 
 ### Database Connection Error
+
 - Verify PostgreSQL is running
 - Check database credentials in `.env` file
 - Verify password stored in Keychain
 
 ### Session Error
+
 - Verify `SESSION_SECRET` is configured
 - Check session store is properly configured
 
 ### Keychain Error
+
 - Check items in macOS Keychain Access app
 - Verify `KeychainUtil` is properly initialized
 

@@ -17,6 +17,7 @@
 ### 1. 테스트 헬퍼 모듈 (`test-helpers.ts`)
 
 다음을 수행하는 중앙 집중식 테스트 구성 모듈을 생성했습니다:
+
 - 실제 keychain 서비스를 대체하는 `MockKeychainUtil` 제공
 - 모든 엔티티가 명시적으로 등록된 `createTestTypeOrmConfig()` 내보내기
 - 민감한 데이터에 keychain 대신 환경 변수 사용
@@ -24,6 +25,7 @@
 ### 2. 업데이트된 테스트 파일
 
 `app.e2e-spec.ts`와 `profile-update-security.e2e-spec.ts` 모두 이제:
+
 - 전체 `AppModule` 대신 개별 모듈 가져오기
 - keychain 의존성을 우회하기 위해 `MockKeychainUtil` 사용
 - 모든 엔티티로 TypeORM을 명시적으로 구성
@@ -40,6 +42,7 @@
 ### 사전 요구사항
 
 1. `.env.test`를 복사하고 테스트 데이터베이스를 구성합니다:
+
    ```bash
    cp .env.test .env.test.local
    # 실제 테스트 데이터베이스 자격 증명으로 .env.test.local 편집
@@ -83,10 +86,13 @@ npm test -- --config=test/jest-e2e.json --verbose
 ## 테스트 구조
 
 ### 기본 애플리케이션 테스트
+
 애플리케이션이 올바르게 초기화되는지 확인하는 스모크 테스트입니다.
 
 ### 보안 테스트
+
 주요 기능에 대한 포괄적인 보안 테스트로, 다음을 포함합니다:
+
 - 인증 및 권한 부여
 - 입력 유효성 검사 및 새니타이제이션
 - 인젝션 공격 방지
@@ -99,6 +105,7 @@ npm test -- --config=test/jest-e2e.json --verbose
 ### EntityMetadataNotFoundError
 
 이 오류가 여전히 표시되는 경우:
+
 1. `test-helpers.ts`에 모든 엔티티가 가져와졌는지 확인
 2. 테스트 데이터베이스에 액세스할 수 있는지 확인
 3. TypeORM 구성이 데이터베이스 설정과 일치하는지 확인
@@ -106,6 +113,7 @@ npm test -- --config=test/jest-e2e.json --verbose
 ### 연결 타임아웃
 
 테스트가 타임아웃되는 경우:
+
 1. 데이터베이스가 실행 중인지 확인
 2. `.env.test`의 데이터베이스 자격 증명 확인
 3. 필요한 경우 `jest-e2e.json`의 `testTimeout` 증가
@@ -113,6 +121,7 @@ npm test -- --config=test/jest-e2e.json --verbose
 ### 세션 문제
 
 세션 관련 테스트가 실패하는 경우:
+
 1. `TEST_SESSION_SECRET`이 설정되어 있는지 확인
 2. 테스트 설정에서 세션 미들웨어가 올바르게 초기화되었는지 확인
 
@@ -141,11 +150,13 @@ CI/CD 파이프라인의 경우:
 새로운 E2E 테스트 파일을 생성할 때:
 
 1. 테스트 헬퍼 가져오기:
+
    ```typescript
    import { createTestTypeOrmConfig, MockKeychainUtil } from './test-helpers';
    ```
 
 2. 명시적 가져오기로 테스트 모듈 설정:
+
    ```typescript
    const moduleFixture = await Test.createTestingModule({
      imports: [
@@ -160,9 +171,16 @@ CI/CD 파이프라인의 경우:
    ```
 
 3. 필요한 경우 세션 미들웨어 초기화:
+
    ```typescript
-   const sessionSecret = await mockKeychainUtil.getPassword('encrypt-session-key');
-   app.use(session({ /* config */ }));
+   const sessionSecret = await mockKeychainUtil.getPassword(
+     'encrypt-session-key',
+   );
+   app.use(
+     session({
+       /* config */
+     }),
+   );
    ```
 
 4. `afterAll`에서 정리:
@@ -213,6 +231,7 @@ The original E2E tests were failing with `EntityMetadataNotFoundError` because:
 ### 1. Test Helper Module (`test-helpers.ts`)
 
 Created a centralized test configuration module that:
+
 - Provides `MockKeychainUtil` to replace the real keychain service
 - Exports `createTestTypeOrmConfig()` with all entities explicitly registered
 - Uses environment variables instead of keychain for sensitive data
@@ -220,6 +239,7 @@ Created a centralized test configuration module that:
 ### 2. Updated Test Files
 
 Both `app.e2e-spec.ts` and `profile-update-security.e2e-spec.ts` now:
+
 - Import individual modules instead of the entire `AppModule`
 - Use `MockKeychainUtil` to bypass keychain dependency
 - Explicitly configure TypeORM with all entities
@@ -236,6 +256,7 @@ Both `app.e2e-spec.ts` and `profile-update-security.e2e-spec.ts` now:
 ### Prerequisites
 
 1. Copy `.env.test` and configure your test database:
+
    ```bash
    cp .env.test .env.test.local
    # Edit .env.test.local with your actual test database credentials
@@ -279,10 +300,13 @@ npm test -- --config=test/jest-e2e.json --verbose
 ## Test Structure
 
 ### Basic Application Tests
+
 Smoke tests to verify the app initializes correctly.
 
 ### Security Tests
+
 Comprehensive security tests for key features, including:
+
 - Authentication and authorization
 - Input validation and sanitization
 - Injection attack prevention
@@ -295,6 +319,7 @@ Comprehensive security tests for key features, including:
 ### EntityMetadataNotFoundError
 
 If you still see this error:
+
 1. Verify all entities are imported in `test-helpers.ts`
 2. Check that the test database is accessible
 3. Ensure TypeORM configuration matches your database setup
@@ -302,6 +327,7 @@ If you still see this error:
 ### Connection Timeout
 
 If tests timeout:
+
 1. Verify database is running
 2. Check database credentials in `.env.test`
 3. Increase `testTimeout` in `jest-e2e.json` if needed
@@ -309,6 +335,7 @@ If tests timeout:
 ### Session Issues
 
 If session-related tests fail:
+
 1. Verify `TEST_SESSION_SECRET` is set
 2. Check that session middleware is properly initialized in test setup
 
@@ -337,11 +364,13 @@ For CI/CD pipelines:
 When creating new E2E test files:
 
 1. Import test helpers:
+
    ```typescript
    import { createTestTypeOrmConfig, MockKeychainUtil } from './test-helpers';
    ```
 
 2. Set up the test module with explicit imports:
+
    ```typescript
    const moduleFixture = await Test.createTestingModule({
      imports: [
@@ -356,9 +385,16 @@ When creating new E2E test files:
    ```
 
 3. Initialize session middleware if needed:
+
    ```typescript
-   const sessionSecret = await mockKeychainUtil.getPassword('encrypt-session-key');
-   app.use(session({ /* config */ }));
+   const sessionSecret = await mockKeychainUtil.getPassword(
+     'encrypt-session-key',
+   );
+   app.use(
+     session({
+       /* config */
+     }),
+   );
    ```
 
 4. Clean up in `afterAll`:

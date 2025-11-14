@@ -502,7 +502,10 @@ export class TodoService {
       // completeDtm을 "YYYY-MM-DD HH:mm" 형식으로 포맷합니다.
       if (completeDtm) {
         const completeDtmDate = new Date(completeDtm);
-        dataRow.getCell('D').value = format(completeDtmDate, 'yyyy-MM-dd HH:mm');
+        dataRow.getCell('D').value = format(
+          completeDtmDate,
+          'yyyy-MM-dd HH:mm',
+        );
         dataRow.getCell('D').alignment = {
           horizontal: 'center',
           vertical: 'middle',

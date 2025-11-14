@@ -162,7 +162,7 @@ export class UserController {
       // 향상된 인증 및 권한 검사
       const currentUser = session.user;
       const { id: sessionId } = session;
-      
+
       if (!currentUser || !currentUser.userSeq) {
         this.logger.warn('Profile update attempted without valid session', {
           sessionId,
@@ -174,7 +174,7 @@ export class UserController {
       }
 
       const { userSeq, userId } = currentUser;
-      
+
       // 추가 세션 검증 - 세션이 여전히 유효한지 확인
       if (!userId) {
         this.logger.warn(
@@ -290,7 +290,7 @@ export class UserController {
       // 향상된 인증 검사
       const currentUser = session.user;
       const { id: sessionId } = session;
-      
+
       if (!currentUser || !currentUser.userSeq) {
         this.logger.warn('Password change attempted without valid session', {
           sessionId,
@@ -302,7 +302,7 @@ export class UserController {
       }
 
       const { userSeq, userId } = currentUser;
-      
+
       // 추가 세션 검증
       if (!userId) {
         this.logger.warn(

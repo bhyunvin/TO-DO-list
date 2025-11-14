@@ -58,7 +58,9 @@ describe('AppController (e2e)', () => {
     app = moduleFixture.createNestApplication();
 
     // 세션 미들웨어 설정
-    const sessionSecret = await mockKeychainUtil.getPassword('encrypt-session-key');
+    const sessionSecret = await mockKeychainUtil.getPassword(
+      'encrypt-session-key',
+    );
     app.use(
       session({
         name: 'todo-session-id',
@@ -87,7 +89,5 @@ describe('AppController (e2e)', () => {
   });
 
   it('should allow access to public routes', () =>
-    request(app.getHttpServer())
-      .get('/user/duplicate/testuser')
-      .expect(200));
+    request(app.getHttpServer()).get('/user/duplicate/testuser').expect(200));
 });
