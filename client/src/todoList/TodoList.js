@@ -59,21 +59,21 @@ function CreateTodoForm(props) {
   function handleFileChange(e) {
     const selectedFiles = Array.from(e.target.files);
     
-    // Clear previous state
+    // 이전 상태 초기화
     setTodoFiles([]);
     setFileValidationResults([]);
     setFileError('');
     
     if (selectedFiles.length > 0) {
-      // Validate files
+      // 파일 유효성 검사
       const validationResults = validateFiles(selectedFiles, 'todoAttachment');
       setFileValidationResults(validationResults);
       
-      // Check if all files are valid
+      // 모든 파일이 유효한지 확인
       const invalidFiles = validationResults.filter(result => !result.isValid);
       if (invalidFiles.length > 0) {
         setFileError(`${invalidFiles.length}개 파일에 문제가 있습니다.`);
-        // Clear the file input
+        // 파일 입력 초기화
         e.target.value = '';
       } else {
         setTodoFiles(selectedFiles);
@@ -91,7 +91,7 @@ function CreateTodoForm(props) {
     
     if (newFiles.length === 0) {
       setFileError('');
-      // Clear the file input
+      // 파일 입력 초기화
       const fileInput = document.getElementById('todoFiles');
       if (fileInput) fileInput.value = '';
     }
@@ -105,7 +105,7 @@ function CreateTodoForm(props) {
       return;
     }
 
-    // Validate files if any are selected
+    // 파일이 선택된 경우 유효성 검사
     if (todoFiles.length > 0) {
       const invalidFiles = fileValidationResults.filter(result => !result.isValid);
       if (invalidFiles.length > 0) {
@@ -117,11 +117,11 @@ function CreateTodoForm(props) {
     setIsSubmitting(true);
     
     try {
-      // Use the enhanced upload function with progress tracking
+      // 진행 상황 추적이 포함된 향상된 업로드 함수 사용
       const result = await onAddTodo({ todoContent, todoNote, todoFiles });
       
       if (result && result.success) {
-        // Reset form on success
+        // 성공 시 폼 초기화
         setTodoContent('');
         setTodoNote('');
         setTodoFiles([]);
@@ -198,7 +198,7 @@ function CreateTodoForm(props) {
               uploadedFiles={uploadedFiles}
               onRemoveFile={removeFile}
               onRetryUpload={async (failedFiles) => {
-                // Reset validation for retry
+                // 재시도를 위한 유효성 검사 초기화
                 const retryValidation = validateFiles(failedFiles, 'todoAttachment');
                 setFileValidationResults(retryValidation);
                 setTodoFiles(failedFiles);
@@ -265,12 +265,12 @@ function TodoList(props) {
       }
     }
 
-    // 메뉴가 열려 있을 때만 이벤트 리스너를 추가합니다.
+    // 메뉴가 열려 있을 때만 이벤트 리스너를 추가
     if (openActionMenu !== null) {
       document.addEventListener('mousedown', handleClickOutside);
     }
 
-    // 컴포넌트가 언마운트되거나 openActionMenu가 변경되기 전에 이벤트 리스너를 제거합니다.
+    // 컴포넌트가 언마운트되거나 openActionMenu가 변경되기 전에 이벤트 리스너를 제거
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
@@ -421,21 +421,21 @@ function EditTodoForm({ todo, onSave, onCancel }) {
   function handleFileChange(e) {
     const selectedFiles = Array.from(e.target.files);
     
-    // Clear previous state
+    // 이전 상태 초기화
     setTodoFiles([]);
     setFileValidationResults([]);
     setFileError('');
     
     if (selectedFiles.length > 0) {
-      // Validate files
+      // 파일 유효성 검사
       const validationResults = validateFiles(selectedFiles, 'todoAttachment');
       setFileValidationResults(validationResults);
       
-      // Check if all files are valid
+      // 모든 파일이 유효한지 확인
       const invalidFiles = validationResults.filter(result => !result.isValid);
       if (invalidFiles.length > 0) {
         setFileError(`${invalidFiles.length}개 파일에 문제가 있습니다.`);
-        // Clear the file input
+        // 파일 입력 초기화
         e.target.value = '';
       } else {
         setTodoFiles(selectedFiles);
@@ -453,7 +453,7 @@ function EditTodoForm({ todo, onSave, onCancel }) {
     
     if (newFiles.length === 0) {
       setFileError('');
-      // Clear the file input
+      // 파일 입력 초기화
       const fileInput = document.getElementById('todoFiles');
       if (fileInput) fileInput.value = '';
     }
@@ -462,7 +462,7 @@ function EditTodoForm({ todo, onSave, onCancel }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate files if any are selected
+    // 파일이 선택된 경우 유효성 검사
     if (todoFiles.length > 0) {
       const invalidFiles = fileValidationResults.filter(result => !result.isValid);
       if (invalidFiles.length > 0) {
@@ -528,7 +528,7 @@ function EditTodoForm({ todo, onSave, onCancel }) {
           </div>
         )}
         
-        {/* Enhanced file upload progress and validation */}
+        {/* 향상된 파일 업로드 진행 상황 및 유효성 검사 */}
         {(fileValidationResults.length > 0 || uploadStatus !== 'idle') && (
           <div className="mt-2 mb-3">
             <FileUploadProgress
@@ -540,7 +540,7 @@ function EditTodoForm({ todo, onSave, onCancel }) {
               uploadedFiles={uploadedFiles}
               onRemoveFile={removeFile}
               onRetryUpload={async (failedFiles) => {
-                // Reset validation for retry
+                // 재시도를 위한 유효성 검사 초기화
                 const retryValidation = validateFiles(failedFiles, 'todoAttachment');
                 setFileValidationResults(retryValidation);
                 setTodoFiles(failedFiles);
@@ -601,7 +601,7 @@ function formatDateTime(isoString) {
 
 // TODO 리스트 및 폼을 조건부로 렌더링하는 컨테이너 컴포넌트
 function TodoContainer() {
-  const { user, logout, api, login } = useAuthStore(); // api 함수 가져오기
+  const { user, logout, api, login } = useAuthStore();
   const { 
     messages, 
     isLoading, 
@@ -619,19 +619,19 @@ function TodoContainer() {
   } = useChatStore();
   
   const [todos, setTodos] = useState([]);
-  const [isLoadingTodos, setIsLoadingTodos] = useState(true); // 할 일 목록 로딩 상태
+  const [isLoadingTodos, setIsLoadingTodos] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
-  const [editingTodo, setEditingTodo] = useState(null); // 수정 중인 ToDo 항목 전체를 저장
-  const [isUpdatingProfile, setIsUpdatingProfile] = useState(false); // 프로필 수정 상태
-  const [isChangingPassword, setIsChangingPassword] = useState(false); // 비밀번호 변경 상태
+  const [editingTodo, setEditingTodo] = useState(null);
+  const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [togglingTodoSeq, setTogglingTodoSeq] = useState(null);
-  const [openActionMenu, setOpenActionMenu] = useState(null); // '...' 메뉴 상태
-  const [isChatOpen, setIsChatOpen] = useState(false); // 채팅 모달 상태
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false); // 사용자 메뉴 드롭다운 상태
-  const [optimisticUpdates, setOptimisticUpdates] = useState(new Map()); // 낙관적 업데이트 추적
+  const [openActionMenu, setOpenActionMenu] = useState(null);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [optimisticUpdates, setOptimisticUpdates] = useState(new Map());
   
-  const userMenuRef = useRef(null); // 사용자 메뉴 외부 클릭 감지용
+  const userMenuRef = useRef(null);
 
   // 선택된 날짜에 해당하는 ToDo 목록을 서버에서 가져오는 함수
   const fetchTodos = useCallback(async () => {
@@ -688,18 +688,17 @@ function TodoContainer() {
   }, [isUserMenuOpen]);
 
 
-  //CreateTodoForm에서 넘어온 Todo 요소 추가
+  // CreateTodoForm에서 넘어온 Todo 요소 추가
   async function handleAddTodo({ todoContent, todoNote, todoFiles }) {
     try {
       const formattedDate = formatDate(selectedDate);
       
-      // Create FormData for file upload
       const formData = new FormData();
       formData.append('todoContent', todoContent);
       formData.append('todoDate', formattedDate);
       formData.append('todoNote', todoNote || '');
       
-      // Add files if any
+      // 파일이 있으면 추가
       if (todoFiles && todoFiles.length > 0) {
         todoFiles.forEach((file) => {
           formData.append('files', file);
@@ -708,8 +707,8 @@ function TodoContainer() {
 
       const response = await api(`/api/todo`, {
         method: 'POST',
-        credentials: 'include', // 다른 도메인으로 쿠키를 전송하기 위한 설정
-        body: formData, // Use FormData instead of JSON
+        credentials: 'include',
+        body: formData,
       });
 
       if (response.ok) {
@@ -730,7 +729,7 @@ function TodoContainer() {
       } else {
         const errorData = await response.json();
         
-        // Handle file upload errors specifically
+        // 파일 업로드 오류를 구체적으로 처리
         if (errorData.errors && Array.isArray(errorData.errors)) {
           const errorMessages = errorData.errors.map(err => 
             `${err.fileName}: ${err.errorMessage}`
@@ -756,11 +755,11 @@ function TodoContainer() {
   // todos 배열을 서버와 동일한 방식으로 정렬하는 헬퍼 함수
   const sortTodos = (todosArray) => {
     return [...todosArray].sort((a, b) => {
-      // 1. completeDtm이 null인 항목(미완료)을 먼저 (nulls first)
+      // completeDtm이 null인 항목(미완료)을 먼저
       if (a.completeDtm === null && b.completeDtm !== null) return -1;
       if (a.completeDtm !== null && b.completeDtm === null) return 1;
       
-      // 2. 둘 다 완료되었거나 둘 다 미완료인 경우, todoSeq 내림차순 (최신 항목이 위로)
+      // 둘 다 완료되었거나 둘 다 미완료인 경우, todoSeq 내림차순 (최신 항목이 위로)
       return b.todoSeq - a.todoSeq;
     });
   };
@@ -824,7 +823,6 @@ function TodoContainer() {
     // 낙관적 UI 업데이트
     updateTodoOptimistically(todoSeq, newCompleteDtm);
     
-    // optimisticUpdates Map에 추가
     setOptimisticUpdates(prev => {
       const newMap = new Map(prev);
       newMap.set(todoSeq, {
@@ -837,7 +835,6 @@ function TodoContainer() {
     
     setTogglingTodoSeq(todoSeq);
 
-    // 30초 타임아웃을 위한 AbortController
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 30000);
 
@@ -855,7 +852,6 @@ function TodoContainer() {
       clearTimeout(timeoutId);
 
       if (response.ok) {
-        // 성공: optimisticUpdates에서 제거
         setOptimisticUpdates(prev => {
           const newMap = new Map(prev);
           newMap.delete(todoSeq);
@@ -931,7 +927,7 @@ function TodoContainer() {
 
   // ToDo 항목을 삭제하는 함수
   const handleDeleteTodo = async (todoSeq) => {
-    // 사용자에게 삭제 확인을 받습니다.
+    // 사용자에게 삭제 확인을 받음
     const result = await Swal.fire({
       title: '정말로 삭제하시겠습니까?',
       text: "삭제된 데이터는 복구할 수 없습니다.",
@@ -943,12 +939,12 @@ function TodoContainer() {
       cancelButtonText: '아니오'
     });
 
-    // 사용자가 '네'를 클릭한 경우에만 삭제를 진행합니다.
+    // 사용자가 '네'를 클릭한 경우에만 삭제를 진행
     if (result.isConfirmed) {
       try {
         const response = await api(`/api/todo/${todoSeq}`, {
           method: 'DELETE',
-          credentials: 'include', // 다른 도메인으로 쿠키를 전송하기 위한 설정
+          credentials: 'include',
         });
 
         if (response.ok) {
@@ -975,12 +971,11 @@ function TodoContainer() {
     try {
       const { todoContent, todoNote, todoFiles } = updatedData;
       
-      // Create FormData for file upload
       const formData = new FormData();
       formData.append('todoContent', todoContent);
       formData.append('todoNote', todoNote || '');
       
-      // Add files if any
+      // 파일이 있으면 추가
       if (todoFiles && todoFiles.length > 0) {
         todoFiles.forEach((file) => {
           formData.append('files', file);
@@ -989,8 +984,8 @@ function TodoContainer() {
 
       const response = await api(`/api/todo/${todoSeq}`, {
         method: 'PATCH',
-        credentials: 'include', // 다른 도메인으로 쿠키를 전송하기 위한 설정
-        body: formData, // Use FormData instead of JSON
+        credentials: 'include',
+        body: formData,
       });
 
       if (response.ok) {
@@ -1011,7 +1006,7 @@ function TodoContainer() {
       } else {
         const errorData = await response.json();
         
-        // Handle file upload errors specifically
+        // 파일 업로드 오류를 구체적으로 처리
         if (errorData.errors && Array.isArray(errorData.errors)) {
           const errorMessages = errorData.errors.map(err => 
             `${err.fileName}: ${err.errorMessage}`
@@ -1081,13 +1076,12 @@ function TodoContainer() {
       const response = await api('/api/user/profile', {
         method: 'PATCH',
         credentials: 'include',
-        body: profileData.formData, // Use FormData for file upload
+        body: profileData.formData,
       });
 
       if (response.ok) {
         const updatedUser = await response.json();
         
-        // Update user session data
         login(updatedUser);
         
         Swal.fire({
@@ -1104,7 +1098,6 @@ function TodoContainer() {
           setIsUpdatingProfile(false);
         });
       } else {
-        // Handle server validation errors
         const errorData = await response.json().catch(() => ({}));
         
         if (errorData.errors && Array.isArray(errorData.errors)) {
@@ -1204,20 +1197,19 @@ function TodoContainer() {
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include', // 다른 도메인으로 쿠키를 전송하기 위한 설정
+        credentials: 'include',
       });
 
-      // 서버 응답이 정상이 아니더라도 클라이언트에서는 로그아웃을 진행합니다.
-      // 사용자에게는 실패 사실을 알립니다.
+      // 서버 응답이 정상이 아니더라도 클라이언트에서는 로그아웃을 진행
+      // 사용자에게는 실패 사실을 알림
       if (!response.ok) {
         await Swal.fire('로그아웃 실패', '서버와 통신에 실패했지만, 클라이언트에서 로그아웃합니다.', 'error');
       }
     } catch (error) {
       console.error('Logout Error : ', error);
-      // 네트워크 오류 등이 발생해도 사용자에게 알린 후 로그아웃을 진행합니다.
+      // 네트워크 오류 등이 발생해도 사용자에게 알린 후 로그아웃을 진행
       await Swal.fire('오류 발생', '서버와의 연결에 문제가 발생했습니다.', 'error');
     } finally {
-      // API 요청의 성공/실패 여부와 관계없이 항상 클라이언트의 상태를 로그아웃 처리합니다.
       logout();
     }
   }
@@ -1248,30 +1240,29 @@ function TodoContainer() {
   };
 
   const handleSendMessage = async (messageContent, isRetry = false) => {
-    // Check if we can send a request (throttling)
+    // 요청 전송 가능 여부 확인 (쓰로틀링)
     if (!isRetry && !canSendRequest()) {
-      return; // Silently ignore if request is throttled
+      return; // 요청이 제한된 경우 조용히 무시
     }
 
-    // Store message for potential retry
+    // 재시도를 위해 메시지 저장
     if (!isRetry) {
       setRetryMessage(messageContent);
       
-      // Add user message immediately (only for new messages, not retries)
+      // 사용자 메시지를 즉시 추가 (새 메시지만, 재시도는 제외)
       addMessage({
         content: messageContent,
         isUser: true,
       });
     }
 
-    // Set loading state and clear any previous errors
+    // 로딩 상태 설정 및 이전 오류 초기화
     setLoading(true);
     clearError();
 
     try {
-      // Create AbortController for timeout handling
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
 
       const response = await api('/api/assistance/chat', {
         method: 'POST',
@@ -1290,23 +1281,17 @@ function TodoContainer() {
       if (response.ok) {
         const data = await response.json();
         
-        // Check if response is successful
         if (data.success !== false) {
-          // Add AI response
           addMessage({
             content: data.response,
             isUser: false,
             isHtml: true,
           });
           
-          // Reset retry state on success
           resetRetryState();
           
-          // Trigger todo list refresh after successful AI chat response
-          // This ensures the main todo list updates when AI creates/updates todos
           triggerTodoRefresh();
         } else {
-          // Handle API error response
           const { shouldRetry } = handleApiError(new Error(data.error || 'API Error'), response);
           
           if (!shouldRetry) {
@@ -1317,7 +1302,7 @@ function TodoContainer() {
           }
         }
       } else {
-        // Handle HTTP error responses
+        // HTTP 오류 응답 처리
         const errorData = await response.json().catch(() => ({}));
         const { shouldRetry } = handleApiError(new Error(errorData.error || 'HTTP Error'), response);
         
@@ -1332,7 +1317,6 @@ function TodoContainer() {
     } catch (error) {
       console.error('Chat API Error:', error);
       
-      // Handle different types of errors
       const { shouldRetry } = handleApiError(error);
       
       if (!shouldRetry) {
@@ -1354,7 +1338,7 @@ function TodoContainer() {
     }
   };
 
-  // Retry handler
+  // 재시도 핸들러
   const handleRetry = () => {
     const lastMessage = getRetryMessage();
     if (lastMessage) {
@@ -1362,15 +1346,14 @@ function TodoContainer() {
     }
   };
 
-  // Clear error handler
+  // 오류 초기화 핸들러
   const handleClearError = () => {
     clearError();
     resetRetryState();
   };
 
-  // Show date range selection modal for Excel export
+  // Excel 내보내기를 위한 날짜 범위 선택 모달 표시
   const showDateRangeModal = async () => {
-    // Get current month's first and last day as default values
     const now = new Date();
     const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
     const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
@@ -1416,13 +1399,11 @@ function TodoContainer() {
         const startDate = document.getElementById('startDate').value;
         const endDate = document.getElementById('endDate').value;
         
-        // Validate both dates are selected
         if (!startDate || !endDate) {
           Swal.showValidationMessage('날짜를 선택해주세요');
           return false;
         }
         
-        // Validate startDate is not after endDate
         if (startDate > endDate) {
           Swal.showValidationMessage('시작일은 종료일보다 이전이어야 합니다');
           return false;
@@ -1435,12 +1416,10 @@ function TodoContainer() {
     return result;
   };
 
-  // Handle Excel export with date range selection, API call, and file download
+  // 날짜 범위 선택, API 호출 및 파일 다운로드를 통한 Excel 내보내기 처리
   const handleExcelExport = async () => {
-    // Trigger date range modal
     const result = await showDateRangeModal();
     
-    // If user cancelled the modal, return early
     if (!result.isConfirmed) {
       return;
     }
@@ -1448,7 +1427,6 @@ function TodoContainer() {
     const { startDate, endDate } = result.value;
 
     try {
-      // Call backend API with selected date range
       const response = await api(
         `/api/todo/excel?startDate=${startDate}&endDate=${endDate}`,
         {
@@ -1458,29 +1436,21 @@ function TodoContainer() {
       );
 
       if (response.ok) {
-        // Convert response to blob
         const blob = await response.blob();
-        
-        // Create object URL from blob
         const url = window.URL.createObjectURL(blob);
         
-        // Create temporary anchor element for download
         const a = document.createElement('a');
         a.href = url;
         a.download = `todos_${startDate}_to_${endDate}.xlsx`;
         
-        // Append to body, trigger download, and cleanup
         document.body.appendChild(a);
         a.click();
         
-        // Cleanup resources
         window.URL.revokeObjectURL(url);
         document.body.removeChild(a);
         
-        // Display success message
         Swal.fire('성공', 'Excel 파일이 다운로드되었습니다.', 'success');
       } else {
-        // Handle API errors (400, 401, 500)
         const errorData = await response.json().catch(() => ({}));
         let errorMessage = 'Excel 내보내기에 실패했습니다.';
         
@@ -1495,7 +1465,6 @@ function TodoContainer() {
         Swal.fire('오류', errorMessage, 'error');
       }
     } catch (error) {
-      // Handle network errors
       console.error('Excel export error:', error);
       
       let errorMessage = 'Excel 내보내기에 실패했습니다.';
@@ -1622,19 +1591,19 @@ function TodoContainer() {
         )}
       </div>
 
-      {/* 할 일 목록을 볼 때만 DatePicker를 표시합니다. */}
+      {/* 할 일 목록을 볼 때만 DatePicker를 표시 */}
       {!isCreating && !editingTodo && !isUpdatingProfile && !isChangingPassword && (
         <div className="date-navigator">
           <button onClick={handlePrevDay} className="date-nav-btn">&lt;</button>
           <DatePicker
             locale={ko} // 달력을 한국어로 설정
             selected={selectedDate} // 현재 선택된 날짜
-            onChange={(date) => setSelectedDate(date)} // 날짜 선택 시 상태 변경
-            dateFormat="yyyy-MM-dd" // 표시 형식
-            className="date-display" // CSS 스타일링을 위한 클래스
-            showMonthDropdown // 월 선택 드롭다운 활성화
-            showYearDropdown // 연도 선택 드롭다운 활성화
-            dropdownMode="select" // 드롭다운 모드를 select로 설정
+            onChange={(date) => setSelectedDate(date)}
+            dateFormat="yyyy-MM-dd"
+            className="date-display"
+            showMonthDropdown
+            showYearDropdown
+            dropdownMode="select"
             withPortal
           />
           <button onClick={handleNextDay} className="date-nav-btn">&gt;</button>
