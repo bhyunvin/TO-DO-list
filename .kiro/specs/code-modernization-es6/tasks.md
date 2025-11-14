@@ -39,7 +39,7 @@
   - Apply ES6+ syntax considering TypeScript characteristics
   - _Requirements: 1.1, 1.2, 1.3, 2.1, 2.2, 3.1, 3.2, 3.3, 3.4, 3.5, 4.2_
 
-- [ ] 7. Refactor backend Assistance module
+- [x] 7. Refactor backend Assistance module
   - Refactor src/assistance/assistance.service.ts
   - Refactor src/assistance/chat.controller.ts
   - Refactor src/assistance/assistance.dto.ts

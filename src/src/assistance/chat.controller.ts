@@ -87,14 +87,12 @@ export class ChatController {
         }
 
         // 마지막 시도이거나 재시도 불가능한 오류인 경우, 오류 응답 반환
-        const errorResponse: ChatResponseDto = {
+        return {
           response: '',
           timestamp: new Date().toISOString(),
           success: false,
           error: this.getKoreanErrorMessage(error, attempt, maxRetries),
         };
-
-        return errorResponse;
       }
     }
   }
@@ -123,7 +121,7 @@ export class ChatController {
   }
 
   private sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   private getKoreanErrorMessage(

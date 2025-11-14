@@ -1,10 +1,8 @@
 import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
 
 export class RequestAssistanceDto {
-  userSeq: number; // 사용자번호
-
+  userSeq: number; // 사용자 번호
   prompt: string; // 요청
-
   response: string; // 응답
 }
 
