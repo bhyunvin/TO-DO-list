@@ -159,7 +159,7 @@ export class UserProfileValidationPipe implements PipeTransform<any> {
     const safe = { ...value };
     Object.keys(safe).forEach((key) => {
       if (typeof safe[key] === 'string' && safe[key].length > 100) {
-        safe[key] = safe[key].substring(0, 100) + '...'
+        safe[key] = safe[key].substring(0, 100) + '...';
       }
     });
 

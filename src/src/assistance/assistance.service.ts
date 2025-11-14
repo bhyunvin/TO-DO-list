@@ -1,4 +1,10 @@
-import { Injectable, Logger, OnModuleInit, InternalServerErrorException, ServiceUnavailableException, } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnModuleInit,
+  InternalServerErrorException,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { RequestAssistanceDto } from './assistance.dto';
 import { HttpService } from '@nestjs/axios';
 import { AxiosError } from 'axios';
@@ -138,27 +144,32 @@ export class AssistanceService implements OnModuleInit {
   private async findTodoByContent(
     userSeq: number,
     contentToFind: string,
-  ): Promise<{ success: boolean; todoSeq?: number; matches?: number; error?: string }> {
+  ): Promise<{
+    success: boolean;
+    todoSeq?: number;
+    matches?: number;
+    error?: string;
+  }> {
     try {
       const currentDate = new Date().toISOString().split('T')[0];
       const allTodos = await this.todoService.findAll(userSeq, currentDate);
-      
-      const matches = allTodos.filter(todo => 
-        todo.todoContent.toLowerCase().includes(contentToFind.toLowerCase())
+
+      const matches = allTodos.filter((todo) =>
+        todo.todoContent.toLowerCase().includes(contentToFind.toLowerCase()),
       );
-      
+
       if (matches.length === 0) {
         return { success: false, error: '일치하는 할 일을 찾을 수 없습니다.' };
       }
-      
+
       if (matches.length > 1) {
-        return { 
-          success: false, 
+        return {
+          success: false,
           matches: matches.length,
-          error: `"${contentToFind}"와 일치하는 할 일이 ${matches.length}개 있습니다. 더 구체적으로 지정해주세요.` 
+          error: `"${contentToFind}"와 일치하는 할 일이 ${matches.length}개 있습니다. 더 구체적으로 지정해주세요.`,
         };
       }
-      
+
       return { success: true, todoSeq: matches[0].todoSeq };
     } catch (error) {
       this.logger.error('[findTodoByContent] 검색 중 오류 발생', error);
@@ -183,7 +194,6 @@ export class AssistanceService implements OnModuleInit {
         '🚨 FATAL: Gemini API 키 로드 또는 복호화 실패. AI 비서 기능이 작동하지 않을 수 있습니다.',
         error,
       );
-
     }
   }
 
@@ -221,7 +231,7 @@ export class AssistanceService implements OnModuleInit {
         process.env.SYSTEM_PROMPT_PATH ||
         './src/assistance/assistance.systemPrompt.txt';
       systemPrompt = fs.readFileSync(path.resolve(promptPath), 'utf-8').trim();
-      
+
       if (userName) {
         systemPrompt = systemPrompt.replace(/\[사용자 이름\]/g, userName);
       }
@@ -456,7 +466,9 @@ export class AssistanceService implements OnModuleInit {
         }
       }
 
-      throw new InternalServerErrorException('AI 어시스턴트 API 요청이 실패했습니다');
+      throw new InternalServerErrorException(
+        'AI 어시스턴트 API 요청이 실패했습니다',
+      );
     }
   }
 
@@ -492,7 +504,7 @@ export class AssistanceService implements OnModuleInit {
       );
 
       let filteredTodos = todos;
-      
+
       const todayOnlyDate = new Date(
         today.getFullYear(),
         today.getMonth(),
@@ -503,7 +515,7 @@ export class AssistanceService implements OnModuleInit {
         filteredTodos = todos.filter((todo) => {
           const todoDate = new Date(todo.todoDate);
           const isCompleted = todo.completeDtm !== null;
-          
+
           const isOverdue = !isCompleted && todoDate < todayOnlyDate;
 
           switch (status) {
@@ -511,7 +523,7 @@ export class AssistanceService implements OnModuleInit {
               return isCompleted;
 
             case 'incomplete':
-              return !isCompleted; 
+              return !isCompleted;
 
             case 'overdue':
               return isOverdue;
@@ -682,17 +694,23 @@ export class AssistanceService implements OnModuleInit {
 
     try {
       let targetTodoSeq = todoSeq;
-      
+
       if (!targetTodoSeq && todoContentToFind) {
-        const searchResult = await this.findTodoByContent(userSeq, todoContentToFind);
+        const searchResult = await this.findTodoByContent(
+          userSeq,
+          todoContentToFind,
+        );
         if (!searchResult.success) {
           return searchResult;
         }
         targetTodoSeq = searchResult.todoSeq;
       }
-      
+
       if (!targetTodoSeq) {
-        return { success: false, error: 'todoSeq 또는 todoContentToFind가 필요합니다.' };
+        return {
+          success: false,
+          error: 'todoSeq 또는 todoContentToFind가 필요합니다.',
+        };
       }
       const user = {
         userSeq,
