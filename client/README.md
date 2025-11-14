@@ -1,70 +1,551 @@
-# Getting Started with Create React App
+# 프론트엔드 (React)
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+TO-DO List 애플리케이션의 프론트엔드 클라이언트입니다. React 19와 React Bootstrap을 사용하여 구축되었으며, Zustand를 통한 상태 관리를 제공합니다.
 
-## Available Scripts
+## 주요 기능
 
-In the project directory, you can run:
+- 사용자 인증 (로그인/회원가입)
+- 날짜별 Todo 관리 인터페이스
+- AI 채팅 어시스턴트
+- 파일 업로드 (진행률 표시)
+- 프로필 관리 및 이미지 업로드
+- 비밀번호 변경
+- 반응형 디자인 (Bootstrap 5)
+- 실시간 알림 (SweetAlert2)
 
-### `npm start`
+## 기술 스택
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- **프레임워크**: React 19.1.1
+- **빌드 도구**: Create React App 5.0.1
+- **UI 라이브러리**: React Bootstrap 2.10+ with Bootstrap 5.3+
+- **상태 관리**: Zustand 5.0.8
+- **HTTP 클라이언트**: Axios (setupProxy.js를 통한 프록시)
+- **알림**: SweetAlert2 11.22.5
+- **날짜 처리**: date-fns 4.1.0, react-datepicker 8.7.0
+- **보안**: DOMPurify 3.3.0
+- **아이콘**: Bootstrap Icons 1.13.1
+- **테스트**: Jest, React Testing Library
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## 프로젝트 구조
 
-### `npm test`
+```
+client/
+├── public/                      # 정적 파일
+│   ├── index.html
+│   └── favicon.ico
+├── src/
+│   ├── index.js                # 애플리케이션 진입점
+│   ├── App.js                  # 메인 애플리케이션 컴포넌트
+│   ├── App.css                 # 전역 스타일
+│   ├── loginForm/              # 로그인/회원가입
+│   │   ├── LoginForm.js
+│   │   ├── SignupForm.js
+│   │   └── loginForm.css
+│   ├── todoList/               # Todo 관리
+│   │   ├── TodoList.js
+│   │   └── todoList.css
+│   ├── components/             # 재사용 가능한 컴포넌트
+│   │   ├── ChatComponent.js
+│   │   ├── FileUploadComponent.js
+│   │   ├── ProfileComponent.js
+│   │   ├── FloatingActionButton.js
+│   │   └── *.css
+│   ├── authStore/              # Zustand 인증 상태
+│   │   └── authStore.js
+│   ├── stores/                 # 추가 Zustand 스토어
+│   │   └── chatStore.js
+│   ├── hooks/                  # 커스텀 React 훅
+│   │   ├── useScrollLock.js
+│   │   └── useFileUpload.js
+│   └── setupProxy.js           # 개발 프록시 설정
+└── package.json
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## 사전 요구사항
 
-### `npm run build`
+- Node.js 24.0.0 이상
+- npm 8 이상
+- nvm (권장)
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## 설치 방법
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+```bash
+# Node 버전 설정 (필수)
+nvm use 24
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+# 의존성 설치
+npm install
+```
 
-### `npm run eject`
+## 환경 변수 설정
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+`.env` 파일을 생성하고 다음 변수들을 설정하세요:
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```env
+# API 프록시 설정 (개발 환경)
+REACT_APP_API_URL=...
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+# 기타 설정
+REACT_APP_MAX_FILE_SIZE=...
+```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+**보안 참고**: 프로덕션 환경에서는 적절한 API URL과 설정값을 사용하세요.
 
-## Learn More
+## 실행 방법
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+```bash
+# Node 버전 설정 (필수)
+nvm use 24
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+# 개발 서버 시작 (포트 3000)
+npm start
 
-### Code Splitting
+# 프로덕션 빌드
+npm run build
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+# 빌드된 애플리케이션 테스트 (serve 필요)
+npx serve -s build
+```
 
-### Analyzing the Bundle Size
+개발 서버가 시작되면 브라우저에서 애플리케이션을 확인할 수 있습니다.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## 테스트
 
-### Making a Progressive Web App
+```bash
+# Node 버전 설정 (필수)
+nvm use 24
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+# 테스트 실행 (watch 모드)
+npm test
 
-### Advanced Configuration
+# 테스트 커버리지
+npm test -- --coverage
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+# 특정 테스트 파일 실행
+npm test -- LoginForm.test.js
+```
+
+## 코드 품질
+
+```bash
+# Lint 검사
+npm run lint
+
+# Lint 자동 수정 (package.json에 스크립트 추가 필요)
+npm run lint -- --fix
+```
+
+## 주요 컴포넌트
+
+### App.js
+- 메인 애플리케이션 컴포넌트
+- 인증 상태에 따른 라우팅
+- 로그인/회원가입 폼 또는 Todo 리스트 표시
+
+### LoginForm / SignupForm
+- 사용자 인증 폼
+- 입력 유효성 검사
+- 에러 처리 및 알림
+
+### TodoList
+- 날짜별 Todo 관리
+- Todo 생성, 수정, 삭제
+- 날짜 선택기 통합
+
+### ChatComponent
+- AI 채팅 인터페이스
+- 마크다운 렌더링
+- 실시간 메시지 스트리밍
+
+### FileUploadComponent
+- 파일 업로드 인터페이스
+- 진행률 표시
+- 드래그 앤 드롭 지원
+
+### ProfileComponent
+- 사용자 프로필 관리
+- 프로필 이미지 업로드
+- 비밀번호 변경
+
+### FloatingActionButton
+- 플로팅 액션 버튼
+- 채팅 및 프로필 모달 토글
+
+## 상태 관리
+
+### authStore (Zustand)
+- 사용자 인증 상태
+- 로그인/로그아웃 액션
+- 세션 확인
+
+### chatStore (Zustand)
+- 채팅 메시지 상태
+- 메시지 추가/삭제
+- 채팅 히스토리 관리
+
+## API 통신
+
+### setupProxy.js
+개발 환경에서 백엔드 API로의 프록시를 설정합니다.
+
+### Axios 설정
+- 자동 쿠키 전송
+- 에러 처리 인터셉터
+- 응답 데이터 변환
+
+**보안 참고**: 프로덕션 환경에서는 적절한 CORS 설정과 API 엔드포인트를 구성하세요.
+
+## 스타일링
+
+- **Bootstrap 5.3+**: 기본 UI 프레임워크
+- **React Bootstrap**: React 컴포넌트 래퍼
+- **Bootstrap Icons**: 아이콘 라이브러리
+- **커스텀 CSS**: 컴포넌트별 스타일 파일
+
+## 보안
+
+- HTML 새니타이제이션을 통한 XSS 방지
+- 입력 유효성 검사
+- CSRF 보호 (세션 기반)
+- 안전한 쿠키 전송
+
+**중요**: 프로덕션 환경에서는 HTTPS를 사용하고, 적절한 보안 헤더를 설정하세요.
+
+## 명명 규칙
+
+- **컴포넌트**: PascalCase
+- **파일**: PascalCase (컴포넌트), camelCase (유틸리티)
+- **CSS 클래스**: camelCase
+- **함수**: camelCase
+- **상수**: UPPER_SNAKE_CASE
+
+## 코드 주석 작성 가이드라인
+
+- **모든 코드 주석은 한글로 작성**해야 하며, 문법상 필요한 요소는 예외입니다
+- 변수명, 함수명, 기술 용어는 영문으로 유지합니다
+- 주석의 설명 내용만 한글로 작성합니다
+
+## 빌드 및 배포
+
+### 프로덕션 빌드
+
+```bash
+# Node 버전 설정 (필수)
+nvm use 24
+
+# 빌드 생성
+npm run build
+```
+
+빌드된 파일은 `build/` 디렉토리에 생성됩니다.
+
+### 배포
+
+빌드된 파일을 정적 파일 서버에 배포:
+- Nginx
+- Apache
+- AWS S3 + CloudFront
+- Vercel
+- Netlify
+
+## 문제 해결
+
+### 프록시 오류
+- 백엔드 서버가 실행 중인지 확인 (포트 3001)
+- `setupProxy.js` 설정 확인
+
+### 빌드 오류
+- Node 버전 확인 (`nvm use 24`)
+- `node_modules` 삭제 후 재설치
+- 캐시 정리: `npm cache clean --force`
+
+### 스타일 오류
+- Bootstrap CSS가 올바르게 임포트되었는지 확인
+- 브라우저 캐시 정리
+
+## Create React App 정보
+
+이 프로젝트는 [Create React App](https://github.com/facebook/create-react-app)으로 부트스트랩되었습니다.
+
+더 자세한 정보는 [Create React App 문서](https://facebook.github.io/create-react-app/docs/getting-started)를 참조하세요.
+
+## 라이선스
+
+UNLICENSED - 비공개 프로젝트
+
+---
+
+# Frontend (React)
+
+Frontend client for the TO-DO List application. Built with React 19 and React Bootstrap, providing state management via Zustand.
+
+## Key Features
+
+- User authentication (login/signup)
+- Date-based Todo management interface
+- AI chat assistant
+- File upload (with progress tracking)
+- Profile management and image upload
+- Password change
+- Responsive design (Bootstrap 5)
+- Real-time notifications (SweetAlert2)
+
+## Technology Stack
+
+- **Framework**: React 19.1.1
+- **Build Tool**: Create React App 5.0.1
+- **UI Library**: React Bootstrap 2.10+ with Bootstrap 5.3+
+- **State Management**: Zustand 5.0.8
+- **HTTP Client**: Axios (proxied via setupProxy.js)
+- **Notifications**: SweetAlert2 11.22.5
+- **Date Handling**: date-fns 4.1.0, react-datepicker 8.7.0
+- **Security**: DOMPurify 3.3.0
+- **Icons**: Bootstrap Icons 1.13.1
+- **Testing**: Jest, React Testing Library
+
+## Project Structure
+
+```
+client/
+├── public/                      # Static files
+│   ├── index.html
+│   └── favicon.ico
+├── src/
+│   ├── index.js                # Application entry point
+│   ├── App.js                  # Main application component
+│   ├── App.css                 # Global styles
+│   ├── loginForm/              # Login/signup
+│   │   ├── LoginForm.js
+│   │   ├── SignupForm.js
+│   │   └── loginForm.css
+│   ├── todoList/               # Todo management
+│   │   ├── TodoList.js
+│   │   └── todoList.css
+│   ├── components/             # Reusable components
+│   │   ├── ChatComponent.js
+│   │   ├── FileUploadComponent.js
+│   │   ├── ProfileComponent.js
+│   │   ├── FloatingActionButton.js
+│   │   └── *.css
+│   ├── authStore/              # Zustand auth state
+│   │   └── authStore.js
+│   ├── stores/                 # Additional Zustand stores
+│   │   └── chatStore.js
+│   ├── hooks/                  # Custom React hooks
+│   │   ├── useScrollLock.js
+│   │   └── useFileUpload.js
+│   └── setupProxy.js           # Development proxy configuration
+└── package.json
+```
+
+## Prerequisites
+
+- Node.js 24.0.0 or higher
+- npm 8 or higher
+- nvm (recommended)
+
+## Installation
+
+```bash
+# Set Node version (required)
+nvm use 24
+
+# Install dependencies
+npm install
+```
+
+## Environment Configuration
+
+Create a `.env` file and configure the following variables:
+
+```env
+# API proxy configuration (development)
+REACT_APP_API_URL=...
+
+# Other settings
+REACT_APP_MAX_FILE_SIZE=...
+```
+
+**Security Note**: Use appropriate API URL and configuration values in production.
+
+## Running the Application
+
+```bash
+# Set Node version (required)
+nvm use 24
+
+# Start development server (port 3000)
+npm start
+
+# Production build
+npm run build
+
+# Test built application (requires serve)
+npx serve -s build
+```
+
+Once the development server starts, you can view the application in your browser.
+
+## Testing
+
+```bash
+# Set Node version (required)
+nvm use 24
+
+# Run tests (watch mode)
+npm test
+
+# Test coverage
+npm test -- --coverage
+
+# Run specific test file
+npm test -- LoginForm.test.js
+```
+
+## Code Quality
+
+```bash
+# Lint check
+npm run lint
+
+# Lint auto-fix (requires script in package.json)
+npm run lint -- --fix
+```
+
+## Main Components
+
+### App.js
+- Main application component
+- Routing based on authentication state
+- Displays login/signup forms or Todo list
+
+### LoginForm / SignupForm
+- User authentication forms
+- Input validation
+- Error handling and notifications
+
+### TodoList
+- Date-based Todo management
+- Todo creation, editing, deletion
+- Date picker integration
+
+### ChatComponent
+- AI chat interface
+- Markdown rendering
+- Real-time message streaming
+
+### FileUploadComponent
+- File upload interface
+- Progress tracking
+- Drag and drop support
+
+### ProfileComponent
+- User profile management
+- Profile image upload
+- Password change
+
+### FloatingActionButton
+- Floating action button
+- Toggle chat and profile modals
+
+## State Management
+
+### authStore (Zustand)
+- User authentication state
+- Login/logout actions
+- Session verification
+
+### chatStore (Zustand)
+- Chat message state
+- Message add/delete
+- Chat history management
+
+## API Communication
+
+### setupProxy.js
+Configures proxy for backend API in development environment.
+
+### Axios Configuration
+- Automatic cookie transmission
+- Error handling interceptors
+- Response data transformation
+
+**Security Note**: Configure appropriate CORS settings and API endpoints in production.
+
+## Styling
+
+- **Bootstrap 5.3+**: Base UI framework
+- **React Bootstrap**: React component wrappers
+- **Bootstrap Icons**: Icon library
+- **Custom CSS**: Component-specific style files
+
+## Security
+
+- XSS prevention via HTML sanitization
+- Input validation
+- CSRF protection (session-based)
+- Secure cookie transmission
+
+**Important**: Use HTTPS in production and configure appropriate security headers.
+
+## Naming Conventions
+
+- **Components**: PascalCase
+- **Files**: PascalCase (components), camelCase (utilities)
+- **CSS Classes**: camelCase
+- **Functions**: camelCase
+- **Constants**: UPPER_SNAKE_CASE
+
+## Code Comments Guidelines
+
+- **All code comments should be written in Korean**, except for syntax-required elements
+- Variable names, function names, and technical terms remain in English
+- Only the descriptive content of comments should be in Korean
+
+## Build and Deployment
+
+### Production Build
+
+```bash
+# Set Node version (required)
+nvm use 24
+
+# Create build
+npm run build
+```
+
+Built files are generated in the `build/` directory.
 
 ### Deployment
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+Deploy built files to a static file server:
+- Nginx
+- Apache
+- AWS S3 + CloudFront
+- Vercel
+- Netlify
 
-### `npm run build` fails to minify
+## Troubleshooting
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+### Proxy Error
+- Verify backend server is running (port 3001)
+- Check `setupProxy.js` configuration
+
+### Build Error
+- Check Node version (`nvm use 24`)
+- Delete `node_modules` and reinstall
+- Clear cache: `npm cache clean --force`
+
+### Style Error
+- Verify Bootstrap CSS is properly imported
+- Clear browser cache
+
+## Create React App Information
+
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+
+For more information, refer to the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+
+## License
+
+UNLICENSED - Private project
