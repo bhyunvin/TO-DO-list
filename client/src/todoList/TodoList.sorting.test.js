@@ -4,10 +4,8 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import TodoList from './TodoList';
 
-// Create mock API function
 const mockApi = jest.fn();
 
-// Mock dependencies
 jest.mock('../authStore/authStore', () => ({
   useAuthStore: () => ({
     user: { userId: 'testuser', userName: 'Test User', userSeq: 1 },
