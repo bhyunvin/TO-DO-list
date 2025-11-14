@@ -257,7 +257,15 @@ export class AssistanceService implements OnModuleInit {
           ],
         },
       ],
-      tools: [this.getTodosTool, this.createTodoTool, this.updateTodoTool],
+      tools: [
+        {
+          functionDeclarations: [
+            ...this.getTodosTool.functionDeclarations,
+            ...this.createTodoTool.functionDeclarations,
+            ...this.updateTodoTool.functionDeclarations,
+          ],
+        },
+      ],
     };
 
     try {
