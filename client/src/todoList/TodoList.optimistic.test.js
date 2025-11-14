@@ -5,12 +5,12 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import TodoContainer from './TodoList';
 
-// Mock SweetAlert2
+// SweetAlert2 모킹
 jest.mock('sweetalert2', () => ({
   fire: jest.fn(() => Promise.resolve({ isConfirmed: true }))
 }));
 
-// Mock auth store
+// auth store 모킹
 const mockApi = jest.fn();
 jest.mock('../authStore/authStore', () => ({
   useAuthStore: () => ({
@@ -25,7 +25,7 @@ jest.mock('../authStore/authStore', () => ({
   })
 }));
 
-// Mock file upload hooks
+// 파일 업로드 hooks 모킹
 jest.mock('../hooks/useFileUploadValidator', () => ({
   useFileUploadValidator: () => ({
     validateFiles: jest.fn(() => [{ isValid: true, file: {}, fileName: 'test.jpg', fileSize: 1000 }]),
@@ -45,7 +45,7 @@ jest.mock('../hooks/useFileUploadProgress', () => ({
   })
 }));
 
-// Mock components
+// 컴포넌트 모킹
 jest.mock('../components/FileUploadProgress', () => {
   return function MockFileUploadProgress() {
     return <div data-testid="file-upload-progress">File Upload Progress</div>;
@@ -82,7 +82,7 @@ describe('TodoContainer Optimistic UI Pattern', () => {
     const Swal = require('sweetalert2');
     Swal.fire.mockResolvedValue({ isConfirmed: true });
     
-    // Mock initial todos fetch
+    // 초기 todos fetch 모킹
     mockApi.mockResolvedValue({
       ok: true,
       json: () => Promise.resolve([
@@ -107,7 +107,7 @@ describe('TodoContainer Optimistic UI Pattern', () => {
   test('checkbox updates immediately when clicked (optimistic update)', async () => {
     const user = userEvent.setup();
     
-    // Mock slow API response
+    // 느린 API 응답 모킹
     let resolveApiCall;
     const apiPromise = new Promise((resolve) => {
       resolveApiCall = resolve;
@@ -124,7 +124,7 @@ describe('TodoContainer Optimistic UI Pattern', () => {
 
     render(<TodoContainer />);
 
-    // Wait for initial todos to load
+    // 초기 todos 로드 대기
     await waitFor(() => {
       expect(screen.getByText('Test todo 1')).toBeInTheDocument();
     });
@@ -132,14 +132,14 @@ describe('TodoContainer Optimistic UI Pattern', () => {
     const checkbox = screen.getAllByRole('checkbox')[0];
     expect(checkbox).not.toBeChecked();
 
-    // Click checkbox cell (not the checkbox itself, as it has pointer-events: none)
+    // 체크박스 셀 클릭 (체크박스 자체가 아님, pointer-events: none이므로)
     const checkboxCell = checkbox.closest('td');
     await user.click(checkboxCell);
 
-    // Checkbox should be checked immediately (optimistic update)
+    // 체크박스가 즉시 체크되어야 함 (낙관적 업데이트)
     expect(checkbox).toBeChecked();
 
-    // API call should be in progress
+    // API 호출이 진행 중이어야 함
     expect(mockApi).toHaveBeenCalledWith(
       '/api/todo/1',
       expect.objectContaining({
@@ -148,13 +148,13 @@ describe('TodoContainer Optimistic UI Pattern', () => {
       })
     );
 
-    // Resolve API call
+    // API 호출 해결
     resolveApiCall({
       ok: true,
       json: () => Promise.resolve({})
     });
 
-    // Checkbox should remain checked after API success
+    // API 성공 후 체크박스가 체크된 상태로 유지되어야 함
     await waitFor(() => {
       expect(checkbox).toBeChecked();
     });
@@ -178,27 +178,27 @@ describe('TodoContainer Optimistic UI Pattern', () => {
 
     render(<TodoContainer />);
 
-    // Wait for initial todos to load
+    // 초기 todos 로드 대기
     await waitFor(() => {
       expect(screen.getByText('Test todo 1')).toBeInTheDocument();
     });
 
-    // Get fresh reference to checkbox
+    // 체크박스에 대한 새로운 참조 가져오기
     let checkbox = screen.getAllByRole('checkbox')[0];
     expect(checkbox).not.toBeChecked();
 
-    // Click checkbox cell
+    // 체크박스 셀 클릭
     const checkboxCell = checkbox.closest('td');
     await user.click(checkboxCell);
 
-    // Wait for API failure and rollback - checkbox should end up unchecked
+    // API 실패 및 롤백 대기 - 체크박스가 체크 해제되어야 함
     await waitFor(() => {
       checkbox = screen.getAllByRole('checkbox')[0];
       expect(checkbox).not.toBeChecked();
       expect(checkbox).not.toBeDisabled();
     }, { timeout: 2000 });
 
-    // Error toast should be displayed
+    // 오류 토스트가 표시되어야 함
     await waitFor(() => {
       const Swal = require('sweetalert2');
       expect(Swal.fire).toHaveBeenCalledWith(
@@ -214,7 +214,7 @@ describe('TodoContainer Optimistic UI Pattern', () => {
   test('prevents duplicate clicks on same todo while request is pending', async () => {
     const user = userEvent.setup();
     
-    // Mock slow API response
+    // 느린 API 응답 모킹
     let resolveApiCall;
     const apiPromise = new Promise((resolve) => {
       resolveApiCall = resolve;
@@ -231,7 +231,7 @@ describe('TodoContainer Optimistic UI Pattern', () => {
 
     render(<TodoContainer />);
 
-    // Wait for initial todos to load
+    // 초기 todos 로드 대기
     await waitFor(() => {
       expect(screen.getByText('Test todo 1')).toBeInTheDocument();
     });
@@ -239,17 +239,17 @@ describe('TodoContainer Optimistic UI Pattern', () => {
     const checkbox = screen.getAllByRole('checkbox')[0];
     const checkboxCell = checkbox.closest('td');
 
-    // Click checkbox cell first time
+    // 첫 번째 체크박스 셀 클릭
     await user.click(checkboxCell);
 
-    // Try to click again immediately
+    // 즉시 다시 클릭 시도
     await user.click(checkboxCell);
     await user.click(checkboxCell);
 
-    // API should only be called once
-    expect(mockApi).toHaveBeenCalledTimes(2); // 1 for initial fetch, 1 for toggle
+    // API는 한 번만 호출되어야 함
+    expect(mockApi).toHaveBeenCalledTimes(2); // 초기 fetch 1회, 토글 1회
 
-    // Resolve API call
+    // API 호출 해결
     resolveApiCall({
       ok: true,
       json: () => Promise.resolve({})
@@ -274,7 +274,7 @@ describe('TodoContainer Optimistic UI Pattern', () => {
 
     render(<TodoContainer />);
 
-    // Wait for initial todos to load
+    // 초기 todos 로드 대기
     await waitFor(() => {
       expect(screen.getByText('Test todo 1')).toBeInTheDocument();
       expect(screen.getByText('Test todo 2')).toBeInTheDocument();
@@ -284,15 +284,15 @@ describe('TodoContainer Optimistic UI Pattern', () => {
     const checkboxCell1 = checkboxes[0].closest('td');
     const checkboxCell2 = checkboxes[1].closest('td');
 
-    // Click both checkbox cells rapidly
+    // 두 체크박스 셀을 빠르게 클릭
     await user.click(checkboxCell1);
     await user.click(checkboxCell2);
 
-    // Both should be checked immediately
+    // 둘 다 즉시 체크되어야 함
     expect(checkboxes[0]).toBeChecked();
     expect(checkboxes[1]).toBeChecked();
 
-    // Both API calls should be made
+    // 두 API 호출이 모두 이루어져야 함
     await waitFor(() => {
       expect(mockApi).toHaveBeenCalledWith('/api/todo/1', expect.anything());
       expect(mockApi).toHaveBeenCalledWith('/api/todo/2', expect.anything());
@@ -313,7 +313,7 @@ describe('TodoContainer Optimistic UI Pattern', () => {
 
     render(<TodoContainer />);
 
-    // Wait for initial todos to load
+    // 초기 todos 로드 대기
     await waitFor(() => {
       expect(screen.getByText('Test todo 1')).toBeInTheDocument();
     });
@@ -321,10 +321,10 @@ describe('TodoContainer Optimistic UI Pattern', () => {
     const checkbox = screen.getAllByRole('checkbox')[0];
     const checkboxCell = checkbox.closest('td');
 
-    // Click checkbox cell
+    // 체크박스 셀 클릭
     await user.click(checkboxCell);
 
-    // Wait for error toast
+    // 오류 토스트 대기
     await waitFor(() => {
       const Swal = require('sweetalert2');
       expect(Swal.fire).toHaveBeenCalledWith(
@@ -338,14 +338,14 @@ describe('TodoContainer Optimistic UI Pattern', () => {
       );
     });
 
-    // Checkbox should be rolled back
+    // 체크박스가 롤백되어야 함
     expect(checkbox).not.toBeChecked();
   });
 
   test('handles timeout error with AbortController', async () => {
     const user = userEvent.setup();
     
-    // Mock API that never resolves (simulating timeout)
+    // 해결되지 않는 API 모킹 (타임아웃 시뮬레이션)
     mockApi
       .mockResolvedValueOnce({
         ok: true,
@@ -355,7 +355,7 @@ describe('TodoContainer Optimistic UI Pattern', () => {
       })
       .mockImplementationOnce(() => {
         return new Promise((resolve, reject) => {
-          // Simulate abort after timeout
+          // 타임아웃 후 중단 시뮬레이션
           setTimeout(() => {
             const abortError = new Error('The operation was aborted');
             abortError.name = 'AbortError';
@@ -366,7 +366,7 @@ describe('TodoContainer Optimistic UI Pattern', () => {
 
     render(<TodoContainer />);
 
-    // Wait for initial todos to load
+    // 초기 todos 로드 대기
     await waitFor(() => {
       expect(screen.getByText('Test todo 1')).toBeInTheDocument();
     });
@@ -374,10 +374,10 @@ describe('TodoContainer Optimistic UI Pattern', () => {
     const checkbox = screen.getAllByRole('checkbox')[0];
     const checkboxCell = checkbox.closest('td');
 
-    // Click checkbox cell
+    // 체크박스 셀 클릭
     await user.click(checkboxCell);
 
-    // Wait for timeout error
+    // 타임아웃 오류 대기
     await waitFor(() => {
       const Swal = require('sweetalert2');
       expect(Swal.fire).toHaveBeenCalledWith(
@@ -389,7 +389,7 @@ describe('TodoContainer Optimistic UI Pattern', () => {
       );
     }, { timeout: 3000 });
 
-    // Checkbox should be rolled back
+    // 체크박스가 롤백되어야 함
     expect(checkbox).not.toBeChecked();
   });
 
@@ -404,12 +404,12 @@ describe('TodoContainer Optimistic UI Pattern', () => {
           { todoSeq: 2, todoContent: 'Test todo 2', todoNote: 'Note 2', completeDtm: null, todoDate: '2024-01-01' }
         ])
       })
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({}) }) // Todo 1 succeeds
-      .mockResolvedValueOnce({ ok: false, status: 500, json: () => Promise.resolve({}) }); // Todo 2 fails
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({}) }) // Todo 1 성공
+      .mockResolvedValueOnce({ ok: false, status: 500, json: () => Promise.resolve({}) }); // Todo 2 실패
 
     render(<TodoContainer />);
 
-    // Wait for initial todos to load
+    // 초기 todos 로드 대기
     await waitFor(() => {
       expect(screen.getByText('Test todo 1')).toBeInTheDocument();
       expect(screen.getByText('Test todo 2')).toBeInTheDocument();
@@ -419,15 +419,15 @@ describe('TodoContainer Optimistic UI Pattern', () => {
     const checkboxCell1 = checkboxes[0].closest('td');
     const checkboxCell2 = checkboxes[1].closest('td');
 
-    // Click both checkbox cells
+    // 두 체크박스 셀 클릭
     await user.click(checkboxCell1);
     await user.click(checkboxCell2);
 
-    // Wait for API calls to complete
+    // API 호출 완료 대기
     await waitFor(() => {
-      // Todo 1 should remain checked (success)
+      // Todo 1은 체크된 상태로 유지되어야 함 (성공)
       expect(checkboxes[0]).toBeChecked();
-      // Todo 2 should be unchecked (rollback)
+      // Todo 2는 체크 해제되어야 함 (롤백)
       expect(checkboxes[1]).not.toBeChecked();
     });
   });
@@ -435,7 +435,7 @@ describe('TodoContainer Optimistic UI Pattern', () => {
   test('checkbox is disabled during pending request', async () => {
     const user = userEvent.setup();
     
-    // Mock slow API response
+    // 느린 API 응답 모킹
     let resolveApiCall;
     const apiPromise = new Promise((resolve) => {
       resolveApiCall = resolve;
@@ -452,7 +452,7 @@ describe('TodoContainer Optimistic UI Pattern', () => {
 
     render(<TodoContainer />);
 
-    // Wait for initial todos to load
+    // 초기 todos 로드 대기
     await waitFor(() => {
       expect(screen.getByText('Test todo 1')).toBeInTheDocument();
     });
@@ -460,19 +460,19 @@ describe('TodoContainer Optimistic UI Pattern', () => {
     const checkbox = screen.getAllByRole('checkbox')[0];
     const checkboxCell = checkbox.closest('td');
 
-    // Click checkbox cell
+    // 체크박스 셀 클릭
     await user.click(checkboxCell);
 
-    // Checkbox should be disabled during request
+    // 요청 중에는 체크박스가 비활성화되어야 함
     expect(checkbox).toBeDisabled();
 
-    // Resolve API call
+    // API 호출 해결
     resolveApiCall({
       ok: true,
       json: () => Promise.resolve({})
     });
 
-    // Checkbox should be enabled again
+    // 체크박스가 다시 활성화되어야 함
     await waitFor(() => {
       expect(checkbox).not.toBeDisabled();
     });

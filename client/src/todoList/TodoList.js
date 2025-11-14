@@ -186,7 +186,7 @@ function CreateTodoForm(props) {
           </div>
         )}
         
-        {/* Enhanced file upload progress and validation */}
+        {/* 향상된 파일 업로드 진행 상황 및 유효성 검사 */}
         {(fileValidationResults.length > 0 || uploadStatus !== 'idle') && (
           <div className="mt-2 mb-3">
             <FileUploadProgress

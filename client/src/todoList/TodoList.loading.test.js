@@ -4,10 +4,10 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import TodoList from './TodoList';
 
-// Create mock API function
+// mock API 함수 생성
 const mockApi = jest.fn();
 
-// Mock dependencies
+// 의존성 모킹
 jest.mock('../authStore/authStore', () => ({
   useAuthStore: () => ({
     user: { userId: 'testuser', userName: 'Test User', userSeq: 1 },
@@ -65,7 +65,7 @@ describe('TodoContainer Loading State', () => {
   });
 
   test('displays loading message while fetching todos', async () => {
-    // Mock a delayed API response
+    // 지연된 API 응답 모킹
     mockApi.mockImplementation(() => 
       new Promise(resolve => {
         setTimeout(() => {
@@ -79,18 +79,18 @@ describe('TodoContainer Loading State', () => {
 
     render(<TodoList />);
 
-    // Should show loading message immediately
+    // 즉시 로딩 메시지가 표시되어야 함
     expect(screen.getByText('불러오는 중...')).toBeInTheDocument();
     expect(screen.queryByText('할 일이 없습니다.')).not.toBeInTheDocument();
 
-    // Wait for loading to complete
+    // 로딩 완료 대기
     await waitFor(() => {
       expect(screen.queryByText('불러오는 중...')).not.toBeInTheDocument();
     });
   });
 
   test('displays empty message after loading when no todos exist', async () => {
-    // Mock API response with empty array
+    // 빈 배열로 API 응답 모킹
     mockApi.mockResolvedValueOnce({
       ok: true,
       json: async () => [],
@@ -98,10 +98,10 @@ describe('TodoContainer Loading State', () => {
 
     render(<TodoList />);
 
-    // Initially shows loading
+    // 처음에는 로딩 표시
     expect(screen.getByText('불러오는 중...')).toBeInTheDocument();
 
-    // After loading, shows empty message
+    // 로딩 후 빈 메시지 표시
     await waitFor(() => {
       expect(screen.queryByText('불러오는 중...')).not.toBeInTheDocument();
       expect(screen.getByText('할 일이 없습니다.')).toBeInTheDocument();
@@ -113,7 +113,7 @@ describe('TodoContainer Loading State', () => {
       { todoSeq: 1, todoContent: 'Test Todo', completeDtm: null, todoNote: '', todoDate: '2025-11-13' },
     ];
 
-    // Mock API response with todos
+    // todos와 함께 API 응답 모킹
     mockApi.mockResolvedValueOnce({
       ok: true,
       json: async () => mockTodos,
@@ -121,10 +121,10 @@ describe('TodoContainer Loading State', () => {
 
     render(<TodoList />);
 
-    // Initially shows loading
+    // 처음에는 로딩 표시
     expect(screen.getByText('불러오는 중...')).toBeInTheDocument();
 
-    // After loading, shows todos
+    // 로딩 후 todos 표시
     await waitFor(() => {
       expect(screen.queryByText('불러오는 중...')).not.toBeInTheDocument();
       expect(screen.getByText('Test Todo')).toBeInTheDocument();
@@ -133,7 +133,7 @@ describe('TodoContainer Loading State', () => {
   });
 
   test('loading indicator has spinner', async () => {
-    // Mock a delayed API response
+    // 지연된 API 응답 모킹
     mockApi.mockImplementation(() => 
       new Promise(resolve => {
         setTimeout(() => {
@@ -147,19 +147,19 @@ describe('TodoContainer Loading State', () => {
 
     render(<TodoList />);
 
-    // Check for spinner element
+    // 스피너 요소 확인
     const spinner = document.querySelector('.spinner-border');
     expect(spinner).toBeInTheDocument();
     expect(spinner).toHaveClass('spinner-border-sm');
 
-    // Wait for loading to complete
+    // 로딩 완료 대기
     await waitFor(() => {
       expect(screen.queryByText('불러오는 중...')).not.toBeInTheDocument();
     });
   });
 
   test('loading state is properly managed', async () => {
-    // Mock API response
+    // API 응답 모킹
     mockApi.mockResolvedValueOnce({
       ok: true,
       json: async () => [
@@ -169,15 +169,15 @@ describe('TodoContainer Loading State', () => {
 
     render(<TodoList />);
 
-    // Initially shows loading
+    // 처음에는 로딩 표시
     expect(screen.getByText('불러오는 중...')).toBeInTheDocument();
 
-    // After loading completes, loading message should be gone
+    // 로딩 완료 후 로딩 메시지가 사라져야 함
     await waitFor(() => {
       expect(screen.queryByText('불러오는 중...')).not.toBeInTheDocument();
     });
 
-    // And todos should be visible
+    // 그리고 todos가 표시되어야 함
     expect(screen.getByText('Todo 1')).toBeInTheDocument();
   });
 });

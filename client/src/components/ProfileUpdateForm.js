@@ -249,7 +249,7 @@ function ProfileUpdateForm({ user, onSave, onCancel, isSubmitting = false }) {
     <div className="profile-update-form">
       <h2>프로필 수정</h2>
       <form onSubmit={handleSubmit}>
-        {/* Name Field */}
+        {/* 이름 필드 */}
         <div className="form-group row mb-3">
           <label htmlFor="userName" className="col-3 col-form-label">
             이름 <span className="text-danger">*</span>
@@ -270,7 +270,7 @@ function ProfileUpdateForm({ user, onSave, onCancel, isSubmitting = false }) {
           </div>
         </div>
 
-        {/* Email Field */}
+        {/* 이메일 필드 */}
         <div className="form-group row mb-3">
           <label htmlFor="userEmail" className="col-3 col-form-label">
             이메일 <span className="text-danger">*</span>
@@ -291,7 +291,7 @@ function ProfileUpdateForm({ user, onSave, onCancel, isSubmitting = false }) {
           </div>
         </div>
 
-        {/* Profile Image Upload */}
+        {/* 프로필 이미지 업로드 */}
         <div className="form-group row mb-3">
           <label htmlFor="profileImage" className="col-3 col-form-label">
             프로필 이미지
@@ -320,7 +320,7 @@ function ProfileUpdateForm({ user, onSave, onCancel, isSubmitting = false }) {
           </div>
         </div>
 
-        {/* Image Preview */}
+        {/* 이미지 미리보기 */}
         {profileImage && profileImageValidation?.isValid && (
           <div className="form-group row mb-3">
             <label className="col-3 col-form-label">미리보기</label>
@@ -351,7 +351,7 @@ function ProfileUpdateForm({ user, onSave, onCancel, isSubmitting = false }) {
           </div>
         )}
 
-        {/* File Upload Progress */}
+        {/* 파일 업로드 진행 상황 */}
         {profileImageFile && (uploadStatus !== 'idle' || isSubmitting) && (
           <div className="form-group row mb-3">
             <label className="col-3 col-form-label">업로드 상태</label>
@@ -378,7 +378,7 @@ function ProfileUpdateForm({ user, onSave, onCancel, isSubmitting = false }) {
           </div>
         )}
 
-        {/* Description Field */}
+        {/* 설명 필드 */}
         <div className="form-group row mb-3">
           <label htmlFor="userDescription" className="col-3 col-form-label">
             추가 설명
@@ -401,7 +401,7 @@ function ProfileUpdateForm({ user, onSave, onCancel, isSubmitting = false }) {
           </div>
         </div>
 
-        {/* Form Actions */}
+        {/* 폼 액션 */}
         <div className="row">
           <div className="col-3">
             <button 

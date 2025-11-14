@@ -151,7 +151,7 @@ export const useChatStore = create(
         return messages.slice(-count);
       },
 
-      // Todo list refresh trigger
+      // Todo 목록 새로고침 트리거
       todoRefreshTrigger: 0,
       triggerTodoRefresh: () => set((state) => ({ 
         todoRefreshTrigger: state.todoRefreshTrigger + 1 

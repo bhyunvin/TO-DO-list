@@ -322,7 +322,7 @@ function SignupForm({ onSignupComplete }) {
     <div className="signup-container">
       <h2>회원가입</h2>
       <form onSubmit={submitSignupHandler}>
-        {/* ID */}
+        {/* 아이디 */}
         <div className="form-group row mb-3">
           <label htmlFor="userId" className="col-3 col-form-label">
             ID <span className="text-danger">*</span>
