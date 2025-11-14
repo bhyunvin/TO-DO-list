@@ -11,30 +11,30 @@ const ChatModal = ({ isOpen, onClose, user, messages, onSendMessage, isLoading, 
   const modalRef = useRef(null);
   const previousFocusRef = useRef(null);
 
-  // Lock body scroll when modal is open
+  // 모달이 열려있을 때 body 스크롤 잠금
   useBodyScrollLock(isOpen);
 
-  // Auto-scroll to bottom when new messages are added
+  // 새 메시지가 추가되면 자동으로 하단으로 스크롤
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages]);
 
-  // Focus management when modal opens/closes
+  // 모달이 열리거나 닫힐 때 포커스 관리
   useEffect(() => {
     if (isOpen) {
-      // Store the previously focused element
+      // 이전에 포커스된 요소 저장
       previousFocusRef.current = document.activeElement;
       
-      // Focus the input field after modal animation
+      // 모달 애니메이션 후 입력 필드에 포커스
       setTimeout(() => {
         if (inputRef.current) {
           inputRef.current.focus();
         }
       }, 150);
     } else {
-      // Restore focus to the previously focused element when modal closes
+      // 모달이 닫힐 때 이전에 포커스된 요소로 포커스 복원
       if (previousFocusRef.current && typeof previousFocusRef.current.focus === 'function') {
         setTimeout(() => {
           previousFocusRef.current.focus();
@@ -49,7 +49,7 @@ const ChatModal = ({ isOpen, onClose, user, messages, onSendMessage, isLoading, 
       onSendMessage(trimmedMessage);
       setInputValue('');
       
-      // Focus back to input after sending (for better UX)
+      // 전송 후 입력 필드로 포커스 복귀 (더 나은 UX를 위해)
       setTimeout(() => {
         if (inputRef.current && !isLoading) {
           inputRef.current.focus();
@@ -70,7 +70,7 @@ const ChatModal = ({ isOpen, onClose, user, messages, onSendMessage, isLoading, 
       onClose();
     }
     
-    // Focus trap - keep focus within modal
+    // 포커스 트랩 - 모달 내에서 포커스 유지
     if (e.key === 'Tab') {
       const modal = modalRef.current;
       if (!modal) return;
@@ -83,13 +83,13 @@ const ChatModal = ({ isOpen, onClose, user, messages, onSendMessage, isLoading, 
       const lastElement = focusableElements[focusableElements.length - 1];
       
       if (e.shiftKey) {
-        // Shift + Tab
+        // Shift + Tab 처리
         if (document.activeElement === firstElement) {
           e.preventDefault();
           lastElement.focus();
         }
       } else {
-        // Tab
+        // Tab 처리
         if (document.activeElement === lastElement) {
           e.preventDefault();
           firstElement.focus();

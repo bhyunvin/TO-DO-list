@@ -5,7 +5,7 @@ import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 export class FileInfoEntity {
   constructor() {
     this.auditColumns = new AuditColumns(); // auditColumns을 초기화
-    this.validationStatus = 'pending'; // Initialize validation status
+    this.validationStatus = 'pending'; // 검증 상태 초기화
   }
 
   @PrimaryGeneratedColumn({ name: 'file_no' })

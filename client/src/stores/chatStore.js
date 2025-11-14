@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
-// Chat message interface structure
+// 채팅 메시지 인터페이스 구조
 // {
 //   id: string,
 //   content: string,
@@ -10,7 +10,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 //   isHtml?: boolean
 // }
 
-// Korean error messages for different failure scenarios
+// 다양한 실패 시나리오에 대한 한국어 오류 메시지
 const ERROR_MESSAGES = {
   NETWORK_ERROR: '네트워크 연결을 확인해주세요.',
   API_ERROR: 'AI 서비스에 일시적인 문제가 발생했습니다.',
@@ -25,10 +25,10 @@ const ERROR_MESSAGES = {
 export const useChatStore = create(
   persist(
     (set, get) => ({
-      // Persisted state
+      // 영구 저장되는 상태
       messages: [],
 
-      // Non-persisted state (will be reset on page reload)
+      // 영구 저장되지 않는 상태 (페이지 새로고침 시 초기화됨)
       isLoading: false,
       error: null,
       retryCount: 0,
@@ -36,7 +36,7 @@ export const useChatStore = create(
       requestInProgress: false,
       lastRequestTime: 0,
 
-      // Actions
+      // 액션
       addMessage: (messageData) => {
         const message = {
           id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
@@ -46,8 +46,8 @@ export const useChatStore = create(
         
         set((state) => ({
           messages: [...state.messages, message],
-          error: null, // Clear any previous errors when adding a message
-          retryCount: 0, // Reset retry count on successful message
+          error: null, // 메시지 추가 시 이전 오류 지우기
+          retryCount: 0, // 성공적인 메시지 전송 시 재시도 횟수 초기화
           lastFailedMessage: null,
         }));
       },
@@ -77,38 +77,38 @@ export const useChatStore = create(
 
       clearError: () => set({ error: null }),
 
-      // Enhanced error handling with retry functionality
+      // 재시도 기능이 포함된 향상된 오류 처리
       handleApiError: (error, response = null) => {
         const { retryCount } = get();
         let errorType = 'GENERIC_ERROR';
         let shouldRetry = false;
 
-        // Determine error type based on response status or error properties
+        // 응답 상태 또는 오류 속성을 기반으로 오류 유형 결정
         if (response) {
           const status = response.status;
           if (status === 401) {
             errorType = 'AUTH_ERROR';
           } else if (status === 429) {
             errorType = 'RATE_LIMIT';
-            shouldRetry = retryCount < 2; // Allow up to 2 retries for rate limiting
+            shouldRetry = retryCount < 2; // 속도 제한의 경우 최대 2회 재시도 허용
           } else if (status >= 500) {
             errorType = 'SERVER_ERROR';
-            shouldRetry = retryCount < 1; // Allow 1 retry for server errors
+            shouldRetry = retryCount < 1; // 서버 오류의 경우 1회 재시도 허용
           } else if (status >= 400) {
             errorType = 'API_ERROR';
           }
         } else if (error) {
-          // Network or other errors
+          // 네트워크 또는 기타 오류
           if (error.name === 'TypeError' && error.message.includes('fetch')) {
             errorType = 'NETWORK_ERROR';
-            shouldRetry = retryCount < 2; // Allow up to 2 retries for network errors
+            shouldRetry = retryCount < 2; // 네트워크 오류의 경우 최대 2회 재시도 허용
           } else if (error.name === 'AbortError' || error.message.includes('timeout')) {
             errorType = 'TIMEOUT_ERROR';
-            shouldRetry = retryCount < 1; // Allow 1 retry for timeout
+            shouldRetry = retryCount < 1; // 타임아웃의 경우 1회 재시도 허용
           }
         }
 
-        // If max retries reached, show exhausted message
+        // 최대 재시도 횟수에 도달한 경우, 소진 메시지 표시
         if (retryCount >= 2) {
           errorType = 'RETRY_EXHAUSTED';
           shouldRetry = false;
@@ -123,16 +123,16 @@ export const useChatStore = create(
         return { shouldRetry, errorType };
       },
 
-      // Request throttling
+      // 요청 제한
       canSendRequest: () => {
         const { requestInProgress, lastRequestTime } = get();
         const now = Date.now();
-        const minInterval = 1000; // Minimum 1 second between requests
+        const minInterval = 1000; // 요청 간 최소 1초 간격
         
         return !requestInProgress && (now - lastRequestTime) >= minInterval;
       },
 
-      // Retry functionality
+      // 재시도 기능
       setRetryMessage: (message) => set({ lastFailedMessage: message }),
 
       getRetryMessage: () => get().lastFailedMessage,
@@ -145,16 +145,16 @@ export const useChatStore = create(
         requestInProgress: false
       }),
 
-      // Helper to get the last few messages for context
+      // 컨텍스트를 위한 최근 메시지 가져오기 헬퍼
       getRecentMessages: (count = 10) => {
         const { messages } = get();
         return messages.slice(-count);
       },
     }),
     {
-      name: 'chat-storage', // sessionStorage key name
+      name: 'chat-storage', // sessionStorage 키 이름
       storage: createJSONStorage(() => sessionStorage),
-      // Only persist messages, not loading states or errors
+      // 로딩 상태나 오류가 아닌 메시지만 영구 저장
       partialize: (state) => ({
         messages: state.messages,
       }),

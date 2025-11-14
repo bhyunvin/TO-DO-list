@@ -14,12 +14,12 @@ import {
 } from './file-validation.constants';
 
 /**
- * Service for validating file uploads with size and type restrictions
+ * 크기 및 유형 제한으로 파일 업로드를 검증하는 서비스
  */
 @Injectable()
 export class FileValidationService {
   /**
-   * Validates a single file's size against the maximum allowed size
+   * 단일 파일의 크기를 최대 허용 크기와 비교하여 검증합니다
    */
   validateFileSize(
     file: File | Express.Multer.File,
@@ -40,7 +40,7 @@ export class FileValidationService {
   }
 
   /**
-   * Validates a single file's type against allowed and blocked extensions
+   * 허용 및 차단된 확장자와 비교하여 단일 파일의 유형을 검증합니다
    */
   validateFileType(
     file: File | Express.Multer.File,
@@ -50,7 +50,7 @@ export class FileValidationService {
     const fileName = 'originalname' in file ? file.originalname : file.name;
     const fileExtension = extname(fileName).toLowerCase();
 
-    // Check if file type is explicitly blocked
+    // 파일 유형이 명시적으로 차단되었는지 확인
     if (blockedTypes.length > 0 && blockedTypes.includes(fileExtension)) {
       return {
         isValid: false,
@@ -60,7 +60,7 @@ export class FileValidationService {
       };
     }
 
-    // Check if file type is in allowed list
+    // 파일 유형이 허용 목록에 있는지 확인
     if (!allowedTypes.includes(fileExtension)) {
       return {
         isValid: false,
@@ -74,7 +74,7 @@ export class FileValidationService {
   }
 
   /**
-   * Validates multiple files against the provided configuration
+   * 제공된 구성에 따라 여러 파일을 검증합니다
    */
   validateMultipleFiles(
     files: File[] | Express.Multer.File[],
@@ -82,7 +82,7 @@ export class FileValidationService {
   ): ValidationResult[] {
     const results: ValidationResult[] = [];
 
-    // Check file count limit
+    // 파일 개수 제한 확인
     if (config.maxFileCount && files.length > config.maxFileCount) {
       return files.map(() => ({
         isValid: false,
@@ -92,7 +92,7 @@ export class FileValidationService {
       }));
     }
 
-    // Validate each file individually
+    // 각 파일을 개별적으로 검증
     for (const file of files) {
       const sizeValidation = this.validateFileSize(file, config.maxFileSize);
       if (!sizeValidation.isValid) {
@@ -112,19 +112,19 @@ export class FileValidationService {
   }
 
   /**
-   * Validates files based on their category (profile_image or todo_attachment)
+   * 카테고리(profile_image 또는 todo_attachment)에 따라 파일을 검증합니다
    */
   validateFilesByCategory(
     files: File[] | Express.Multer.File[],
     category: FileCategory,
   ): ValidationResult[] {
-    // Map snake_case category to camelCase policy key
+    // snake_case 카테고리를 camelCase 정책 키로 매핑
     const policyKey =
       category === 'profile_image' ? 'profileImage' : 'todoAttachment';
     const policyConfig = FILE_UPLOAD_POLICY[policyKey];
 
     if (!policyConfig) {
-      throw new Error(`Invalid file category: ${category}`);
+      throw new Error(`잘못된 파일 카테고리: ${category}`);
     }
 
     const validationConfig: ValidationConfig = {
@@ -141,7 +141,7 @@ export class FileValidationService {
   }
 
   /**
-   * Gets validation errors for files that failed validation
+   * 검증에 실패한 파일에 대한 검증 오류를 가져옵니다
    */
   getValidationErrors(
     files: File[] | Express.Multer.File[],
@@ -161,7 +161,7 @@ export class FileValidationService {
         errors.push({
           fileName,
           errorCode: result.errorCode || 'UNKNOWN_ERROR',
-          errorMessage: result.errorMessage || 'Unknown validation error',
+          errorMessage: result.errorMessage || '알 수 없는 검증 오류',
           fileSize,
           fileType,
         });
@@ -172,7 +172,7 @@ export class FileValidationService {
   }
 
   /**
-   * Filters out invalid files and returns only valid ones
+   * 유효하지 않은 파일을 필터링하고 유효한 파일만 반환합니다
    */
   getValidFiles(
     files: File[] | Express.Multer.File[],
@@ -190,7 +190,7 @@ export class FileValidationService {
   }
 
   /**
-   * Formats file size in human-readable format
+   * 파일 크기를 사람이 읽을 수 있는 형식으로 포맷합니다
    */
   formatFileSize(bytes: number): string {
     if (bytes === 0) return '0 Bytes';
@@ -203,7 +203,7 @@ export class FileValidationService {
   }
 
   /**
-   * Checks if a file type is valid for a specific category
+   * 특정 카테고리에 대해 파일 유형이 유효한지 확인합니다
    */
   isValidFileType(
     fileName: string,
@@ -212,12 +212,12 @@ export class FileValidationService {
   ): boolean {
     const fileExtension = extname(fileName).toLowerCase();
 
-    // Check if blocked
+    // 차단되었는지 확인
     if (blockedTypes.includes(fileExtension)) {
       return false;
     }
 
-    // Check if allowed
+    // 허용되었는지 확인
     return allowedTypes.includes(fileExtension);
   }
 }

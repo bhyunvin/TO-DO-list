@@ -12,7 +12,7 @@ export class KeychainUtil {
   /**
    * macOS 키체인에서 비밀번호를 조회합니다.
    * @param account 해당 서비스 내 계정 이름
-   * @returns 조회된 비밀번호 또는 빈 문자열
+   * @returns 조회된 비밀번호 또는 null
    */
   async getPassword(account: string): Promise<string | null> {
     const sanitizedAccount = this.sanitizeInput(account);
@@ -39,7 +39,7 @@ export class KeychainUtil {
       // stdout의 마지막 개행 문자를 제거하고 반환합니다.
       return stdout.trim();
     } catch (error) {
-      // 명령 실행 자체에 실패한 경우 (e.g., command not found)
+      // 명령 실행 자체에 실패한 경우 (예: command not found)
       this.logger.error('security 명령어 실행에 실패했습니다.', error);
       return null;
     }

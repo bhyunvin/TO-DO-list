@@ -139,12 +139,12 @@ export class AssistanceService implements OnModuleInit {
   }
 
   /**
-   * Gets a response from Gemini API with function calling support
-   * @param requestAssistanceDto - The request containing user prompt and conversation history
-   * @param userSeq - Optional user sequence number for authenticated operations
-   * @param ip - Optional client IP address for audit logging
-   * @param userName - Optional user name for personalized responses
-   * @returns Response DTO with AI-generated response
+   * 함수 호출 지원을 포함하여 Gemini API로부터 응답을 가져옵니다
+   * @param requestAssistanceDto - 사용자 프롬프트와 대화 기록을 포함하는 요청
+   * @param userSeq - 인증된 작업을 위한 선택적 사용자 시퀀스 번호
+   * @param ip - 감사 로깅을 위한 선택적 클라이언트 IP 주소
+   * @param userName - 개인화된 응답을 위한 선택적 사용자 이름
+   * @returns AI가 생성한 응답을 포함하는 응답 DTO
    */
   async getGeminiResponse(
     requestAssistanceDto: RequestAssistanceDto,
@@ -171,7 +171,7 @@ export class AssistanceService implements OnModuleInit {
         './src/assistance/assistance.systemPrompt.txt';
       systemPrompt = fs.readFileSync(path.resolve(promptPath), 'utf-8').trim();
       
-      // Replace [사용자 이름] placeholder with actual user name
+      // [사용자 이름] 플레이스홀더를 실제 사용자 이름으로 교체
       if (userName) {
         systemPrompt = systemPrompt.replace(/\[사용자 이름\]/g, userName);
       }
@@ -210,7 +210,7 @@ export class AssistanceService implements OnModuleInit {
         `[Gemini Request] API 요청 전송... Prompt: "${requestAssistanceDto.prompt}"`,
       );
 
-      // First API call to get initial response or function call request
+      // 초기 응답 또는 함수 호출 요청을 받기 위한 첫 번째 API 호출
       let response = await firstValueFrom(
         this.httpService.post<GeminiApiResponse>(apiUrl, requestData, {
           headers: {
@@ -235,7 +235,7 @@ export class AssistanceService implements OnModuleInit {
         `[Gemini Response] firstPart 타입 확인 - functionCall 존재: ${!!firstPart.functionCall}, text 존재: ${!!firstPart.text}`,
       );
 
-      // Check if Gemini wants to call a function
+      // Gemini가 함수를 호출하려는지 확인
       if (firstPart.functionCall) {
         const functionCall = firstPart.functionCall;
         const args = functionCall.args || {};
@@ -246,7 +246,7 @@ export class AssistanceService implements OnModuleInit {
           `[Gemini Function Call] Gemini가 함수 호출 요청: ${functionCall.name}, Args: ${JSON.stringify(args)}`,
         );
 
-        // Execute the appropriate function based on function name
+        // 함수 이름에 따라 적절한 함수 실행
         switch (functionCall.name) {
           case 'getTodos':
             if (userSeq) {
@@ -307,22 +307,22 @@ export class AssistanceService implements OnModuleInit {
             break;
 
           default:
-            this.logger.warn(`Unknown function call: ${functionCall.name}`);
+            this.logger.warn(`알 수 없는 함수 호출: ${functionCall.name}`);
         }
 
-        // If a function was executed, add the call and response to conversation
+        // 함수가 실행된 경우, 호출과 응답을 대화에 추가
         if (functionResult !== undefined) {
           // ⬇️ [로그 추가] 3. 로컬 함수 실행 완료 및 결과
           this.logger.log(
             `[Gemini Function Result] ${functionCall.name} 함수 실행 결과 (Gemini에게 전송): ${JSON.stringify(functionResult)}`,
           );
 
-          // Add function call to conversation
+          // 함수 호출을 대화에 추가
           requestData.contents.push({
             parts: [candidate.content.parts[0] as any],
           });
 
-          // Add function response to conversation
+          // 함수 응답을 대화에 추가
           const functionResponsePart = {
             parts: [
               {
@@ -350,7 +350,7 @@ export class AssistanceService implements OnModuleInit {
             `[Gemini Request] 함수 실행 결과를 포함하여 2차 API 요청...`,
           );
 
-          // Make second API call with function result
+          // 함수 결과를 포함하여 두 번째 API 호출 수행
           response = await firstValueFrom(
             this.httpService.post<GeminiApiResponse>(apiUrl, requestData, {
               headers: {
@@ -405,7 +405,7 @@ export class AssistanceService implements OnModuleInit {
     } catch (error) {
       // 🚨 여기가 수정된 catch 블록입니다 🚨
       this.logger.error(
-        'Failed to get response from Gemini API',
+        'Gemini API로부터 응답을 받는데 실패했습니다',
         error.response?.data || error.message,
       );
 
@@ -417,13 +417,13 @@ export class AssistanceService implements OnModuleInit {
         if (status === 503 || status === 429) {
           // 500 대신 "서비스 사용 불가 (503)" 예외를 발생시킵니다.
           throw new ServiceUnavailableException(
-            'AI Assistant is temporarily overloaded. Please try again later.',
+            'AI 어시스턴트가 일시적으로 과부하 상태입니다. 잠시 후 다시 시도해주세요.',
           );
         }
       }
 
       // 위 경우가 아닌 다른 모든 오류는 기존처럼 500 (서버 내부 오류)으로 처리합니다.
-      throw new InternalServerErrorException('AI Assistant API request failed');
+      throw new InternalServerErrorException('AI 어시스턴트 API 요청이 실패했습니다');
     }
   }
 
@@ -438,7 +438,7 @@ export class AssistanceService implements OnModuleInit {
     );
 
     try {
-      // Calculate date range based on days parameter
+      // days 매개변수를 기반으로 날짜 범위 계산
       let targetDate: string;
       const today = new Date();
 
@@ -455,7 +455,7 @@ export class AssistanceService implements OnModuleInit {
         `[getTodos] targetDate 계산됨: ${targetDate} (days: ${days})`,
       );
 
-      // Get todos using existing TodoService method
+      // 기존 TodoService 메서드를 사용하여 할 일 목록 가져오기
       const todos = await this.todoService.findAll(userSeq, targetDate);
 
       // ⬇️ [로그 추가] C. DB에서 데이터 조회 완료
@@ -463,7 +463,7 @@ export class AssistanceService implements OnModuleInit {
         `[getTodos] todoService.findAll(${userSeq}, ${targetDate}) 결과: 총 ${todos.length}개`,
       );
 
-      // Filter todos based on status parameter
+      // 상태 매개변수에 따라 할 일 목록 필터링
       let filteredTodos = todos;
       
       // 'overdue' 기준 날짜를 명확히 하기 위해 "오늘"의 0시 0분 0초를 기준으로 설정
@@ -505,7 +505,7 @@ export class AssistanceService implements OnModuleInit {
         );
       }
 
-      // Return structured data suitable for AI context
+      // AI 컨텍스트에 적합한 구조화된 데이터 반환
       const result = {
         totalCount: filteredTodos.length,
         todos: filteredTodos.map((todo) => ({
@@ -537,10 +537,10 @@ export class AssistanceService implements OnModuleInit {
       // ⬇️ [로그 추가] F. getTodos 함수에서 오류 발생
       this.logger.error('[getTodos] 함수 실행 중 오류 발생', error);
       // Gemini에게 오류를 반환할 때는 500 예외 대신 구조화된 JSON을 반환하는 것이 더 좋습니다.
-      // throw new InternalServerErrorException('Failed to retrieve todo data');
+      // throw new InternalServerErrorException('할 일 데이터를 가져오는데 실패했습니다');
       return {
         success: false,
-        error: 'Failed to retrieve todo data',
+        error: '할 일 데이터를 가져오는데 실패했습니다',
         totalCount: 0,
         todos: [],
       };
@@ -548,13 +548,13 @@ export class AssistanceService implements OnModuleInit {
   }
 
   /**
-   * Creates a new TODO item for the user
-   * @param userSeq - User sequence number identifying the user
-   * @param ip - Client IP address for audit logging
-   * @param todoContent - The content/description of the TODO item
-   * @param todoDate - Target date for the TODO in YYYY-MM-DD format
-   * @param todoNote - Optional additional notes for the TODO
-   * @returns Structured response with success status and created TODO data
+   * 사용자를 위한 새로운 TODO 항목을 생성합니다
+   * @param userSeq - 사용자를 식별하는 사용자 시퀀스 번호
+   * @param ip - 감사 로깅을 위한 클라이언트 IP 주소
+   * @param todoContent - TODO 항목의 내용/설명
+   * @param todoDate - YYYY-MM-DD 형식의 TODO 목표 날짜
+   * @param todoNote - TODO에 대한 선택적 추가 메모
+   * @returns 성공 상태와 생성된 TODO 데이터를 포함하는 구조화된 응답
    */
   private async createTodo(
     userSeq: number,
@@ -569,7 +569,7 @@ export class AssistanceService implements OnModuleInit {
     );
 
     try {
-      // Validate todoDate format (YYYY-MM-DD)
+      // todoDate 형식 검증 (YYYY-MM-DD)
       const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
       if (!dateRegex.test(todoDate)) {
         this.logger.warn(
@@ -578,12 +578,12 @@ export class AssistanceService implements OnModuleInit {
         return {
           success: false,
           error:
-            'Invalid date format. Please use YYYY-MM-DD format (e.g., 2024-12-31)',
+            '잘못된 날짜 형식입니다. YYYY-MM-DD 형식을 사용해주세요 (예: 2024-12-31)',
         };
       }
 
-      // Construct user object (userId can be empty string for function calls)
-      // Only userSeq is actually used by TodoService, but we need to satisfy the type
+      // 사용자 객체 생성 (함수 호출의 경우 userId는 빈 문자열일 수 있음)
+      // TodoService에서는 실제로 userSeq만 사용하지만, 타입을 만족시켜야 함
       const user = {
         userSeq,
         userId: '',
@@ -595,14 +595,14 @@ export class AssistanceService implements OnModuleInit {
         auditColumns: null,
       } as Omit<UserEntity, 'userPassword'>;
 
-      // Create DTO with TODO data
+      // TODO 데이터로 DTO 생성
       const createTodoDto: CreateTodoDto = {
         todoContent,
         todoDate,
         todoNote,
       };
 
-      // Call TodoService to create the TODO
+      // TodoService를 호출하여 TODO 생성
       this.logger.log(`[createTodo] todoService.create 호출 중...`);
       const createdTodo = await this.todoService.create(
         user,
@@ -615,7 +615,7 @@ export class AssistanceService implements OnModuleInit {
         `[createTodo] Todo 생성 성공. todoSeq: ${createdTodo.todoSeq}`,
       );
 
-      // Return structured success response
+      // 구조화된 성공 응답 반환
       const result = {
         success: true,
         data: {
@@ -636,18 +636,18 @@ export class AssistanceService implements OnModuleInit {
       this.logger.error('[createTodo] 함수 실행 중 오류 발생', error);
       return {
         success: false,
-        error: 'Failed to create TODO item. Please try again.',
+        error: 'TODO 항목 생성에 실패했습니다. 다시 시도해주세요.',
       };
     }
   }
 
   /**
-   * Updates an existing TODO item for the user
-   * @param userSeq - User sequence number identifying the user
-   * @param ip - Client IP address for audit logging
-   * @param todoSeq - TODO sequence number identifying the TODO to update
-   * @param updateData - Object containing optional fields to update (partial update)
-   * @returns Structured response with success status and updated TODO data
+   * 사용자를 위한 기존 TODO 항목을 업데이트합니다
+   * @param userSeq - 사용자를 식별하는 사용자 시퀀스 번호
+   * @param ip - 감사 로깅을 위한 클라이언트 IP 주소
+   * @param todoSeq - 업데이트할 TODO를 식별하는 TODO 시퀀스 번호
+   * @param updateData - 업데이트할 선택적 필드를 포함하는 객체 (부분 업데이트)
+   * @returns 성공 상태와 업데이트된 TODO 데이터를 포함하는 구조화된 응답
    */
   private async updateTodo(
     userSeq: number,
@@ -665,8 +665,8 @@ export class AssistanceService implements OnModuleInit {
     );
 
     try {
-      // Construct user object (userId can be empty string for function calls)
-      // Only userSeq is actually used by TodoService, but we need to satisfy the type
+      // 사용자 객체 생성 (함수 호출의 경우 userId는 빈 문자열일 수 있음)
+      // TodoService에서는 실제로 userSeq만 사용하지만, 타입을 만족시켜야 함
       const user = {
         userSeq,
         userId: '',
@@ -678,7 +678,7 @@ export class AssistanceService implements OnModuleInit {
         auditColumns: null,
       } as Omit<UserEntity, 'userPassword'>;
 
-      // Create UpdateTodoDto with only provided fields (partial update)
+      // 제공된 필드만으로 UpdateTodoDto 생성 (부분 업데이트)
       const updateTodoDto: any = {};
       if (updateData.todoContent !== undefined) {
         updateTodoDto.todoContent = updateData.todoContent;
@@ -695,7 +695,7 @@ export class AssistanceService implements OnModuleInit {
         `[updateTodo] updateTodoDto: ${JSON.stringify(updateTodoDto)}`,
       );
 
-      // Call TodoService to update the TODO
+      // TodoService를 호출하여 TODO 업데이트
       this.logger.log(`[updateTodo] todoService.update 호출 중...`);
       const updatedTodo = await this.todoService.update(
         todoSeq,
@@ -704,14 +704,14 @@ export class AssistanceService implements OnModuleInit {
         updateTodoDto,
       );
 
-      // Handle "not found" case explicitly
+      // "찾을 수 없음" 케이스를 명시적으로 처리
       if (!updatedTodo) {
         this.logger.warn(
           `[updateTodo] Todo를 찾을 수 없거나 접근 권한 없음. todoSeq: ${todoSeq}`,
         );
         return {
           success: false,
-          error: 'TODO item not found or access denied',
+          error: 'TODO 항목을 찾을 수 없거나 접근이 거부되었습니다',
         };
       }
 
@@ -720,7 +720,7 @@ export class AssistanceService implements OnModuleInit {
         `[updateTodo] Todo 수정 성공. todoSeq: ${updatedTodo.todoSeq}`,
       );
 
-      // Return structured success response with updated TODO data
+      // 업데이트된 TODO 데이터와 함께 구조화된 성공 응답 반환
       const result = {
         success: true,
         data: {
@@ -741,7 +741,7 @@ export class AssistanceService implements OnModuleInit {
       this.logger.error('[updateTodo] 함수 실행 중 오류 발생', error);
       return {
         success: false,
-        error: 'Failed to update TODO item. Please try again.',
+        error: 'TODO 항목 업데이트에 실패했습니다. 다시 시도해주세요.',
       };
     }
   }

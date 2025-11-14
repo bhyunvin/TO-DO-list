@@ -28,7 +28,7 @@ export const useAuthStore = create(
       },
     }),
     {
-      // 3. 설정 객체
+      // 설정 객체
       name: 'auth-storage', // sessionStorage에 저장될 때 사용될 키 이름
       storage: createJSONStorage(() => sessionStorage), // localStorage 대신 sessionStorage 사용
     }
