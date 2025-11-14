@@ -3,10 +3,10 @@ import axios from 'axios';
 import { useFileUploadValidator } from './useFileUploadValidator';
 
 /**
- * Custom hook for managing file upload progress and status
+ * 파일 업로드 진행 상황 및 상태를 관리하는 커스텀 훅
  */
 export const useFileUploadProgress = () => {
-  const [uploadStatus, setUploadStatus] = useState('idle'); // 'idle', 'validating', 'uploading', 'success', 'error'
+  const [uploadStatus, setUploadStatus] = useState('idle');
   const [uploadProgress, setUploadProgress] = useState({});
   const [uploadErrors, setUploadErrors] = useState([]);
   const [uploadedFiles, setUploadedFiles] = useState([]);
@@ -16,7 +16,7 @@ export const useFileUploadProgress = () => {
   const cancelTokenRef = useRef(null);
 
   /**
-   * Reset upload state
+   * 업로드 상태 초기화
    */
   const resetUploadState = useCallback(() => {
     setUploadStatus('idle');
@@ -31,7 +31,7 @@ export const useFileUploadProgress = () => {
   }, []);
 
   /**
-   * Update progress for a specific file
+   * 특정 파일의 진행 상황 업데이트
    */
   const updateFileProgress = useCallback((fileName, progress) => {
     setUploadProgress(prev => ({
@@ -41,7 +41,7 @@ export const useFileUploadProgress = () => {
   }, []);
 
   /**
-   * Update overall progress based on individual file progress
+   * 개별 파일 진행 상황을 기반으로 전체 진행 상황 업데이트
    */
   const updateOverallProgress = useCallback((files) => {
     const totalProgress = Object.values(uploadProgress).reduce((sum, progress) => sum + progress, 0);
@@ -50,7 +50,7 @@ export const useFileUploadProgress = () => {
   }, [uploadProgress]);
 
   /**
-   * Validate files before upload
+   * 업로드 전 파일 유효성 검사
    */
   const validateFilesForUpload = useCallback((files, category) => {
     setUploadStatus('validating');
@@ -82,7 +82,7 @@ export const useFileUploadProgress = () => {
   }, [validateFiles]);
 
   /**
-   * Upload files with progress tracking
+   * 진행 상황 추적과 함께 파일 업로드
    */
   const uploadFiles = useCallback(async (files, uploadUrl, additionalData = {}) => {
     if (!files || files.length === 0) {
@@ -93,20 +93,16 @@ export const useFileUploadProgress = () => {
     setUploadProgress({});
     setUploadErrors([]);
     
-    // Create cancel token for this upload
     cancelTokenRef.current = axios.CancelToken.source();
 
     try {
       const formData = new FormData();
       
-      // Add files to form data
       Array.from(files).forEach((file) => {
         formData.append('files', file);
-        // Initialize progress for each file
         updateFileProgress(file.name, 0);
       });
 
-      // Add additional data
       Object.keys(additionalData).forEach(key => {
         formData.append(key, additionalData[key]);
       });
@@ -119,18 +115,15 @@ export const useFileUploadProgress = () => {
         onUploadProgress: (progressEvent) => {
           const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
           
-          // Update progress for all files equally (since we can't track individual file progress)
           Array.from(files).forEach((file) => {
             updateFileProgress(file.name, progress);
           });
         },
       });
 
-      // Handle successful upload
       const uploadedFilesList = response.data.uploadedFiles || [];
       setUploadedFiles(uploadedFilesList);
       
-      // Check for partial success (some files failed)
       const totalFiles = Array.from(files).length;
       const successfulUploads = uploadedFilesList.length;
       
@@ -138,7 +131,6 @@ export const useFileUploadProgress = () => {
         setUploadStatus('success');
       } else if (successfulUploads > 0) {
         setUploadStatus('partial_success');
-        // Set errors for files that weren't uploaded
         const failedFiles = Array.from(files).filter(file => 
           !uploadedFilesList.some(uploaded => 
             uploaded.originalFileName === file.name || uploaded.fileName === file.name
@@ -169,7 +161,6 @@ export const useFileUploadProgress = () => {
         return { success: false, cancelled: true };
       }
 
-      // Parse server errors
       const serverErrors = parseServerErrors(error.response?.data || error);
       setUploadErrors(serverErrors);
       setUploadStatus('error');
@@ -185,10 +176,9 @@ export const useFileUploadProgress = () => {
   }, [updateFileProgress, parseServerErrors, formatErrorSummary]);
 
   /**
-   * Upload files with validation
+   * 유효성 검사와 함께 파일 업로드
    */
   const uploadFilesWithValidation = useCallback(async (files, uploadUrl, category, additionalData = {}) => {
-    // First validate files
     const validation = validateFilesForUpload(files, category);
     if (!validation.isValid) {
       return {
@@ -198,12 +188,11 @@ export const useFileUploadProgress = () => {
       };
     }
 
-    // Then upload files
     return await uploadFiles(files, uploadUrl, additionalData);
   }, [validateFilesForUpload, uploadFiles]);
 
   /**
-   * Cancel ongoing upload
+   * 진행 중인 업로드 취소
    */
   const cancelUpload = useCallback(() => {
     if (cancelTokenRef.current) {
@@ -215,7 +204,7 @@ export const useFileUploadProgress = () => {
   }, []);
 
   /**
-   * Retry failed upload
+   * 실패한 업로드 재시도
    */
   const retryUpload = useCallback(async (files, uploadUrl, additionalData = {}) => {
     resetUploadState();
@@ -223,7 +212,7 @@ export const useFileUploadProgress = () => {
   }, [resetUploadState, uploadFiles]);
 
   /**
-   * Get user-friendly status message with enhanced details
+   * 향상된 세부 정보가 포함된 사용자 친화적 상태 메시지 가져오기
    */
   const getStatusMessage = useCallback(() => {
     const totalFiles = validationResults.length;
@@ -248,7 +237,7 @@ export const useFileUploadProgress = () => {
   }, [uploadStatus, validationResults, uploadedFiles, uploadErrors, uploadProgress]);
 
   /**
-   * Get detailed upload summary with enhanced metrics
+   * 향상된 메트릭이 포함된 상세 업로드 요약 가져오기
    */
   const getUploadSummary = useCallback(() => {
     const totalFiles = validationResults.length;
@@ -257,11 +246,9 @@ export const useFileUploadProgress = () => {
     const uploadedCount = uploadedFiles.length;
     const failedCount = uploadErrors.length;
     
-    // Calculate overall progress
     const overallProgress = totalFiles > 0 ? 
       Object.values(uploadProgress).reduce((sum, progress) => sum + progress, 0) / totalFiles : 0;
     
-    // Calculate upload statistics
     const totalSize = validationResults.reduce((sum, result) => {
       return sum + (result.file?.size || 0);
     }, 0);
@@ -293,14 +280,12 @@ export const useFileUploadProgress = () => {
   }, [validationResults, uploadedFiles, uploadErrors, uploadStatus, uploadProgress, getStatusMessage]);
 
   return {
-    // State
     uploadStatus,
     uploadProgress,
     uploadErrors,
     uploadedFiles,
     validationResults,
     
-    // Actions
     validateFilesForUpload,
     uploadFiles,
     uploadFilesWithValidation,
@@ -309,7 +294,6 @@ export const useFileUploadProgress = () => {
     resetUploadState,
     updateFileProgress,
     
-    // Utilities
     getUploadSummary,
     getStatusMessage,
     updateOverallProgress,

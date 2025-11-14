@@ -1,9 +1,9 @@
 import { useState, useCallback } from 'react';
 
 /**
- * File validation constants (mirrored from backend)
+ * 파일 유효성 검사 상수 (백엔드와 동일)
  */
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
 const ALLOWED_IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
 const ALLOWED_DOCUMENT_EXTENSIONS = ['.xlsx', '.pptx', '.docx', '.pdf', '.hwp', '.txt'];
@@ -24,7 +24,7 @@ const FILE_VALIDATION_MESSAGES = {
 };
 
 /**
- * User-friendly error messages with additional context
+ * 추가 컨텍스트가 포함된 사용자 친화적 오류 메시지
  */
 const USER_FRIENDLY_MESSAGES = {
   [FILE_VALIDATION_ERRORS.FILE_TOO_LARGE]: 'This file is too large. Please choose a file smaller than 10MB.',
@@ -48,16 +48,16 @@ const FILE_UPLOAD_POLICY = {
 };
 
 /**
- * Custom hook for file upload validation
- * @returns {Object} Validation functions and utilities
+ * 파일 업로드 유효성 검사를 위한 커스텀 훅
+ * @returns {Object} 유효성 검사 함수 및 유틸리티
  */
 export const useFileUploadValidator = () => {
   const [validationResults, setValidationResults] = useState([]);
 
   /**
-   * Get file extension from filename
-   * @param {string} fileName - The file name
-   * @returns {string} File extension in lowercase
+   * 파일명에서 파일 확장자 가져오기
+   * @param {string} fileName - 파일명
+   * @returns {string} 소문자 파일 확장자
    */
   const getFileExtension = useCallback((fileName) => {
     const lastDot = fileName.lastIndexOf('.');
@@ -65,9 +65,9 @@ export const useFileUploadValidator = () => {
   }, []);
 
   /**
-   * Format file size in human readable format
-   * @param {number} bytes - File size in bytes
-   * @returns {string} Formatted file size
+   * 사람이 읽을 수 있는 형식으로 파일 크기 포맷
+   * @param {number} bytes - 바이트 단위 파일 크기
+   * @returns {string} 포맷된 파일 크기
    */
   const formatFileSize = useCallback((bytes) => {
     if (bytes === 0) return '0 Bytes';
@@ -80,10 +80,10 @@ export const useFileUploadValidator = () => {
   }, []);
 
   /**
-   * Validate file size
-   * @param {File} file - The file to validate
-   * @param {number} maxSize - Maximum allowed size in bytes
-   * @returns {Object} Validation result
+   * 파일 크기 유효성 검사
+   * @param {File} file - 검사할 파일
+   * @param {number} maxSize - 바이트 단위 최대 허용 크기
+   * @returns {Object} 유효성 검사 결과
    */
   const validateFileSize = useCallback((file, maxSize) => {
     if (file.size > maxSize) {
@@ -97,16 +97,15 @@ export const useFileUploadValidator = () => {
   }, [formatFileSize]);
 
   /**
-   * Validate file type
-   * @param {File} file - The file to validate
-   * @param {string[]} allowedTypes - Array of allowed file extensions
-   * @param {string[]} blockedTypes - Array of blocked file extensions
-   * @returns {Object} Validation result
+   * 파일 유형 유효성 검사
+   * @param {File} file - 검사할 파일
+   * @param {string[]} allowedTypes - 허용된 파일 확장자 배열
+   * @param {string[]} blockedTypes - 차단된 파일 확장자 배열
+   * @returns {Object} 유효성 검사 결과
    */
   const validateFileType = useCallback((file, allowedTypes = [], blockedTypes = []) => {
     const fileExtension = getFileExtension(file.name);
     
-    // Check if file type is blocked
     if (blockedTypes.length > 0 && blockedTypes.includes(fileExtension)) {
       return {
         isValid: false,
@@ -115,7 +114,6 @@ export const useFileUploadValidator = () => {
       };
     }
     
-    // Check if file type is allowed
     if (allowedTypes.length > 0 && !allowedTypes.includes(fileExtension)) {
       return {
         isValid: false,
@@ -128,10 +126,10 @@ export const useFileUploadValidator = () => {
   }, [getFileExtension]);
 
   /**
-   * Validate file count
-   * @param {FileList|File[]} files - Files to validate
-   * @param {number} maxCount - Maximum allowed file count
-   * @returns {Object} Validation result
+   * 파일 개수 유효성 검사
+   * @param {FileList|File[]} files - 검사할 파일들
+   * @param {number} maxCount - 최대 허용 파일 개수
+   * @returns {Object} 유효성 검사 결과
    */
   const validateFileCount = useCallback((files, maxCount) => {
     const fileCount = files.length || files.length;
@@ -146,10 +144,10 @@ export const useFileUploadValidator = () => {
   }, []);
 
   /**
-   * Validate a single file against configuration
-   * @param {File} file - The file to validate
-   * @param {Object} config - Validation configuration
-   * @returns {Object} Validation result with file info
+   * 구성에 따라 단일 파일 유효성 검사
+   * @param {File} file - 검사할 파일
+   * @param {Object} config - 유효성 검사 구성
+   * @returns {Object} 파일 정보가 포함된 유효성 검사 결과
    */
   const validateSingleFile = useCallback((file, config) => {
     const sizeValidation = validateFileSize(file, config.maxSize);
@@ -188,10 +186,10 @@ export const useFileUploadValidator = () => {
   }, [validateFileSize, validateFileType, getFileExtension]);
 
   /**
-   * Validate multiple files against configuration
-   * @param {FileList|File[]} files - Files to validate
-   * @param {string} category - File category ('profileImage' or 'todoAttachment')
-   * @returns {Object[]} Array of validation results
+   * 구성에 따라 여러 파일 유효성 검사
+   * @param {FileList|File[]} files - 검사할 파일들
+   * @param {string} category - 파일 카테고리 ('profileImage' 또는 'todoAttachment')
+   * @returns {Object[]} 유효성 검사 결과 배열
    */
   const validateFiles = useCallback((files, category) => {
     const config = FILE_UPLOAD_POLICY[category];
@@ -201,10 +199,8 @@ export const useFileUploadValidator = () => {
 
     const fileArray = Array.from(files);
     
-    // Validate file count first
     const countValidation = validateFileCount(fileArray, config.maxCount);
     if (!countValidation.isValid) {
-      // Return count error for all files
       return fileArray.map(file => ({
         file,
         fileName: file.name,
@@ -214,7 +210,6 @@ export const useFileUploadValidator = () => {
       }));
     }
 
-    // Validate each file individually
     const results = fileArray.map(file => validateSingleFile(file, config));
     setValidationResults(results);
     
@@ -222,10 +217,10 @@ export const useFileUploadValidator = () => {
   }, [validateFileCount, validateSingleFile, getFileExtension]);
 
   /**
-   * Get only valid files from validation results
-   * @param {FileList|File[]} files - Files to validate
-   * @param {string} category - File category
-   * @returns {File[]} Array of valid files
+   * 유효성 검사 결과에서 유효한 파일만 가져오기
+   * @param {FileList|File[]} files - 검사할 파일들
+   * @param {string} category - 파일 카테고리
+   * @returns {File[]} 유효한 파일 배열
    */
   const getValidFiles = useCallback((files, category) => {
     const results = validateFiles(files, category);
@@ -233,10 +228,10 @@ export const useFileUploadValidator = () => {
   }, [validateFiles]);
 
   /**
-   * Check if a file type is valid for a category
-   * @param {string} fileName - File name to check
-   * @param {string} category - File category
-   * @returns {boolean} True if file type is valid
+   * 카테고리에 대해 파일 유형이 유효한지 확인
+   * @param {string} fileName - 확인할 파일명
+   * @param {string} category - 파일 카테고리
+   * @returns {boolean} 파일 유형이 유효하면 true
    */
   const isValidFileType = useCallback((fileName, category) => {
     const config = FILE_UPLOAD_POLICY[category];
@@ -244,12 +239,10 @@ export const useFileUploadValidator = () => {
 
     const fileExtension = getFileExtension(fileName);
     
-    // Check if blocked
     if (config.blockedTypes && config.blockedTypes.includes(fileExtension)) {
       return false;
     }
     
-    // Check if allowed
     if (config.allowedTypes && !config.allowedTypes.includes(fileExtension)) {
       return false;
     }
@@ -258,18 +251,18 @@ export const useFileUploadValidator = () => {
   }, [getFileExtension]);
 
   /**
-   * Get file upload policy for a category
-   * @param {string} category - File category
-   * @returns {Object} Policy configuration
+   * 카테고리에 대한 파일 업로드 정책 가져오기
+   * @param {string} category - 파일 카테고리
+   * @returns {Object} 정책 구성
    */
   const getUploadPolicy = useCallback((category) => {
     return FILE_UPLOAD_POLICY[category] || null;
   }, []);
 
   /**
-   * Get user-friendly error message for display
-   * @param {Object} error - Validation error object
-   * @returns {string} User-friendly error message
+   * 표시를 위한 사용자 친화적 오류 메시지 가져오기
+   * @param {Object} error - 유효성 검사 오류 객체
+   * @returns {string} 사용자 친화적 오류 메시지
    */
   const getUserFriendlyMessage = useCallback((error) => {
     const baseMessage = USER_FRIENDLY_MESSAGES[error.errorCode] || error.errorMessage;
@@ -288,9 +281,9 @@ export const useFileUploadValidator = () => {
   }, [formatFileSize]);
 
   /**
-   * Format multiple validation errors into a summary message
-   * @param {Object[]} errors - Array of validation errors
-   * @returns {string} Formatted error summary
+   * 여러 유효성 검사 오류를 요약 메시지로 포맷
+   * @param {Object[]} errors - 유효성 검사 오류 배열
+   * @returns {string} 포맷된 오류 요약
    */
   const formatErrorSummary = useCallback((errors) => {
     if (errors.length === 0) {
@@ -301,7 +294,6 @@ export const useFileUploadValidator = () => {
       return `"${errors[0].fileName}": ${getUserFriendlyMessage(errors[0])}`;
     }
 
-    // Group errors by type
     const errorGroups = errors.reduce((groups, error) => {
       const key = error.errorCode;
       if (!groups[key]) {
@@ -325,16 +317,15 @@ export const useFileUploadValidator = () => {
   }, [getUserFriendlyMessage]);
 
   /**
-   * Parse server error response and extract validation errors
-   * @param {Object} errorResponse - Server error response
-   * @returns {Object[]} Array of validation errors
+   * 서버 오류 응답을 파싱하고 유효성 검사 오류 추출
+   * @param {Object} errorResponse - 서버 오류 응답
+   * @returns {Object[]} 유효성 검사 오류 배열
    */
   const parseServerErrors = useCallback((errorResponse) => {
     if (errorResponse?.errors && Array.isArray(errorResponse.errors)) {
       return errorResponse.errors;
     }
 
-    // Handle different error response formats
     if (errorResponse?.response?.data?.errors) {
       return errorResponse.response.data.errors;
     }
@@ -355,20 +346,18 @@ export const useFileUploadValidator = () => {
   }, []);
 
   /**
-   * Clear validation results
+   * 유효성 검사 결과 초기화
    */
   const clearValidationResults = useCallback(() => {
     setValidationResults([]);
   }, []);
 
   return {
-    // Validation functions
     validateFiles,
     validateSingleFile,
     getValidFiles,
     isValidFileType,
     
-    // Utility functions
     formatFileSize,
     getFileExtension,
     getUploadPolicy,
@@ -376,11 +365,9 @@ export const useFileUploadValidator = () => {
     formatErrorSummary,
     parseServerErrors,
     
-    // State and actions
     validationResults,
     clearValidationResults,
     
-    // Constants
     FILE_VALIDATION_ERRORS,
     FILE_VALIDATION_MESSAGES,
     USER_FRIENDLY_MESSAGES,
