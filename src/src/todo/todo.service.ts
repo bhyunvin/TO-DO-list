@@ -232,7 +232,7 @@ export class TodoService {
     if (files && files.length > 0) {
       const auditSettings: AuditSettings = {
         ip,
-        entity: null, // Will be set in saveFileInfo
+        entity: null, // saveFileInfo에서 설정됨
         id: user.userId,
       };
 
@@ -463,7 +463,7 @@ export class TodoService {
     const ROW_HEIGHT = 15;
 
     // 열 너비를 설정합니다.
-    worksheet.getColumn('A').width = 4; // Column A는 비어있음 (visible but empty)
+    worksheet.getColumn('A').width = 4; // Column A는 비어있음 (보이지만 비어있음)
     worksheet.getColumn('B').width = 6; // 번호
     worksheet.getColumn('C').width = 80; // 내용
     worksheet.getColumn('D').width = 17; // 완료일시

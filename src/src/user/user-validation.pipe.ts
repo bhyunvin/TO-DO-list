@@ -11,7 +11,7 @@ import { InputSanitizerService } from '../utils/inputSanitizer';
 import { UpdateUserDto } from './user.dto';
 
 /**
- * Custom validation pipe for user profile updates with enhanced security
+ * 향상된 보안 기능을 갖춘 사용자 프로필 업데이트용 커스텀 검증 파이프
  */
 @Injectable()
 export class UserProfileValidationPipe implements PipeTransform<any> {
@@ -23,13 +23,13 @@ export class UserProfileValidationPipe implements PipeTransform<any> {
       return value;
     }
 
-    // Sanitize input before validation
+    // 검증 전에 입력값 새니타이즈
     const sanitizedValue = this.sanitizeInput(value);
 
-    // Transform to class instance
+    // 클래스 인스턴스로 변환
     const object = plainToClass(metatype, sanitizedValue);
 
-    // Validate using class-validator decorators
+    // class-validator 데코레이터를 사용하여 검증
     const errors = await validate(object);
 
     if (errors.length > 0) {
@@ -51,7 +51,7 @@ export class UserProfileValidationPipe implements PipeTransform<any> {
       });
     }
 
-    // Additional security checks
+    // 추가 보안 검사
     this.performSecurityChecks(sanitizedValue);
 
     return object;
@@ -69,7 +69,7 @@ export class UserProfileValidationPipe implements PipeTransform<any> {
 
     const sanitized = { ...value };
 
-    // Sanitize each field based on its purpose
+    // 각 필드를 목적에 따라 새니타이즈
     if (sanitized.userName) {
       sanitized.userName = this.inputSanitizer.sanitizeName(sanitized.userName);
     }
@@ -90,7 +90,7 @@ export class UserProfileValidationPipe implements PipeTransform<any> {
   }
 
   private performSecurityChecks(value: UpdateUserDto): void {
-    // Check for potential SQL injection patterns
+    // 잠재적인 SQL 인젝션 패턴 검사
     const sqlInjectionPatterns = [
       /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|UNION)\b)/i,
       /(\b(OR|AND)\s+\d+\s*=\s*\d+)/i,
@@ -118,7 +118,7 @@ export class UserProfileValidationPipe implements PipeTransform<any> {
       }
     };
 
-    // Check each field for security violations
+    // 각 필드의 보안 위반 검사
     if (value.userName) {
       checkValue(value.userName, 'userName');
     }
@@ -131,7 +131,7 @@ export class UserProfileValidationPipe implements PipeTransform<any> {
       checkValue(value.userDescription, 'userDescription');
     }
 
-    // Check for excessive special characters that might indicate an attack
+    // 공격을 나타낼 수 있는 과도한 특수 문자 검사
     const specialCharPattern = /[<>{}[\]\\\/\$\^]/g;
 
     Object.entries(value).forEach(([key, val]) => {
@@ -139,7 +139,7 @@ export class UserProfileValidationPipe implements PipeTransform<any> {
         const specialCharCount = (val.match(specialCharPattern) || []).length;
         const totalLength = val.length;
 
-        // If more than 10% of characters are special characters, flag as suspicious
+        // 문자의 10% 이상이 특수 문자인 경우 의심스러운 것으로 표시
         if (totalLength > 0 && specialCharCount / totalLength > 0.1) {
           this.logger.warn(
             'Suspicious input with high special character ratio',
@@ -161,7 +161,7 @@ export class UserProfileValidationPipe implements PipeTransform<any> {
   }
 
   private logSafeValue(value: any): any {
-    // Create a safe version for logging (truncate long strings)
+    // 로깅을 위한 안전한 버전 생성 (긴 문자열 잘라내기)
     if (!value || typeof value !== 'object') {
       return value;
     }

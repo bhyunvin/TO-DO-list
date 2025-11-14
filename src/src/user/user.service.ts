@@ -65,7 +65,7 @@ export class UserService {
     ip: string,
   ): Promise<UserDto> {
     return this.dataSource.transaction(async (transactionalEntityManager) => {
-      // Check email uniqueness
+      // 이메일 고유성 확인
       const existingUserWithEmail = await transactionalEntityManager.findOne(
         UserEntity,
         {
@@ -90,7 +90,7 @@ export class UserService {
       // 프로필 이미지 등록 시
       if (profileImageFile) {
         try {
-          // Validate profile image file
+          // 프로필 이미지 파일 검증
           const validationResults =
             this.fileValidationService.validateFilesByCategory(
               [profileImageFile],
@@ -113,11 +113,11 @@ export class UserService {
             });
           }
 
-          // Save validated profile image
+          // 검증된 프로필 이미지 저장
           const fileUploadResult = await this.fileUploadUtil.saveFileInfo(
             [profileImageFile],
             { entity: null, id: userDto.userId, ip },
-            'profile_image', // Specify file category
+            'profile_image', // 파일 카테고리 지정
           );
 
           userDto.userProfileImageFileGroupNo = fileUploadResult.fileGroupNo;
@@ -164,7 +164,7 @@ export class UserService {
     ip: string,
   ): Promise<Omit<UserEntity, 'userPassword'>> {
     return this.dataSource.transaction(async (transactionalEntityManager) => {
-      // Enhanced user validation
+      // 향상된 사용자 검증
       const currentUser = await transactionalEntityManager.findOne(UserEntity, {
         where: { userSeq },
       });
@@ -177,8 +177,8 @@ export class UserService {
         throw new BadRequestException('사용자를 찾을 수 없습니다.');
       }
 
-      // Additional security check - ensure user is active (if you have such a field)
-      // This is a placeholder for future user status checks
+      // 추가 보안 검사 - 사용자가 활성 상태인지 확인 (해당 필드가 있는 경우)
+      // 향후 사용자 상태 검사를 위한 플레이스홀더
       if (currentUser.adminYn === 'SUSPENDED') {
         this.logger.warn('Profile update attempted by suspended user', {
           userSeq,
@@ -190,15 +190,15 @@ export class UserService {
         );
       }
 
-      // Validate and sanitize input data
+      // 입력 데이터 검증 및 새니타이즈
       const sanitizedDto = this.validateAndSanitizeUpdateData(updateUserDto);
 
-      // Enhanced email uniqueness check with additional validation
+      // 추가 검증을 포함한 향상된 이메일 고유성 검사
       if (
         sanitizedDto.userEmail &&
         sanitizedDto.userEmail !== currentUser.userEmail
       ) {
-        // Additional email format validation
+        // 추가 이메일 형식 검증
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(sanitizedDto.userEmail)) {
           throw new BadRequestException({
@@ -208,13 +208,13 @@ export class UserService {
           });
         }
 
-        // Check for email uniqueness
+        // 이메일 고유성 확인
         const existingUser = await transactionalEntityManager.findOne(
           UserEntity,
           {
             where: {
               userEmail: sanitizedDto.userEmail,
-              userSeq: Not(userSeq), // Exclude current user
+              userSeq: Not(userSeq), // 현재 사용자 제외
             },
           },
         );
@@ -234,10 +234,10 @@ export class UserService {
         }
       }
 
-      // Track what fields are being updated for audit purposes
+      // 감사 목적으로 업데이트되는 필드 추적
       const updatedFields: string[] = [];
 
-      // Update user fields with additional validation
+      // 추가 검증과 함께 사용자 필드 업데이트
       if (
         sanitizedDto.userName !== undefined &&
         sanitizedDto.userName !== currentUser.userName
@@ -271,13 +271,13 @@ export class UserService {
         updatedFields.push('userDescription');
       }
 
-      // Enhanced profile image handling with additional security checks
+      // 추가 보안 검사를 포함한 향상된 프로필 이미지 처리
       if (profileImageFile) {
         try {
-          // Additional file security checks
+          // 추가 파일 보안 검사
           this.validateProfileImageSecurity(profileImageFile, userSeq, ip);
 
-          // Validate profile image file
+          // 프로필 이미지 파일 검증
           const validationResults =
             this.fileValidationService.validateFilesByCategory(
               [profileImageFile],
@@ -302,7 +302,7 @@ export class UserService {
             });
           }
 
-          // Save validated profile image
+          // 검증된 프로필 이미지 저장
           const fileUploadResult = await this.fileUploadUtil.saveFileInfo(
             [profileImageFile],
             { entity: null, id: currentUser.userId, ip },
@@ -343,7 +343,7 @@ export class UserService {
         }
       }
 
-      // Log the update attempt for audit purposes
+      // 감사 목적으로 업데이트 시도 로깅
       this.logger.log('Profile update processing', {
         userSeq,
         userId: currentUser.userId,
@@ -352,20 +352,20 @@ export class UserService {
         ip,
       });
 
-      // Set audit columns for update
+      // 업데이트를 위한 감사 컬럼 설정
       const updatedUser = setAuditColumn({
         entity: currentUser,
         id: currentUser.userId,
         ip,
       });
 
-      // Save updated user
+      // 업데이트된 사용자 저장
       const savedUser = await transactionalEntityManager.save(
         UserEntity,
         updatedUser,
       );
 
-      // Log successful update
+      // 성공적인 업데이트 로깅
       this.logger.log('Profile update completed successfully', {
         userSeq,
         userId: savedUser.userId,
@@ -373,27 +373,27 @@ export class UserService {
         ip,
       });
 
-      // Return user without password
+      // 비밀번호 없이 사용자 반환
       const { userPassword: _, ...userToReturn } = savedUser;
       return userToReturn;
     });
   }
 
   /**
-   * Validates and sanitizes profile update data
+   * 프로필 업데이트 데이터를 검증하고 새니타이즈합니다
    */
   private validateAndSanitizeUpdateData(
     updateUserDto: UpdateUserDto,
   ): UpdateUserDto {
     const sanitized: UpdateUserDto = {};
 
-    // Sanitize name
+    // 이름 새니타이즈
     if (updateUserDto.userName !== undefined) {
       sanitized.userName = this.inputSanitizer.sanitizeName(
         updateUserDto.userName,
       );
 
-      // Additional name validation
+      // 추가 이름 검증
       if (sanitized.userName && sanitized.userName.length > 200) {
         throw new BadRequestException({
           message: 'Name too long',
@@ -403,13 +403,13 @@ export class UserService {
       }
     }
 
-    // Sanitize email
+    // 이메일 새니타이즈
     if (updateUserDto.userEmail !== undefined) {
       sanitized.userEmail = this.inputSanitizer.sanitizeEmail(
         updateUserDto.userEmail,
       );
 
-      // Additional email validation
+      // 추가 이메일 검증
       if (sanitized.userEmail && sanitized.userEmail.length > 100) {
         throw new BadRequestException({
           message: 'Email too long',
@@ -419,13 +419,13 @@ export class UserService {
       }
     }
 
-    // Sanitize description
+    // 설명 새니타이즈
     if (updateUserDto.userDescription !== undefined) {
       sanitized.userDescription = this.inputSanitizer.sanitizeDescription(
         updateUserDto.userDescription,
       );
 
-      // Additional description validation
+      // 추가 설명 검증
       if (
         sanitized.userDescription &&
         sanitized.userDescription.length > 4000
@@ -442,14 +442,14 @@ export class UserService {
   }
 
   /**
-   * Additional security validation for profile image uploads
+   * 프로필 이미지 업로드를 위한 추가 보안 검증
    */
   private validateProfileImageSecurity(
     profileImageFile: Express.Multer.File,
     userSeq: number,
     ip: string,
   ): void {
-    // Check file name for suspicious patterns
+    // 의심스러운 패턴에 대한 파일 이름 검사
     const suspiciousPatterns = [
       /\.(php|jsp|asp|aspx|exe|bat|cmd|sh)$/i,
       /\.(htaccess|htpasswd)$/i,
@@ -474,7 +474,7 @@ export class UserService {
       }
     }
 
-    // Check for excessively large files (additional check beyond multer limits)
+    // 과도하게 큰 파일 검사 (multer 제한을 넘어선 추가 검사)
     const maxSize = 5 * 1024 * 1024; // 5MB
     if (profileImageFile.size > maxSize) {
       this.logger.warn('Profile image file too large', {
@@ -492,7 +492,7 @@ export class UserService {
       });
     }
 
-    // Check MIME type matches file extension
+    // MIME 타입이 파일 확장자와 일치하는지 검사
     const allowedMimeTypes = [
       'image/jpeg',
       'image/png',
@@ -522,7 +522,7 @@ export class UserService {
     ip: string,
   ): Promise<void> {
     return this.dataSource.transaction(async (transactionalEntityManager) => {
-      // Enhanced user validation
+      // 향상된 사용자 검증
       const currentUser = await transactionalEntityManager.findOne(UserEntity, {
         where: { userSeq },
       });
@@ -535,7 +535,7 @@ export class UserService {
         throw new BadRequestException('사용자를 찾을 수 없습니다.');
       }
 
-      // Additional security check - ensure user is active
+      // 추가 보안 검사 - 사용자가 활성 상태인지 확인
       if (currentUser.adminYn === 'SUSPENDED') {
         this.logger.warn('Password change attempted by suspended user', {
           userSeq,
@@ -547,7 +547,7 @@ export class UserService {
         );
       }
 
-      // Validate current password
+      // 현재 비밀번호 검증
       const isCurrentPasswordValid = await isHashValid(
         changePasswordDto.currentPassword,
         currentUser.userPassword,
@@ -565,14 +565,14 @@ export class UserService {
         throw new UnauthorizedException('현재 비밀번호가 올바르지 않습니다.');
       }
 
-      // Validate new password confirmation
+      // 새 비밀번호 확인 검증
       if (changePasswordDto.newPassword !== changePasswordDto.confirmPassword) {
         throw new BadRequestException(
           '새 비밀번호와 비밀번호 확인이 일치하지 않습니다.',
         );
       }
 
-      // Check if new password is different from current password
+      // 새 비밀번호가 현재 비밀번호와 다른지 확인
       const isSamePassword = await isHashValid(
         changePasswordDto.newPassword,
         currentUser.userPassword,
@@ -584,23 +584,23 @@ export class UserService {
         );
       }
 
-      // Encrypt new password
+      // 새 비밀번호 암호화
       const encryptedNewPassword = await encrypt(changePasswordDto.newPassword);
 
-      // Update password
+      // 비밀번호 업데이트
       currentUser.userPassword = encryptedNewPassword;
 
-      // Set audit columns for update
+      // 업데이트를 위한 감사 컬럼 설정
       const updatedUser = setAuditColumn({
         entity: currentUser,
         id: currentUser.userId,
         ip,
       });
 
-      // Save updated user
+      // 업데이트된 사용자 저장
       await transactionalEntityManager.save(UserEntity, updatedUser);
 
-      // Log successful password change
+      // 성공적인 비밀번호 변경 로깅
       this.logger.log('Password change completed successfully', {
         userSeq,
         userId: currentUser.userId,

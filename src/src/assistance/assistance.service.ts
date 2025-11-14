@@ -119,32 +119,32 @@ export class AssistanceService implements OnModuleInit {
   ) {}
 
   /**
-   * Get current date in KST (Korea Standard Time, UTC+9) timezone
-   * @returns Current date in YYYY-MM-DD format
+   * KST (한국 표준시, UTC+9) 시간대의 현재 날짜 가져오기
+   * @returns YYYY-MM-DD 형식의 현재 날짜
    */
   private getCurrentKSTDate(): string {
     const now = new Date();
-    const kstOffset = 9 * 60; // KST is UTC+9 in minutes
+    const kstOffset = 9 * 60; // KST는 UTC+9 (분 단위)
     const kstTime = new Date(now.getTime() + kstOffset * 60 * 1000);
     return kstTime.toISOString().split('T')[0]; // YYYY-MM-DD
   }
 
   /**
-   * Find a todo by its content (case-insensitive search)
-   * @param userSeq - User sequence number to filter todos
-   * @param contentToFind - Content text to search for
-   * @returns Result object with success status, todoSeq if found, or error message
+   * 내용으로 할 일 찾기 (대소문자 구분 없는 검색)
+   * @param userSeq - 할 일을 필터링할 사용자 시퀀스 번호
+   * @param contentToFind - 검색할 내용 텍스트
+   * @returns 성공 상태, 찾은 경우 todoSeq, 또는 오류 메시지를 포함하는 결과 객체
    */
   private async findTodoByContent(
     userSeq: number,
     contentToFind: string,
   ): Promise<{ success: boolean; todoSeq?: number; matches?: number; error?: string }> {
     try {
-      // Get all user's todos
+      // 사용자의 모든 할 일 가져오기
       const currentDate = new Date().toISOString().split('T')[0];
       const allTodos = await this.todoService.findAll(userSeq, currentDate);
       
-      // Case-insensitive search
+      // 대소문자 구분 없는 검색
       const matches = allTodos.filter(todo => 
         todo.todoContent.toLowerCase().includes(contentToFind.toLowerCase())
       );
@@ -232,7 +232,7 @@ export class AssistanceService implements OnModuleInit {
         systemPrompt = systemPrompt.replace(/\[사용자 이름\]/g, userName);
       }
 
-      // Add current date context to system prompt
+      // 시스템 프롬프트에 현재 날짜 컨텍스트 추가
       const currentDate = this.getCurrentKSTDate();
       const dateContext = `\n\n[CURRENT_DATE]\n오늘 날짜: ${currentDate} (YYYY-MM-DD 형식)\n이 날짜를 기준으로 "오늘", "내일", "다음 주" 등의 상대적 날짜를 계산하세요.`;
       systemPrompt = systemPrompt + dateContext;
@@ -477,7 +477,7 @@ export class AssistanceService implements OnModuleInit {
       if (error instanceof AxiosError && error.response) {
         const status = error.response.status;
 
-        // 503 (Overloaded) 또는 429 (Rate Limit / 너무 많은 요청) 오류인 경우
+        // 503 (과부하) 또는 429 (속도 제한 / 너무 많은 요청) 오류인 경우
         if (status === 503 || status === 429) {
           // 500 대신 "서비스 사용 불가 (503)" 예외를 발생시킵니다.
           throw new ServiceUnavailableException(
@@ -680,7 +680,7 @@ export class AssistanceService implements OnModuleInit {
         `[createTodo] Todo 생성 성공. todoSeq: ${createdTodo.todoSeq}`,
       );
 
-      // Auto-refresh list after creation (±7 days)
+      // 생성 후 목록 자동 새로고침 (±7일)
       const refreshedList = await this.getTodos(userSeq, undefined, 7);
 
       // 구조화된 성공 응답 반환
@@ -740,11 +740,11 @@ export class AssistanceService implements OnModuleInit {
     try {
       let targetTodoSeq = todoSeq;
       
-      // If no todoSeq provided, search by content
+      // todoSeq가 제공되지 않은 경우 내용으로 검색
       if (!targetTodoSeq && todoContentToFind) {
         const searchResult = await this.findTodoByContent(userSeq, todoContentToFind);
         if (!searchResult.success) {
-          return searchResult; // Return error to AI
+          return searchResult; // AI에게 오류 반환
         }
         targetTodoSeq = searchResult.todoSeq;
       }
@@ -770,7 +770,7 @@ export class AssistanceService implements OnModuleInit {
         updateTodoDto.todoContent = updateData.todoContent;
       }
       if (updateData?.isCompleted !== undefined) {
-        // Convert boolean to completeDtm: true = NOW(), false = null
+        // boolean을 completeDtm으로 변환: true = NOW(), false = null
         updateTodoDto.completeDtm = updateData.isCompleted ? 'NOW()' : null;
       }
       if (updateData?.todoNote !== undefined) {
@@ -807,7 +807,7 @@ export class AssistanceService implements OnModuleInit {
         `[updateTodo] Todo 수정 성공. todoSeq: ${updatedTodo.todoSeq}`,
       );
 
-      // Auto-refresh list after update (±7 days)
+      // 업데이트 후 목록 자동 새로고침 (±7일)
       const refreshedList = await this.getTodos(userSeq, undefined, 7);
 
       // 업데이트된 TODO 데이터와 함께 구조화된 성공 응답 반환

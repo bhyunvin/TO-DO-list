@@ -4,12 +4,12 @@ import { render, screen, fireEvent, waitFor, within } from '@testing-library/rea
 import userEvent from '@testing-library/user-event';
 import ProfileUpdateForm from './ProfileUpdateForm';
 
-// Mock SweetAlert2
+// SweetAlert2 모킹
 jest.mock('sweetalert2', () => ({
   fire: jest.fn(() => Promise.resolve({ isConfirmed: true }))
 }));
 
-// Mock file upload hooks
+// 파일 업로드 훅 모킹
 jest.mock('../hooks/useFileUploadValidator', () => ({
   useFileUploadValidator: () => ({
     validateFiles: jest.fn(() => [{ isValid: true, file: {}, fileName: 'test.jpg', fileSize: 1000 }]),
@@ -29,7 +29,7 @@ jest.mock('../hooks/useFileUploadProgress', () => ({
   })
 }));
 
-// Mock FileUploadProgress component
+// FileUploadProgress 컴포넌트 모킹
 jest.mock('./FileUploadProgress', () => {
   return function MockFileUploadProgress() {
     return <div data-testid="file-upload-progress">File Upload Progress</div>;
@@ -117,10 +117,10 @@ describe('ProfileUpdateForm', () => {
     const nameInput = screen.getByLabelText(/이름/);
     const submitButton = screen.getByRole('button', { name: /저장/ });
     
-    // Clear and add a very long name that exceeds maxLength
+    // maxLength를 초과하는 매우 긴 이름을 지우고 추가
     await user.clear(nameInput);
-    // Since maxLength prevents typing more than 200 chars, we'll test the validation logic
-    // by manually setting a long value and triggering validation
+    // maxLength가 200자 이상 입력을 방지하므로, 긴 값을 수동으로 설정하고
+    // 검증을 트리거하여 검증 로직을 테스트합니다
     fireEvent.change(nameInput, { target: { value: 'a'.repeat(201) } });
     fireEvent.blur(nameInput);
 
@@ -143,10 +143,10 @@ describe('ProfileUpdateForm', () => {
     const emailInput = screen.getByLabelText(/이메일/);
     const submitButton = screen.getByRole('button', { name: /저장/ });
     
-    // Clear and add a very long email that exceeds maxLength
+    // maxLength를 초과하는 매우 긴 이메일을 지우고 추가
     await user.clear(emailInput);
-    // Since maxLength prevents typing more than 100 chars, we'll test the validation logic
-    // by manually setting a long value and triggering validation
+    // maxLength가 100자 이상 입력을 방지하므로, 긴 값을 수동으로 설정하고
+    // 검증을 트리거하여 검증 로직을 테스트합니다
     fireEvent.change(emailInput, { target: { value: 'a'.repeat(95) + '@test.com' } });
     fireEvent.blur(emailInput);
 

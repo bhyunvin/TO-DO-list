@@ -86,7 +86,7 @@ export class UserController {
         ip,
       );
 
-      // Log successful signup with file upload
+      // 파일 업로드와 함께 성공적인 회원가입 로깅
       if (profileImageFile) {
         const errorContext = this.fileUploadErrorService.extractErrorContext(
           {
@@ -156,7 +156,7 @@ export class UserController {
     @Ip() ip: string,
   ): Promise<Omit<UserEntity, 'userPassword'>> {
     try {
-      // Enhanced authentication and authorization checks
+      // 향상된 인증 및 권한 검사
       const currentUser = session.user;
       if (!currentUser || !currentUser.userSeq) {
         this.logger.warn('Profile update attempted without valid session', {
@@ -168,7 +168,7 @@ export class UserController {
         );
       }
 
-      // Additional session validation - check if session is still valid
+      // 추가 세션 검증 - 세션이 여전히 유효한지 확인
       if (!session.user.userId) {
         this.logger.warn(
           'Profile update attempted with incomplete session data',
@@ -183,10 +183,10 @@ export class UserController {
         );
       }
 
-      // Verify user can only update their own profile
+      // 사용자가 자신의 프로필만 업데이트할 수 있는지 확인
       const userSeq = currentUser.userSeq;
 
-      // Log profile update attempt for audit purposes
+      // 감사 목적으로 프로필 업데이트 시도 로깅
       this.logger.log('Profile update attempt', {
         userSeq,
         userId: currentUser.userId,
@@ -196,10 +196,10 @@ export class UserController {
         sessionId: session.id,
       });
 
-      // Rate limiting check - prevent too frequent updates
+      // 속도 제한 검사 - 너무 빈번한 업데이트 방지
       const lastUpdateTime = session.lastProfileUpdate;
       const now = Date.now();
-      const minUpdateInterval = 60000; // 1 minute minimum between updates
+      const minUpdateInterval = 60000; // 업데이트 간 최소 1분
 
       if (lastUpdateTime && now - lastUpdateTime < minUpdateInterval) {
         this.logger.warn('Profile update rate limit exceeded', {
@@ -220,7 +220,7 @@ export class UserController {
         ip,
       );
 
-      // Update session with new user data and timestamp
+      // 새 사용자 데이터와 타임스탬프로 세션 업데이트
       session.user = updatedUser;
       session.lastProfileUpdate = now;
 
@@ -279,7 +279,7 @@ export class UserController {
     @Ip() ip: string,
   ): Promise<{ message: string }> {
     try {
-      // Enhanced authentication checks
+      // 향상된 인증 검사
       const currentUser = session.user;
       if (!currentUser || !currentUser.userSeq) {
         this.logger.warn('Password change attempted without valid session', {
@@ -291,7 +291,7 @@ export class UserController {
         );
       }
 
-      // Additional session validation
+      // 추가 세션 검증
       if (!session.user.userId) {
         this.logger.warn(
           'Password change attempted with incomplete session data',
@@ -308,7 +308,7 @@ export class UserController {
 
       const userSeq = currentUser.userSeq;
 
-      // Log password change attempt for audit purposes
+      // 감사 목적으로 비밀번호 변경 시도 로깅
       this.logger.log('Password change attempt', {
         userSeq,
         userId: currentUser.userId,
@@ -316,10 +316,10 @@ export class UserController {
         sessionId: session.id,
       });
 
-      // Rate limiting check - prevent too frequent password changes
+      // 속도 제한 검사 - 너무 빈번한 비밀번호 변경 방지
       const lastPasswordChange = session.lastPasswordChange;
       const now = Date.now();
-      const minChangeInterval = 300000; // 5 minutes minimum between password changes
+      const minChangeInterval = 300000; // 비밀번호 변경 간 최소 5분
 
       if (lastPasswordChange && now - lastPasswordChange < minChangeInterval) {
         this.logger.warn('Password change rate limit exceeded', {
@@ -335,7 +335,7 @@ export class UserController {
 
       await this.userService.changePassword(userSeq, changePasswordDto, ip);
 
-      // Update session with password change timestamp
+      // 비밀번호 변경 타임스탬프로 세션 업데이트
       session.lastPasswordChange = now;
 
       return new Promise((resolve, reject) => {
