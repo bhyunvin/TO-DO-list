@@ -29,8 +29,7 @@ export class TodoService {
 
   async findAll(userSeq: number, todoDate: string): Promise<TodoEntity[]> {
     const startOfDay = `${todoDate} 00:00:00`;
-    const nextDayStr =
-      format(addDays(new Date(todoDate), 1), 'yyyy-MM-dd') + ' 00:00:00';
+    const nextDayStr = `${format(addDays(new Date(todoDate), 1), 'yyyy-MM-dd')} 00:00:00`;
 
     const qb = this.todoRepository.createQueryBuilder('todo');
 
@@ -80,14 +79,15 @@ export class TodoService {
     ip: string,
     createTodoDto: CreateTodoDto,
   ): Promise<TodoEntity> {
+    const { userSeq, userId } = user;
     const newTodo = this.todoRepository.create({
       ...createTodoDto,
-      userSeq: user.userSeq,
+      userSeq,
     });
     const auditSettings: AuditSettings = {
       ip,
       entity: newTodo,
-      id: user.userId,
+      id: userId,
     };
     setAuditColumn(auditSettings);
 
@@ -100,8 +100,9 @@ export class TodoService {
     ip: string,
     updateTodoDto: UpdateTodoDto,
   ): Promise<TodoEntity> {
+    const { userSeq, userId } = user;
     const todo = await this.todoRepository.findOne({
-      where: { todoSeq: id, userSeq: user.userSeq },
+      where: { todoSeq: id, userSeq },
     });
     if (!todo) {
       return null;
@@ -111,7 +112,7 @@ export class TodoService {
     const auditSettings: AuditSettings = {
       ip,
       entity: todo,
-      id: user.userId,
+      id: userId,
       isUpdate: true,
     };
     setAuditColumn(auditSettings);
@@ -124,10 +125,11 @@ export class TodoService {
     ip: string,
     todoId: number,
   ): Promise<void> {
+    const { userSeq, userId } = user;
     const todoToDelete = await this.todoRepository.findOne({
       where: {
         todoSeq: todoId,
-        userSeq: user.userSeq,
+        userSeq,
       },
     });
 
@@ -136,7 +138,7 @@ export class TodoService {
       setAuditColumn({
         ip,
         entity: todoToDelete,
-        id: user.userId,
+        id: userId,
         isUpdate: true,
       });
       await this.todoRepository.save(todoToDelete);
@@ -156,10 +158,11 @@ export class TodoService {
       };
     }
 
+    const { userId } = user;
     const auditSettings: AuditSettings = {
       ip,
       entity: null,
-      id: user.userId,
+      id: userId,
     };
 
     try {
@@ -208,10 +211,11 @@ export class TodoService {
     let fileGroupNo: number | null = null;
 
     if (files && files.length > 0) {
+      const { userId } = user;
       const auditSettings: AuditSettings = {
         ip,
         entity: null,
-        id: user.userId,
+        id: userId,
       };
 
       try {
@@ -240,12 +244,13 @@ export class TodoService {
       }
     }
 
+    const { todoSeq, todoContent, todoDate, todoNote, completeDtm } = newTodo;
     return {
-      todoSeq: newTodo.todoSeq,
-      todoContent: newTodo.todoContent,
-      todoDate: newTodo.todoDate,
-      todoNote: newTodo.todoNote,
-      completeDtm: newTodo.completeDtm,
+      todoSeq,
+      todoContent,
+      todoDate,
+      todoNote,
+      completeDtm,
       attachments,
       createdAt: newTodo.auditColumns.regDtm.toISOString(),
     };
@@ -257,8 +262,9 @@ export class TodoService {
     ip: string,
     files: Express.Multer.File[],
   ): Promise<FileUploadResponseDto> {
+    const { userSeq, userId } = user;
     const todo = await this.todoRepository.findOne({
-      where: { todoSeq: todoId, userSeq: user.userSeq, delYn: 'N' },
+      where: { todoSeq: todoId, userSeq, delYn: 'N' },
     });
 
     if (!todo) {
@@ -280,7 +286,7 @@ export class TodoService {
     const auditSettings: AuditSettings = {
       ip,
       entity: null,
-      id: user.userId,
+      id: userId,
     };
 
     try {
@@ -320,13 +326,14 @@ export class TodoService {
         const savedFiles: FileInfoEntity[] = [];
 
         for (const file of files) {
+          const { path, filename, originalname, size } = file;
           let newFile = this.fileInfoRepository.create({
-            fileGroupNo: fileGroupNo,
-            filePath: file.path,
-            saveFileName: file.filename,
-            originalFileName: file.originalname,
-            fileExt: file.originalname.split('.').pop() || '',
-            fileSize: file.size,
+            fileGroupNo,
+            filePath: path,
+            saveFileName: filename,
+            originalFileName: originalname,
+            fileExt: originalname.split('.').pop() || '',
+            fileSize: size,
             fileCategory: 'todo_attachment',
             validationStatus: 'validated',
           });
@@ -372,7 +379,7 @@ export class TodoService {
   ): Promise<FileAttachmentResponseDto[]> {
     // TODO 항목이 존재하고 사용자 소유인지 확인합니다.
     const todo = await this.todoRepository.findOne({
-      where: { todoSeq: todoId, userSeq: userSeq, delYn: 'N' },
+      where: { todoSeq: todoId, userSeq, delYn: 'N' },
     });
 
     if (!todo || !todo.todoFileGroupNo) {
@@ -380,9 +387,10 @@ export class TodoService {
     }
 
     // 파일 그룹에 속한 모든 파일을 조회합니다.
+    const { todoFileGroupNo } = todo;
     const files = await this.fileInfoRepository.find({
       where: {
-        fileGroupNo: todo.todoFileGroupNo,
+        fileGroupNo: todoFileGroupNo,
         fileCategory: 'todo_attachment',
       },
       order: { fileNo: 'ASC' },
@@ -482,18 +490,19 @@ export class TodoService {
       const rowNumber = index + 3;
       const dataRow = worksheet.getRow(rowNumber);
       dataRow.height = ROW_HEIGHT; // 데이터 행의 높이를 설정합니다.
+      const { todoSeq, todoContent, completeDtm, todoNote } = todo;
 
-      dataRow.getCell('B').value = todo.todoSeq;
+      dataRow.getCell('B').value = todoSeq;
       dataRow.getCell('B').alignment = {
         horizontal: 'center',
         vertical: 'middle',
       };
-      dataRow.getCell('C').value = todo.todoContent || '';
+      dataRow.getCell('C').value = todoContent || '';
 
       // completeDtm을 "YYYY-MM-DD HH:mm" 형식으로 포맷합니다.
-      if (todo.completeDtm) {
-        const completeDtm = new Date(todo.completeDtm);
-        dataRow.getCell('D').value = format(completeDtm, 'yyyy-MM-dd HH:mm');
+      if (completeDtm) {
+        const completeDtmDate = new Date(completeDtm);
+        dataRow.getCell('D').value = format(completeDtmDate, 'yyyy-MM-dd HH:mm');
         dataRow.getCell('D').alignment = {
           horizontal: 'center',
           vertical: 'middle',
@@ -502,7 +511,7 @@ export class TodoService {
         dataRow.getCell('D').value = '';
       }
 
-      dataRow.getCell('E').value = todo.todoNote || '';
+      dataRow.getCell('E').value = todoNote || '';
     });
 
     // 워크북을 버퍼로 변환하여 반환합니다.

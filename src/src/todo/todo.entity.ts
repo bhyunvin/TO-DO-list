@@ -1,5 +1,5 @@
-import { AuditColumns } from '../utils/auditColumns';
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { AuditColumns } from '../utils/auditColumns';
 
 @Entity('nj_todo')
 export class TodoEntity {

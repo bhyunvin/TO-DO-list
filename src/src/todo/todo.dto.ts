@@ -1,9 +1,7 @@
 // ToDo 항목 생성을 위한 DTO (Data Transfer Object)
 export class CreateTodoDto {
   todoContent: string; // 할 일 내용
-
   todoDate: string; // 할 일 날짜
-
   todoNote?: string; // 비고 (선택 사항)
 }
 
@@ -15,9 +13,7 @@ export class CreateTodoWithFilesDto extends CreateTodoDto {
 // ToDo 항목 수정을 위한 DTO
 export class UpdateTodoDto {
   todoContent?: string; // 할 일 내용 (선택 사항)
-
   completeDtm?: string; // 완료 일시 (선택 사항)
-
   todoNote?: string; // 비고 (선택 사항)
 }
 

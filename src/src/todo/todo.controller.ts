@@ -48,13 +48,15 @@ export class TodoController {
     @Body() createTodoDto: CreateTodoDto,
     @Ip() ip: string,
   ) {
-    return this.todoService.create(session.user, ip, createTodoDto);
+    const { user } = session;
+    return this.todoService.create(user, ip, createTodoDto);
   }
 
   // 특정 날짜의 모든 ToDo 항목을 조회합니다.
   @Get()
   findAll(@Session() session: SessionData, @Query('date') date: string) {
-    return this.todoService.findAll(session.user.userSeq, date);
+    const { user } = session;
+    return this.todoService.findAll(user.userSeq, date);
   }
 
   // ToDo 항목을 Excel 파일로 내보냅니다.
@@ -67,7 +69,8 @@ export class TodoController {
   ) {
     try {
       // 세션에서 userSeq 추출
-      const userSeq = session.user.userSeq;
+      const { user } = session;
+      const { userSeq } = user;
 
       // Excel 파일 생성 (검증은 서비스 레이어에서 수행)
       const buffer = await this.todoService.exportToExcel(
@@ -89,8 +92,9 @@ export class TodoController {
       // Excel 버퍼를 응답으로 전송
       res.send(buffer);
     } catch (error) {
+      const { user } = session;
       this.logger.error('Excel export failed', {
-        userId: session.user.userSeq,
+        userId: user.userSeq,
         startDate,
         endDate,
         error: error.message,
@@ -107,7 +111,8 @@ export class TodoController {
     @Ip() ip: string,
     @Body() updateTodoDto: UpdateTodoDto,
   ) {
-    return this.todoService.update(Number(id), session.user, ip, updateTodoDto);
+    const { user } = session;
+    return this.todoService.update(Number(id), user, ip, updateTodoDto);
   }
 
   // 특정 ToDo 항목을 삭제합니다.
@@ -118,7 +123,8 @@ export class TodoController {
     @Session() session: SessionData,
     @Ip() ip: string,
   ) {
-    return this.todoService.delete(session.user, ip, Number(id));
+    const { user } = session;
+    return this.todoService.delete(user, ip, Number(id));
   }
 
   // TODO 파일 첨부 업로드 엔드포인트
@@ -133,11 +139,8 @@ export class TodoController {
     @Ip() ip: string,
   ) {
     try {
-      const result = await this.todoService.uploadAttachments(
-        session.user,
-        ip,
-        files,
-      );
+      const { user } = session;
+      const result = await this.todoService.uploadAttachments(user, ip, files);
 
       // 성공적인 업로드 로그 기록
       const errorContext = this.fileUploadErrorService.extractErrorContext(
@@ -149,7 +152,7 @@ export class TodoController {
           path: '/todo/upload-attachments',
         } as any,
         'todo_attachment',
-        session.user.userSeq,
+        user.userSeq,
       );
 
       this.fileUploadErrorService.logSuccessfulUpload(
@@ -166,8 +169,9 @@ export class TodoController {
         errorContext.requestId,
       );
     } catch (error) {
+      const { user } = session;
       this.logger.error('TODO attachment upload failed', {
-        userId: session.user.userSeq,
+        userId: user.userSeq,
         error: error.message,
         fileCount: files?.length || 0,
       });
@@ -188,8 +192,9 @@ export class TodoController {
     @Ip() ip: string,
   ) {
     try {
+      const { user } = session;
       const result = await this.todoService.createWithFiles(
-        session.user,
+        user,
         ip,
         createTodoDto,
         files,
@@ -206,7 +211,7 @@ export class TodoController {
             path: '/todo/with-files',
           } as any,
           'todo_attachment',
-          session.user.userSeq,
+          user.userSeq,
         );
 
         this.fileUploadErrorService.logSuccessfulUpload(
@@ -220,8 +225,9 @@ export class TodoController {
 
       return result;
     } catch (error) {
+      const { user } = session;
       this.logger.error('TODO creation with files failed', {
-        userId: session.user.userSeq,
+        userId: user.userSeq,
         error: error.message,
         fileCount: files?.length || 0,
       });
@@ -242,9 +248,10 @@ export class TodoController {
     @Ip() ip: string,
   ) {
     try {
+      const { user } = session;
       const result = await this.todoService.addAttachments(
         Number(id),
-        session.user,
+        user,
         ip,
         files,
       );
@@ -259,7 +266,7 @@ export class TodoController {
           path: `/todo/${id}/attachments`,
         } as any,
         'todo_attachment',
-        session.user.userSeq,
+        user.userSeq,
       );
 
       this.fileUploadErrorService.logSuccessfulUpload(
@@ -276,9 +283,10 @@ export class TodoController {
         errorContext.requestId,
       );
     } catch (error) {
+      const { user } = session;
       this.logger.error('TODO attachment addition failed', {
         todoId: id,
-        userId: session.user.userSeq,
+        userId: user.userSeq,
         error: error.message,
         fileCount: files?.length || 0,
       });
@@ -289,6 +297,7 @@ export class TodoController {
   // TODO 항목의 첨부 파일 목록을 조회합니다.
   @Get(':id/attachments')
   getAttachments(@Param('id') id: string, @Session() session: SessionData) {
-    return this.todoService.getAttachments(Number(id), session.user.userSeq);
+    const { user } = session;
+    return this.todoService.getAttachments(Number(id), user.userSeq);
   }
 }

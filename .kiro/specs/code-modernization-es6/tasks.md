@@ -32,7 +32,7 @@
   - Apply ES6+ syntax considering TypeScript characteristics
   - _Requirements: 1.1, 1.2, 1.3, 2.1, 2.2, 3.1, 3.2, 3.3, 3.4, 3.5, 4.2_
 
-- [ ] 6. Refactor backend Todo module
+- [x] 6. Refactor backend Todo module
   - Refactor src/todo/todo.service.ts
   - Refactor src/todo/todo.controller.ts
   - Refactor src/todo/todo.dto.ts, todo.entity.ts
