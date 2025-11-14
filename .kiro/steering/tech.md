@@ -96,3 +96,13 @@ npm test -- --testNamePattern="test name pattern"
 - Backend: `.env` in `src/` directory
 - Frontend: `.env` in `client/` directory  
 - Database credentials stored securely in macOS Keychain
+
+## Code Comments Guidelines
+- **All code comments should be written in Korean**, except for syntax-required elements (e.g., JSDoc tags like `@param`, `@return`)
+- This applies to:
+  - Inline comments (`//`)
+  - Block comments (`/* */`)
+  - JSX comments (`{/* */}`)
+  - JSDoc documentation comments
+- Variable names, function names, and technical terms should remain in English
+- Comment content and descriptions should be in Korean

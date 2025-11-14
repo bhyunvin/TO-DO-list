@@ -88,3 +88,9 @@ myTodoApp/
 - Keep shared utilities in dedicated `utils/` directories
 - Separate configuration files at appropriate levels
 - Use consistent file extensions (`.ts` for backend, `.js` for frontend)
+
+## Code Comments Guidelines
+- **All code comments should be written in Korean**, except for syntax-required elements
+- This includes inline comments, block comments, JSX comments, and JSDoc documentation
+- Variable names, function names, and technical terms remain in English
+- Only the descriptive content of comments should be in Korean
