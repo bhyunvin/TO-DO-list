@@ -46,7 +46,7 @@
   - Apply ES6+ syntax considering TypeScript characteristics
   - _Requirements: 1.1, 1.2, 1.3, 2.1, 2.2, 3.1, 3.2, 3.3, 3.4, 3.5, 4.2_
 
-- [ ] 8. Refactor backend FileUpload module
+- [x] 8. Refactor backend FileUpload module
   - Refactor src/fileUpload/fileUploadUtil.ts
   - Refactor all files in src/fileUpload/validation/ directory
   - Refactor src/fileUpload/file.entity.ts

@@ -25,7 +25,7 @@ export class FileValidationService {
     file: File | Express.Multer.File,
     maxSize: number,
   ): ValidationResult {
-    const fileSize = file.size;
+    const { size: fileSize } = file;
 
     if (fileSize > maxSize) {
       return {
@@ -80,10 +80,10 @@ export class FileValidationService {
     files: File[] | Express.Multer.File[],
     config: ValidationConfig,
   ): ValidationResult[] {
-    const results: ValidationResult[] = [];
+    const { maxFileCount, maxFileSize, allowedExtensions, blockedExtensions } = config;
 
     // 파일 개수 제한 확인
-    if (config.maxFileCount && files.length > config.maxFileCount) {
+    if (maxFileCount && files.length > maxFileCount) {
       return files.map(() => ({
         isValid: false,
         errorCode: FILE_VALIDATION_ERRORS.TOO_MANY_FILES,
@@ -93,22 +93,14 @@ export class FileValidationService {
     }
 
     // 각 파일을 개별적으로 검증
-    for (const file of files) {
-      const sizeValidation = this.validateFileSize(file, config.maxFileSize);
+    return files.map((file) => {
+      const sizeValidation = this.validateFileSize(file, maxFileSize);
       if (!sizeValidation.isValid) {
-        results.push(sizeValidation);
-        continue;
+        return sizeValidation;
       }
 
-      const typeValidation = this.validateFileType(
-        file,
-        config.allowedExtensions,
-        config.blockedExtensions,
-      );
-      results.push(typeValidation);
-    }
-
-    return results;
+      return this.validateFileType(file, allowedExtensions, blockedExtensions);
+    });
   }
 
   /**
@@ -119,8 +111,7 @@ export class FileValidationService {
     category: FileCategory,
   ): ValidationResult[] {
     // snake_case 카테고리를 camelCase 정책 키로 매핑
-    const policyKey =
-      category === 'profile_image' ? 'profileImage' : 'todoAttachment';
+    const policyKey = category === 'profile_image' ? 'profileImage' : 'todoAttachment';
     const policyConfig = FILE_UPLOAD_POLICY[policyKey];
 
     if (!policyConfig) {
@@ -130,10 +121,9 @@ export class FileValidationService {
     const validationConfig: ValidationConfig = {
       maxFileSize: policyConfig.maxSize,
       allowedExtensions: policyConfig.allowedTypes,
-      blockedExtensions:
-        category === 'todo_attachment'
-          ? (policyConfig as any).blockedTypes || BLOCKED_EXTENSIONS
-          : BLOCKED_EXTENSIONS,
+      blockedExtensions: category === 'todo_attachment'
+        ? (policyConfig as any).blockedTypes || BLOCKED_EXTENSIONS
+        : BLOCKED_EXTENSIONS,
       maxFileCount: policyConfig.maxCount,
     };
 
@@ -147,15 +137,12 @@ export class FileValidationService {
     files: File[] | Express.Multer.File[],
     validationResults: ValidationResult[],
   ): FileValidationError[] {
-    const errors: FileValidationError[] = [];
-
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
+    return files.reduce((errors, file, i) => {
       const result = validationResults[i];
 
       if (!result.isValid) {
         const fileName = 'originalname' in file ? file.originalname : file.name;
-        const fileSize = file.size;
+        const { size: fileSize } = file;
         const fileType = extname(fileName).toLowerCase();
 
         errors.push({
@@ -166,9 +153,9 @@ export class FileValidationService {
           fileType,
         });
       }
-    }
 
-    return errors;
+      return errors;
+    }, [] as FileValidationError[]);
   }
 
   /**
@@ -178,15 +165,7 @@ export class FileValidationService {
     files: File[] | Express.Multer.File[],
     validationResults: ValidationResult[],
   ): (File | Express.Multer.File)[] {
-    const validFiles: (File | Express.Multer.File)[] = [];
-
-    for (let i = 0; i < files.length; i++) {
-      if (validationResults[i].isValid) {
-        validFiles.push(files[i]);
-      }
-    }
-
-    return validFiles;
+    return files.filter((_, i) => validationResults[i].isValid);
   }
 
   /**

@@ -82,8 +82,7 @@ export class FileUploadErrorService {
   ): FileUploadSuccessResponse {
     return {
       success: true,
-      message:
-        message || `Successfully uploaded ${uploadedFiles.length} file(s)`,
+      message: message || `Successfully uploaded ${uploadedFiles.length} file(s)`,
       uploadedFiles,
       timestamp: new Date().toISOString(),
       requestId,
@@ -99,7 +98,8 @@ export class FileUploadErrorService {
     }
 
     if (errors.length === 1) {
-      return `File "${errors[0].fileName}": ${this.getUserFriendlyMessage(errors[0])}`;
+      const [firstError] = errors;
+      return `File "${firstError.fileName}": ${this.getUserFriendlyMessage(firstError)}`;
     }
 
     // 여러 오류 - 오류 유형별로 그룹화
@@ -108,13 +108,15 @@ export class FileUploadErrorService {
 
     for (const [, fileErrors] of Object.entries(errorGroups)) {
       if (fileErrors.length === 1) {
+        const [error] = fileErrors;
         messages.push(
-          `"${fileErrors[0].fileName}": ${this.getUserFriendlyMessage(fileErrors[0])}`,
+          `"${error.fileName}": ${this.getUserFriendlyMessage(error)}`,
         );
       } else {
-        const fileNames = fileErrors.map((e) => `"${e.fileName}"`).join(', ');
+        const fileNames = fileErrors.map(({ fileName }) => `"${fileName}"`).join(', ');
+        const [firstError] = fileErrors;
         messages.push(
-          `${fileNames}: ${this.getUserFriendlyMessage(fileErrors[0])}`,
+          `${fileNames}: ${this.getUserFriendlyMessage(firstError)}`,
         );
       }
     }
@@ -130,16 +132,18 @@ export class FileUploadErrorService {
       FILE_VALIDATION_MESSAGES[error.errorCode] || error.errorMessage;
 
     switch (error.errorCode) {
-      case FILE_VALIDATION_ERRORS.FILE_TOO_LARGE:
+      case FILE_VALIDATION_ERRORS.FILE_TOO_LARGE: {
         const sizeInfo = error.fileSize
           ? ` (${this.formatFileSize(error.fileSize)})`
           : '';
         return `${baseMessage}${sizeInfo}`;
+      }
 
       case FILE_VALIDATION_ERRORS.INVALID_FILE_TYPE:
-      case FILE_VALIDATION_ERRORS.BLOCKED_FILE_TYPE:
+      case FILE_VALIDATION_ERRORS.BLOCKED_FILE_TYPE: {
         const typeInfo = error.fileType ? ` (${error.fileType})` : '';
         return `${baseMessage}${typeInfo}`;
+      }
 
       default:
         return baseMessage;
@@ -152,17 +156,14 @@ export class FileUploadErrorService {
   private groupErrorsByType(
     errors: FileValidationError[],
   ): Record<string, FileValidationError[]> {
-    return errors.reduce(
-      (groups, error) => {
-        const key = error.errorCode;
-        if (!groups[key]) {
-          groups[key] = [];
-        }
-        groups[key].push(error);
-        return groups;
-      },
-      {} as Record<string, FileValidationError[]>,
-    );
+    return errors.reduce((groups, error) => {
+      const { errorCode } = error;
+      if (!groups[errorCode]) {
+        groups[errorCode] = [];
+      }
+      groups[errorCode].push(error);
+      return groups;
+    }, {} as Record<string, FileValidationError[]>);
   }
 
   /**
@@ -174,18 +175,18 @@ export class FileUploadErrorService {
     context: ErrorLogContext,
   ): void {
     const securityErrors = errors.filter(
-      (error) => error.errorCode === FILE_VALIDATION_ERRORS.BLOCKED_FILE_TYPE,
+      ({ errorCode }) => errorCode === FILE_VALIDATION_ERRORS.BLOCKED_FILE_TYPE,
     );
 
     if (securityErrors.length === 0) {
       return;
     }
 
-    securityErrors.forEach((error) => {
+    securityErrors.forEach(({ fileName, fileType, fileSize }) => {
       this.logger.warn(`SECURITY ALERT: Blocked file type upload attempt`, {
-        fileName: error.fileName,
-        fileType: error.fileType,
-        fileSize: error.fileSize,
+        fileName,
+        fileType,
+        fileSize,
         clientIp: context.clientIp,
         userAgent: context.userAgent,
         userId: context.userId,
@@ -206,7 +207,7 @@ export class FileUploadErrorService {
     context: ErrorLogContext,
   ): void {
     const nonSecurityErrors = errors.filter(
-      (error) => error.errorCode !== FILE_VALIDATION_ERRORS.BLOCKED_FILE_TYPE,
+      ({ errorCode }) => errorCode !== FILE_VALIDATION_ERRORS.BLOCKED_FILE_TYPE,
     );
 
     if (nonSecurityErrors.length === 0) {
@@ -216,11 +217,11 @@ export class FileUploadErrorService {
     this.logger.warn(
       `File validation failed for ${nonSecurityErrors.length} file(s)`,
       {
-        errors: nonSecurityErrors.map((error) => ({
-          fileName: error.fileName,
-          errorCode: error.errorCode,
-          fileSize: error.fileSize,
-          fileType: error.fileType,
+        errors: nonSecurityErrors.map(({ fileName, errorCode, fileSize, fileType }) => ({
+          fileName,
+          errorCode,
+          fileSize,
+          fileType,
         })),
         clientIp: context.clientIp,
         userAgent: context.userAgent,
@@ -290,10 +291,7 @@ export class FileUploadErrorService {
     files: Express.Multer.File[],
     validationResults: ValidationResult[],
   ): FileValidationError[] {
-    const errors: FileValidationError[] = [];
-
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
+    return files.reduce((errors, file, i) => {
       const result = validationResults[i];
 
       if (!result.isValid) {
@@ -305,9 +303,9 @@ export class FileUploadErrorService {
           fileType: extname(file.originalname).toLowerCase(),
         });
       }
-    }
 
-    return errors;
+      return errors;
+    }, [] as FileValidationError[]);
   }
 
   /**
@@ -318,10 +316,9 @@ export class FileUploadErrorService {
     errors: FileValidationError[],
     requestId?: string,
   ): FileUploadErrorResponse {
-    const message =
-      errors.length > 0
-        ? `Partial upload success: ${uploadedFiles.length} file(s) uploaded, ${errors.length} failed`
-        : `Successfully uploaded ${uploadedFiles.length} file(s)`;
+    const message = errors.length > 0
+      ? `Partial upload success: ${uploadedFiles.length} file(s) uploaded, ${errors.length} failed`
+      : `Successfully uploaded ${uploadedFiles.length} file(s)`;
 
     return {
       success: false,

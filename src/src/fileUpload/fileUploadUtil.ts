@@ -32,14 +32,14 @@ export class FileUploadUtil {
 
     if (files.length > 0) {
       // 첫 번째 파일을 DB에 저장하여 fileGroupNo를 설정합니다.
-      const firstFile = files[0];
+      const [firstFile] = files;
       let newFirstFile = this.fileInfoRepository.create({
         filePath: firstFile.path,
         saveFileName: firstFile.filename,
         originalFileName: firstFile.originalname,
         fileExt: extname(firstFile.originalname).substring(1),
         fileSize: firstFile.size,
-        fileCategory: fileCategory,
+        fileCategory,
         validationStatus: 'validated',
       });
 
@@ -52,7 +52,7 @@ export class FileUploadUtil {
       // 첫 번째 파일의 fileGroupNo를 기준으로 업데이트합니다.
       await this.fileInfoRepository.update(
         { fileNo: fileGroupNo },
-        { fileGroupNo: fileGroupNo },
+        { fileGroupNo },
       );
 
       // 첫 번째 파일을 savedFiles에 추가합니다.
@@ -64,13 +64,13 @@ export class FileUploadUtil {
       for (let i = 1; i < files.length; i++) {
         const file = files[i];
         let newFile = this.fileInfoRepository.create({
-          fileGroupNo: fileGroupNo, // 모든 파일에 같은 fileGroupNo 설정
+          fileGroupNo, // 모든 파일에 같은 fileGroupNo 설정
           filePath: file.path,
           saveFileName: file.filename,
           originalFileName: file.originalname,
           fileExt: extname(file.originalname).substring(1),
           fileSize: file.size,
-          fileCategory: fileCategory,
+          fileCategory,
           validationStatus: 'validated',
         });
 
@@ -87,27 +87,25 @@ export class FileUploadUtil {
 }
 
 // 검증 기능이 향상된 파일 필터 함수
-export const createFileFilter = (category: FileCategory) => {
-  return (
-    req: any,
-    file: Express.Multer.File,
-    callback: (error: Error | null, acceptFile?: boolean) => void,
-  ) => {
-    const fileValidationService = new FileValidationService();
-    const validationResults = fileValidationService.validateFilesByCategory(
-      [file],
-      category,
-    );
-    const result = validationResults[0];
+export const createFileFilter = (category: FileCategory) => (
+  req: any,
+  file: Express.Multer.File,
+  callback: (error: Error | null, acceptFile?: boolean) => void,
+) => {
+  const fileValidationService = new FileValidationService();
+  const validationResults = fileValidationService.validateFilesByCategory(
+    [file],
+    category,
+  );
+  const [result] = validationResults;
 
-    if (!result.isValid) {
-      const error = new Error(result.errorMessage);
-      (error as any).code = result.errorCode;
-      return callback(error, false);
-    }
+  if (!result.isValid) {
+    const error = new Error(result.errorMessage);
+    (error as any).code = result.errorCode;
+    return callback(error, false);
+  }
 
-    callback(null, true);
-  };
+  callback(null, true);
 };
 
 // 프로필 이미지를 위한 향상된 multer 설정
@@ -115,7 +113,7 @@ export const profileImageMulterOptions = {
   storage: diskStorage({
     destination: uploadFileDirectory,
     filename: (req, file, callback) => {
-      const uniqueSuffix = Date.now() + '_' + Math.round(Math.random() * 1e9);
+      const uniqueSuffix = `${Date.now()}_${Math.round(Math.random() * 1e9)}`;
       const ext = extname(file.originalname);
       const filename = `profile_${uniqueSuffix}${ext}`;
       callback(null, filename);
@@ -133,7 +131,7 @@ export const todoAttachmentMulterOptions = {
   storage: diskStorage({
     destination: uploadFileDirectory,
     filename: (req, file, callback) => {
-      const uniqueSuffix = Date.now() + '_' + Math.round(Math.random() * 1e9);
+      const uniqueSuffix = `${Date.now()}_${Math.round(Math.random() * 1e9)}`;
       const ext = extname(file.originalname);
       const filename = `todo_${uniqueSuffix}${ext}`;
       callback(null, filename);
