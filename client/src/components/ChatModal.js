@@ -58,14 +58,14 @@ const ChatModal = ({ isOpen, onClose, user, messages, onSendMessage, isLoading, 
     }
   };
 
-  const handleInputKeyDown = (e) => {
+  const handleInputKeyDown = e => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
     }
   };
 
-  const handleKeyDown = (e) => {
+  const handleKeyDown = e => {
     if (e.key === 'Escape') {
       onClose();
     }
@@ -79,7 +79,7 @@ const ChatModal = ({ isOpen, onClose, user, messages, onSendMessage, isLoading, 
         'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
       );
       
-      const firstElement = focusableElements[0];
+      const [firstElement] = focusableElements;
       const lastElement = focusableElements[focusableElements.length - 1];
       
       if (e.shiftKey) {
@@ -134,7 +134,7 @@ const ChatModal = ({ isOpen, onClose, user, messages, onSendMessage, isLoading, 
               <p>안녕하세요! 할 일 관리에 대해 무엇이든 물어보세요.</p>
             </div>
           ) : (
-            messages.map((message) => (
+            messages.map(message => (
               <ChatMessage
                 key={message.id}
                 message={message}
@@ -192,7 +192,7 @@ const ChatModal = ({ isOpen, onClose, user, messages, onSendMessage, isLoading, 
               className="form-control chat-input"
               placeholder="할 일에 대해 질문해보세요..."
               value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
+              onChange={e => setInputValue(e.target.value)}
               onKeyDown={handleInputKeyDown}
               disabled={isLoading}
               aria-label="채팅 메시지 입력"

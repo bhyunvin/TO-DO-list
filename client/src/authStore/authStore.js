@@ -11,8 +11,9 @@ export const useAuthStore = create(
 
       api: async (url, options) => {
         const response = await fetch(url, options);
+        const { status } = response;
 
-        if (response.status === 401 || response.status === 504) {
+        if (status === 401 || status === 504) {
           set({ user: null });
         }
 

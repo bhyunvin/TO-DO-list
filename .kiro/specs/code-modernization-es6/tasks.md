@@ -1,6 +1,6 @@
 # Implementation Plan
 
-- [ ] 1. Refactor frontend core files
+- [x] 1. Refactor frontend core files
   - Apply ES6+ syntax to App.js, authStore.js, chatStore.js files
   - Convert and reorder object property shorthand syntax
   - Remove commented-out code
@@ -8,7 +8,7 @@
   - Apply arrow functions, template literals, destructuring, method shorthand syntax
   - _Requirements: 1.1, 1.2, 1.3, 2.1, 2.2, 3.1, 3.2, 3.3, 3.4, 3.5, 4.1, 4.2_
 
-- [ ] 2. Refactor frontend components
+- [x] 2. Refactor frontend components
   - Refactor all component files in components/ directory
   - Process ChatModal.js, ChatMessage.js, FloatingActionButton.js, ProfileUpdateForm.js, PasswordChangeForm.js, FileUploadProgress.js
   - Apply same ES6+ refactoring rules

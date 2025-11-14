@@ -24,7 +24,7 @@ const FileUploadProgress = ({
   /**
    * Bootstrap 컴포넌트를 위한 상태 variant 가져오기
    */
-  const getStatusVariant = (status) => {
+  const getStatusVariant = status => {
     switch (status) {
       case 'success':
         return 'success';
@@ -43,7 +43,7 @@ const FileUploadProgress = ({
   /**
    * 개별 파일 업로드 상태 가져오기
    */
-  const getFileUploadStatus = (file) => {
+  const getFileUploadStatus = file => {
     const fileName = file.name;
     
     // 파일이 성공적으로 업로드되었는지 확인
@@ -85,7 +85,7 @@ const FileUploadProgress = ({
   /**
    * 파일 업로드 진행률 가져오기
    */
-  const getFileProgress = (fileName) => {
+  const getFileProgress = fileName => {
     return uploadProgress[fileName] || 0;
   };
 
@@ -105,7 +105,7 @@ const FileUploadProgress = ({
   /**
    * 향상된 시각적 피드백 및 실시간 상태와 함께 파일 진행률 표시줄 렌더링
    */
-  const renderProgressBar = (file) => {
+  const renderProgressBar = file => {
     const progress = getFileProgress(file.name);
     const fileStatus = getFileUploadStatus(file);
     let variant = 'primary';

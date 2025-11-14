@@ -2,7 +2,7 @@ import React from 'react';
 import './FloatingActionButton.css';
 
 const FloatingActionButton = ({ isOpen, onClick }) => {
-  const handleKeyDown = (e) => {
+  const handleKeyDown = e => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       onClick();

@@ -5,7 +5,7 @@ import Swal from 'sweetalert2';
  * PasswordChangeForm 컴포넌트
  * 사용자가 비밀번호를 변경할 수 있도록 합니다
  */
-function PasswordChangeForm({ onSave, onCancel, isSubmitting = false }) {
+const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
   // 폼 상태
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -24,7 +24,7 @@ function PasswordChangeForm({ onSave, onCancel, isSubmitting = false }) {
   /**
    * 유효성 검사와 함께 현재 비밀번호 입력 변경 처리
    */
-  function handleCurrentPasswordChange(e) {
+  const handleCurrentPasswordChange = e => {
     const passwordValue = e.target.value;
     setCurrentPassword(passwordValue);
     
@@ -34,12 +34,12 @@ function PasswordChangeForm({ onSave, onCancel, isSubmitting = false }) {
     } else {
       setCurrentPasswordError('');
     }
-  }
+  };
 
   /**
    * 유효성 검사와 함께 새 비밀번호 입력 변경 처리
    */
-  function handleNewPasswordChange(e) {
+  const handleNewPasswordChange = e => {
     const passwordValue = e.target.value;
     setNewPassword(passwordValue);
     
@@ -66,12 +66,12 @@ function PasswordChangeForm({ onSave, onCancel, isSubmitting = false }) {
         setConfirmPasswordError('');
       }
     }
-  }
+  };
 
   /**
    * 유효성 검사와 함께 비밀번호 확인 입력 변경 처리
    */
-  function handleConfirmPasswordChange(e) {
+  const handleConfirmPasswordChange = e => {
     const passwordValue = e.target.value;
     setConfirmPassword(passwordValue);
     
@@ -83,12 +83,12 @@ function PasswordChangeForm({ onSave, onCancel, isSubmitting = false }) {
     } else {
       setConfirmPasswordError('');
     }
-  }
+  };
 
   /**
    * 제출 전 전체 폼 유효성 검사
    */
-  function validateForm() {
+  const validateForm = () => {
     let isValid = true;
 
     // 현재 비밀번호 유효성 검사
@@ -131,12 +131,12 @@ function PasswordChangeForm({ onSave, onCancel, isSubmitting = false }) {
     }
 
     return isValid;
-  }
+  };
 
   /**
    * 폼 제출 처리
    */
-  async function handleSubmit(e) {
+  const handleSubmit = async e => {
     e.preventDefault();
 
     // 폼 유효성 검사
@@ -157,12 +157,12 @@ function PasswordChangeForm({ onSave, onCancel, isSubmitting = false }) {
       console.error('Password change error:', error);
       // 오류 처리는 부모 컴포넌트에서 수행됨
     }
-  }
+  };
 
   /**
    * 확인과 함께 취소 동작 처리
    */
-  function handleCancel() {
+  const handleCancel = () => {
     // 폼이 수정되었는지 확인
     const hasChanges = currentPassword || newPassword || confirmPassword;
 
@@ -177,7 +177,7 @@ function PasswordChangeForm({ onSave, onCancel, isSubmitting = false }) {
         cancelButtonColor: '#6C757D',
         confirmButtonText: '확인',
         cancelButtonText: '계속 수정',
-      }).then((result) => {
+      }).then(result => {
         if (result.isConfirmed) {
           onCancel();
         }
@@ -185,12 +185,12 @@ function PasswordChangeForm({ onSave, onCancel, isSubmitting = false }) {
     } else {
       onCancel();
     }
-  }
+  };
 
   /**
    * 비밀번호 강도 표시기 가져오기
    */
-  function getPasswordStrength(password) {
+  const getPasswordStrength = password => {
     if (!password) return { strength: 0, text: '', color: '' };
     
     let strength = 0;
@@ -208,7 +208,7 @@ function PasswordChangeForm({ onSave, onCancel, isSubmitting = false }) {
     if (strength <= 2) return { strength, text: '약함', color: 'danger' };
     if (strength <= 4) return { strength, text: '보통', color: 'warning' };
     return { strength, text: '강함', color: 'success' };
-  }
+  };
 
   const passwordStrength = getPasswordStrength(newPassword);
 
@@ -368,6 +368,6 @@ function PasswordChangeForm({ onSave, onCancel, isSubmitting = false }) {
       </form>
     </div>
   );
-}
+};
 
 export default PasswordChangeForm;

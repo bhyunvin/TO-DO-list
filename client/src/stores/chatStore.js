@@ -39,7 +39,7 @@ export const useChatStore = create(
       // 액션
       addMessage: (messageData) => {
         const message = {
-          id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+          id: `${Date.now()}${Math.random().toString(36).substr(2, 9)}`,
           timestamp: new Date(),
           ...messageData,
         };
@@ -52,11 +52,14 @@ export const useChatStore = create(
         }));
       },
 
-      setLoading: (loading) => set((state) => ({ 
-        isLoading: loading,
-        requestInProgress: loading,
-        lastRequestTime: loading ? Date.now() : state.lastRequestTime
-      })),
+      setLoading: (loading) => {
+        const lastRequestTime = loading ? Date.now() : undefined;
+        set((state) => ({ 
+          isLoading: loading,
+          requestInProgress: loading,
+          lastRequestTime: lastRequestTime !== undefined ? lastRequestTime : state.lastRequestTime
+        }));
+      },
 
       setError: (error, errorType = 'GENERIC_ERROR') => {
         const errorMessage = ERROR_MESSAGES[errorType] || error || ERROR_MESSAGES.GENERIC_ERROR;
@@ -85,7 +88,7 @@ export const useChatStore = create(
 
         // 응답 상태 또는 오류 속성을 기반으로 오류 유형 결정
         if (response) {
-          const status = response.status;
+          const { status } = response;
           if (status === 401) {
             errorType = 'AUTH_ERROR';
           } else if (status === 429) {
@@ -99,10 +102,11 @@ export const useChatStore = create(
           }
         } else if (error) {
           // 네트워크 또는 기타 오류
-          if (error.name === 'TypeError' && error.message.includes('fetch')) {
+          const { name, message } = error;
+          if (name === 'TypeError' && message.includes('fetch')) {
             errorType = 'NETWORK_ERROR';
             shouldRetry = retryCount < 2; // 네트워크 오류의 경우 최대 2회 재시도 허용
-          } else if (error.name === 'AbortError' || error.message.includes('timeout')) {
+          } else if (name === 'AbortError' || message.includes('timeout')) {
             errorType = 'TIMEOUT_ERROR';
             shouldRetry = retryCount < 1; // 타임아웃의 경우 1회 재시도 허용
           }
@@ -135,7 +139,10 @@ export const useChatStore = create(
       // 재시도 기능
       setRetryMessage: (message) => set({ lastFailedMessage: message }),
 
-      getRetryMessage: () => get().lastFailedMessage,
+      getRetryMessage: () => {
+        const { lastFailedMessage } = get();
+        return lastFailedMessage;
+      },
 
       incrementRetryCount: () => set((state) => ({ retryCount: state.retryCount + 1 })),
 

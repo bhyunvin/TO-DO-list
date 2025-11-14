@@ -3,7 +3,7 @@ import DOMPurify from 'dompurify';
 import './ChatMessage.css';
 
 const ChatMessage = ({ message, isUser }) => {
-  const formatTimestamp = (timestamp) => {
+  const formatTimestamp = timestamp => {
     const date = new Date(timestamp);
     const now = new Date();
     const diffInMinutes = Math.floor((now - date) / (1000 * 60));
@@ -29,20 +29,20 @@ const ChatMessage = ({ message, isUser }) => {
     if (isUser) {
       // 사용자 메시지는 일반 텍스트
       return <div className="message-text">{message.content}</div>;
-    } else {
-      // AI 메시지는 HTML을 포함할 수 있으므로 렌더링 전에 새니타이즈
-      const sanitizedContent = DOMPurify.sanitize(message.content, {
-        ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'],
-        ALLOWED_ATTR: []
-      });
-      
-      return (
-        <div 
-          className="message-text"
-          dangerouslySetInnerHTML={{ __html: sanitizedContent }}
-        />
-      );
     }
+    
+    // AI 메시지는 HTML을 포함할 수 있으므로 렌더링 전에 새니타이즈
+    const sanitizedContent = DOMPurify.sanitize(message.content, {
+      ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'],
+      ALLOWED_ATTR: []
+    });
+    
+    return (
+      <div 
+        className="message-text"
+        dangerouslySetInnerHTML={{ __html: sanitizedContent }}
+      />
+    );
   };
 
   return (

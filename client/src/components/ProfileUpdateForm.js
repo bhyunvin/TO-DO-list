@@ -8,7 +8,7 @@ import FileUploadProgress from './FileUploadProgress';
  * ProfileUpdateForm 컴포넌트
  * 사용자가 이름, 이메일, 설명 및 프로필 이미지를 포함한 프로필 정보를 업데이트할 수 있도록 합니다
  */
-function ProfileUpdateForm({ user, onSave, onCancel, isSubmitting = false }) {
+const ProfileUpdateForm = ({ user, onSave, onCancel, isSubmitting = false }) => {
   const { 
     validateFiles, 
     formatFileSize, 
@@ -49,7 +49,7 @@ function ProfileUpdateForm({ user, onSave, onCancel, isSubmitting = false }) {
   /**
    * 프로필 이미지 파일 선택 및 유효성 검사 처리
    */
-  function handleImageChange(e) {
+  const handleImageChange = e => {
     const file = e.target.files[0];
     
     // 이전 상태 초기화
@@ -61,7 +61,7 @@ function ProfileUpdateForm({ user, onSave, onCancel, isSubmitting = false }) {
     if (file) {
       // 파일 유효성 검사
       const validationResults = validateFiles([file], 'profileImage');
-      const validation = validationResults[0];
+      const [validation] = validationResults;
       
       setProfileImageValidation(validation);
       
@@ -71,7 +71,7 @@ function ProfileUpdateForm({ user, onSave, onCancel, isSubmitting = false }) {
         
         // 미리보기 생성
         const reader = new FileReader();
-        reader.onloadend = function () {
+        reader.onloadend = () => {
           setProfileImage(reader.result);
         };
         reader.readAsDataURL(file);
@@ -81,12 +81,12 @@ function ProfileUpdateForm({ user, onSave, onCancel, isSubmitting = false }) {
         e.target.value = '';
       }
     }
-  }
+  };
 
   /**
    * 유효성 검사와 함께 이름 입력 변경 처리
    */
-  function handleNameChange(e) {
+  const handleNameChange = e => {
     const nameValue = e.target.value;
     setUserName(nameValue);
     
@@ -98,12 +98,12 @@ function ProfileUpdateForm({ user, onSave, onCancel, isSubmitting = false }) {
     } else {
       setNameError('');
     }
-  }
+  };
 
   /**
    * 유효성 검사와 함께 이메일 입력 변경 처리
    */
-  function handleEmailChange(e) {
+  const handleEmailChange = e => {
     const emailValue = e.target.value;
     setUserEmail(emailValue);
     
@@ -117,20 +117,20 @@ function ProfileUpdateForm({ user, onSave, onCancel, isSubmitting = false }) {
     } else {
       setEmailError('');
     }
-  }
+  };
 
   /**
    * 설명 입력 변경 처리
    */
-  function handleDescriptionChange(e) {
+  const handleDescriptionChange = e => {
     const descriptionValue = e.target.value;
     setUserDescription(descriptionValue);
-  }
+  };
 
   /**
    * 제출 전 전체 폼 유효성 검사
    */
-  function validateForm() {
+  const validateForm = () => {
     let isValid = true;
 
     // 이름 유효성 검사
@@ -170,12 +170,12 @@ function ProfileUpdateForm({ user, onSave, onCancel, isSubmitting = false }) {
     }
 
     return isValid;
-  }
+  };
 
   /**
    * API 통합과 함께 폼 제출 처리
    */
-  async function handleSubmit(e) {
+  const handleSubmit = async e => {
     e.preventDefault();
 
     // 폼 유효성 검사
@@ -209,12 +209,12 @@ function ProfileUpdateForm({ user, onSave, onCancel, isSubmitting = false }) {
       console.error('Profile update error:', error);
       // 오류 처리는 부모 컴포넌트에서 수행됨
     }
-  }
+  };
 
   /**
    * 확인과 함께 취소 동작 처리
    */
-  function handleCancel() {
+  const handleCancel = () => {
     // 폼이 수정되었는지 확인
     const hasChanges = 
       userName !== (user?.userName || '') ||
@@ -233,7 +233,7 @@ function ProfileUpdateForm({ user, onSave, onCancel, isSubmitting = false }) {
         cancelButtonColor: '#6C757D',
         confirmButtonText: '확인',
         cancelButtonText: '계속 수정',
-      }).then((result) => {
+      }).then(result => {
         if (result.isConfirmed) {
           resetUploadState();
           onCancel();
@@ -243,7 +243,7 @@ function ProfileUpdateForm({ user, onSave, onCancel, isSubmitting = false }) {
       resetUploadState();
       onCancel();
     }
-  }
+  };
 
   return (
     <div className="profile-update-form">
@@ -365,7 +365,7 @@ function ProfileUpdateForm({ user, onSave, onCancel, isSubmitting = false }) {
                 showValidation={false}
                 showProgress={true}
                 showDetailedStatus={true}
-                onRetryUpload={async (failedFiles) => {
+                onRetryUpload={async failedFiles => {
                   // 프로필 이미지의 경우 유효성 검사만 재설정
                   if (failedFiles.length > 0) {
                     const file = failedFiles[0];
@@ -434,6 +434,6 @@ function ProfileUpdateForm({ user, onSave, onCancel, isSubmitting = false }) {
       </form>
     </div>
   );
-}
+};
 
 export default ProfileUpdateForm;
