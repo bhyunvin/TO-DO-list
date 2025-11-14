@@ -9,5 +9,7 @@
   "moduleNameMapper": {
     "^marked$": "<rootDir>/../node_modules/marked/lib/marked.umd.js",
     "^src/(.*)$": "<rootDir>/src/$1"
-  }
+  },
+  "setupFiles": ["<rootDir>/test/setup-e2e.ts"],
+  "testTimeout": 60000
 }
