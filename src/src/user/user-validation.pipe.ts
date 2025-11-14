@@ -64,21 +64,18 @@ export class UserProfileValidationPipe implements PipeTransform<any> {
     }
 
     const sanitized = { ...value };
+    const { userName, userEmail, userDescription } = sanitized;
 
-    if (sanitized.userName) {
-      sanitized.userName = this.inputSanitizer.sanitizeName(sanitized.userName);
+    if (userName) {
+      sanitized.userName = this.inputSanitizer.sanitizeName(userName);
     }
 
-    if (sanitized.userEmail) {
-      sanitized.userEmail = this.inputSanitizer.sanitizeEmail(
-        sanitized.userEmail,
-      );
+    if (userEmail) {
+      sanitized.userEmail = this.inputSanitizer.sanitizeEmail(userEmail);
     }
 
-    if (sanitized.userDescription) {
-      sanitized.userDescription = this.inputSanitizer.sanitizeDescription(
-        sanitized.userDescription,
-      );
+    if (userDescription) {
+      sanitized.userDescription = this.inputSanitizer.sanitizeDescription(userDescription);
     }
 
     return sanitized;
@@ -100,7 +97,7 @@ export class UserProfileValidationPipe implements PipeTransform<any> {
           this.logger.error('Potential SQL injection attempt detected', {
             field: fieldName,
             pattern: pattern.toString(),
-            value: fieldValue.substring(0, 50) + '...',
+            value: `${fieldValue.substring(0, 50)}...`,
           });
 
           throw new BadRequestException({
@@ -112,16 +109,18 @@ export class UserProfileValidationPipe implements PipeTransform<any> {
       }
     };
 
-    if (value.userName) {
-      checkValue(value.userName, 'userName');
+    const { userName, userEmail, userDescription } = value;
+
+    if (userName) {
+      checkValue(userName, 'userName');
     }
 
-    if (value.userEmail) {
-      checkValue(value.userEmail, 'userEmail');
+    if (userEmail) {
+      checkValue(userEmail, 'userEmail');
     }
 
-    if (value.userDescription) {
-      checkValue(value.userDescription, 'userDescription');
+    if (userDescription) {
+      checkValue(userDescription, 'userDescription');
     }
 
     const specialCharPattern = /[<>{}[\]\\\/\$\^]/g;
@@ -137,7 +136,7 @@ export class UserProfileValidationPipe implements PipeTransform<any> {
             {
               field: key,
               specialCharRatio: specialCharCount / totalLength,
-              value: val.substring(0, 50) + '...',
+              value: `${val.substring(0, 50)}...`,
             },
           );
 

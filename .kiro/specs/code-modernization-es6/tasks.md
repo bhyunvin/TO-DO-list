@@ -25,7 +25,7 @@
   - Apply same ES6+ refactoring rules
   - _Requirements: 1.1, 1.2, 1.3, 2.1, 2.2, 3.1, 3.2, 3.3, 3.4, 3.5, 4.1, 4.2_
 
-- [ ] 5. Refactor backend User module
+- [x] 5. Refactor backend User module
   - Refactor src/user/user.service.ts
   - Refactor src/user/user.controller.ts
   - Refactor src/user/user.dto.ts, user.entity.ts

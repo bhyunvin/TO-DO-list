@@ -88,6 +88,7 @@ export class UserController {
 
       // 파일 업로드와 함께 성공적인 회원가입 로깅
       if (profileImageFile) {
+        const { originalname, size } = profileImageFile;
         const errorContext = this.fileUploadErrorService.extractErrorContext(
           {
             ip,
@@ -103,8 +104,8 @@ export class UserController {
         this.fileUploadErrorService.logSuccessfulUpload(
           [
             {
-              originalFileName: profileImageFile.originalname,
-              fileSize: profileImageFile.size,
+              originalFileName: originalname,
+              fileSize: size,
             },
           ],
           errorContext,
@@ -113,9 +114,11 @@ export class UserController {
 
       return result;
     } catch (error) {
+      const { userId } = userDto;
+      const { message } = error;
       this.logger.error('Profile image upload failed during signup', {
-        userId: userDto.userId,
-        error: error.message,
+        userId,
+        error: message,
         fileName: profileImageFile?.originalname,
         fileSize: profileImageFile?.size,
       });
@@ -158,9 +161,11 @@ export class UserController {
     try {
       // 향상된 인증 및 권한 검사
       const currentUser = session.user;
+      const { id: sessionId } = session;
+      
       if (!currentUser || !currentUser.userSeq) {
         this.logger.warn('Profile update attempted without valid session', {
-          sessionId: session.id,
+          sessionId,
           ip,
         });
         throw new UnauthorizedException(
@@ -168,13 +173,15 @@ export class UserController {
         );
       }
 
+      const { userSeq, userId } = currentUser;
+      
       // 추가 세션 검증 - 세션이 여전히 유효한지 확인
-      if (!session.user.userId) {
+      if (!userId) {
         this.logger.warn(
           'Profile update attempted with incomplete session data',
           {
-            userSeq: currentUser.userSeq,
-            sessionId: session.id,
+            userSeq,
+            sessionId,
             ip,
           },
         );
@@ -183,21 +190,18 @@ export class UserController {
         );
       }
 
-      // 사용자가 자신의 프로필만 업데이트할 수 있는지 확인
-      const userSeq = currentUser.userSeq;
-
       // 감사 목적으로 프로필 업데이트 시도 로깅
       this.logger.log('Profile update attempt', {
         userSeq,
-        userId: currentUser.userId,
+        userId,
         updateFields: Object.keys(updateUserDto),
         hasProfileImage: !!profileImageFile,
         ip,
-        sessionId: session.id,
+        sessionId,
       });
 
       // 속도 제한 검사 - 너무 빈번한 업데이트 방지
-      const lastUpdateTime = session.lastProfileUpdate;
+      const { lastProfileUpdate: lastUpdateTime } = session;
       const now = Date.now();
       const minUpdateInterval = 60000; // 업데이트 간 최소 1분
 
@@ -227,17 +231,19 @@ export class UserController {
       return new Promise((resolve, reject) => {
         session.save((err) => {
           if (err) {
+            const { message } = err;
             this.logger.error('Session save error during profile update', {
               userSeq,
-              error: err.message,
+              error: message,
               ip,
             });
             return reject(new Error('세션 저장에 실패했습니다.'));
           }
 
+          const { userId: updatedUserId } = updatedUser;
           this.logger.log('Profile update completed successfully', {
             userSeq,
-            userId: updatedUser.userId,
+            userId: updatedUserId,
             updatedFields: Object.keys(updateUserDto),
             hasNewProfileImage: !!profileImageFile,
             ip,
@@ -247,14 +253,16 @@ export class UserController {
         });
       });
     } catch (error) {
+      const { message } = error;
+      const { id: sessionId } = session;
       this.logger.error('Profile update failed', {
         userSeq: session.user?.userSeq,
         userId: session.user?.userId,
-        error: error.message,
+        error: message,
         fileName: profileImageFile?.originalname,
         fileSize: profileImageFile?.size,
         ip,
-        sessionId: session.id,
+        sessionId,
       });
 
       // 전역 예외 필터에서 처리하도록 오류 재발생
@@ -281,9 +289,11 @@ export class UserController {
     try {
       // 향상된 인증 검사
       const currentUser = session.user;
+      const { id: sessionId } = session;
+      
       if (!currentUser || !currentUser.userSeq) {
         this.logger.warn('Password change attempted without valid session', {
-          sessionId: session.id,
+          sessionId,
           ip,
         });
         throw new UnauthorizedException(
@@ -291,13 +301,15 @@ export class UserController {
         );
       }
 
+      const { userSeq, userId } = currentUser;
+      
       // 추가 세션 검증
-      if (!session.user.userId) {
+      if (!userId) {
         this.logger.warn(
           'Password change attempted with incomplete session data',
           {
-            userSeq: currentUser.userSeq,
-            sessionId: session.id,
+            userSeq,
+            sessionId,
             ip,
           },
         );
@@ -306,18 +318,16 @@ export class UserController {
         );
       }
 
-      const userSeq = currentUser.userSeq;
-
       // 감사 목적으로 비밀번호 변경 시도 로깅
       this.logger.log('Password change attempt', {
         userSeq,
-        userId: currentUser.userId,
+        userId,
         ip,
-        sessionId: session.id,
+        sessionId,
       });
 
       // 속도 제한 검사 - 너무 빈번한 비밀번호 변경 방지
-      const lastPasswordChange = session.lastPasswordChange;
+      const { lastPasswordChange } = session;
       const now = Date.now();
       const minChangeInterval = 300000; // 비밀번호 변경 간 최소 5분
 
@@ -341,9 +351,10 @@ export class UserController {
       return new Promise((resolve, reject) => {
         session.save((err) => {
           if (err) {
+            const { message } = err;
             this.logger.error('Session save error during password change', {
               userSeq,
-              error: err.message,
+              error: message,
               ip,
             });
             return reject(new Error('세션 저장에 실패했습니다.'));
@@ -351,7 +362,7 @@ export class UserController {
 
           this.logger.log('Password change completed successfully', {
             userSeq,
-            userId: currentUser.userId,
+            userId,
             ip,
           });
 
@@ -359,12 +370,14 @@ export class UserController {
         });
       });
     } catch (error) {
+      const { message } = error;
+      const { id: sessionId } = session;
       this.logger.error('Password change failed', {
         userSeq: session.user?.userSeq,
         userId: session.user?.userId,
-        error: error.message,
+        error: message,
         ip,
-        sessionId: session.id,
+        sessionId,
       });
 
       // 전역 예외 필터에서 처리하도록 오류 재발생
