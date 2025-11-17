@@ -44,9 +44,9 @@ myTodoApp/
 ### Feature Components
 - `src/loginForm/` - Authentication forms (login/signup)
 - `src/todoList/` - Todo management interface
-- `src/components/` - Reusable UI components (chat, file upload, profile, floating action button)
+- `src/components/` - Reusable UI components (chat, file upload, profile, floating action button, theme toggle)
 - `src/authStore/` - Zustand authentication state management
-- `src/stores/` - Additional Zustand stores (chat)
+- `src/stores/` - Additional Zustand stores (chat, theme)
 - `src/hooks/` - Custom React hooks (scroll lock, file upload)
 
 ### Configuration
@@ -79,9 +79,10 @@ myTodoApp/
 
 ### Frontend Patterns
 - **Component composition** - Small, focused React components
-- **Global state management** - Zustand for authentication state
+- **Global state management** - Zustand for authentication, chat, and theme state
 - **Proxy pattern** - Development API proxy via setupProxy.js
 - **Conditional rendering** - Auth-based component switching
+- **CSS Custom Properties** - Dynamic theming with CSS variables
 
 ## File Organization Rules
 - Group related files in feature directories

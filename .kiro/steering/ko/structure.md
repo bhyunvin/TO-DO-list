@@ -44,9 +44,9 @@ myTodoApp/
 ### 기능 컴포넌트
 - `src/loginForm/` - 인증 폼 (로그인/회원가입)
 - `src/todoList/` - Todo 관리 인터페이스
-- `src/components/` - 재사용 가능한 UI 컴포넌트 (채팅, 파일 업로드, 프로필, 플로팅 액션 버튼)
+- `src/components/` - 재사용 가능한 UI 컴포넌트 (채팅, 파일 업로드, 프로필, 플로팅 액션 버튼, 테마 토글)
 - `src/authStore/` - Zustand 인증 상태 관리
-- `src/stores/` - 추가 Zustand 스토어 (채팅)
+- `src/stores/` - 추가 Zustand 스토어 (채팅, 테마)
 - `src/hooks/` - 커스텀 React 훅 (스크롤 잠금, 파일 업로드)
 
 ### 구성
@@ -79,9 +79,10 @@ myTodoApp/
 
 ### 프론트엔드 패턴
 - **컴포넌트 조합** - 작고 집중된 React 컴포넌트
-- **전역 상태 관리** - 인증 상태를 위한 Zustand
+- **전역 상태 관리** - 인증, 채팅, 테마 상태를 위한 Zustand
 - **프록시 패턴** - setupProxy.js를 통한 개발 API 프록시
 - **조건부 렌더링** - 인증 기반 컴포넌트 전환
+- **CSS Custom Properties** - CSS 변수를 사용한 동적 테마 적용
 
 ## 파일 구성 규칙
 - 관련 파일을 기능 디렉토리에 그룹화

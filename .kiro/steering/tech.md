@@ -13,11 +13,12 @@
 ## Frontend (React)
 - **Framework**: React 19 with Create React App
 - **UI Library**: React Bootstrap 2.10+ with Bootstrap 5.3+
-- **State Management**: Zustand for global state (auth and chat)
+- **State Management**: Zustand for global state (auth, chat, and theme)
 - **HTTP Client**: Axios (configured via setupProxy.js)
 - **Notifications**: SweetAlert2
 - **Date Handling**: date-fns and react-datepicker
 - **Security**: DOMPurify for HTML sanitization
+- **Theming**: CSS Custom Properties for dynamic light/dark mode
 
 ## Development Tools
 - **Package Manager**: npm with workspaces

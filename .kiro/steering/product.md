@@ -10,6 +10,7 @@ This is a full-stack TO-DO List application built with modern web technologies. 
 - AI chat assistant using Google Gemini with function calling (can read, create, and update todos)
 - User profile management with profile image support
 - Password change functionality
+- Dark mode theme toggle with persistent user preference
 - Comprehensive audit logging for all operations
 - Secure password encryption and keychain integration
 - Markdown rendering with XSS protection
