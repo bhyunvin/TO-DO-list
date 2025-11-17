@@ -1,5 +1,5 @@
 /**
- * File validation module exports
+ * 파일 검증 모듈 exports
  */
 
 export * from './file-validation.interfaces';

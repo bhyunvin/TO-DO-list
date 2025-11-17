@@ -12,7 +12,7 @@ import {
 } from './file-validation.constants';
 
 /**
- * Standardized error response format for file uploads
+ * 파일 업로드를 위한 표준화된 에러 응답 형식
  */
 export interface FileUploadErrorResponse {
   success: false;
@@ -24,7 +24,7 @@ export interface FileUploadErrorResponse {
 }
 
 /**
- * Success response format for file uploads
+ * 파일 업로드를 위한 성공 응답 형식
  */
 export interface FileUploadSuccessResponse {
   success: true;
@@ -35,7 +35,7 @@ export interface FileUploadSuccessResponse {
 }
 
 /**
- * Error logging context for security and debugging
+ * 보안 및 디버깅을 위한 에러 로깅 컨텍스트
  */
 export interface ErrorLogContext {
   clientIp: string;
@@ -47,14 +47,14 @@ export interface ErrorLogContext {
 }
 
 /**
- * Service for handling file upload errors with standardized responses and logging
+ * 표준화된 응답 및 로깅으로 파일 업로드 에러를 처리하는 서비스
  */
 @Injectable()
 export class FileUploadErrorService {
   private readonly logger = new Logger(FileUploadErrorService.name);
 
   /**
-   * Create standardized error response for file upload failures
+   * 파일 업로드 실패에 대한 표준화된 에러 응답 생성
    */
   createErrorResponse(
     errors: FileValidationError[],
@@ -73,7 +73,7 @@ export class FileUploadErrorService {
   }
 
   /**
-   * Create standardized success response for file uploads
+   * 파일 업로드를 위한 표준화된 성공 응답 생성
    */
   createSuccessResponse(
     uploadedFiles: any[],
@@ -91,7 +91,7 @@ export class FileUploadErrorService {
   }
 
   /**
-   * Generate user-friendly error message from validation errors
+   * 검증 에러로부터 사용자 친화적인 에러 메시지 생성
    */
   generateErrorMessage(errors: FileValidationError[]): string {
     if (errors.length === 0) {
@@ -128,7 +128,7 @@ export class FileUploadErrorService {
   }
 
   /**
-   * Get user-friendly error message with additional context
+   * 추가 컨텍스트와 함께 사용자 친화적인 에러 메시지 가져오기
    */
   getUserFriendlyMessage(error: FileValidationError): string {
     const baseMessage =
@@ -154,7 +154,7 @@ export class FileUploadErrorService {
   }
 
   /**
-   * Group errors by error code for better message formatting
+   * 더 나은 메시지 포맷팅을 위해 에러 코드별로 에러 그룹화
    */
   private groupErrorsByType(
     errors: FileValidationError[],
@@ -173,7 +173,7 @@ export class FileUploadErrorService {
   }
 
   /**
-   * Log security events for blocked file attempts
+   * 차단된 파일 시도에 대한 보안 이벤트 로깅
    */
   logSecurityEvent(
     files: Express.Multer.File[],
@@ -205,7 +205,7 @@ export class FileUploadErrorService {
   }
 
   /**
-   * Log validation errors for debugging
+   * 디버깅을 위한 검증 에러 로깅
    */
   logValidationErrors(
     files: Express.Multer.File[],
@@ -243,7 +243,7 @@ export class FileUploadErrorService {
   }
 
   /**
-   * Log successful file uploads
+   * 성공적인 파일 업로드 로깅
    */
   logSuccessfulUpload(uploadedFiles: any[], context: ErrorLogContext): void {
     this.logger.log(`Successfully uploaded ${uploadedFiles.length} file(s)`, {
@@ -262,7 +262,7 @@ export class FileUploadErrorService {
   }
 
   /**
-   * Extract error logging context from request
+   * 요청으로부터 에러 로깅 컨텍스트 추출
    */
   extractErrorContext(
     request: Request,
@@ -280,7 +280,7 @@ export class FileUploadErrorService {
   }
 
   /**
-   * Format file size in human-readable format
+   * 사람이 읽을 수 있는 형식으로 파일 크기 포맷팅
    */
   private formatFileSize(bytes: number): string {
     if (bytes === 0) return '0 Bytes';
@@ -293,7 +293,7 @@ export class FileUploadErrorService {
   }
 
   /**
-   * Map validation results to file validation errors
+   * 검증 결과를 파일 검증 에러로 매핑
    */
   mapValidationResultsToErrors(
     files: Express.Multer.File[],
@@ -317,7 +317,7 @@ export class FileUploadErrorService {
   }
 
   /**
-   * Create partial success response for mixed upload results
+   * 혼합 업로드 결과에 대한 부분 성공 응답 생성
    */
   createPartialSuccessResponse(
     uploadedFiles: any[],

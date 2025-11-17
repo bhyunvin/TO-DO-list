@@ -1,7 +1,7 @@
 import { FileUploadPolicyConfig } from './file-validation.interfaces';
 
 /**
- * File validation constants and configuration
+ * 파일 검증 상수 및 설정
  */
 
 // 최대 파일 크기: 10MB (바이트 단위)

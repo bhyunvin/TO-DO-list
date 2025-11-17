@@ -12,7 +12,7 @@ import { FileCategory } from './file-validation.interfaces';
 import { FileUploadErrorService } from './file-upload-error.service';
 
 /**
- * Interceptor for server-side file validation with security logging
+ * 보안 로깅을 포함한 서버 측 파일 검증을 위한 인터셉터
  */
 @Injectable()
 export class FileValidationInterceptor implements NestInterceptor {
@@ -36,7 +36,7 @@ export class FileValidationInterceptor implements NestInterceptor {
       return next.handle();
     }
 
-    // Perform server-side validation
+    // 서버 측 검증 수행
     const validationResults =
       this.fileValidationService.validateFilesByCategory(
         filesToValidate,
@@ -49,7 +49,7 @@ export class FileValidationInterceptor implements NestInterceptor {
     );
 
     if (failedValidations.length > 0) {
-      // Get detailed error information
+      // 상세한 에러 정보 가져오기
       const validationErrors =
         this.fileUploadErrorService.mapValidationResultsToErrors(
           filesToValidate,
@@ -75,7 +75,7 @@ export class FileValidationInterceptor implements NestInterceptor {
         errorContext,
       );
 
-      // Create standardized error response
+      // 표준화된 에러 응답 생성
       const errorResponse = this.fileUploadErrorService.createErrorResponse(
         validationErrors,
         'File validation failed',
@@ -86,7 +86,7 @@ export class FileValidationInterceptor implements NestInterceptor {
       throw new BadRequestException(errorResponse);
     }
 
-    // Log successful validation
+    // 성공적인 검증 로깅
     this.logger.log(
       `File validation passed for ${filesToValidate.length} file(s) in category: ${this.fileCategory}`,
     );
@@ -96,7 +96,7 @@ export class FileValidationInterceptor implements NestInterceptor {
 }
 
 /**
- * Profile image validation interceptor
+ * 프로필 이미지 검증 인터셉터
  */
 @Injectable()
 export class ProfileImageValidationInterceptor extends FileValidationInterceptor {
@@ -109,7 +109,7 @@ export class ProfileImageValidationInterceptor extends FileValidationInterceptor
 }
 
 /**
- * TODO attachment validation interceptor
+ * TODO 첨부파일 검증 인터셉터
  */
 @Injectable()
 export class TodoAttachmentValidationInterceptor extends FileValidationInterceptor {

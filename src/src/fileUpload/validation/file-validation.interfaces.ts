@@ -1,5 +1,5 @@
 /**
- * File validation interfaces and types
+ * 파일 검증 인터페이스 및 타입
  */
 
 export interface ValidationResult {
