@@ -50,7 +50,10 @@ describe('AppController (e2e)', () => {
     app = moduleFixture.createNestApplication();
 
     // 세션 미들웨어 설정
-    const sessionSecret = process.env.TEST_SESSION_SECRET || process.env.SESSION_SECRET || 'test_session_secret_key_for_e2e_testing';
+    const sessionSecret =
+      process.env.TEST_SESSION_SECRET ||
+      process.env.SESSION_SECRET ||
+      'test_session_secret_key_for_e2e_testing';
     app.use(
       session({
         name: 'todo-session-id',

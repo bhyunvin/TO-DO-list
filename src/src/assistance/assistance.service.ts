@@ -184,11 +184,11 @@ export class AssistanceService implements OnModuleInit {
     this.logger.log('AssistanceService 모듈 초기화 중...');
     try {
       this.geminiApiKey = this.configService.get<string>('GEMINI_API_KEY');
-      
+
       if (!this.geminiApiKey) {
         throw new Error('GEMINI_API_KEY가 환경 변수에 설정되지 않았습니다.');
       }
-      
+
       this.logger.log('✅ Gemini API 키 로드 완료.');
     } catch (error) {
       this.logger.error(

@@ -38,7 +38,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => {
         const dbPassword = configService.get<string>('DB_DEV_PASSWORD');
-        
+
         if (!dbPassword) {
           throw new Error(
             '데이터베이스 비밀번호를 환경 변수에서 찾을 수 없습니다. DB_DEV_PASSWORD를 .env 파일에 설정해주세요.',
