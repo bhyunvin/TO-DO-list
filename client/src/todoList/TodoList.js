@@ -9,6 +9,7 @@ import ProfileUpdateForm from '../components/ProfileUpdateForm';
 import PasswordChangeForm from '../components/PasswordChangeForm';
 import FloatingActionButton from '../components/FloatingActionButton';
 import ChatModal from '../components/ChatModal';
+import ThemeToggle from '../components/ThemeToggle';
 import './todoList.css';
 import DatePicker from 'react-datepicker';
 import { ko } from 'date-fns/locale';
@@ -1597,6 +1598,9 @@ function TodoContainer() {
               >
                 비밀번호 변경
               </button>
+              <div className="dropdown-divider"></div>
+              <ThemeToggle />
+              <div className="dropdown-divider"></div>
               <button 
                 className="dropdown-item" 
                 onClick={handleLogout}

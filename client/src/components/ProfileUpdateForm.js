@@ -329,13 +329,7 @@ const ProfileUpdateForm = ({ user, onSave, onCancel, isSubmitting = false }) => 
                 <img
                   src={profileImage}
                   alt="프로필 미리보기"
-                  style={{ 
-                    width: '100px', 
-                    height: '100px', 
-                    objectFit: 'cover',
-                    border: '2px solid #28a745',
-                    borderRadius: '8px'
-                  }}
+                  className="profile-preview-image"
                 />
                 <div className="ms-3">
                   <div className="text-success">

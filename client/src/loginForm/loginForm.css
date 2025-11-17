@@ -1,8 +1,6 @@
 :root {
-  --border-color-light: #ccc;
   --border-radius-default: 10px;
   --border-radius-button: 20px;
-  --box-shadow-light: 0 0 10px rgb(0 0 0 / 0.1);
   --spacing-default: 20px;
   --spacing-large: 30px;
   --spacing-xlarge: 50px;
@@ -15,9 +13,14 @@
 .signup-container {
   margin: var(--spacing-xlarge) auto;
   padding: var(--spacing-default);
-  border: 1px solid var(--border-color-light);
+  border: 1px solid var(--border-medium);
   border-radius: var(--border-radius-default);
-  box-shadow: var(--box-shadow-light);
+  box-shadow: var(--shadow-medium);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color var(--transition-duration) var(--transition-timing),
+              color var(--transition-duration) var(--transition-timing),
+              border-color var(--transition-duration) var(--transition-timing);
 }
 
 .login-container {
@@ -49,4 +52,79 @@
 /* 전체 너비 보조 버튼 */
 .btn-secondary.full-width {
   width: 100%;
+}
+
+
+/* ============================================
+   다크 모드 명시적 오버라이드
+   ============================================ */
+
+[data-theme='dark'] .login-container,
+[data-theme='dark'] .signup-container {
+  background-color: var(--bg-primary);
+  border-color: var(--border-medium);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-medium);
+}
+
+[data-theme='dark'] .login-container h2,
+[data-theme='dark'] .signup-container h2 {
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .login-container label,
+[data-theme='dark'] .signup-container label {
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .login-container .form-control,
+[data-theme='dark'] .signup-container .form-control {
+  background-color: var(--bg-tertiary);
+  border-color: var(--border-medium);
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .login-container .form-control:focus,
+[data-theme='dark'] .signup-container .form-control:focus {
+  background-color: var(--bg-tertiary);
+  border-color: var(--color-primary);
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .login-container .form-control::placeholder,
+[data-theme='dark'] .signup-container .form-control::placeholder {
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+[data-theme='dark'] .login-container .form-text,
+[data-theme='dark'] .signup-container .form-text {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme='dark'] .login-container small.form-text,
+[data-theme='dark'] .signup-container small.form-text,
+[data-theme='dark'] .login-container small.text-muted,
+[data-theme='dark'] .signup-container small.text-muted {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme='dark'] .login-container .text-danger,
+[data-theme='dark'] .signup-container .text-danger {
+  color: var(--color-danger) !important;
+}
+
+[data-theme='dark'] .login-container p,
+[data-theme='dark'] .signup-container p {
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .login-container a,
+[data-theme='dark'] .signup-container a {
+  color: var(--color-primary);
+}
+
+[data-theme='dark'] .login-container a:hover,
+[data-theme='dark'] .signup-container a:hover {
+  color: var(--color-primary-dark);
 }

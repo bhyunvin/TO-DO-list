@@ -31,6 +31,24 @@
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
     <title>TO-DO</title>
+    <!-- 테마 초기화 스크립트 - React 로드 전에 실행하여 깜빡임 방지 -->
+    <script>
+      (function() {
+        try {
+          // localStorage에서 저장된 테마 가져오기
+          const savedTheme = localStorage.getItem('theme-storage');
+          if (savedTheme) {
+            const { state } = JSON.parse(savedTheme);
+            if (state && state.theme) {
+              document.documentElement.setAttribute('data-theme', state.theme);
+            }
+          }
+        } catch (e) {
+          // 오류 발생 시 무시 (기본 테마 사용)
+          console.warn('Failed to load saved theme:', e);
+        }
+      })();
+    </script>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>

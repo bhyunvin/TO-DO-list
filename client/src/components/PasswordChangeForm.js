@@ -238,7 +238,7 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
                 className="btn btn-outline-secondary"
                 onClick={() => setShowCurrentPassword(!showCurrentPassword)}
               >
-                {showCurrentPassword ? '🙈' : '👁️'}
+                {showCurrentPassword ? <i class="bi bi-eye-slash"></i> : <i class="bi bi-eye"></i>}
               </button>
             </div>
             {currentPasswordError && <div className="invalid-feedback d-block">{currentPasswordError}</div>}
@@ -268,7 +268,7 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
                 className="btn btn-outline-secondary"
                 onClick={() => setShowNewPassword(!showNewPassword)}
               >
-                {showNewPassword ? '🙈' : '👁️'}
+                {showNewPassword ? <i class="bi bi-eye-slash"></i> : <i class="bi bi-eye"></i>}
               </button>
             </div>
             {newPasswordError && <div className="invalid-feedback d-block">{newPasswordError}</div>}
@@ -314,7 +314,7 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
                 className="btn btn-outline-secondary"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               >
-                {showConfirmPassword ? '🙈' : '👁️'}
+                {showConfirmPassword ? <i class="bi bi-eye-slash"></i> : <i class="bi bi-eye"></i>}
               </button>
             </div>
             {confirmPasswordError && <div className="invalid-feedback d-block">{confirmPasswordError}</div>}

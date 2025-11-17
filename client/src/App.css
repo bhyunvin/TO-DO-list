@@ -1,1 +1,452 @@
-/* App.css는 현재 사용되지 않지만 향후 확장을 위해 유지 */
+/* Bootstrap 컴포넌트 다크 테마 오버라이드 */
+
+/* 폼 컨트롤 (입력 필드, 텍스트 영역, 셀렉트) */
+[data-theme='dark'] .form-control {
+  background-color: var(--bg-tertiary);
+  border-color: var(--border-medium);
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .form-control:focus {
+  background-color: var(--bg-tertiary);
+  border-color: var(--color-primary);
+  color: var(--text-primary);
+  box-shadow: 0 0 0 0.25rem rgba(74, 158, 255, 0.25);
+}
+
+[data-theme='dark'] .form-control::placeholder {
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+[data-theme='dark'] .form-control:disabled {
+  background-color: var(--bg-secondary);
+  color: var(--text-muted);
+}
+
+/* 폼 레이블 */
+[data-theme='dark'] .form-label,
+[data-theme='dark'] .col-form-label {
+  color: var(--text-primary);
+}
+
+/* 폼 텍스트 (도움말 텍스트) */
+[data-theme='dark'] .form-text {
+  color: var(--text-secondary);
+}
+
+/* Bootstrap text-muted 클래스 다크 모드 오버라이드 */
+[data-theme='dark'] .text-muted {
+  color: var(--text-secondary) !important;
+}
+
+/* 폼 내부의 작은 텍스트 (안내문구) */
+[data-theme='dark'] small.form-text,
+[data-theme='dark'] small.text-muted,
+[data-theme='dark'] .form-text.text-muted {
+  color: var(--text-secondary) !important;
+}
+
+/* 모든 small 태그 다크 모드 */
+[data-theme='dark'] small {
+  color: var(--text-secondary);
+}
+
+/* 유효성 검사 피드백 텍스트 */
+[data-theme='dark'] .text-danger,
+[data-theme='dark'] small.text-danger {
+  color: var(--color-danger) !important;
+}
+
+[data-theme='dark'] .text-success,
+[data-theme='dark'] small.text-success {
+  color: var(--color-success) !important;
+}
+
+[data-theme='dark'] .text-warning,
+[data-theme='dark'] small.text-warning {
+  color: #ffc107 !important;
+}
+
+[data-theme='dark'] .text-info,
+[data-theme='dark'] small.text-info {
+  color: #17a2b8 !important;
+}
+
+/* 입력 그룹 */
+[data-theme='dark'] .input-group-text {
+  background-color: var(--bg-tertiary);
+  border-color: var(--border-medium);
+  color: var(--text-primary);
+}
+
+/* 버튼 스타일 */
+[data-theme='dark'] .btn-primary {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #ffffff;
+}
+
+[data-theme='dark'] .btn-primary:hover {
+  background-color: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+}
+
+[data-theme='dark'] .btn-primary:focus {
+  box-shadow: 0 0 0 0.25rem rgba(74, 158, 255, 0.5);
+}
+
+[data-theme='dark'] .btn-primary:disabled {
+  background-color: var(--bg-tertiary);
+  border-color: var(--border-medium);
+  color: var(--text-muted);
+}
+
+[data-theme='dark'] .btn-secondary {
+  background-color: var(--bg-tertiary);
+  border-color: var(--border-medium);
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .btn-secondary:hover {
+  background-color: var(--bg-hover);
+  border-color: var(--border-medium);
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .btn-secondary:focus {
+  box-shadow: 0 0 0 0.25rem rgba(58, 58, 58, 0.5);
+}
+
+[data-theme='dark'] .btn-danger {
+  background-color: var(--color-danger);
+  border-color: var(--color-danger);
+}
+
+[data-theme='dark'] .btn-danger:hover {
+  background-color: var(--color-danger-dark);
+  border-color: var(--color-danger-dark);
+}
+
+[data-theme='dark'] .btn-success {
+  background-color: var(--color-success);
+  border-color: var(--color-success);
+}
+
+/* 유효성 검사 피드백 */
+[data-theme='dark'] .form-control.is-valid {
+  border-color: var(--color-success);
+}
+
+[data-theme='dark'] .form-control.is-invalid {
+  border-color: var(--color-danger);
+}
+
+[data-theme='dark'] .valid-feedback {
+  color: var(--color-success);
+}
+
+[data-theme='dark'] .invalid-feedback {
+  color: var(--color-danger);
+}
+
+/* 스피너 */
+[data-theme='dark'] .spinner-border {
+  border-color: currentColor;
+  border-right-color: transparent;
+}
+
+/* 모달 스타일 */
+[data-theme='dark'] .modal-content {
+  background-color: var(--bg-primary);
+  border-color: var(--border-medium);
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .modal-header {
+  border-bottom-color: var(--border-medium);
+  background-color: var(--bg-primary);
+}
+
+[data-theme='dark'] .modal-footer {
+  border-top-color: var(--border-medium);
+  background-color: var(--bg-primary);
+}
+
+[data-theme='dark'] .modal-title {
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .btn-close {
+  filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+/* 드롭다운 메뉴 스타일 */
+[data-theme='dark'] .dropdown-menu {
+  background-color: var(--bg-primary);
+  border-color: var(--border-medium);
+  box-shadow: var(--shadow-dropdown);
+}
+
+[data-theme='dark'] .dropdown-item {
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .dropdown-item:hover,
+[data-theme='dark'] .dropdown-item:focus {
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .dropdown-item:active {
+  background-color: var(--color-primary);
+  color: #ffffff;
+}
+
+[data-theme='dark'] .dropdown-divider {
+  border-top-color: var(--border-separator);
+}
+
+[data-theme='dark'] .dropdown-header {
+  color: var(--text-secondary);
+}
+
+/* 테이블 스타일 */
+[data-theme='dark'] .table {
+  color: var(--text-primary);
+  border-color: var(--border-medium);
+}
+
+[data-theme='dark'] .table thead th {
+  background-color: var(--bg-secondary);
+  border-bottom-color: var(--border-medium);
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .table tbody tr {
+  border-bottom-color: var(--border-light);
+}
+
+[data-theme='dark'] .table-hover tbody tr:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .table-striped tbody tr:nth-of-type(odd) {
+  background-color: var(--bg-secondary);
+}
+
+[data-theme='dark'] .table td,
+[data-theme='dark'] .table th {
+  border-color: var(--border-light);
+}
+
+/* 카드 스타일 */
+[data-theme='dark'] .card {
+  background-color: var(--bg-primary);
+  border-color: var(--border-medium);
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .card-header {
+  background-color: var(--bg-secondary);
+  border-bottom-color: var(--border-medium);
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .card-footer {
+  background-color: var(--bg-secondary);
+  border-top-color: var(--border-medium);
+}
+
+[data-theme='dark'] .card-body {
+  color: var(--text-primary);
+}
+
+/* 알림 (Alert) 스타일 */
+[data-theme='dark'] .alert {
+  border-color: var(--border-medium);
+}
+
+[data-theme='dark'] .alert-primary {
+  background-color: rgba(74, 158, 255, 0.2);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+[data-theme='dark'] .alert-danger {
+  background-color: rgba(255, 71, 87, 0.2);
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+
+[data-theme='dark'] .alert-success {
+  background-color: rgba(46, 204, 113, 0.2);
+  border-color: var(--color-success);
+  color: var(--color-success);
+}
+
+[data-theme='dark'] .alert-warning {
+  background-color: rgba(255, 193, 7, 0.2);
+  border-color: #ffc107;
+  color: #ffc107;
+}
+
+[data-theme='dark'] .alert-info {
+  background-color: rgba(23, 162, 184, 0.2);
+  border-color: #17a2b8;
+  color: #5dccde;
+}
+
+[data-theme='dark'] .alert-info .alert-heading {
+  color: #5dccde;
+}
+
+[data-theme='dark'] .alert-info ul,
+[data-theme='dark'] .alert-info li {
+  color: #5dccde;
+}
+
+/* 배지 (Badge) 스타일 */
+[data-theme='dark'] .badge {
+  color: #ffffff;
+}
+
+[data-theme='dark'] .badge.bg-secondary {
+  background-color: var(--bg-tertiary) !important;
+  color: var(--text-primary);
+}
+
+/* 네비게이션 바 스타일 */
+[data-theme='dark'] .navbar {
+  background-color: var(--bg-primary);
+  border-color: var(--border-medium);
+}
+
+[data-theme='dark'] .navbar-light .navbar-nav .nav-link {
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .navbar-light .navbar-nav .nav-link:hover,
+[data-theme='dark'] .navbar-light .navbar-nav .nav-link:focus {
+  color: var(--color-primary);
+}
+
+/* 페이지네이션 스타일 */
+[data-theme='dark'] .pagination .page-link {
+  background-color: var(--bg-primary);
+  border-color: var(--border-medium);
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .pagination .page-link:hover {
+  background-color: var(--bg-hover);
+  border-color: var(--border-medium);
+  color: var(--color-primary);
+}
+
+[data-theme='dark'] .pagination .page-item.active .page-link {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #ffffff;
+}
+
+[data-theme='dark'] .pagination .page-item.disabled .page-link {
+  background-color: var(--bg-secondary);
+  border-color: var(--border-medium);
+  color: var(--text-muted);
+}
+
+/* 프로필 이미지 미리보기 스타일 */
+.profile-preview-image {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border: 2px solid var(--color-success);
+  border-radius: 8px;
+}
+
+/* React DatePicker 다크 모드 스타일 */
+[data-theme='dark'] .react-datepicker {
+  background-color: var(--bg-primary);
+  border-color: var(--border-medium);
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .react-datepicker__header {
+  background-color: var(--bg-secondary);
+  border-bottom-color: var(--border-medium);
+}
+
+[data-theme='dark'] .react-datepicker__current-month,
+[data-theme='dark'] .react-datepicker__day-name {
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .react-datepicker__day {
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .react-datepicker__day:hover {
+  background-color: var(--bg-hover);
+}
+
+[data-theme='dark'] .react-datepicker__day--selected,
+[data-theme='dark'] .react-datepicker__day--keyboard-selected {
+  background-color: var(--color-primary);
+  color: #ffffff;
+}
+
+[data-theme='dark'] .react-datepicker__day--disabled {
+  color: var(--text-muted);
+}
+
+[data-theme='dark'] .react-datepicker__navigation-icon::before {
+  border-color: var(--text-primary);
+}
+
+[data-theme='dark'] .react-datepicker__month-select,
+[data-theme='dark'] .react-datepicker__year-select {
+  background-color: var(--bg-tertiary);
+  border-color: var(--border-medium);
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .react-datepicker__triangle {
+  border-bottom-color: var(--bg-secondary);
+}
+
+[data-theme='dark'] .react-datepicker__triangle::before {
+  border-bottom-color: var(--border-medium);
+}
+
+/* SweetAlert2 다크 모드 스타일 */
+[data-theme='dark'] .swal2-popup {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .swal2-title {
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .swal2-html-container {
+  color: var(--text-secondary);
+}
+
+[data-theme='dark'] .swal2-input,
+[data-theme='dark'] .swal2-textarea {
+  background-color: var(--bg-tertiary);
+  border-color: var(--border-medium);
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .swal2-input:focus,
+[data-theme='dark'] .swal2-textarea:focus {
+  border-color: var(--color-primary);
+}
+
+/* Bootstrap Icons 다크 모드 조정 */
+[data-theme='dark'] .bi {
+  color: inherit;
+}

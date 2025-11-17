@@ -1,4 +1,5 @@
 :root {
+  /* 레이아웃 관련 변수 */
   --chat-msg-avatar-size: 32px;
   --chat-msg-avatar-size-tablet: 28px;
   --chat-msg-avatar-size-mobile: 24px;
@@ -16,24 +17,50 @@
   --chat-msg-font-size-mobile: 0.85rem;
   --chat-msg-timestamp-size: 0.75rem;
   --chat-msg-timestamp-size-mobile: 0.7rem;
-  --chat-msg-color-primary: #007bff;
-  --chat-msg-color-primary-dark: #0056b3;
-  --chat-msg-color-success: #28a745;
-  --chat-msg-color-success-dark: #1e7e34;
-  --chat-msg-color-text: #212529;
-  --chat-msg-color-text-secondary: #495057;
-  --chat-msg-color-text-muted: #6c757d;
-  --chat-msg-color-bg-light: #ffffff;
-  --chat-msg-color-bg-lighter: #f8f9fa;
-  --chat-msg-color-border: #e9ecef;
-  --chat-msg-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
-  --chat-msg-shadow-hover: 0 4px 12px rgb(0 0 0 / 0.15);
-  --chat-msg-shadow-user: 0 2px 12px rgb(0 123 255 / 0.3);
-  --chat-msg-shadow-user-hover: 0 4px 16px rgb(0 123 255 / 0.4);
-  --chat-msg-shadow-ai: 0 2px 8px rgb(0 0 0 / 0.08);
-  --chat-msg-shadow-ai-hover: 0 4px 12px rgb(0 0 0 / 0.12);
-  --chat-msg-shadow-avatar: 0 2px 6px rgb(0 0 0 / 0.15);
   --chat-msg-transition: all 0.2s ease;
+  
+  /* 테마 인식 색상 변수 - 전역 테마 변수 참조 */
+  --chat-msg-color-primary: var(--color-primary);
+  --chat-msg-color-primary-dark: var(--color-primary-dark);
+  --chat-msg-color-success: var(--color-success);
+  --chat-msg-color-text: var(--text-primary);
+  --chat-msg-color-text-secondary: var(--text-secondary);
+  --chat-msg-color-text-muted: var(--text-muted);
+  --chat-msg-color-bg-light: var(--bg-primary);
+  --chat-msg-color-bg-lighter: var(--bg-secondary);
+  --chat-msg-color-border: var(--border-medium);
+  
+  /* 채팅 메시지 전용 색상 */
+  --chat-msg-color-success-dark: #1e7e34;
+  --chat-msg-shadow: var(--shadow-light);
+  --chat-msg-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --chat-msg-shadow-user: 0 2px 12px rgba(0, 123, 255, 0.3);
+  --chat-msg-shadow-user-hover: 0 4px 16px rgba(0, 123, 255, 0.4);
+  --chat-msg-shadow-ai: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --chat-msg-shadow-ai-hover: 0 4px 12px rgba(0, 0, 0, 0.12);
+  --chat-msg-shadow-avatar: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* 라이트 테마 명시적 색상 */
+[data-theme='light'] {
+  --chat-msg-color-success-dark: #1e7e34;
+  --chat-msg-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --chat-msg-shadow-user: 0 2px 12px rgba(0, 123, 255, 0.3);
+  --chat-msg-shadow-user-hover: 0 4px 16px rgba(0, 123, 255, 0.4);
+  --chat-msg-shadow-ai: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --chat-msg-shadow-ai-hover: 0 4px 12px rgba(0, 0, 0, 0.12);
+  --chat-msg-shadow-avatar: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* 다크 테마 전용 색상 오버라이드 */
+[data-theme='dark'] {
+  --chat-msg-color-success-dark: #25a555;
+  --chat-msg-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --chat-msg-shadow-user: 0 2px 12px rgba(74, 158, 255, 0.4);
+  --chat-msg-shadow-user-hover: 0 4px 16px rgba(74, 158, 255, 0.5);
+  --chat-msg-shadow-ai: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --chat-msg-shadow-ai-hover: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --chat-msg-shadow-avatar: 0 2px 6px rgba(0, 0, 0, 0.4);
 }
 
 .chat-message {
@@ -291,32 +318,45 @@
   }
 }
 
-/* 다크 모드 지원 */
-@media (prefers-color-scheme: dark) {
-  .ai-message .message-bubble {
-    background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
-    color: #e2e8f0;
-    border-color: #718096;
-  }
-  
-  .ai-message .message-text strong {
-    color: #63b3ed;
-  }
-  
-  .ai-message .message-text em {
-    color: #cbd5e0;
-  }
-  
-  .ai-message .message-text h1,
-  .ai-message .message-text h2,
-  .ai-message .message-text h3,
-  .ai-message .message-text h4,
-  .ai-message .message-text h5,
-  .ai-message .message-text h6 {
-    color: #f7fafc;
-  }
-  
-  .ai-message .message-timestamp {
-    color: #a0aec0;
-  }
+
+
+
+/* 라이트 테마 명시적 스타일 */
+[data-theme='light'] .message-avatar {
+  color: white;
+}
+
+[data-theme='light'] .ai-message .message-avatar {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+}
+
+[data-theme='light'] .user-message .message-avatar {
+  background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+}
+
+[data-theme='light'] .user-message .message-bubble {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  color: white;
+}
+
+[data-theme='light'] .ai-message .message-bubble {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  color: #212529;
+  border-color: #dee2e6;
+}
+
+[data-theme='light'] .ai-message .message-text strong {
+  color: #0056b3;
+}
+
+[data-theme='light'] .ai-message .message-text em {
+  color: #495057;
+}
+
+[data-theme='light'] .ai-message .message-timestamp {
+  color: #6c757d;
+}
+
+[data-theme='light'] .user-message .message-timestamp {
+  color: rgba(255, 255, 255, 0.8);
 }
