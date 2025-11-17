@@ -5,7 +5,7 @@
 - **Language**: TypeScript
 - **Database**: PostgreSQL with TypeORM
 - **Authentication**: Express sessions with bcrypt password hashing
-- **Security**: Keychain integration for secure credential storage
+- **Security**: Environment variables for secure credential storage
 - **AI Integration**: Google Gemini API via @nestjs/axios with function calling
 - **File Upload**: Multer for multipart form handling
 - **Markdown Processing**: marked for markdown parsing, sanitize-html for XSS protection
@@ -96,7 +96,7 @@ npm test -- --testNamePattern="test name pattern"
 ## Environment Configuration
 - Backend: `.env` in `src/` directory
 - Frontend: `.env` in `client/` directory  
-- Database credentials stored securely in macOS Keychain
+- All credentials stored in environment variables (not committed to git)
 
 ## Code Comments Guidelines
 - **All code comments should be written in Korean**, except for syntax-required elements (e.g., JSDoc tags like `@param`, `@return`)

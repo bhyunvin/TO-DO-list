@@ -9,9 +9,7 @@ import { LoggingModule } from '../src/logging/logging.module';
 import { FileUploadModule } from '../src/fileUpload/fileUpload.module';
 import { AssistanceModule } from '../src/assistance/assistance.module';
 import { AuthModule } from '../types/express/auth.module';
-import { KeychainModule } from '../src/utils/keychain.module';
-import { KeychainUtil } from '../src/utils/keychainUtil';
-import { createTestTypeOrmConfig, MockKeychainUtil } from './test-helpers';
+import { createTestTypeOrmConfig } from './test-helpers';
 import { APP_INTERCEPTOR, APP_FILTER } from '@nestjs/core';
 import { LoggingInterceptor } from '../src/interceptor/logging.interceptor';
 import { HttpExceptionFilter } from '../src/filter/http-exception.filter';
@@ -36,10 +34,8 @@ describe('Profile Update Security (e2e)', () => {
   let dataSource: DataSource;
   let testUser: UserEntity;
   let sessionCookie: string;
-  let mockKeychainUtil: MockKeychainUtil;
 
   beforeAll(async () => {
-    mockKeychainUtil = new MockKeychainUtil();
     const typeOrmConfig = await createTestTypeOrmConfig();
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -55,7 +51,6 @@ describe('Profile Update Security (e2e)', () => {
         LoggingModule,
         FileUploadModule,
         AssistanceModule,
-        KeychainModule,
       ],
       providers: [
         {
@@ -67,10 +62,7 @@ describe('Profile Update Security (e2e)', () => {
           useClass: HttpExceptionFilter,
         },
       ],
-    })
-      .overrideProvider(KeychainUtil)
-      .useValue(mockKeychainUtil)
-      .compile();
+    }).compile();
 
     app = moduleFixture.createNestApplication();
 
@@ -84,13 +76,11 @@ describe('Profile Update Security (e2e)', () => {
     );
 
     // 세션 미들웨어 설정
-    const sessionSecret = await mockKeychainUtil.getPassword(
-      'encrypt-session-key',
-    );
+    const sessionSecret = process.env.TEST_SESSION_SECRET || process.env.SESSION_SECRET || 'test_session_secret_key_for_e2e_testing';
     app.use(
       session({
         name: 'todo-session-id',
-        secret: sessionSecret || 'test_session_secret',
+        secret: sessionSecret,
         resave: false,
         saveUninitialized: false,
         cookie: {

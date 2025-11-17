@@ -9,9 +9,7 @@ import { LoggingModule } from '../src/logging/logging.module';
 import { FileUploadModule } from '../src/fileUpload/fileUpload.module';
 import { AssistanceModule } from '../src/assistance/assistance.module';
 import { AuthModule } from '../types/express/auth.module';
-import { KeychainModule } from '../src/utils/keychain.module';
-import { KeychainUtil } from '../src/utils/keychainUtil';
-import { createTestTypeOrmConfig, MockKeychainUtil } from './test-helpers';
+import { createTestTypeOrmConfig } from './test-helpers';
 import { APP_INTERCEPTOR, APP_FILTER } from '@nestjs/core';
 import { LoggingInterceptor } from '../src/interceptor/logging.interceptor';
 import { HttpExceptionFilter } from '../src/filter/http-exception.filter';
@@ -19,10 +17,8 @@ import session from 'express-session';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication;
-  let mockKeychainUtil: MockKeychainUtil;
 
   beforeEach(async () => {
-    mockKeychainUtil = new MockKeychainUtil();
     const typeOrmConfig = await createTestTypeOrmConfig();
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -38,7 +34,6 @@ describe('AppController (e2e)', () => {
         LoggingModule,
         FileUploadModule,
         AssistanceModule,
-        KeychainModule,
       ],
       providers: [
         {
@@ -50,21 +45,16 @@ describe('AppController (e2e)', () => {
           useClass: HttpExceptionFilter,
         },
       ],
-    })
-      .overrideProvider(KeychainUtil)
-      .useValue(mockKeychainUtil)
-      .compile();
+    }).compile();
 
     app = moduleFixture.createNestApplication();
 
     // 세션 미들웨어 설정
-    const sessionSecret = await mockKeychainUtil.getPassword(
-      'encrypt-session-key',
-    );
+    const sessionSecret = process.env.TEST_SESSION_SECRET || process.env.SESSION_SECRET || 'test_session_secret_key_for_e2e_testing';
     app.use(
       session({
         name: 'todo-session-id',
-        secret: sessionSecret || 'test_session_secret',
+        secret: sessionSecret,
         resave: false,
         saveUninitialized: false,
         cookie: {

@@ -9,16 +9,15 @@ import { RequestAssistanceDto } from './assistance.dto';
 import { HttpService } from '@nestjs/axios';
 import { AxiosError } from 'axios';
 import { firstValueFrom } from 'rxjs';
-import { decrypt } from '../utils/cryptUtil';
 import { GeminiApiResponse } from './gemini.interface';
 import { marked } from 'marked';
 import * as sanitizeHtml from 'sanitize-html';
 import * as fs from 'fs';
 import * as path from 'path';
-import { KeychainUtil } from '../utils/keychainUtil';
 import { TodoService } from '../todo/todo.service';
 import { CreateTodoDto } from '../todo/todo.dto';
 import { UserEntity } from '../user/user.entity';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AssistanceService implements OnModuleInit {
@@ -120,8 +119,8 @@ export class AssistanceService implements OnModuleInit {
 
   constructor(
     private readonly httpService: HttpService,
-    private readonly keychainUtil: KeychainUtil,
     private readonly todoService: TodoService,
+    private readonly configService: ConfigService,
   ) {}
 
   /**
@@ -179,19 +178,21 @@ export class AssistanceService implements OnModuleInit {
 
   /**
    * 모듈 초기화 시 실행
-   * 키체인에서 API 키를 불러와 복호화 후 저장
+   * 환경 변수에서 API 키를 불러와 저장
    */
   async onModuleInit() {
     this.logger.log('AssistanceService 모듈 초기화 중...');
     try {
-      const encryptedKey = await this.keychainUtil.getPassword(
-        'encrypt-google-api-key',
-      );
-      this.geminiApiKey = await decrypt(encryptedKey);
-      this.logger.log('✅ Gemini API 키 로드 및 복호화 완료.');
+      this.geminiApiKey = this.configService.get<string>('GEMINI_API_KEY');
+      
+      if (!this.geminiApiKey) {
+        throw new Error('GEMINI_API_KEY가 환경 변수에 설정되지 않았습니다.');
+      }
+      
+      this.logger.log('✅ Gemini API 키 로드 완료.');
     } catch (error) {
       this.logger.error(
-        '🚨 FATAL: Gemini API 키 로드 또는 복호화 실패. AI 비서 기능이 작동하지 않을 수 있습니다.',
+        '🚨 FATAL: Gemini API 키 로드 실패. AI 비서 기능이 작동하지 않을 수 있습니다. GEMINI_API_KEY를 .env 파일에 설정해주세요.',
         error,
       );
     }

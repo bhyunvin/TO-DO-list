@@ -20,13 +20,9 @@ import { AssistanceModule } from './assistance/assistance.module';
 
 import { TodoModule } from './todo/todo.module';
 
-import { KeychainModule } from './utils/keychain.module';
-import { KeychainUtil } from './utils/keychainUtil';
-
 import { AuthModule } from '../types/express/auth.module';
 
 import { CustomNamingStrategy } from './utils/customNamingStrategy';
-import { decrypt } from './utils/cryptUtil';
 
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
@@ -38,21 +34,16 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     }),
     AuthModule,
     TypeOrmModule.forRootAsync({
-      imports: [ConfigModule, KeychainModule],
-      inject: [ConfigService, KeychainUtil],
-      useFactory: async (
-        configService: ConfigService,
-        keychainUtil: KeychainUtil,
-      ) => {
-        const encryptedDbPassword = await keychainUtil.getPassword(
-          'encrypt-db-password',
-        );
-        if (!encryptedDbPassword) {
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => {
+        const dbPassword = configService.get<string>('DB_DEV_PASSWORD');
+        
+        if (!dbPassword) {
           throw new Error(
-            '데이터베이스 비밀번호를 키체인에서 찾을 수 없습니다.',
+            '데이터베이스 비밀번호를 환경 변수에서 찾을 수 없습니다. DB_DEV_PASSWORD를 .env 파일에 설정해주세요.',
           );
         }
-        const dbPassword = await decrypt(encryptedDbPassword);
 
         return {
           type: 'postgres',
@@ -73,7 +64,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     LoggingModule,
     TodoModule,
     FileUploadModule,
-    KeychainModule,
   ],
   providers: [
     {
@@ -89,18 +79,16 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 export class AppModule implements NestModule {
   private readonly logger = new Logger(AppModule.name);
 
-  constructor(private readonly keychainService: KeychainUtil) {}
+  constructor(private readonly configService: ConfigService) {}
 
-  async configure(consumer: MiddlewareConsumer) {
-    const sessionSecret = await this.keychainService.getPassword(
-      'encrypt-session-key',
-    );
+  configure(consumer: MiddlewareConsumer) {
+    const sessionSecret = this.configService.get<string>('SESSION_SECRET');
 
     if (!sessionSecret) {
       this.logger.error(
-        '세션 비밀 키를 키체인에서 찾을 수 없습니다! 애플리케이션을 시작할 수 없습니다.',
+        '세션 비밀 키를 환경 변수에서 찾을 수 없습니다! SESSION_SECRET을 .env 파일에 설정해주세요.',
       );
-      throw new Error('Session secret key not found.');
+      throw new Error('Session secret key not found in environment variables.');
     }
 
     this.logger.log('Session middleware configured with a valid secret key.');

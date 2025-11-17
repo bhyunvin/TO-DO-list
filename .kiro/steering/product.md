@@ -12,7 +12,7 @@ This is a full-stack TO-DO List application built with modern web technologies. 
 - Password change functionality
 - Dark mode theme toggle with persistent user preference
 - Comprehensive audit logging for all operations
-- Secure password encryption and keychain integration
+- Secure password encryption and environment-based credential management
 - Markdown rendering with XSS protection
 
 ## Target Users

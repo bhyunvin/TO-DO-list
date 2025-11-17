@@ -274,7 +274,7 @@ const ERROR_MESSAGES = {
 
 ### Data Privacy
 - **Conversation Storage**: Do not persist chat history
-- **API Key Security**: Maintain secure keychain storage
+- **API Key Security**: Store API key securely in environment variables
 - **User Data**: Only send necessary todo data to Gemini API
 
 ## Accessibility Features

@@ -25,7 +25,7 @@ myTodoApp/
 - `src/logging/` - Application logging and audit trails
 
 ### Infrastructure
-- `src/utils/` - Shared utilities (crypto, keychain, audit columns, naming strategy)
+- `src/utils/` - Shared utilities (crypto, audit columns, naming strategy)
 - `src/filter/` - Global exception filters
 - `src/interceptor/` - Global interceptors (logging)
 - `src/types/express/` - TypeScript type extensions and auth guards

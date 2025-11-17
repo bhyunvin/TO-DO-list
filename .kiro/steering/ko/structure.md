@@ -25,7 +25,7 @@ myTodoApp/
 - `src/logging/` - 애플리케이션 로깅 및 감사 추적
 
 ### 인프라
-- `src/utils/` - 공유 유틸리티 (crypto, keychain, audit columns, naming strategy)
+- `src/utils/` - 공유 유틸리티 (crypto, audit columns, naming strategy)
 - `src/filter/` - 전역 예외 필터
 - `src/interceptor/` - 전역 인터셉터 (로깅)
 - `src/types/express/` - TypeScript 타입 확장 및 인증 가드

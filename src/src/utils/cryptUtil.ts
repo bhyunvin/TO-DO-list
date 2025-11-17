@@ -1,8 +1,4 @@
 import bcrypt from 'bcrypt';
-import crypto from 'crypto';
-import { KeychainUtil } from './keychainUtil';
-
-const keychainUtil = new KeychainUtil();
 
 // 암호화
 export const encrypt = async (rawText: string): Promise<string> => {
@@ -16,31 +12,4 @@ export const isHashValid = async (
   hashedText: string,
 ): Promise<boolean> => {
   return await bcrypt.compare(rawText, hashedText);
-};
-
-// DB, API KEY 등 복호화 가능하게끔 암호화
-export const encryptForDecrypt = async (text: string): Promise<string> => {
-  const algorithm = 'aes-256-cbc';
-  const secretKey = await keychainUtil.getPassword('secret-key');
-  const iv = crypto.randomBytes(16);
-  const cipher = crypto.createCipheriv(algorithm, Buffer.from(secretKey), iv);
-  let encrypted = cipher.update(text);
-  encrypted = Buffer.concat([encrypted, cipher.final()]);
-  return `${iv.toString('hex')}:${encrypted.toString('hex')}`;
-};
-
-// 암호화된 텍스트 복호화
-export const decrypt = async (text: string): Promise<string> => {
-  const secretKey = await keychainUtil.getPassword('secret-key');
-  const textParts = text.split(':');
-  const iv = Buffer.from(textParts.shift(), 'hex');
-  const encryptedText = Buffer.from(textParts.join(':'), 'hex');
-  const decipher = crypto.createDecipheriv(
-    'aes-256-cbc',
-    Buffer.from(secretKey),
-    iv,
-  );
-  let decrypted = decipher.update(encryptedText);
-  decrypted = Buffer.concat([decrypted, decipher.final()]);
-  return decrypted.toString();
 };

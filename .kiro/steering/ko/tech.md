@@ -5,7 +5,7 @@
 - **언어**: TypeScript
 - **데이터베이스**: TypeORM을 사용하는 PostgreSQL
 - **인증**: bcrypt 비밀번호 해싱을 사용하는 Express 세션
-- **보안**: 안전한 자격 증명 저장을 위한 Keychain 통합
+- **보안**: 안전한 자격 증명 저장을 위한 환경 변수
 - **AI 통합**: 함수 호출 기능을 갖춘 @nestjs/axios를 통한 Google Gemini API
 - **파일 업로드**: multipart form 처리를 위한 Multer
 - **마크다운 처리**: 마크다운 파싱을 위한 marked, XSS 보호를 위한 sanitize-html
@@ -96,7 +96,7 @@ npm test -- --testNamePattern="test name pattern"
 ## 환경 설정
 - 백엔드: `src/` 디렉토리의 `.env`
 - 프론트엔드: `client/` 디렉토리의 `.env`
-- 데이터베이스 자격 증명은 macOS Keychain에 안전하게 저장됨
+- 모든 자격 증명은 환경 변수에 저장됨 (git에 커밋되지 않음)
 
 ## 코드 주석 작성 가이드라인
 - **모든 코드 주석은 한글로 작성**해야 하며, 문법상 필요한 요소(예: JSDoc 태그 `@param`, `@return`)는 예외

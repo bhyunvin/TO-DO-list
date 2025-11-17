@@ -9,7 +9,7 @@ TO-DO List 애플리케이션의 백엔드 서버입니다. NestJS 프레임워�
 - Google Gemini API를 활용한 AI 지원
 - 파일 업로드 및 관리
 - 포괄적인 감사 로깅
-- macOS Keychain을 통한 보안 자격 증명 관리
+- 환경 변수를 통한 보안 자격 증명 관리
 
 ## 기술 스택
 
@@ -50,7 +50,6 @@ src/
 │   └── logging.entity.ts
 ├── utils/                       # 유틸리티
 │   ├── crypto.util.ts
-│   ├── keychain.util.ts
 │   ├── audit-columns.ts
 │   └── naming-strategy.ts
 ├── filter/                      # 전역 필터
@@ -227,17 +226,17 @@ npm run format
 
 - PostgreSQL이 실행 중인지 확인
 - `.env` 파일의 데이터베이스 자격 증명 확인
-- Keychain에 저장된 비밀번호 확인
+- `DB_DEV_PASSWORD` 환경 변수가 올바르게 설정되어 있는지 확인
 
 ### 세션 오류
 
 - `SESSION_SECRET`이 설정되어 있는지 확인
 - 세션 스토어가 올바르게 구성되어 있는지 확인
 
-### Keychain 오류
+### 환경 변수 오류
 
-- macOS Keychain Access 앱에서 항목 확인
-- `KeychainUtil`이 올바르게 초기화되었는지 확인
+- `.env` 파일에 모든 필수 환경 변수가 설정되어 있는지 확인
+- `DB_DEV_PASSWORD`, `SESSION_SECRET`, `GEMINI_API_KEY` 등이 올바르게 설정되어 있는지 확인
 
 ## 라이선스
 
@@ -256,7 +255,7 @@ Backend server for the TO-DO List application. Built with NestJS framework and i
 - AI assistance powered by Google Gemini API
 - File upload and management
 - Comprehensive audit logging
-- Secure credential management via macOS Keychain
+- Secure credential management via environment variables
 
 ## Technology Stack
 
@@ -297,7 +296,6 @@ src/
 │   └── logging.entity.ts
 ├── utils/                       # Utilities
 │   ├── crypto.util.ts
-│   ├── keychain.util.ts
 │   ├── audit-columns.ts
 │   └── naming-strategy.ts
 ├── filter/                      # Global filters
@@ -474,17 +472,17 @@ For detailed API specifications, please refer to the separate API documentation.
 
 - Verify PostgreSQL is running
 - Check database credentials in `.env` file
-- Verify password stored in Keychain
+- Verify `DB_DEV_PASSWORD` environment variable is properly set
 
 ### Session Error
 
 - Verify `SESSION_SECRET` is configured
 - Check session store is properly configured
 
-### Keychain Error
+### Environment Variable Error
 
-- Check items in macOS Keychain Access app
-- Verify `KeychainUtil` is properly initialized
+- Verify all required environment variables are set in `.env` file
+- Check that `DB_DEV_PASSWORD`, `SESSION_SECRET`, `GEMINI_API_KEY` are properly configured
 
 ## License
 
