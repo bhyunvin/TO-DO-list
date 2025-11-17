@@ -212,28 +212,30 @@ function CreateTodoForm({ onAddTodo, onCancel }) {
           </div>
         )}
         
-        <button 
-          type="submit" 
-          className="btn btn-success"
-          disabled={isSubmitting || uploadStatus === 'uploading' || uploadStatus === 'validating'}
-        >
-          {isSubmitting || uploadStatus === 'uploading' ? (
-            <>
-              <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-              {uploadStatus === 'uploading' ? '업로드 중...' : 
-               uploadStatus === 'validating' ? '검증 중...' : '추가 중...'}
-            </>
-          ) : (
-            '추가'
-          )}
-        </button>
-        <button
-          type="button"
-          className="btn btn-secondary ms-2"
-          onClick={onCancel}
-        >
-          취소
-        </button>
+        <div className="form-actions">
+          <button 
+            type="submit" 
+            className="btn btn-success"
+            disabled={isSubmitting || uploadStatus === 'uploading' || uploadStatus === 'validating'}
+          >
+            {isSubmitting || uploadStatus === 'uploading' ? (
+              <>
+                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                {uploadStatus === 'uploading' ? '업로드 중...' : 
+                 uploadStatus === 'validating' ? '검증 중...' : '추가 중...'}
+              </>
+            ) : (
+              '추가'
+            )}
+          </button>
+          <button
+            type="button"
+            className="btn btn-secondary ms-2"
+            onClick={onCancel}
+          >
+            취소
+          </button>
+        </div>
       </form>
     </div>
   );
@@ -559,24 +561,26 @@ function EditTodoForm({ todo, onSave, onCancel }) {
           </div>
         )}
         
-        <button 
-          type="submit" 
-          className="btn btn-success"
-          disabled={isSubmitting || uploadStatus === 'uploading' || uploadStatus === 'validating'}
-        >
-          {isSubmitting || uploadStatus === 'uploading' ? (
-            <>
-              <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-              {uploadStatus === 'uploading' ? '업로드 중...' : 
-               uploadStatus === 'validating' ? '검증 중...' : '수정 중...'}
-            </>
-          ) : (
-            '수정'
-          )}
-        </button>
-        <button type="button" className="btn btn-secondary ms-2" onClick={onCancel}>
-          취소
-        </button>
+        <div className="form-actions">
+          <button 
+            type="submit" 
+            className="btn btn-success"
+            disabled={isSubmitting || uploadStatus === 'uploading' || uploadStatus === 'validating'}
+          >
+            {isSubmitting || uploadStatus === 'uploading' ? (
+              <>
+                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                {uploadStatus === 'uploading' ? '업로드 중...' : 
+                 uploadStatus === 'validating' ? '검증 중...' : '수정 중...'}
+              </>
+            ) : (
+              '수정'
+            )}
+          </button>
+          <button type="button" className="btn btn-secondary ms-2" onClick={onCancel}>
+            취소
+          </button>
+        </div>
       </form>
     </div>
   );
@@ -1625,7 +1629,9 @@ function TodoContainer() {
       {/* 할 일 목록을 볼 때만 DatePicker를 표시 */}
       {!isCreating && !editingTodo && !isUpdatingProfile && !isChangingPassword && (
         <div className="date-navigator">
-          <button onClick={handlePrevDay} className="date-nav-btn">&lt;</button>
+          <button onClick={handlePrevDay} className="date-nav-btn" aria-label="이전 날짜">
+            <i className="bi bi-chevron-left"></i>
+          </button>
           <DatePicker
             locale={ko}
             selected={selectedDate}
@@ -1637,7 +1643,9 @@ function TodoContainer() {
             dropdownMode="select"
             withPortal
           />
-          <button onClick={handleNextDay} className="date-nav-btn">&gt;</button>
+          <button onClick={handleNextDay} className="date-nav-btn" aria-label="다음 날짜">
+            <i className="bi bi-chevron-right"></i>
+          </button>
           <button onClick={handleToday} className="date-today-btn">오늘</button>
         </div>
       )}

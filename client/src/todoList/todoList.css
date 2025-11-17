@@ -240,10 +240,19 @@
     font-size: 1rem;
     color: #555;
     transition: background-color 0.2s;
+    display: flex; /* 아이콘을 중앙 정렬하기 위해 flex 사용 */
+    align-items: center; /* 수직 중앙 정렬 */
+    justify-content: center; /* 수평 중앙 정렬 */
+    padding: 0; /* 패딩 제거로 아이콘이 정확히 중앙에 위치 */
 }
 
 .date-nav-btn:hover {
     background-color: #f0f0f0;
+}
+
+.date-nav-btn i {
+    font-size: 0.9rem; /* 아이콘 크기 조정 */
+    line-height: 1; /* 라인 높이 조정 */
 }
 
 /* Today 버튼 */
@@ -292,41 +301,36 @@
     border: none;
     padding: 4px 8px;
     cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+    color: #6c757d;
+}
+
+.more-actions-btn:hover {
+    background-color: #f8f9fa;
+    color: #495057;
+}
+
+.more-actions-btn:active {
+    background-color: #e9ecef;
 }
 
 /* 액션 팝업 메뉴 */
 .action-menu {
     position: absolute;
-    left: 50%; /* 버튼의 중앙에서 시작 */
-    top: 50%; /* 수직 중앙 정렬 */
-    transform: translate(20px, -50%); /* 수직 중앙 정렬 및 오른쪽으로 이동 */
+    right: 100%; /* 버튼의 왼쪽에 배치 */
+    top: 50%;
+    transform: translate(-8px, -50%); /* 왼쪽으로 약간 이동, 수직 중앙 정렬 */
     background-color: white;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-    z-index: 1050; /* Higher z-index to appear above all other elements */
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    z-index: 1050;
     display: flex;
-    gap: 8px; /* 버튼 간 간격 */
+    gap: 8px;
     padding: 8px;
-    /* 팝업 메뉴 자체에 대한 부드러운 등장 효과 */
-    animation: fadeIn 0.15s ease-out;
-    /* Ensure the menu is not clipped by parent containers */
     white-space: nowrap;
-}
-
-/* 팝업 메뉴 안의 버튼 애니메이션 */
-.action-menu .btn {
-    animation: slideIn 0.3s ease-out forwards;
-    opacity: 0; /* 애니메이션 시작 전에는 투명하게 */
-}
-
-/* 버튼이 순서대로 나타나도록 지연 시간 설정 */
-.action-menu .btn:nth-child(1) {
-    animation-delay: 0s;
-}
-
-.action-menu .btn:nth-child(2) {
-    animation-delay: 0.07s;
+    animation: actionMenuFadeInLeft 0.15s ease-out;
 }
 
 /* 팝업 메뉴 안의 버튼 */
@@ -337,52 +341,16 @@
     padding: 6px 10px;
 }
 
-/* 팝업 메뉴 등장 애니메이션 */
-@keyframes fadeIn {
+/* 왼쪽에서 나타나는 애니메이션 */
+@keyframes actionMenuFadeInLeft {
     from {
         opacity: 0;
-        transform: translate(20px, -60%);
+        transform: translate(-18px, -50%); /* 왼쪽에서 시작 */
     }
     to {
         opacity: 1;
-        transform: translate(20px, -50%);
+        transform: translate(-8px, -50%); /* 최종 위치 */
     }
-}
-
-/* Ensure action menu is always visible and not clipped */
-.todo-list tbody tr:last-child .action-menu {
-    /* For the last row, position the menu above the button to avoid clipping */
-    top: auto;
-    bottom: 50%;
-    transform: translate(20px, 50%);
-}
-
-/* Alternative positioning for action menus near the right edge */
-.todo-actions-cell:last-child .action-menu {
-    left: auto;
-    right: 100%;
-    transform: translate(-8px, -50%);
-}
-
-.todo-actions-cell:last-child .action-menu.fadeIn {
-    animation: fadeInLeft 0.15s ease-out;
-}
-
-@keyframes fadeInLeft {
-    from {
-        opacity: 0;
-        transform: translate(-18px, -60%);
-    }
-    to {
-        opacity: 1;
-        transform: translate(-8px, -50%);
-    }
-}
-
-/* 버튼 슬라이드인 애니메이션 */
-@keyframes slideIn {
-    from { opacity: 0; transform: translateX(-10px); }
-    to   { opacity: 1; transform: translateX(0); }
 }
 /* 
 Additional fixes for layout issues */
@@ -392,30 +360,10 @@ Additional fixes for layout issues */
     overflow: visible;
 }
 
-/* Make sure the table wrapper allows natural content flow while preserving mobile scroll */
-.table-responsive-container {
-    /* Remove any implicit height constraints */
-    height: auto !important;
-    min-height: auto !important;
-    /* Use max-height to allow scrolling only when content is large */
-    max-height: 50vh !important;
-    /* Ensure mobile horizontal scroll is preserved */
-    overflow-x: auto !important;
-    /* Allow vertical scroll only when content exceeds max-height */
-    overflow-y: auto !important;
-}
-
 /* Ensure table cells can accommodate dropdown menus */
 .todo-list td {
     position: relative;
     overflow: visible;
-}
-
-/* Ensure action menu stays within viewport bounds */
-.action-menu {
-    /* Keep original absolute positioning but ensure visibility */
-    position: absolute;
-    z-index: 1050;
 }
 /* Mobile-specific fixes to ensure horizontal scroll works */
 @media (max-width: 768px) {
@@ -505,8 +453,7 @@ Additional fixes for layout issues */
     /* Remove any tbody-specific height constraints */
     max-height: none !important;
 }
-/* Clicka
-ble checkbox cell */
+/* Clickable checkbox cell */
 .checkbox-cell {
     user-select: none;
     transition: background-color 0.15s ease;
@@ -518,4 +465,12 @@ ble checkbox cell */
 
 .checkbox-cell input[type="checkbox"] {
     pointer-events: none; /* Prevent checkbox from capturing clicks */
+}
+
+/* 폼 액션 버튼 컨테이너 - 오른쪽 정렬 */
+.form-actions {
+    display: flex;
+    justify-content: flex-end; /* 버튼들을 오른쪽으로 정렬 */
+    gap: 8px; /* 버튼 간 간격 */
+    margin-top: 20px; /* 위쪽 여백 */
 }
