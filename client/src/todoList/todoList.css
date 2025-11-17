@@ -196,7 +196,7 @@
 .todo-list {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 1rem;
+  margin-top: 0;
   background-color: var(--color-white);
   border-radius: var(--border-radius-default);
   overflow: visible;
