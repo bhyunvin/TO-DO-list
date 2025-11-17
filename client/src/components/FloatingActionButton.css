@@ -1,102 +1,128 @@
+:root {
+  --fab-size: 56px;
+  --fab-size-tablet: 48px;
+  --fab-size-mobile: 52px;
+  --fab-color-primary: #007bff;
+  --fab-color-primary-dark: #0056b3;
+  --fab-color-danger: #dc3545;
+  --fab-color-danger-dark: #c82333;
+  --fab-shadow-primary: 0 4px 12px rgb(0 123 255 / 0.3);
+  --fab-shadow-primary-hover: 0 6px 20px rgb(0 123 255 / 0.4);
+  --fab-shadow-danger-hover: 0 6px 20px rgb(220 53 69 / 0.4);
+  --fab-shadow-focus: 0 6px 20px rgb(0 123 255 / 0.4), 0 0 0 4px rgb(0 123 255 / 0.2);
+  --fab-position-bottom: 20px;
+  --fab-position-right: 20px;
+  --fab-position-tablet: 16px;
+  --fab-position-mobile: 12px;
+  --fab-position-mobile-small: 10px;
+  --fab-position-top: 20px;
+  --fab-position-top-mobile: 10px;
+  --fab-font-size: 20px;
+  --fab-font-size-tablet: 18px;
+  --fab-z-index: 1060;
+  --fab-z-index-open: 1070;
+  --fab-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 .floating-action-button {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
-  width: 56px;
-  height: 56px;
+  bottom: var(--fab-position-bottom);
+  right: var(--fab-position-right);
+  width: var(--fab-size);
+  height: var(--fab-size);
   border-radius: 50%;
-  background-color: #007bff;
+  background-color: var(--fab-color-primary);
   color: white;
   border: none;
-  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+  box-shadow: var(--fab-shadow-primary);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
-  z-index: 1060; /* Higher z-index to ensure it's above modal and other elements */
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: var(--fab-font-size);
+  z-index: var(--fab-z-index);
+  transition: var(--fab-transition);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }
 
 .floating-action-button:hover {
-  background-color: #0056b3;
-  box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+  background-color: var(--fab-color-primary-dark);
+  box-shadow: var(--fab-shadow-primary-hover);
   transform: translateY(-2px) scale(1.05);
 }
 
 .floating-action-button:focus {
-  outline: 2px solid #0056b3;
+  outline: 2px solid var(--fab-color-primary-dark);
   outline-offset: 2px;
-  box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4), 0 0 0 4px rgba(0, 123, 255, 0.2);
+  box-shadow: var(--fab-shadow-focus);
 }
 
 .floating-action-button.open {
-  background-color: #dc3545;
+  background-color: var(--fab-color-danger);
 }
 
 .floating-action-button.open:hover {
-  background-color: #c82333;
-  box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+  background-color: var(--fab-color-danger-dark);
+  box-shadow: var(--fab-shadow-danger-hover);
   transform: translateY(-2px) scale(1.05);
 }
 
-/* Responsive design */
+/* 반응형 디자인 */
 @media (max-width: 768px) {
   .floating-action-button {
-    bottom: 16px;
-    right: 16px;
-    width: 48px;
-    height: 48px;
-    font-size: 18px;
+    bottom: var(--fab-position-tablet);
+    right: var(--fab-position-tablet);
+    width: var(--fab-size-tablet);
+    height: var(--fab-size-tablet);
+    font-size: var(--fab-font-size-tablet);
   }
   
-  /* When chat is open on tablet, move button to top-right of screen */
+  /* 태블릿에서 채팅이 열렸을 때 버튼을 화면 상단 우측으로 이동 */
   .floating-action-button.open {
-    top: 20px;
+    top: var(--fab-position-top);
     bottom: auto;
-    right: 20px;
-    background-color: #dc3545;
-    z-index: 1070; /* Higher than modal */
+    right: var(--fab-position-top);
+    background-color: var(--fab-color-danger);
+    z-index: var(--fab-z-index-open);
   }
 }
 
-/* Ensure proper touch target size on mobile */
+/* 모바일에서 적절한 터치 타겟 크기 보장 */
 @media (max-width: 480px) {
   .floating-action-button {
-    width: 52px;
-    height: 52px;
-    bottom: 12px;
-    right: 12px;
+    width: var(--fab-size-mobile);
+    height: var(--fab-size-mobile);
+    bottom: var(--fab-position-mobile);
+    right: var(--fab-position-mobile);
   }
   
-  /* When chat is open on mobile, move button to top-right corner */
+  /* 모바일에서 채팅이 열렸을 때 버튼을 상단 우측 모서리로 이동 */
   .floating-action-button.open {
-    top: 10px;
+    top: var(--fab-position-top-mobile);
     bottom: auto;
     right: 15px;
-    background-color: #dc3545;
-    z-index: 1070; /* Higher than modal */
+    background-color: var(--fab-color-danger);
+    z-index: var(--fab-z-index-open);
   }
 }
 
-/* For very small screens, ensure proper positioning */
+/* 매우 작은 화면에서 적절한 위치 보장 */
 @media (max-width: 360px) {
   .floating-action-button.open {
-    top: 10px;
-    right: 10px;
+    top: var(--fab-position-top-mobile);
+    right: var(--fab-position-mobile-small);
   }
 }
 
-/* High contrast mode support */
+/* 고대비 모드 지원 */
 @media (prefers-contrast: high) {
   .floating-action-button {
     border: 2px solid currentColor;
   }
 }
 
-/* Reduced motion support */
+/* 모션 감소 지원 */
 @media (prefers-reduced-motion: reduce) {
   .floating-action-button {
     transition: none;

@@ -1,476 +1,486 @@
+:root {
+  --color-white: #fff;
+  --color-border-light: #e0e0e0;
+  --color-border-medium: #dee2e6;
+  --color-border-separator: #f0f0f0;
+  --color-bg-light: #f8f9fa;
+  --color-bg-hover: #f8f9fa;
+  --color-bg-completed: #f0f8f0;
+  --color-text-primary: #212529;
+  --color-text-secondary: #495057;
+  --color-text-muted: #6c757d;
+  --color-primary: #007bff;
+  --color-primary-dark: #0056b3;
+  --color-danger: #dc3545;
+  --color-danger-dark: #c82333;
+  --border-radius-default: 8px;
+  --border-radius-small: 4px;
+  --border-radius-medium: 0.375rem;
+  --border-radius-circle: 50%;
+  --box-shadow-light: 0 2px 4px rgb(0 0 0 / 0.1);
+  --box-shadow-medium: 0 4px 6px rgb(0 0 0 / 0.05);
+  --box-shadow-dropdown: 0 0.5rem 1rem rgb(0 0 0 / 0.15);
+  --spacing-xs: 8px;
+  --spacing-sm: 12px;
+  --spacing-md: 16px;
+  --spacing-lg: 20px;
+  --spacing-xl: 24px;
+  --spacing-2xl: 40px;
+  --container-max-width: 800px;
+  --table-min-width-mobile: 600px;
+  --table-min-width-small: 650px;
+  --transition-fast: 0.15s ease-in-out;
+  --transition-default: 0.2s ease;
+}
+
 /* 전체 TODO 컨테이너 */
 .todo-container {
-    max-width: 800px;
-    margin: 40px auto; /* 상하 여백 증가로 보기 좋게 */
-    padding: 24px;
-    border: 1px solid #e0e0e0; /* 테두리 색상 약간 연하게 */
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); /* 그림자 효과 */
-    background-color: #fff;
-    min-height: auto; /* Remove any minimum height constraints */
-    overflow: visible; /* Allow content to overflow naturally */
+  max-width: var(--container-max-width);
+  margin: var(--spacing-2xl) auto;
+  padding: var(--spacing-xl);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--border-radius-default);
+  box-shadow: var(--box-shadow-medium);
+  background-color: var(--color-white);
+  min-height: auto;
+  overflow: visible;
+}
+
+.todo-container > * {
+  overflow: visible;
 }
 
 /* 긴 텍스트를 자르고 말줄임표(...)로 표시하는 유틸리티 클래스 */
 .text-truncate {
-    display: block;
-    max-width: 100%; /* 부모 요소의 너비를 넘지 않도록 설정 */
-    white-space: nowrap; /* 텍스트가 한 줄로 표시되도록 강제 */
-    overflow: hidden; /* 넘치는 텍스트를 숨김 */
-    text-overflow: ellipsis; /* 숨겨진 텍스트를 말줄임표로 표시 */
+  display: block;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* 1. 제목을 위한 헤더: 중앙 정렬 */
+/* 제목을 위한 헤더: 중앙 정렬 */
 .todo-title-header {
-    text-align: center; /* 텍스트를 중앙으로 정렬합니다. */
-    margin-bottom: 8px; /* 사용자 정보와의 약간의 간격 */
-    padding-bottom: 16px;
-    border-bottom: 1px solid #f0f0f0; /* 구분선 */
+  text-align: center;
+  margin-bottom: 0;
+  padding-bottom: var(--spacing-md);
+  border-bottom: 1px solid var(--color-border-separator);
 }
 
 .todo-title-header h2 {
-    margin: 0;
-    font-size: 1.5rem;
+  margin: 0;
+  font-size: 1.5rem;
 }
 
-/* 2. 사용자 정보를 위한 헤더: 우측 정렬 */
+/* 사용자 정보를 위한 헤더: 우측 정렬 */
 .user-info-header {
-    display: flex;
-    justify-content: flex-end; /* 내용을 오른쪽 끝으로 보냅니다. */
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 20px; /* 아래의 액션 버튼들과의 간격 */
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
 }
 
 /* 사용자 메뉴 컨테이너 */
 .user-menu-container {
-    position: relative;
+  position: relative;
 }
 
 /* 사용자 메뉴 아이콘 버튼 */
 .user-menu-icon {
-    background: none;
-    border: none;
-    padding: 8px;
-    cursor: pointer;
-    font-size: 1.5rem;
-    color: #6c757d;
-    border-radius: 50%;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  background: none;
+  border: none;
+  padding: var(--spacing-xs);
+  cursor: pointer;
+  font-size: 1.5rem;
+  color: var(--color-text-muted);
+  border-radius: var(--border-radius-circle);
+  transition: all var(--transition-default);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .user-menu-icon:hover {
-    background-color: #f8f9fa;
-    color: #495057;
-    transform: scale(1.1);
+  background-color: var(--color-bg-light);
+  color: var(--color-text-secondary);
+  transform: scale(1.1);
 }
 
 .user-menu-icon:focus {
-    outline: 2px solid #007bff;
-    outline-offset: 2px;
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 /* 사용자 드롭다운 메뉴 */
 .user-dropdown-menu {
-    position: absolute;
-    top: 100%;
-    right: 0;
-    background-color: white;
-    border: 1px solid #dee2e6;
-    border-radius: 0.375rem;
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-    z-index: 1000;
-    min-width: 160px;
-    padding: 0.5rem 0;
-    margin-top: 0.125rem;
-    animation: dropdownFadeIn 0.15s ease-out;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: var(--color-white);
+  border: 1px solid var(--color-border-medium);
+  border-radius: var(--border-radius-medium);
+  box-shadow: var(--box-shadow-dropdown);
+  z-index: 1000;
+  min-width: 160px;
+  padding: 0.5rem 0;
+  margin-top: 0.125rem;
+  animation: dropdownFadeIn 0.15s ease-out;
 }
 
 /* 드롭다운 메뉴 항목 */
 .user-dropdown-menu .dropdown-item {
-    display: block;
-    width: 100%;
-    padding: 0.5rem 1rem;
-    clear: both;
-    font-weight: 400;
-    color: #212529;
-    text-align: left;
-    text-decoration: none;
-    white-space: nowrap;
-    background-color: transparent;
-    border: 0;
-    cursor: pointer;
-    transition: background-color 0.15s ease-in-out;
+  display: block;
+  width: 100%;
+  padding: 0.5rem 1rem;
+  clear: both;
+  font-weight: 400;
+  color: var(--color-text-primary);
+  text-align: left;
+  text-decoration: none;
+  white-space: nowrap;
+  background-color: transparent;
+  border: 0;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
 }
 
 .user-dropdown-menu .dropdown-item:hover,
 .user-dropdown-menu .dropdown-item:focus {
-    background-color: #f8f9fa;
-    color: #16181b;
+  background-color: var(--color-bg-light);
+  color: #16181b;
 }
 
 .user-dropdown-menu .dropdown-item:disabled {
-    color: #6c757d;
-    pointer-events: none;
-    background-color: transparent;
+  color: var(--color-text-muted);
+  pointer-events: none;
+  background-color: transparent;
 }
 
 /* 드롭다운 애니메이션 */
 @keyframes dropdownFadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* 신규, 수정, 삭제 버튼 그룹 */
 .todo-actions {
-    display: flex;
-    justify-content: flex-end; /* 오른쪽 정렬 */
-    gap: 8px; /* 버튼 간 간격 */
-    margin-bottom: 20px;
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-lg);
 }
 
 /* todo-actions 내부의 버튼들이 불필요하게 늘어나는 것을 방지 */
 .todo-actions .btn {
-    width: auto; /* 버튼 내용에 맞게 너비 자동 설정 */
-    flex-grow: 0; /* flex item이 늘어나지 않도록 설정 */
-    min-width: 80px; /* 버튼의 최소 너비 지정 (선택 사항) */
+  width: auto;
+  flex-grow: 0;
+  min-width: 80px;
 }
 
 /* 할 일 목록 섹션 */
 .todo-list-section {
-    margin-top: 20px;
-    height: auto; /* Ensure flexible height */
-    overflow: visible; /* Allow content to overflow naturally */
+  margin-top: var(--spacing-lg);
+  height: auto;
+  overflow: visible;
 }
 
 /* TODO 테이블 스타일 */
 .todo-list {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 1rem;
-    background-color: white;
-    border-radius: 8px;
-    overflow: visible; /* Allow overflow for dropdown menus */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  background-color: var(--color-white);
+  border-radius: var(--border-radius-default);
+  overflow: visible;
+  box-shadow: var(--box-shadow-light);
+  height: auto;
+  min-height: auto;
+  max-height: none;
 }
 
 .todo-list th,
 .todo-list td {
-    padding: 12px 8px;
-    text-align: left;
-    border-bottom: 1px solid #dee2e6;
-    vertical-align: middle;
+  padding: var(--spacing-sm) var(--spacing-xs);
+  text-align: left;
+  border-bottom: 1px solid var(--color-border-medium);
+  vertical-align: middle;
+  position: relative;
+  overflow: visible;
 }
 
 .todo-list th {
-    background-color: #f8f9fa;
-    font-weight: 600;
-    color: #495057;
-    white-space: nowrap;
+  background-color: var(--color-bg-light);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.todo-list tbody {
+  height: auto;
+  min-height: auto;
+  max-height: none;
 }
 
 .todo-list tbody tr {
-    position: relative; /* Ensure proper positioning context for action menus */
+  position: relative;
 }
 
 .todo-list tbody tr:hover {
-    background-color: #f8f9fa;
+  background-color: var(--color-bg-hover);
 }
 
 .todo-list tbody tr.completed {
-    opacity: 0.7;
-    background-color: #f0f8f0;
+  opacity: 0.7;
+  background-color: var(--color-bg-completed);
 }
 
 .todo-list tbody tr.completed td {
-    color: #6c757d;
+  color: var(--color-text-muted);
 }
 
 /* 테이블 반응형 컨테이너 */
 .table-responsive-container {
-    width: 100%;
-    overflow-x: auto; /* ★ 가로 스크롤만 담당 */
-    overflow-y: visible; /* ★★★ 중요: 메뉴가 잘리지 않도록 visible로 변경 */
-    -webkit-overflow-scrolling: touch;
-    border-radius: 0;
-    box-shadow: none;
-    min-height: auto;
-    height: auto;
-    max-height: none; /* ★★★ 중요: 모든 높이 제한 제거 */
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 0;
+  box-shadow: none;
+  min-height: auto;
+  height: auto;
+  max-height: 50vh;
 }
 
 .list-wrapper {
-    max-height: 60vh; /* 50vh보다 넉넉하게 설정 */
-    overflow-y: auto;
-    overflow-x: hidden; /* 이 컨테이너는 가로 스크롤을 하지 않음 */
-    
-    /* 기존 .table-responsive-container가 가졌던 시각적 속성을 이곳으로 이동 */
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  max-height: 60vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border-radius: var(--border-radius-default);
+  box-shadow: var(--box-shadow-light);
 }
 
 /* 날짜 네비게이터 컨테이너 */
 .date-navigator {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 15px; /* 요소들 사이의 간격 */
-    margin-bottom: 20px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: var(--spacing-lg);
+  padding-bottom: var(--spacing-lg);
+  border-bottom: 1px solid var(--color-border-separator);
 }
 
 /* 이전/다음 날짜 이동 버튼 */
 .date-nav-btn {
-    background: none;
-    border: 1px solid #ccc;
-    border-radius: 50%; /* 동그란 모양 */
-    width: 30px;
-    height: 30px;
-    cursor: pointer;
-    font-size: 1rem;
-    color: #555;
-    transition: background-color 0.2s;
-    display: flex; /* 아이콘을 중앙 정렬하기 위해 flex 사용 */
-    align-items: center; /* 수직 중앙 정렬 */
-    justify-content: center; /* 수평 중앙 정렬 */
-    padding: 0; /* 패딩 제거로 아이콘이 정확히 중앙에 위치 */
+  background: none;
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--border-radius-circle);
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  font-size: 1rem;
+  color: #555;
+  transition: background-color var(--transition-default);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
 }
 
 .date-nav-btn:hover {
-    background-color: #f0f0f0;
+  background-color: #f0f0f0;
 }
 
 .date-nav-btn i {
-    font-size: 0.9rem; /* 아이콘 크기 조정 */
-    line-height: 1; /* 라인 높이 조정 */
+  font-size: 0.9rem;
+  line-height: 1;
 }
 
 /* Today 버튼 */
 .date-today-btn {
-    background: none;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    padding: 5px 12px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    color: #555;
-    transition: background-color 0.2s;
+  background: none;
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--border-radius-small);
+  padding: 5px var(--spacing-sm);
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #555;
+  transition: background-color var(--transition-default);
 }
 
 .date-today-btn:hover {
-    background-color: #f0f0f0;
+  background-color: #f0f0f0;
 }
 
 /* DatePicker의 input을 텍스트처럼 보이게 스타일링 */
 .date-display {
-    background-color: transparent;
-    border: none;
-    font-size: 1.2rem; /* 글자 크기 키우기 */
-    font-weight: bold;
-    text-align: center;
-    cursor: pointer;
-    width: 130px; /* 너비 고정 */
-    color: #333;
+  background-color: transparent;
+  border: none;
+  font-size: 1.2rem;
+  font-weight: bold;
+  text-align: center;
+  cursor: pointer;
+  width: 130px;
+  color: #333;
 }
 
-/* react-datepicker 팝업 위치 조정을 위한 CSS (선택사항이지만 추천) */
+/* react-datepicker 팝업 위치 조정을 위한 CSS */
 .react-datepicker-popper {
-    z-index: 10; /* 다른 요소들 위에 보이도록 z-index 설정 */
+  z-index: 10;
 }
 
 /* 할 일 목록의 액션 버튼 셀 */
 .todo-actions-cell {
-    position: relative; /* 팝업 메뉴의 기준점 */
-    text-align: center;
-    overflow: visible; /* Ensure dropdown menu is not clipped */
+  position: relative;
+  text-align: center;
+  overflow: visible;
 }
 
 /* 더보기(...) 버튼 */
 .more-actions-btn {
-    background: none;
-    border: none;
-    padding: 4px 8px;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: background-color 0.2s ease;
-    color: #6c757d;
+  background: none;
+  border: none;
+  padding: 4px var(--spacing-xs);
+  cursor: pointer;
+  border-radius: var(--border-radius-small);
+  transition: background-color var(--transition-default);
+  color: var(--color-text-muted);
 }
 
 .more-actions-btn:hover {
-    background-color: #f8f9fa;
-    color: #495057;
+  background-color: var(--color-bg-light);
+  color: var(--color-text-secondary);
 }
 
 .more-actions-btn:active {
-    background-color: #e9ecef;
+  background-color: #e9ecef;
 }
 
 /* 액션 팝업 메뉴 */
 .action-menu {
-    position: absolute;
-    right: 100%; /* 버튼의 왼쪽에 배치 */
-    top: 50%;
-    transform: translate(-8px, -50%); /* 왼쪽으로 약간 이동, 수직 중앙 정렬 */
-    background-color: white;
-    border: 1px solid #dee2e6;
-    border-radius: 0.375rem;
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-    z-index: 1050;
-    display: flex;
-    gap: 8px;
-    padding: 8px;
-    white-space: nowrap;
-    animation: actionMenuFadeInLeft 0.15s ease-out;
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  transform: translate(-8px, -50%);
+  background-color: var(--color-white);
+  border: 1px solid var(--color-border-medium);
+  border-radius: var(--border-radius-medium);
+  box-shadow: var(--box-shadow-dropdown);
+  z-index: 1050;
+  display: flex;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs);
+  white-space: nowrap;
+  animation: actionMenuFadeInLeft 0.15s ease-out;
 }
 
 /* 팝업 메뉴 안의 버튼 */
 .action-menu .btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
 }
 
 /* 왼쪽에서 나타나는 애니메이션 */
 @keyframes actionMenuFadeInLeft {
-    from {
-        opacity: 0;
-        transform: translate(-18px, -50%); /* 왼쪽에서 시작 */
-    }
-    to {
-        opacity: 1;
-        transform: translate(-8px, -50%); /* 최종 위치 */
-    }
-}
-/* 
-Additional fixes for layout issues */
-
-/* Ensure the main content area doesn't have unnecessary height constraints */
-.todo-container > * {
-    overflow: visible;
+  from {
+    opacity: 0;
+    transform: translate(-18px, -50%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-8px, -50%);
+  }
 }
 
-/* Ensure table cells can accommodate dropdown menus */
-.todo-list td {
-    position: relative;
-    overflow: visible;
-}
-/* Mobile-specific fixes to ensure horizontal scroll works */
-@media (max-width: 768px) {
-    /* Force horizontal scroll on mobile devices with higher specificity */
-    .todo-container .table-responsive-container {
-        overflow-x: auto !important;
-        overflow-y: auto !important; /* Allow vertical scroll when content exceeds max-height */
-        -webkit-overflow-scrolling: touch !important;
-        /* Ensure the container can scroll horizontally */
-        position: relative;
-        width: 100%;
-        /* Create a new stacking context to prevent global overflow issues */
-        transform: translateZ(0);
-        /* Use max-height to allow scrolling when content is large */
-        max-height: 50vh !important;
-    }
-    
-    /* Ensure table has minimum width to trigger scroll */
-    .todo-container .todo-list {
-        min-width: 600px !important;
-        width: auto !important;
-        table-layout: auto !important;
-    }
-    
-    /* Prevent any parent containers from hiding overflow except body */
-    .todo-container {
-        overflow: visible !important;
-        /* Allow horizontal overflow specifically for table scrolling */
-        overflow-x: visible !important;
-    }
-    
-    /* Ensure all table columns are visible and properly sized */
-    .todo-list th,
-    .todo-list td {
-        white-space: nowrap;
-        min-width: fit-content;
-    }
-    
-    /* Specific column widths to ensure proper layout */
-    .todo-list th:nth-child(1), .todo-list td:nth-child(1) { min-width: 60px; } /* 완료 */
-    .todo-list th:nth-child(2), .todo-list td:nth-child(2) { min-width: 60px; } /* 번호 */
-    .todo-list th:nth-child(3), .todo-list td:nth-child(3) { min-width: 200px; } /* 내용 */
-    .todo-list th:nth-child(4), .todo-list td:nth-child(4) { min-width: 140px; } /* 완료일시 */
-    .todo-list th:nth-child(5), .todo-list td:nth-child(5) { min-width: 150px; } /* 비고 */
-    .todo-list th:nth-child(6), .todo-list td:nth-child(6) { min-width: 80px; } /* 액션 */
-}
-
-@media (max-width: 480px) {
-    .todo-container .todo-list {
-        min-width: 650px !important;
-    }
-}
-
-/* Ensure floating action button maintains its blue color */
-.floating-action-button {
-    background-color: #007bff !important;
-}
-
-.floating-action-button:hover {
-    background-color: #0056b3 !important;
-}
-
-.floating-action-button.open {
-    background-color: #dc3545 !important;
-}
-
-.floating-action-button.open:hover {
-    background-color: #c82333 !important;
-}
-/* Apply max-height only when needed to prevent unnecessary scrollbars with few items */
-.table-responsive-container {
-    /* Use max-height to allow scrolling only when content is large */
-    max-height: 50vh !important;
-}
-
-/* Ensure table grows naturally with content */
-.todo-list {
-    height: auto !important;
-    min-height: auto !important;
-    /* Remove any table-specific height constraints */
-    max-height: none !important;
-}
-
-.todo-list tbody {
-    height: auto !important;
-    min-height: auto !important;
-    /* Remove any tbody-specific height constraints */
-    max-height: none !important;
-}
-/* Clickable checkbox cell */
+/* 클릭 가능한 체크박스 셀 */
 .checkbox-cell {
-    user-select: none;
-    transition: background-color 0.15s ease;
+  user-select: none;
+  transition: background-color var(--transition-fast);
 }
 
 .checkbox-cell:hover {
-    background-color: #e9ecef !important;
+  background-color: #e9ecef;
 }
 
 .checkbox-cell input[type="checkbox"] {
-    pointer-events: none; /* Prevent checkbox from capturing clicks */
+  pointer-events: none;
 }
 
 /* 폼 액션 버튼 컨테이너 - 오른쪽 정렬 */
 .form-actions {
-    display: flex;
-    justify-content: flex-end; /* 버튼들을 오른쪽으로 정렬 */
-    gap: 8px; /* 버튼 간 간격 */
-    margin-top: 20px; /* 위쪽 여백 */
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-lg);
+}
+
+/* 플로팅 액션 버튼 색상 유지 */
+.floating-action-button {
+  background-color: var(--color-primary);
+}
+
+.floating-action-button:hover {
+  background-color: var(--color-primary-dark);
+}
+
+.floating-action-button.open {
+  background-color: var(--color-danger);
+}
+
+.floating-action-button.open:hover {
+  background-color: var(--color-danger-dark);
+}
+
+/* 모바일 전용 수정 사항 */
+@media (max-width: 768px) {
+  .todo-container .table-responsive-container {
+    overflow-x: auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    position: relative;
+    width: 100%;
+    transform: translateZ(0);
+    max-height: 50vh;
+  }
+  
+  .todo-container .todo-list {
+    min-width: var(--table-min-width-mobile);
+    width: auto;
+    table-layout: auto;
+  }
+  
+  .todo-container {
+    overflow: visible;
+    overflow-x: visible;
+  }
+  
+  .todo-list th,
+  .todo-list td {
+    white-space: nowrap;
+    min-width: fit-content;
+  }
+  
+  /* 특정 컬럼 너비 설정 */
+  .todo-list th:nth-child(1), .todo-list td:nth-child(1) { min-width: 60px; }
+  .todo-list th:nth-child(2), .todo-list td:nth-child(2) { min-width: 60px; }
+  .todo-list th:nth-child(3), .todo-list td:nth-child(3) { min-width: 200px; }
+  .todo-list th:nth-child(4), .todo-list td:nth-child(4) { min-width: 140px; }
+  .todo-list th:nth-child(5), .todo-list td:nth-child(5) { min-width: 150px; }
+  .todo-list th:nth-child(6), .todo-list td:nth-child(6) { min-width: 80px; }
+}
+
+@media (max-width: 480px) {
+  .todo-container .todo-list {
+    min-width: var(--table-min-width-small);
+  }
 }

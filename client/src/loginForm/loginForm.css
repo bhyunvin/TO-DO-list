@@ -1,40 +1,52 @@
-.login-container {
-  max-width: 400px;
-  margin: 50px auto;
-  padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+:root {
+  --border-color-light: #ccc;
+  --border-radius-default: 10px;
+  --border-radius-button: 20px;
+  --box-shadow-light: 0 0 10px rgb(0 0 0 / 0.1);
+  --spacing-default: 20px;
+  --spacing-large: 30px;
+  --spacing-xlarge: 50px;
+  --container-width-small: 400px;
+  --container-width-medium: 600px;
 }
 
-.login-container h2 {
-  text-align: center;
-  margin-bottom: 30px;
+/* 로그인 및 회원가입 컨테이너 공통 스타일 */
+.login-container,
+.signup-container {
+  margin: var(--spacing-xlarge) auto;
+  padding: var(--spacing-default);
+  border: 1px solid var(--border-color-light);
+  border-radius: var(--border-radius-default);
+  box-shadow: var(--box-shadow-light);
+}
+
+.login-container {
+  max-width: var(--container-width-small);
 }
 
 .signup-container {
-  max-width: 600px;
-  margin: 50px auto;
-  padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  max-width: var(--container-width-medium);
 }
 
+/* 제목 스타일 */
+.login-container h2,
 .signup-container h2 {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: var(--spacing-large);
 }
 
+/* 입력 필드 스타일 */
 .form-group input {
-  border-radius: 10px;
+  border-radius: var(--border-radius-default);
 }
 
+/* 기본 버튼 스타일 */
 .btn-primary {
-  border-radius: 20px;
+  border-radius: var(--border-radius-button);
   width: 100%;
 }
 
+/* 전체 너비 보조 버튼 */
 .btn-secondary.full-width {
   width: 100%;
 }
