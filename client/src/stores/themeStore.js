@@ -17,10 +17,8 @@ export const useThemeStore = create(
       toggleTheme: () => {
         const currentTheme = get().theme;
         const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-        console.log('[ThemeStore] Toggling theme from', currentTheme, 'to', newTheme);
         set({ theme: newTheme });
         document.documentElement.setAttribute('data-theme', newTheme);
-        console.log('[ThemeStore] data-theme attribute:', document.documentElement.getAttribute('data-theme'));
       },
 
       /**
@@ -29,7 +27,6 @@ export const useThemeStore = create(
        */
       setTheme: (theme) => {
         if (theme !== 'light' && theme !== 'dark') {
-          console.warn(`Invalid theme: ${theme}. Using 'light' as default.`);
           theme = 'light';
         }
         set({ theme });
@@ -43,13 +40,9 @@ export const useThemeStore = create(
       initializeTheme: () => {
         const { theme } = get();
         
-        console.log('[ThemeStore] Initializing theme. Current theme:', theme);
-        
         // 저장된 테마가 있으면 그것을 사용
         if (theme) {
           document.documentElement.setAttribute('data-theme', theme);
-          console.log('[ThemeStore] Applied saved theme:', theme);
-          console.log('[ThemeStore] data-theme attribute:', document.documentElement.getAttribute('data-theme'));
           return;
         }
 
@@ -67,8 +60,6 @@ export const useThemeStore = create(
 
         set({ theme: initialTheme });
         document.documentElement.setAttribute('data-theme', initialTheme);
-        console.log('[ThemeStore] Applied initial theme:', initialTheme);
-        console.log('[ThemeStore] data-theme attribute:', document.documentElement.getAttribute('data-theme'));
       },
     }),
     {
