@@ -111,7 +111,7 @@ function validate(config: Record<string, unknown>) {
                 username: configService.get<string>('DB_DEV_USERNAME'),
                 password: configService.get<string>('DB_DEV_PASSWORD'),
                 database: configService.get<string>('DB_DEV_DATABASE'),
-                ssl: false,
+                ssl: { rejectUnauthorized: false },
 
                 // --- 기타 설정 ---
                 entities: [TodoEntity, UserEntity, LogEntity, FileInfoEntity], // 로드할 엔티티 목록
