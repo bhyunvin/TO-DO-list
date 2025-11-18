@@ -12,7 +12,7 @@ export default defineConfig({
     // API 프록시 설정 (기존과 동일)
     proxy: {
       '/api': {
-        target: 'http://192.168.30.179:3001',
+        target: 'http://192.168.60.118:3001',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
