@@ -97,7 +97,7 @@ REACT_APP_MAX_FILE_SIZE=...
 # Node 버전 설정 (필수)
 nvm use 24
 
-# 개발 서버 시작 (포트 3000)
+# 개발 서버 시작 (포트 5173)
 npm start
 
 # 프로덕션 빌드
@@ -374,7 +374,7 @@ REACT_APP_MAX_FILE_SIZE=...
 # Set Node version (required)
 nvm use 24
 
-# Start development server (port 3000)
+# Start development server (port 5173)
 npm start
 
 # Production build

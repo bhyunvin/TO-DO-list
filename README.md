@@ -155,7 +155,7 @@ npm start
 
 # 또는 개별 실행
 npm run start:server    # 백엔드만 실행 (포트 3001)
-npm run start:client    # 프론트엔드만 실행 (포트 3000)
+npm run start:client    # 프론트엔드만 실행 (포트 5173)
 ```
 
 ### 프로덕션 빌드
@@ -422,7 +422,7 @@ npm start
 
 # Or run individually
 npm run start:server    # Backend only (port 3001)
-npm run start:client    # Frontend only (port 3000)
+npm run start:client    # Frontend only (port 5173)
 ```
 
 ### Production Build

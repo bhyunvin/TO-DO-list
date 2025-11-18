@@ -10,7 +10,7 @@
     "start": ". ~/.nvm/nvm.sh && nvm use && concurrently \"npm:start:server\" \"npm:start:client\"",
     "watch": ". ~/.nvm/nvm.sh && nvm use && concurrently \"npm:start:server\" \"npm:start:client\"",
     "start:server": "cd src && npm run start:dev",
-    "start:client": "cd client && npm start",
+    "start:client": "cd client && npm run dev",
     "build": "concurrently \"cd src && npm run build\" \"cd client && npm run build\"",
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
     "lint": "concurrently \"npm:lint:server\" \"npm:lint:client\"",
@@ -29,12 +29,9 @@
   },
   "overrides": {
     "nth-check": "2.1.1",
-    "postcss": ">=8.4.31",
     "tmp": "^0.2.4",
     "svgo": "^4.0.0",
     "css-select": "^6.0.0",
-    "resolve-url-loader": ">=5.0.0",
-    "webpack-dev-server": "^4.15.2",
     "glob": ">=11.0.4"
   },
   "dependencies": {}
