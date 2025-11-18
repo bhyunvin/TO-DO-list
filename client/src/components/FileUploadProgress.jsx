@@ -1,4 +1,3 @@
-import React from 'react';
 import { ProgressBar, Alert, Badge, ListGroup } from 'react-bootstrap';
 import { useFileUploadValidator } from '../hooks/useFileUploadValidator';
 

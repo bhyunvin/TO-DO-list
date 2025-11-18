@@ -5,8 +5,7 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [
     react({
-      // 'classic' 런타임을 사용하도록 명시
-      jsxRuntime: 'classic',
+      jsxRuntime: 'automatic',
     }),
   ],
   server: {
