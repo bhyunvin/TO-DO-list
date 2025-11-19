@@ -12,11 +12,12 @@ export default defineConfig({
     // API 프록시 설정 (기존과 동일)
     proxy: {
       '/api': {
-        target: 'http://192.168.60.118:3001',
+        target: 'http://127.0.0.1:3001',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
     },
+    host: true,
   },
   test: {
     globals: true, // describe, it, expect 등을 전역으로 사용 (Jest와 동일)
