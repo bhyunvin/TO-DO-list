@@ -25,7 +25,7 @@ export class TodoService {
     @InjectRepository(FileInfoEntity)
     private fileInfoRepository: Repository<FileInfoEntity>,
     private fileUploadUtil: FileUploadUtil,
-  ) {}
+  ) { }
 
   async findAll(userSeq: number, todoDate: string): Promise<TodoEntity[]> {
     const startOfDay = `${todoDate} 00:00:00`;
@@ -79,7 +79,9 @@ export class TodoService {
       .createQueryBuilder('todo')
       .where('todo.userSeq = :userSeq', { userSeq })
       .andWhere('todo.delYn = :delYn', { delYn: 'N' })
-      .andWhere('todo.todoContent LIKE :keyword', { keyword: `%${keyword}%` })
+      .andWhere('LOWER(todo.todoContent) LIKE LOWER(:keyword)', {
+        keyword: `%${keyword}%`,
+      })
       .orderBy('todo.todoDate', 'DESC')
       .addOrderBy('todo.todoSeq', 'DESC')
       .getMany();

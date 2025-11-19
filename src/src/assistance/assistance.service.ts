@@ -121,7 +121,7 @@ export class AssistanceService implements OnModuleInit {
     private readonly httpService: HttpService,
     private readonly todoService: TodoService,
     private readonly configService: ConfigService,
-  ) {}
+  ) { }
 
   /**
    * 한국 표준시 기준 현재 날짜 가져오기
@@ -156,15 +156,23 @@ export class AssistanceService implements OnModuleInit {
         return { success: false, error: '일치하는 할 일을 찾을 수 없습니다.' };
       }
 
-      if (matches.length > 1) {
-        return {
-          success: false,
-          matches: matches.length,
-          error: `"${contentToFind}"와 일치하는 할 일이 ${matches.length}개 있습니다. 더 구체적으로 지정해주세요.`,
-        };
+      if (matches.length === 1) {
+        return { success: true, todoSeq: matches[0].todoSeq };
       }
 
-      return { success: true, todoSeq: matches[0].todoSeq };
+      // 검색 결과가 여러 개인 경우, 미완료된 항목을 우선적으로 찾습니다.
+      const incompleteMatches = matches.filter((todo) => todo.completeDtm === null);
+
+      if (incompleteMatches.length === 1) {
+        return { success: true, todoSeq: incompleteMatches[0].todoSeq };
+      }
+
+      // 여전히 여러 개이거나, 모두 완료된 경우
+      return {
+        success: false,
+        matches: matches.length,
+        error: `"${contentToFind}"와 일치하는 할 일이 ${matches.length}개 있습니다. (미완료: ${incompleteMatches.length}개). 더 구체적으로 지정해주세요.`,
+      };
     } catch (error) {
       this.logger.error('[findTodoByContent] 검색 중 오류 발생', error);
       return { success: false, error: '할 일 검색에 실패했습니다.' };
