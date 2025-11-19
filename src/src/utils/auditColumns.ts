@@ -30,6 +30,8 @@ export interface AuditSettings {
 export const setAuditColumn = (setting: AuditSettings) => {
   const { entity, id, ip, isUpdate = false } = setting;
 
+  entity.auditColumns.updDtm = new Date();
+
   if (isUpdate) {
     // 업데이트 작업: upd_id와 upd_ip만 설정
     entity.auditColumns.updId = id;
@@ -38,6 +40,7 @@ export const setAuditColumn = (setting: AuditSettings) => {
     // 생성 작업: reg_*와 upd_* 컬럼 모두 설정
     entity.auditColumns.regId = id;
     entity.auditColumns.regIp = ip;
+    entity.auditColumns.regDtm = new Date();
     entity.auditColumns.updId = id;
     entity.auditColumns.updIp = ip;
   }
