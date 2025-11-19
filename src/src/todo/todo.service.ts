@@ -25,9 +25,12 @@ export class TodoService {
     @InjectRepository(FileInfoEntity)
     private fileInfoRepository: Repository<FileInfoEntity>,
     private fileUploadUtil: FileUploadUtil,
-  ) { }
+  ) {}
 
-  async findAll(userSeq: number, todoDate: string): Promise<TodoEntity[]> {
+  async findAll(
+    userSeq: number,
+    todoDate: string | null,
+  ): Promise<TodoEntity[]> {
     const startOfDay = `${todoDate} 00:00:00`;
     const nextDayStr = `${format(addDays(new Date(todoDate), 1), 'yyyy-MM-dd')} 00:00:00`;
 
@@ -38,33 +41,35 @@ export class TodoService {
       { userSeq },
     );
 
-    qb.andWhere(
-      new Brackets((subQuery) => {
-        subQuery.where(
-          new Brackets((c1) => {
-            c1.where('todo.todoDate <= :todoDate', { todoDate }).andWhere(
-              'todo.completeDtm IS NULL',
-            );
-          }),
-        );
+    if (todoDate) {
+      qb.andWhere(
+        new Brackets((subQuery) => {
+          subQuery.where(
+            new Brackets((c1) => {
+              c1.where('todo.todoDate <= :todoDate', { todoDate }).andWhere(
+                'todo.completeDtm IS NULL',
+              );
+            }),
+          );
 
-        subQuery.orWhere(
-          new Brackets((c2) => {
-            c2.where('todo.todoDate = :todoDate', { todoDate }).andWhere(
-              'todo.completeDtm IS NOT NULL',
-            );
-          }),
-        );
+          subQuery.orWhere(
+            new Brackets((c2) => {
+              c2.where('todo.todoDate = :todoDate', { todoDate }).andWhere(
+                'todo.completeDtm IS NOT NULL',
+              );
+            }),
+          );
 
-        subQuery.orWhere(
-          new Brackets((c3) => {
-            c3.where('todo.completeDtm >= :startOfDay', {
-              startOfDay,
-            }).andWhere('todo.completeDtm < :nextDayStr', { nextDayStr });
-          }),
-        );
-      }),
-    );
+          subQuery.orWhere(
+            new Brackets((c3) => {
+              c3.where('todo.completeDtm >= :startOfDay', {
+                startOfDay,
+              }).andWhere('todo.completeDtm < :nextDayStr', { nextDayStr });
+            }),
+          );
+        }),
+      );
+    }
 
     qb.orderBy('todo.completeDtm', 'DESC', 'NULLS FIRST').addOrderBy(
       'todo.todoSeq',

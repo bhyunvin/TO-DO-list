@@ -18,7 +18,7 @@ import { AuthenticatedGuard } from '../../types/express/auth.guard';
 export class ChatController {
   private readonly logger = new Logger(ChatController.name);
 
-  constructor(private readonly assistanceService: AssistanceService) { }
+  constructor(private readonly assistanceService: AssistanceService) {}
 
   @Post('chat')
   async chat(

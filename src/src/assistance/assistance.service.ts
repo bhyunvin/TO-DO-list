@@ -121,7 +121,7 @@ export class AssistanceService implements OnModuleInit {
     private readonly httpService: HttpService,
     private readonly todoService: TodoService,
     private readonly configService: ConfigService,
-  ) { }
+  ) {}
 
   /**
    * 한국 표준시 기준 현재 날짜 가져오기
@@ -161,7 +161,9 @@ export class AssistanceService implements OnModuleInit {
       }
 
       // 검색 결과가 여러 개인 경우, 미완료된 항목을 우선적으로 찾습니다.
-      const incompleteMatches = matches.filter((todo) => todo.completeDtm === null);
+      const incompleteMatches = matches.filter(
+        (todo) => todo.completeDtm === null,
+      );
 
       if (incompleteMatches.length === 1) {
         return { success: true, todoSeq: incompleteMatches[0].todoSeq };
@@ -227,7 +229,7 @@ export class AssistanceService implements OnModuleInit {
     }
 
     const apiKey = this.geminiApiKey;
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${apiKey}`;
     let systemPrompt = '';
 
     try {
@@ -503,7 +505,7 @@ export class AssistanceService implements OnModuleInit {
         targetDateObj.setDate(today.getDate() + days);
         targetDate = targetDateObj.toISOString().split('T')[0];
       } else {
-        targetDate = today.toISOString().split('T')[0];
+        targetDate = null;
       }
 
       this.logger.log(
