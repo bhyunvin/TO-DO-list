@@ -8,7 +8,7 @@
   --fab-position-mobile: 12px;
   --fab-position-mobile-small: 10px;
   --fab-position-top: 20px;
-  --fab-position-top-mobile: 10px;
+  --fab-position-bottom-mobile: 15px;
   --fab-font-size: 20px;
   --fab-font-size-tablet: 18px;
   --fab-z-index: 1060;
@@ -69,7 +69,7 @@
     height: var(--fab-size-tablet);
     font-size: var(--fab-font-size-tablet);
   }
-  
+
   /* 태블릿에서 채팅이 열렸을 때 버튼을 화면 상단 우측으로 이동 */
   .floating-action-button.open {
     top: var(--fab-position-top);
@@ -88,21 +88,29 @@
     bottom: var(--fab-position-mobile);
     right: var(--fab-position-mobile);
   }
-  
-  /* 모바일에서 채팅이 열렸을 때 버튼을 상단 우측 모서리로 이동 */
+
+  /* 모바일에서 채팅이 열렸을 때 버튼을 하단 우측 모서리로 이동 */
   .floating-action-button.open {
-    top: var(--fab-position-top-mobile);
-    bottom: auto;
+    bottom: var(--fab-position-bottom-mobile);
+    top: auto;
     right: 15px;
     background-color: var(--fab-color-danger);
     z-index: var(--fab-z-index-open);
+  }
+
+  /* 모바일에서 채팅중일때 버튼을 숨김 */
+  .floating-action-button.open.focus {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
   }
 }
 
 /* 매우 작은 화면에서 적절한 위치 보장 */
 @media (max-width: 360px) {
   .floating-action-button.open {
-    top: var(--fab-position-top-mobile);
+    top: var(--fab-position-bottom-mobile);
     right: var(--fab-position-mobile-small);
   }
 }
@@ -165,7 +173,7 @@
   .floating-action-button {
     transition: none;
   }
-  
+
   .floating-action-button:hover {
     transform: none;
   }

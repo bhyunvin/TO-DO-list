@@ -1,10 +1,10 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { Modal } from 'react-bootstrap';
 import ChatMessage from './ChatMessage';
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
 import './ChatModal.css';
 
-const ChatModal = ({ isOpen, onClose, user, messages, onSendMessage, isLoading, error, onRetry, onClearError }) => {
+const ChatModal = ({ isOpen, onClose, user, messages, onSendMessage, isLoading, error, onRetry, onClearError, onInputFocus, onInputBlur }) => {
   const [inputValue, setInputValue] = useState('');
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
@@ -21,16 +21,26 @@ const ChatModal = ({ isOpen, onClose, user, messages, onSendMessage, isLoading, 
     }
   }, [messages]);
 
-  // 모달이 열리거나 닫힐 때 포커스 관리
+  // 모달이 열릴 때 즉시 스크롤 시도 (화면이 그려지기 전)
+  useLayoutEffect(() => {
+    if (isOpen && messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'auto' });
+    }
+  }, [isOpen]);
+
+  // 모달이 열리거나 닫힐 때 포커스 관리 및 안전장치 스크롤
   useEffect(() => {
     if (isOpen) {
       // 이전에 포커스된 요소 저장
       previousFocusRef.current = document.activeElement;
-      
-      // 모달 애니메이션 후 입력 필드에 포커스
+
+      // 모달 애니메이션 후 입력 필드에 포커스 및 부드러운 스크롤 (안전장치)
       setTimeout(() => {
         if (inputRef.current) {
           inputRef.current.focus();
+        }
+        if (messagesEndRef.current) {
+          messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
         }
       }, 150);
     } else {
@@ -48,7 +58,7 @@ const ChatModal = ({ isOpen, onClose, user, messages, onSendMessage, isLoading, 
     if (trimmedMessage && !isLoading) {
       onSendMessage(trimmedMessage);
       setInputValue('');
-      
+
       // 전송 후 입력 필드로 포커스 복귀 (더 나은 UX를 위해)
       setTimeout(() => {
         if (inputRef.current && !isLoading) {
@@ -69,19 +79,19 @@ const ChatModal = ({ isOpen, onClose, user, messages, onSendMessage, isLoading, 
     if (e.key === 'Escape') {
       onClose();
     }
-    
+
     // 포커스 트랩 - 모달 내에서 포커스 유지
     if (e.key === 'Tab') {
       const modal = modalRef.current;
       if (!modal) return;
-      
+
       const focusableElements = modal.querySelectorAll(
         'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
       );
-      
+
       const [firstElement] = focusableElements;
       const lastElement = focusableElements[focusableElements.length - 1];
-      
+
       if (e.shiftKey) {
         // Shift + Tab 처리
         if (document.activeElement === firstElement) {
@@ -118,13 +128,13 @@ const ChatModal = ({ isOpen, onClose, user, messages, onSendMessage, isLoading, 
           AI 어시스턴트
         </Modal.Title>
       </Modal.Header>
-      
+
       <Modal.Body className="chat-modal-body">
-        <div 
-          id="chat-modal-description" 
-          className="chat-messages" 
-          role="log" 
-          aria-live="polite" 
+        <div
+          id="chat-modal-description"
+          className="chat-messages"
+          role="log"
+          aria-live="polite"
           aria-label="채팅 메시지"
           aria-atomic="false"
         >
@@ -175,7 +185,7 @@ const ChatModal = ({ isOpen, onClose, user, messages, onSendMessage, isLoading, 
           <div ref={messagesEndRef} />
         </div>
       </Modal.Body>
-      
+
       <Modal.Footer className="chat-modal-footer">
         <div className="chat-input-container">
           <div className="input-group">
@@ -187,6 +197,8 @@ const ChatModal = ({ isOpen, onClose, user, messages, onSendMessage, isLoading, 
               value={inputValue}
               onChange={e => setInputValue(e.target.value)}
               onKeyDown={handleInputKeyDown}
+              onFocus={onInputFocus}
+              onBlur={onInputBlur}
               disabled={isLoading}
               aria-label="채팅 메시지 입력"
               aria-describedby="chat-input-help"

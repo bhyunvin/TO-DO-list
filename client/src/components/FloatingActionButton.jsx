@@ -1,6 +1,6 @@
 import './FloatingActionButton.css';
 
-const FloatingActionButton = ({ isOpen, onClick }) => {
+const FloatingActionButton = ({ isOpen, onClick, isFocused }) => {
   const handleKeyDown = e => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
@@ -10,7 +10,7 @@ const FloatingActionButton = ({ isOpen, onClick }) => {
 
   return (
     <button
-      className={`floating-action-button ${isOpen ? 'open' : ''}`}
+      className={`floating-action-button ${isOpen ? 'open' : ''} ${isFocused ? 'focus' : ''}`}
       onClick={onClick}
       onKeyDown={handleKeyDown}
       aria-label={isOpen ? '채팅 닫기' : 'AI 어시스턴트 열기'}

@@ -18,12 +18,12 @@ import 'react-datepicker/dist/react-datepicker.css';
 
 // 신규 TODO 항목 추가 폼 컴포넌트
 function CreateTodoForm({ onAddTodo, onCancel }) {
-  const { 
-    validateFiles, 
-    formatFileSize, 
+  const {
+    validateFiles,
+    formatFileSize,
     getUploadPolicy
   } = useFileUploadValidator();
-  
+
   const {
     uploadStatus,
     uploadProgress,
@@ -31,7 +31,7 @@ function CreateTodoForm({ onAddTodo, onCancel }) {
     uploadedFiles,
     resetUploadState,
   } = useFileUploadProgress();
-  
+
   const [todoContent, setTodoContent] = useState('');
   const [todoNote, setTodoNote] = useState('');
   const [todoFiles, setTodoFiles] = useState([]);
@@ -41,17 +41,17 @@ function CreateTodoForm({ onAddTodo, onCancel }) {
 
   const handleFileChange = (e) => {
     const selectedFiles = Array.from(e.target.files);
-    
+
     // 이전 상태 초기화
     setTodoFiles([]);
     setFileValidationResults([]);
     setFileError('');
-    
+
     if (selectedFiles.length > 0) {
       // 파일 유효성 검사
       const validationResults = validateFiles(selectedFiles, 'todoAttachment');
       setFileValidationResults(validationResults);
-      
+
       // 모든 파일이 유효한지 확인
       const invalidFiles = validationResults.filter(({ isValid }) => !isValid);
       if (invalidFiles.length > 0) {
@@ -85,10 +85,10 @@ function CreateTodoForm({ onAddTodo, onCancel }) {
   const removeFile = (index) => {
     const newFiles = todoFiles.filter((_, i) => i !== index);
     const newValidationResults = fileValidationResults.filter((_, i) => i !== index);
-    
+
     setTodoFiles(newFiles);
     setFileValidationResults(newValidationResults);
-    
+
     if (newFiles.length === 0) {
       setFileError('');
       // 파일 입력 초기화
@@ -115,11 +115,11 @@ function CreateTodoForm({ onAddTodo, onCancel }) {
     }
 
     setIsSubmitting(true);
-    
+
     try {
       // 진행 상황 추적이 포함된 향상된 업로드 함수 사용
       const result = await onAddTodo({ todoContent, todoNote, todoFiles });
-      
+
       if (result && result.success) {
         // 성공 시 폼 초기화
         setTodoContent('');
@@ -187,7 +187,7 @@ function CreateTodoForm({ onAddTodo, onCancel }) {
             <small>{fileError}</small>
           </div>
         )}
-        
+
         {/* 향상된 파일 업로드 진행 상황 및 유효성 검사 */}
         {(fileValidationResults.length > 0 || uploadStatus !== 'idle') && (
           <div className="mt-2 mb-3">
@@ -212,18 +212,18 @@ function CreateTodoForm({ onAddTodo, onCancel }) {
             />
           </div>
         )}
-        
+
         <div className="form-actions">
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             className="btn btn-success"
             disabled={isSubmitting || uploadStatus === 'uploading' || uploadStatus === 'validating'}
           >
             {isSubmitting || uploadStatus === 'uploading' ? (
               <>
                 <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                {uploadStatus === 'uploading' ? '업로드 중...' : 
-                 uploadStatus === 'validating' ? '검증 중...' : '추가 중...'}
+                {uploadStatus === 'uploading' ? '업로드 중...' :
+                  uploadStatus === 'validating' ? '검증 중...' : '추가 중...'}
               </>
             ) : (
               '추가'
@@ -279,7 +279,7 @@ function TodoList({
   }, [openActionMenu, setOpenActionMenu]);
 
   return (
-    <div className="list-wrapper"> 
+    <div className="list-wrapper">
       <div className="table-responsive-container">
         <table className="todo-list">
           <colgroup>
@@ -318,7 +318,7 @@ function TodoList({
                     key={todoSeq}
                     className={completeDtm ? 'completed' : ''}
                   >
-                    <td 
+                    <td
                       className="text-center checkbox-cell"
                       onClick={() => {
                         if (togglingTodoSeq !== todoSeq) {
@@ -385,12 +385,12 @@ function TodoList({
 
 // ToDo 항목 수정을 위한 폼 컴포넌트
 function EditTodoForm({ todo, onSave, onCancel }) {
-  const { 
-    validateFiles, 
-    formatFileSize, 
-    getUploadPolicy 
+  const {
+    validateFiles,
+    formatFileSize,
+    getUploadPolicy
   } = useFileUploadValidator();
-  
+
   const {
     uploadStatus,
     uploadProgress,
@@ -398,7 +398,7 @@ function EditTodoForm({ todo, onSave, onCancel }) {
     uploadedFiles,
     resetUploadState,
   } = useFileUploadProgress();
-  
+
   const { todoContent: initialContent, todoNote: initialNote } = todo;
   const [todoContent, setTodoContent] = useState(initialContent);
   const [todoNote, setTodoNote] = useState(initialNote);
@@ -409,17 +409,17 @@ function EditTodoForm({ todo, onSave, onCancel }) {
 
   const handleFileChange = (e) => {
     const selectedFiles = Array.from(e.target.files);
-    
+
     // 이전 상태 초기화
     setTodoFiles([]);
     setFileValidationResults([]);
     setFileError('');
-    
+
     if (selectedFiles.length > 0) {
       // 파일 유효성 검사
       const validationResults = validateFiles(selectedFiles, 'todoAttachment');
       setFileValidationResults(validationResults);
-      
+
       // 모든 파일이 유효한지 확인
       const invalidFiles = validationResults.filter(({ isValid }) => !isValid);
       if (invalidFiles.length > 0) {
@@ -453,10 +453,10 @@ function EditTodoForm({ todo, onSave, onCancel }) {
   const removeFile = (index) => {
     const newFiles = todoFiles.filter((_, i) => i !== index);
     const newValidationResults = fileValidationResults.filter((_, i) => i !== index);
-    
+
     setTodoFiles(newFiles);
     setFileValidationResults(newValidationResults);
-    
+
     if (newFiles.length === 0) {
       setFileError('');
       // 파일 입력 초기화
@@ -478,11 +478,11 @@ function EditTodoForm({ todo, onSave, onCancel }) {
     }
 
     setIsSubmitting(true);
-    
+
     try {
       const { todoSeq } = todo;
       const result = await onSave(todoSeq, { todoContent, todoNote, todoFiles });
-      
+
       if (result && result.success) {
         resetUploadState();
       }
@@ -536,7 +536,7 @@ function EditTodoForm({ todo, onSave, onCancel }) {
             <small>{fileError}</small>
           </div>
         )}
-        
+
         {/* 향상된 파일 업로드 진행 상황 및 유효성 검사 */}
         {(fileValidationResults.length > 0 || uploadStatus !== 'idle') && (
           <div className="mt-2 mb-3">
@@ -561,18 +561,18 @@ function EditTodoForm({ todo, onSave, onCancel }) {
             />
           </div>
         )}
-        
+
         <div className="form-actions">
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             className="btn btn-success"
             disabled={isSubmitting || uploadStatus === 'uploading' || uploadStatus === 'validating'}
           >
             {isSubmitting || uploadStatus === 'uploading' ? (
               <>
                 <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                {uploadStatus === 'uploading' ? '업로드 중...' : 
-                 uploadStatus === 'validating' ? '검증 중...' : '수정 중...'}
+                {uploadStatus === 'uploading' ? '업로드 중...' :
+                  uploadStatus === 'validating' ? '검증 중...' : '수정 중...'}
               </>
             ) : (
               '수정'
@@ -612,13 +612,13 @@ const formatDateTime = (isoString) => {
 // TODO 리스트 및 폼을 조건부로 렌더링하는 컨테이너 컴포넌트
 function TodoContainer() {
   const { user, logout, api, login } = useAuthStore();
-  const { 
-    messages, 
-    isLoading, 
-    error, 
+  const {
+    messages,
+    isLoading,
+    error,
     addMessage,
     addWelcomeMessage,
-    setLoading, 
+    setLoading,
     clearError,
     handleApiError,
     setRetryMessage,
@@ -628,7 +628,7 @@ function TodoContainer() {
     todoRefreshTrigger,
     triggerTodoRefresh
   } = useChatStore();
-  
+
   const [todos, setTodos] = useState([]);
   const [isLoadingTodos, setIsLoadingTodos] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
@@ -641,7 +641,8 @@ function TodoContainer() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [optimisticUpdates, setOptimisticUpdates] = useState(new Map());
-  
+  const [isChatInputFocused, setIsChatInputFocused] = useState(false);
+
   const userMenuRef = useRef(null);
 
   // 선택된 날짜에 해당하는 ToDo 목록을 서버에서 가져오는 함수
@@ -702,12 +703,12 @@ function TodoContainer() {
   const handleAddTodo = async ({ todoContent, todoNote, todoFiles }) => {
     try {
       const formattedDate = formatDate(selectedDate);
-      
+
       const formData = new FormData();
       formData.append('todoContent', todoContent);
       formData.append('todoDate', formattedDate);
       formData.append('todoNote', todoNote || '');
-      
+
       // 파일이 있으면 추가
       if (todoFiles && todoFiles.length > 0) {
         todoFiles.forEach((file) => {
@@ -738,13 +739,13 @@ function TodoContainer() {
         return { success: true, data: responseData };
       } else {
         const errorData = await response.json();
-        
+
         // 파일 업로드 오류를 구체적으로 처리
         if (errorData.errors && Array.isArray(errorData.errors)) {
-          const errorMessages = errorData.errors.map(({ fileName, errorMessage }) => 
+          const errorMessages = errorData.errors.map(({ fileName, errorMessage }) =>
             `${fileName}: ${errorMessage}`
           ).join('<br>');
-          
+
           Swal.fire({
             title: '파일 업로드 오류',
             html: errorMessages,
@@ -767,11 +768,11 @@ function TodoContainer() {
     return [...todosArray].sort((a, b) => {
       const { completeDtm: aComplete, todoSeq: aSeq } = a;
       const { completeDtm: bComplete, todoSeq: bSeq } = b;
-      
+
       // completeDtm이 null인 항목(미완료)을 먼저
       if (aComplete === null && bComplete !== null) return -1;
       if (aComplete !== null && bComplete === null) return 1;
-      
+
       // 둘 다 완료되었거나 둘 다 미완료인 경우, todoSeq 내림차순 (최신 항목이 위로)
       return bSeq - aSeq;
     });
@@ -780,8 +781,8 @@ function TodoContainer() {
   // 낙관적 업데이트를 위한 헬퍼 함수
   const updateTodoOptimistically = (todoSeq, newCompleteDtm) => {
     setTodos(prevTodos => {
-      const updatedTodos = prevTodos.map(todo => 
-        todo.todoSeq === todoSeq 
+      const updatedTodos = prevTodos.map(todo =>
+        todo.todoSeq === todoSeq
           ? { ...todo, completeDtm: newCompleteDtm }
           : todo
       );
@@ -793,8 +794,8 @@ function TodoContainer() {
   // 롤백을 위한 헬퍼 함수
   const rollbackTodoUpdate = (todoSeq, originalCompleteDtm) => {
     setTodos(prevTodos => {
-      const rolledBackTodos = prevTodos.map(todo => 
-        todo.todoSeq === todoSeq 
+      const rolledBackTodos = prevTodos.map(todo =>
+        todo.todoSeq === todoSeq
           ? { ...todo, completeDtm: originalCompleteDtm }
           : todo
       );
@@ -806,7 +807,7 @@ function TodoContainer() {
   // 에러 메시지 생성 헬퍼 함수
   const getErrorMessage = (error, response) => {
     const { name, message } = error;
-    
+
     if (name === 'AbortError') {
       return '요청 시간이 초과되었습니다. 네트워크 연결을 확인하고 다시 시도해주세요.';
     }
@@ -837,7 +838,7 @@ function TodoContainer() {
 
     // 낙관적 UI 업데이트
     updateTodoOptimistically(todoSeq, newCompleteDtm);
-    
+
     setOptimisticUpdates(prev => {
       const newMap = new Map(prev);
       newMap.set(todoSeq, {
@@ -847,7 +848,7 @@ function TodoContainer() {
       });
       return newMap;
     });
-    
+
     setTogglingTodoSeq(todoSeq);
 
     const controller = new AbortController();
@@ -875,7 +876,7 @@ function TodoContainer() {
       } else {
         // 실패: 롤백
         rollbackTodoUpdate(todoSeq, originalCompleteDtm);
-        
+
         setOptimisticUpdates(prev => {
           const newMap = new Map(prev);
           newMap.delete(todoSeq);
@@ -883,7 +884,7 @@ function TodoContainer() {
         });
 
         const errorMessage = getErrorMessage(new Error(), response);
-        
+
         Swal.fire({
           toast: true,
           position: 'top-end',
@@ -905,10 +906,10 @@ function TodoContainer() {
       }
     } catch (error) {
       clearTimeout(timeoutId);
-      
+
       // 에러 발생: 롤백
       rollbackTodoUpdate(todoSeq, originalCompleteDtm);
-      
+
       setOptimisticUpdates(prev => {
         const newMap = new Map(prev);
         newMap.delete(todoSeq);
@@ -916,7 +917,7 @@ function TodoContainer() {
       });
 
       const errorMessage = getErrorMessage(error, null);
-      
+
       Swal.fire({
         toast: true,
         position: 'top-end',
@@ -986,11 +987,11 @@ function TodoContainer() {
   const handleSaveTodo = async (todoSeq, updatedData) => {
     try {
       const { todoContent, todoNote, todoFiles } = updatedData;
-      
+
       const formData = new FormData();
       formData.append('todoContent', todoContent);
       formData.append('todoNote', todoNote || '');
-      
+
       // 파일이 있으면 추가
       if (todoFiles && todoFiles.length > 0) {
         todoFiles.forEach((file) => {
@@ -1021,13 +1022,13 @@ function TodoContainer() {
         return { success: true, data: responseData };
       } else {
         const errorData = await response.json();
-        
+
         // 파일 업로드 오류를 구체적으로 처리
         if (errorData.errors && Array.isArray(errorData.errors)) {
-          const errorMessages = errorData.errors.map(({ fileName, errorMessage }) => 
+          const errorMessages = errorData.errors.map(({ fileName, errorMessage }) =>
             `${fileName}: ${errorMessage}`
           ).join('<br>');
-          
+
           Swal.fire({
             title: '파일 업로드 오류',
             html: errorMessages,
@@ -1090,7 +1091,7 @@ function TodoContainer() {
   const handleSaveProfile = async (profileData) => {
     try {
       const { formData, profileImageFile } = profileData;
-      
+
       const response = await api('/api/user/profile', {
         method: 'PATCH',
         credentials: 'include',
@@ -1099,9 +1100,9 @@ function TodoContainer() {
 
       if (response.ok) {
         const updatedUser = await response.json();
-        
+
         login(updatedUser);
-        
+
         Swal.fire({
           title: '프로필 수정 완료!',
           html: `
@@ -1117,12 +1118,12 @@ function TodoContainer() {
         });
       } else {
         const errorData = await response.json().catch(() => ({}));
-        
+
         if (errorData.errors && Array.isArray(errorData.errors)) {
-          const errorMessages = errorData.errors.map(({ fileName, errorMessage }) => 
+          const errorMessages = errorData.errors.map(({ fileName, errorMessage }) =>
             `${fileName}: ${errorMessage}`
           ).join('<br>');
-          
+
           Swal.fire({
             title: '파일 업로드 오류',
             html: errorMessages,
@@ -1142,7 +1143,7 @@ function TodoContainer() {
   const handleSavePassword = async (passwordData) => {
     try {
       const { currentPassword, newPassword, confirmPassword } = passwordData;
-      
+
       const response = await api('/api/user/password', {
         method: 'PATCH',
         credentials: 'include',
@@ -1176,7 +1177,7 @@ function TodoContainer() {
         const errorData = await response.json();
         const { message } = errorData;
         let errorMessage = '비밀번호 변경에 실패했습니다.';
-        
+
         if (message) {
           if (Array.isArray(message)) {
             errorMessage = message.join('\n');
@@ -1184,7 +1185,7 @@ function TodoContainer() {
             errorMessage = message;
           }
         }
-        
+
         Swal.fire('비밀번호 변경 실패', errorMessage, 'error');
       }
     } catch (error) {
@@ -1256,12 +1257,12 @@ function TodoContainer() {
   const handleChatToggle = () => {
     const willOpen = !isChatOpen;
     setIsChatOpen(willOpen);
-    
+
     // 채팅을 열 때 환영 메시지 추가 (메시지가 없는 경우에만)
     if (willOpen && messages.length === 0) {
       addWelcomeMessage();
     }
-    
+
     if (error) {
       clearError();
     }
@@ -1276,7 +1277,7 @@ function TodoContainer() {
     // 재시도를 위해 메시지 저장
     if (!isRetry) {
       setRetryMessage(messageContent);
-      
+
       // 사용자 메시지를 즉시 추가 (새 메시지만, 재시도는 제외)
       addMessage({
         content: messageContent,
@@ -1309,20 +1310,20 @@ function TodoContainer() {
       if (response.ok) {
         const data = await response.json();
         const { success, response: apiResponse, error: apiError } = data;
-        
+
         if (success !== false) {
           addMessage({
             content: apiResponse,
             isUser: false,
             isHtml: true,
           });
-          
+
           resetRetryState();
-          
+
           triggerTodoRefresh();
         } else {
           const { shouldRetry } = handleApiError(new Error(apiError || 'API Error'), response);
-          
+
           if (!shouldRetry) {
             addMessage({
               content: apiError || '죄송합니다. 일시적인 문제가 발생했습니다.',
@@ -1335,7 +1336,7 @@ function TodoContainer() {
         const errorData = await response.json().catch(() => ({}));
         const { error: apiError } = errorData;
         const { shouldRetry } = handleApiError(new Error(apiError || 'HTTP Error'), response);
-        
+
         if (!shouldRetry) {
           const errorMessage = apiError || '죄송합니다. 일시적인 문제가 발생했습니다. 잠시 후 다시 시도해주세요.';
           addMessage({
@@ -1346,19 +1347,19 @@ function TodoContainer() {
       }
     } catch (error) {
       console.error('Chat API Error:', error);
-      
+
       const { shouldRetry } = handleApiError(error);
-      
+
       if (!shouldRetry) {
         const { name, message } = error;
         let errorMessage = '문제가 발생했습니다. 다시 시도해주세요.';
-        
+
         if (name === 'AbortError') {
           errorMessage = '요청 시간이 초과되었습니다. 다시 시도해주세요.';
         } else if (name === 'TypeError' && message.includes('fetch')) {
           errorMessage = '네트워크 연결을 확인해주세요.';
         }
-        
+
         addMessage({
           content: errorMessage,
           isUser: false,
@@ -1388,7 +1389,7 @@ function TodoContainer() {
     const now = new Date();
     const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
     const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-    
+
     const formatDateForInput = (date) => {
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -1429,17 +1430,17 @@ function TodoContainer() {
       preConfirm: () => {
         const startDate = document.getElementById('startDate').value;
         const endDate = document.getElementById('endDate').value;
-        
+
         if (!startDate || !endDate) {
           Swal.showValidationMessage('날짜를 선택해주세요');
           return false;
         }
-        
+
         if (startDate > endDate) {
           Swal.showValidationMessage('시작일은 종료일보다 이전이어야 합니다');
           return false;
         }
-        
+
         return { startDate, endDate };
       }
     });
@@ -1450,7 +1451,7 @@ function TodoContainer() {
   // 날짜 범위 선택, API 호출 및 파일 다운로드를 통한 Excel 내보내기 처리
   const handleExcelExport = async () => {
     const result = await showDateRangeModal();
-    
+
     if (!result.isConfirmed) {
       return;
     }
@@ -1469,24 +1470,24 @@ function TodoContainer() {
       if (response.ok) {
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
-        
+
         const a = document.createElement('a');
         a.href = url;
         a.download = `todos_${startDate}_to_${endDate}.xlsx`;
-        
+
         document.body.appendChild(a);
         a.click();
-        
+
         window.URL.revokeObjectURL(url);
         document.body.removeChild(a);
-        
+
         Swal.fire('성공', 'Excel 파일이 다운로드되었습니다.', 'success');
       } else {
         const errorData = await response.json().catch(() => ({}));
         const { status } = response;
         const { message } = errorData;
         let errorMessage = 'Excel 내보내기에 실패했습니다.';
-        
+
         if (status === 400) {
           errorMessage = message || '잘못된 요청입니다. 날짜 형식을 확인해주세요.';
         } else if (status === 401) {
@@ -1494,21 +1495,21 @@ function TodoContainer() {
         } else if (status === 500) {
           errorMessage = '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
         }
-        
+
         Swal.fire('오류', errorMessage, 'error');
       }
     } catch (error) {
       console.error('Excel export error:', error);
-      
+
       const { name, message } = error;
       let errorMessage = 'Excel 내보내기에 실패했습니다.';
-      
+
       if (name === 'TypeError' && message.includes('fetch')) {
         errorMessage = '네트워크 연결을 확인해주세요.';
       } else if (name === 'AbortError') {
         errorMessage = '요청 시간이 초과되었습니다. 다시 시도해주세요.';
       }
-      
+
       Swal.fire('오류', errorMessage, 'error');
     }
   };
@@ -1570,12 +1571,12 @@ function TodoContainer() {
       <div className="todo-title-header">
         <h2>TO-DO 리스트</h2>
       </div>
-  
+
       {/* 2. 사용자 정보를 우측에 배치하기 위한 헤더 */}
       <div className="user-info-header">
         <span>{userName}님 환영합니다.</span>
         <div className="user-menu-container" ref={userMenuRef}>
-          <button 
+          <button
             className="user-menu-icon"
             onClick={handleUserMenuToggle}
             aria-label="사용자 메뉴"
@@ -1584,15 +1585,15 @@ function TodoContainer() {
           </button>
           {isUserMenuOpen && (
             <div className="user-dropdown-menu">
-              <button 
-                className="dropdown-item" 
+              <button
+                className="dropdown-item"
                 onClick={handleUpdateProfile}
                 disabled={isUpdatingProfile || isChangingPassword}
               >
                 프로필 수정
               </button>
-              <button 
-                className="dropdown-item" 
+              <button
+                className="dropdown-item"
                 onClick={handleChangePassword}
                 disabled={isUpdatingProfile || isChangingPassword}
               >
@@ -1601,8 +1602,8 @@ function TodoContainer() {
               <div className="dropdown-divider"></div>
               <ThemeToggle />
               <div className="dropdown-divider"></div>
-              <button 
-                className="dropdown-item" 
+              <button
+                className="dropdown-item"
                 onClick={handleLogout}
               >
                 로그아웃
@@ -1611,13 +1612,13 @@ function TodoContainer() {
           )}
         </div>
       </div>
-  
+
       {/* '신규' 버튼을 오른쪽으로 배치하기 위한 컨테이너 */}
       <div className="todo-actions">
         {!isCreating && !editingTodo && !isUpdatingProfile && !isChangingPassword && (
           <>
-            <button 
-              className="btn btn-outline-success" 
+            <button
+              className="btn btn-outline-success"
               onClick={handleExcelExport}
               aria-label="Excel 내보내기"
             >
@@ -1660,8 +1661,9 @@ function TodoContainer() {
       <FloatingActionButton
         isOpen={isChatOpen}
         onClick={handleChatToggle}
+        isFocused={isChatInputFocused}
       />
-      
+
       <ChatModal
         isOpen={isChatOpen}
         onClose={handleChatToggle}
@@ -1672,6 +1674,8 @@ function TodoContainer() {
         error={error}
         onRetry={handleRetry}
         onClearError={handleClearError}
+        onInputFocus={() => setIsChatInputFocused(true)}
+        onInputBlur={() => setIsChatInputFocused(false)}
       />
     </div>
   );
