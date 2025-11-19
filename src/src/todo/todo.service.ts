@@ -74,6 +74,17 @@ export class TodoService {
     return qb.getMany();
   }
 
+  async search(userSeq: number, keyword: string): Promise<TodoEntity[]> {
+    return this.todoRepository
+      .createQueryBuilder('todo')
+      .where('todo.userSeq = :userSeq', { userSeq })
+      .andWhere('todo.delYn = :delYn', { delYn: 'N' })
+      .andWhere('todo.todoContent LIKE :keyword', { keyword: `%${keyword}%` })
+      .orderBy('todo.todoDate', 'DESC')
+      .addOrderBy('todo.todoSeq', 'DESC')
+      .getMany();
+  }
+
   async create(
     user: Omit<UserEntity, 'userPassword'>,
     ip: string,

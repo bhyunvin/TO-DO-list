@@ -150,12 +150,7 @@ export class AssistanceService implements OnModuleInit {
     error?: string;
   }> {
     try {
-      const currentDate = new Date().toISOString().split('T')[0];
-      const allTodos = await this.todoService.findAll(userSeq, currentDate);
-
-      const matches = allTodos.filter((todo) =>
-        todo.todoContent.toLowerCase().includes(contentToFind.toLowerCase()),
-      );
+      const matches = await this.todoService.search(userSeq, contentToFind);
 
       if (matches.length === 0) {
         return { success: false, error: '일치하는 할 일을 찾을 수 없습니다.' };
@@ -547,13 +542,14 @@ export class AssistanceService implements OnModuleInit {
         totalCount: filteredTodos.length,
         todos: filteredTodos.map((todo) => ({
           todoSeq: todo.todoSeq,
-          todoContent: todo.todoContent,
+          todoContent: todo.todoContent || '',
           todoDate: todo.todoDate,
           todoNote: todo.todoNote,
           completeDtm: todo.completeDtm,
           isCompleted: todo.completeDtm !== null,
           isOverdue:
             todo.completeDtm === null &&
+            todo.todoDate &&
             new Date(todo.todoDate) < todayOnlyDate,
         })),
         queryParams: {
