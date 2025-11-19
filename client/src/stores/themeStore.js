@@ -9,7 +9,7 @@ export const useThemeStore = create(
   persist(
     (set, get) => ({
       // 현재 활성화된 테마 ('light' 또는 'dark')
-      theme: 'light',
+      theme: 'dark',
 
       /**
        * 현재 테마를 토글 (light ↔ dark)
@@ -27,7 +27,7 @@ export const useThemeStore = create(
        */
       setTheme: (theme) => {
         if (theme !== 'light' && theme !== 'dark') {
-          theme = 'light';
+          theme = 'dark';
         }
         set({ theme });
         document.documentElement.setAttribute('data-theme', theme);
@@ -35,11 +35,11 @@ export const useThemeStore = create(
 
       /**
        * 애플리케이션 시작 시 테마 초기화
-       * 저장된 테마가 없으면 시스템 선호도를 확인하고, 그것도 없으면 light 테마 사용
+       * 저장된 테마가 없으면 시스템 선호도를 확인하고, 그것도 없으면 dark 테마 사용
        */
       initializeTheme: () => {
         const { theme } = get();
-        
+
         // 저장된 테마가 있으면 그것을 사용
         if (theme) {
           document.documentElement.setAttribute('data-theme', theme);
@@ -47,15 +47,15 @@ export const useThemeStore = create(
         }
 
         // 저장된 테마가 없으면 시스템 선호도 확인
-        let initialTheme = 'light';
-        
+        let initialTheme = 'dark';
+
         try {
           if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
             initialTheme = 'dark';
           }
         } catch (error) {
           console.warn('System theme detection failed:', error);
-          // 오류 발생 시 기본값인 'light' 사용
+          // 오류 발생 시 기본값인 'dark' 사용
         }
 
         set({ theme: initialTheme });
