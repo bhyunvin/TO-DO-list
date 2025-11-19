@@ -18,7 +18,7 @@ import { AuthenticatedGuard } from '../../types/express/auth.guard';
 export class ChatController {
   private readonly logger = new Logger(ChatController.name);
 
-  constructor(private readonly assistanceService: AssistanceService) {}
+  constructor(private readonly assistanceService: AssistanceService) { }
 
   @Post('chat')
   async chat(
@@ -63,7 +63,7 @@ export class ChatController {
         );
         return response;
       } catch (error) {
-        const isRateLimited = this.isRateLimitError(error);
+        const isRateLimited = this.isRetryableError(error);
         const isLastAttempt = attempt === maxRetries;
 
         this.logger.error(
@@ -97,9 +97,14 @@ export class ChatController {
     }
   }
 
-  private isRateLimitError(error: any): boolean {
+  private isRetryableError(error: any): boolean {
     const status = error.response?.status || error.status;
-    return status === HttpStatus.TOO_MANY_REQUESTS || status === 429;
+    return (
+      status === HttpStatus.TOO_MANY_REQUESTS ||
+      status === 429 ||
+      status === HttpStatus.SERVICE_UNAVAILABLE ||
+      status === 503
+    );
   }
 
   private calculateRetryDelay(

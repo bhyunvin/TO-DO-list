@@ -248,7 +248,7 @@ export class AssistanceService implements OnModuleInit {
       systemPrompt = `[ROLE] 당신은 친절한 한국어 비서입니다. 존댓말로 할 일 목록에 관해서만 답변하세요.`;
     }
 
-    const requestData = {
+    const requestData: any = {
       system_instruction: {
         parts: [{ text: systemPrompt }],
       },
@@ -263,7 +263,7 @@ export class AssistanceService implements OnModuleInit {
       ],
       tools: [
         {
-          functionDeclarations: [
+          function_declarations: [
             ...this.getTodosTool.functionDeclarations,
             ...this.createTodoTool.functionDeclarations,
             ...this.updateTodoTool.functionDeclarations,
@@ -299,13 +299,13 @@ export class AssistanceService implements OnModuleInit {
 
       const candidate = response.data.candidates[0];
       const firstPart = candidate.content.parts[0] as any;
+      const functionCall = firstPart.functionCall || firstPart.function_call;
 
       this.logger.log(
-        `[Gemini Response] firstPart 타입 확인 - functionCall 존재: ${!!firstPart.functionCall}, text 존재: ${!!firstPart.text}`,
+        `[Gemini Response] firstPart 타입 확인 - functionCall 존재: ${!!functionCall}, text 존재: ${!!firstPart.text}`,
       );
 
-      if (firstPart.functionCall) {
-        const functionCall = firstPart.functionCall;
+      if (functionCall) {
         const args = functionCall.args || {};
         let functionResult: any;
 
@@ -384,14 +384,18 @@ export class AssistanceService implements OnModuleInit {
             `[Gemini Function Result] ${functionCall.name} 함수 실행 결과 (Gemini에게 전송): ${JSON.stringify(functionResult)}`,
           );
 
+          // 모델의 이전 응답(함수 호출)을 대화 기록에 추가 (role: model)
           requestData.contents.push({
-            parts: [candidate.content.parts[0] as any],
+            role: 'model',
+            parts: [firstPart],
           });
 
+          // 함수의 실행 결과를 대화 기록에 추가 (role: function)
           const functionResponsePart = {
+            role: 'function',
             parts: [
               {
-                functionResponse: {
+                function_response: {
                   name: functionCall.name,
                   response: {
                     content: functionResult,
@@ -737,7 +741,9 @@ export class AssistanceService implements OnModuleInit {
         updateTodoDto.todoContent = updateData.todoContent;
       }
       if (updateData?.isCompleted !== undefined) {
-        updateTodoDto.completeDtm = updateData.isCompleted ? 'NOW()' : null;
+        updateTodoDto.completeDtm = updateData.isCompleted
+          ? new Date().toISOString()
+          : null;
       }
       if (updateData?.todoNote !== undefined) {
         updateTodoDto.todoNote = updateData.todoNote;
