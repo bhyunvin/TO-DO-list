@@ -43,7 +43,7 @@ export const useChatStore = create(
           timestamp: new Date(),
           ...messageData,
         };
-        
+
         set((state) => ({
           messages: [...state.messages, message],
           error: null, // 메시지 추가 시 이전 오류 지우기
@@ -55,7 +55,7 @@ export const useChatStore = create(
       // 환영 메시지 추가 (채팅 세션 시작 시)
       addWelcomeMessage: () => {
         const { messages } = get();
-        
+
         // 이미 메시지가 있으면 환영 메시지를 추가하지 않음
         if (messages.length > 0) {
           return;
@@ -99,7 +99,7 @@ export const useChatStore = create(
 
       setLoading: (loading) => {
         const lastRequestTime = loading ? Date.now() : undefined;
-        set((state) => ({ 
+        set((state) => ({
           isLoading: loading,
           requestInProgress: loading,
           lastRequestTime: lastRequestTime !== undefined ? lastRequestTime : state.lastRequestTime
@@ -108,22 +108,22 @@ export const useChatStore = create(
 
       setError: (error, errorType = 'GENERIC_ERROR') => {
         const errorMessage = ERROR_MESSAGES[errorType] || error || ERROR_MESSAGES.GENERIC_ERROR;
-        set({ 
-          error: errorMessage, 
-          isLoading: false 
+        set({
+          error: errorMessage,
+          isLoading: false
         });
       },
 
       clearMessages: () => {
-        set({ 
-          messages: [], 
-          error: null, 
-          retryCount: 0, 
+        set({
+          messages: [],
+          error: null,
+          retryCount: 0,
           lastFailedMessage: null,
           requestInProgress: false,
           lastRequestTime: 0
         });
-        
+
         // 메시지를 지운 후 환영 메시지 다시 추가
         const { addWelcomeMessage } = get();
         addWelcomeMessage();
@@ -183,7 +183,7 @@ export const useChatStore = create(
         const { requestInProgress, lastRequestTime } = get();
         const now = Date.now();
         const minInterval = 1000; // 요청 간 최소 1초 간격
-        
+
         return !requestInProgress && (now - lastRequestTime) >= minInterval;
       },
 
@@ -197,8 +197,8 @@ export const useChatStore = create(
 
       incrementRetryCount: () => set((state) => ({ retryCount: state.retryCount + 1 })),
 
-      resetRetryState: () => set({ 
-        retryCount: 0, 
+      resetRetryState: () => set({
+        retryCount: 0,
         lastFailedMessage: null,
         requestInProgress: false
       }),
@@ -211,8 +211,8 @@ export const useChatStore = create(
 
       // Todo 목록 새로고침 트리거
       todoRefreshTrigger: 0,
-      triggerTodoRefresh: () => set((state) => ({ 
-        todoRefreshTrigger: state.todoRefreshTrigger + 1 
+      triggerTodoRefresh: () => set((state) => ({
+        todoRefreshTrigger: state.todoRefreshTrigger + 1
       })),
     }),
     {

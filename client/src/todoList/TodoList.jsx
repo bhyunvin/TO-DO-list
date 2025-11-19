@@ -1293,6 +1293,18 @@ function TodoContainer() {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000);
 
+      // 멀티턴 대화를 위한 history 생성
+      // 환영 메시지를 제외하고 최근 10개의 메시지만 컨텍스트로 전송
+      const recentMessages = messages
+        .filter(msg => !msg.id.startsWith('welcome-')) // 환영 메시지 제외
+        .slice(-10); // 최근 10개만
+
+      // Gemini API 형식으로 변환
+      const history = recentMessages.map(msg => ({
+        role: msg.isUser ? 'user' : 'model',
+        parts: [{ text: msg.isHtml ? msg.content.replace(/<[^>]*>/g, '') : msg.content }] // HTML 태그 제거
+      }));
+
       const response = await api('/api/assistance/chat', {
         method: 'POST',
         headers: {
@@ -1301,6 +1313,7 @@ function TodoContainer() {
         credentials: 'include',
         body: JSON.stringify({
           prompt: messageContent,
+          history: history, // 대화 기록 추가
         }),
         signal: controller.signal,
       });

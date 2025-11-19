@@ -7,7 +7,10 @@
 - 세션 기반 사용자 인증 및 회원가입
 - 날짜별 todo 생성, 조회, 수정, 삭제
 - 파일 업로드 및 첨부 기능 (진행률 표시)
-- Google Gemini API를 활용한 AI 채팅 어시스턴트 (todo 읽기/생성/수정 가능)
+- Google Gemini API를 활용한 AI 채팅 어시스턴트
+  - 멀티턴 대화 지원 (이전 대화 컨텍스트 유지)
+  - Todo 읽기/생성/수정 가능
+  - Function calling을 통한 실시간 Todo 조작
 - 프로필 이미지 업로드 및 관리
 - 비밀번호 변경 기능
 - 마크다운 렌더링 (XSS 보호)
@@ -274,7 +277,10 @@ A full-stack TO-DO List application built with modern web technologies. Provides
 - Session-based user authentication and registration
 - Create, read, update, and delete todos by date
 - File upload and attachment functionality (with progress tracking)
-- AI chat assistant powered by Google Gemini API (can read/create/update todos)
+- AI chat assistant powered by Google Gemini API
+  - Multi-turn conversation support (maintains previous conversation context)
+  - Can read/create/update todos
+  - Real-time todo manipulation via function calling
 - Profile image upload and management
 - Password change functionality
 - Markdown rendering (with XSS protection)

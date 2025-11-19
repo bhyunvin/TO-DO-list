@@ -3,6 +3,10 @@ import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
 export class RequestAssistanceDto {
   userSeq: number; // 사용자 번호
   prompt: string; // 요청
+  history?: {
+    role: 'user' | 'model';
+    parts: { text: string }[];
+  }[]; // 대화 기록
   response: string; // 응답
 }
 
@@ -10,6 +14,12 @@ export class ChatRequestDto {
   @IsString()
   @IsNotEmpty()
   prompt: string; // 사용자 메시지
+
+  @IsOptional()
+  history?: {
+    role: 'user' | 'model';
+    parts: { text: string }[];
+  }[]; // 대화 기록
 }
 
 export class ChatResponseDto {

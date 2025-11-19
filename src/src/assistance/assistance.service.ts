@@ -253,6 +253,7 @@ export class AssistanceService implements OnModuleInit {
         parts: [{ text: systemPrompt }],
       },
       contents: [
+        ...(requestAssistanceDto.history || []),
         {
           parts: [
             {

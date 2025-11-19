@@ -39,6 +39,7 @@ export class ChatController {
         const requestDto = {
           userSeq: session.user.userSeq,
           prompt: chatRequestDto.prompt,
+          history: chatRequestDto.history,
           response: '', // 서비스에서 채워질 예정
         };
 
