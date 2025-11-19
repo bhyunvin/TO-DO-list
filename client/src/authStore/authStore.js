@@ -10,14 +10,23 @@ export const useAuthStore = create(
       logout: () => set({ user: null }),
 
       api: async (url, options) => {
-        const response = await fetch(url, options);
-        const { status } = response;
+        try {
+          const response = await fetch(url, options);
+          const { status } = response;
 
-        if (status === 401 || status === 504) {
+          if (status === 401 || status === 504) {
+            set({ user: null });
+          }
+
+          return response;
+        } catch (error) {
           set({ user: null });
+          return {
+            ok: false,
+            status: 500,
+            json: async () => ({ message: 'Network Error' }),
+          };
         }
-
-        return response;
       },
     }),
     {
