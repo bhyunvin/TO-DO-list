@@ -121,7 +121,7 @@ export class AssistanceService implements OnModuleInit {
     private readonly httpService: HttpService,
     private readonly todoService: TodoService,
     private readonly configService: ConfigService,
-  ) {}
+  ) { }
 
   /**
    * 한국 표준시 기준 현재 날짜 가져오기
@@ -229,7 +229,7 @@ export class AssistanceService implements OnModuleInit {
     }
 
     const apiKey = this.geminiApiKey;
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${apiKey}`;
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
     let systemPrompt = '';
 
     try {
