@@ -121,7 +121,7 @@ export class AssistanceService implements OnModuleInit {
     private readonly httpService: HttpService,
     private readonly todoService: TodoService,
     private readonly configService: ConfigService,
-  ) { }
+  ) {}
 
   /**
    * 한국 표준시 기준 현재 날짜 가져오기

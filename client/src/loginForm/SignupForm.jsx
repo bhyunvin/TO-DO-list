@@ -9,19 +9,19 @@ import './loginForm.css';
 
 const SignupForm = ({ onSignupComplete }) => {
   const { api } = useAuthStore();
-  const { 
-    validateFiles, 
-    formatFileSize, 
-    getUploadPolicy, 
+  const {
+    validateFiles,
+    formatFileSize,
+    getUploadPolicy,
   } = useFileUploadValidator();
-  
+
   const {
     uploadStatus,
     uploadProgress,
     uploadErrors,
     resetUploadState,
   } = useFileUploadProgress();
-  
+
   const [idError, setIdError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
@@ -34,22 +34,22 @@ const SignupForm = ({ onSignupComplete }) => {
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    
+
     setProfileImage(null);
     setProfileImageFile(null);
     setProfileImageValidation(null);
     setProfileImageError('');
-    
+
     if (file) {
       const validationResults = validateFiles([file], 'profileImage');
       const validation = validationResults[0];
-      
+
       setProfileImageValidation(validation);
-      
+
       if (validation.isValid) {
         setProfileImageFile(file);
         setProfileImageError('');
-        
+
         const reader = new FileReader();
         reader.onloadend = () => {
           setProfileImage(reader.result);
@@ -256,12 +256,12 @@ const SignupForm = ({ onSignupComplete }) => {
         }
       } else {
         const errorData = await response.json().catch(() => ({}));
-        
+
         if (errorData.errors && Array.isArray(errorData.errors)) {
-          const errorMessages = errorData.errors.map((err) => 
+          const errorMessages = errorData.errors.map((err) =>
             `${err.fileName}: ${err.errorMessage}`
           ).join('<br>');
-          
+
           Swal.fire({
             title: '파일 업로드 오류',
             html: errorMessages,
@@ -314,7 +314,7 @@ const SignupForm = ({ onSignupComplete }) => {
                 autoComplete="off"
                 onChange={userIdChangeHandler}
                 required
-                length={40}
+                maxLength={40}
                 spellCheck="false"
               />
               <button
@@ -452,9 +452,9 @@ const SignupForm = ({ onSignupComplete }) => {
                 <img
                   src={profileImage}
                   alt="프로필 미리보기"
-                  style={{ 
-                    width: '100px', 
-                    height: '100px', 
+                  style={{
+                    width: '100px',
+                    height: '100px',
                     objectFit: 'cover',
                     border: '2px solid #28a745',
                     borderRadius: '8px'
@@ -463,8 +463,8 @@ const SignupForm = ({ onSignupComplete }) => {
                 <div className="ms-3">
                   <div className="text-success">
                     <small>
-                      <strong>{profileImageFile?.name}</strong><br/>
-                      크기: {formatFileSize(profileImageFile?.size || 0)}<br/>
+                      <strong>{profileImageFile?.name}</strong><br />
+                      크기: {formatFileSize(profileImageFile?.size || 0)}<br />
                       상태: 검증 완료 ✓
                     </small>
                   </div>
@@ -528,16 +528,16 @@ const SignupForm = ({ onSignupComplete }) => {
           </div>
           {/* 회원가입 버튼 */}
           <div className="col-9">
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="btn btn-primary"
               disabled={isSubmitting || uploadStatus === 'uploading' || uploadStatus === 'validating'}
             >
               {isSubmitting || uploadStatus === 'uploading' || uploadStatus === 'validating' ? (
                 <>
                   <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                  {uploadStatus === 'uploading' ? '이미지 업로드 중...' : 
-                   uploadStatus === 'validating' ? '파일 검증 중...' : '가입 중...'}
+                  {uploadStatus === 'uploading' ? '이미지 업로드 중...' :
+                    uploadStatus === 'validating' ? '파일 검증 중...' : '가입 중...'}
                 </>
               ) : (
                 '회원가입'

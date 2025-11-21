@@ -10,7 +10,7 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  
+
   // 유효성 검사 오류 상태
   const [currentPasswordError, setCurrentPasswordError] = useState('');
   const [newPasswordError, setNewPasswordError] = useState('');
@@ -27,7 +27,7 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
   const handleCurrentPasswordChange = e => {
     const passwordValue = e.target.value;
     setCurrentPassword(passwordValue);
-    
+
     // 실시간 유효성 검사
     if (!passwordValue.trim()) {
       setCurrentPasswordError('현재 비밀번호를 입력해주세요.');
@@ -42,7 +42,7 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
   const handleNewPasswordChange = e => {
     const passwordValue = e.target.value;
     setNewPassword(passwordValue);
-    
+
     // 실시간 유효성 검사
     if (!passwordValue.trim()) {
       setNewPasswordError('새 비밀번호를 입력해주세요.');
@@ -74,7 +74,7 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
   const handleConfirmPasswordChange = e => {
     const passwordValue = e.target.value;
     setConfirmPassword(passwordValue);
-    
+
     // 실시간 유효성 검사
     if (!passwordValue.trim()) {
       setConfirmPasswordError('새 비밀번호 확인을 입력해주세요.');
@@ -192,7 +192,7 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
    */
   const getPasswordStrength = password => {
     if (!password) return { strength: 0, text: '', color: '' };
-    
+
     let strength = 0;
     const checks = [
       /[a-z]/.test(password), // 소문자
@@ -202,9 +202,9 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
       password.length >= 8,   // 길이
       password.length >= 12   // 적절한 길이
     ];
-    
+
     strength = checks.filter(Boolean).length;
-    
+
     if (strength <= 2) return { strength, text: '약함', color: 'danger' };
     if (strength <= 4) return { strength, text: '보통', color: 'warning' };
     return { strength, text: '강함', color: 'success' };
@@ -238,7 +238,7 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
                 className="btn btn-outline-secondary"
                 onClick={() => setShowCurrentPassword(!showCurrentPassword)}
               >
-                {showCurrentPassword ? <i class="bi bi-eye-slash"></i> : <i class="bi bi-eye"></i>}
+                {showCurrentPassword ? <i className="bi bi-eye-slash"></i> : <i className="bi bi-eye"></i>}
               </button>
             </div>
             {currentPasswordError && <div className="invalid-feedback d-block">{currentPasswordError}</div>}
@@ -268,7 +268,7 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
                 className="btn btn-outline-secondary"
                 onClick={() => setShowNewPassword(!showNewPassword)}
               >
-                {showNewPassword ? <i class="bi bi-eye-slash"></i> : <i class="bi bi-eye"></i>}
+                {showNewPassword ? <i className="bi bi-eye-slash"></i> : <i className="bi bi-eye"></i>}
               </button>
             </div>
             {newPasswordError && <div className="invalid-feedback d-block">{newPasswordError}</div>}
@@ -277,7 +277,7 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
                 <small>
                   비밀번호 강도: <strong>{passwordStrength.text}</strong>
                   <div className="progress mt-1" style={{ height: '4px' }}>
-                    <div 
+                    <div
                       className={`progress-bar bg-${passwordStrength.color}`}
                       style={{ width: `${(passwordStrength.strength / 6) * 100}%` }}
                     ></div>
@@ -314,7 +314,7 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
                 className="btn btn-outline-secondary"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               >
-                {showConfirmPassword ? <i class="bi bi-eye-slash"></i> : <i class="bi bi-eye"></i>}
+                {showConfirmPassword ? <i className="bi bi-eye-slash"></i> : <i className="bi bi-eye"></i>}
               </button>
             </div>
             {confirmPasswordError && <div className="invalid-feedback d-block">{confirmPasswordError}</div>}
@@ -339,9 +339,9 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
         {/* 폼 액션 */}
         <div className="row">
           <div className="col-3">
-            <button 
-              type="button" 
-              className="btn btn-secondary w-100" 
+            <button
+              type="button"
+              className="btn btn-secondary w-100"
               onClick={handleCancel}
               disabled={isSubmitting}
             >
@@ -349,8 +349,8 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
             </button>
           </div>
           <div className="col-9">
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="btn btn-primary w-100"
               disabled={isSubmitting || currentPasswordError || newPasswordError || confirmPasswordError || !currentPassword || !newPassword || !confirmPassword}
             >

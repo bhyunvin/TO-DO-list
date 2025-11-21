@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 import { useFileUploadValidator } from '../hooks/useFileUploadValidator';
@@ -9,12 +10,12 @@ import FileUploadProgress from './FileUploadProgress';
  * 사용자가 이름, 이메일, 설명 및 프로필 이미지를 포함한 프로필 정보를 업데이트할 수 있도록 합니다
  */
 const ProfileUpdateForm = ({ user, onSave, onCancel, isSubmitting = false }) => {
-  const { 
-    validateFiles, 
-    formatFileSize, 
+  const {
+    validateFiles,
+    formatFileSize,
     getUploadPolicy
   } = useFileUploadValidator();
-  
+
   const {
     uploadStatus,
     uploadProgress,
@@ -26,12 +27,12 @@ const ProfileUpdateForm = ({ user, onSave, onCancel, isSubmitting = false }) => 
   const [userName, setUserName] = useState(user?.userName || '');
   const [userEmail, setUserEmail] = useState(user?.userEmail || '');
   const [userDescription, setUserDescription] = useState(user?.userDescription || '');
-  
+
   // 프로필 이미지 상태
   const [profileImage, setProfileImage] = useState(null);
   const [profileImageFile, setProfileImageFile] = useState(null);
   const [profileImageValidation, setProfileImageValidation] = useState(null);
-  
+
   // 유효성 검사 오류 상태
   const [nameError, setNameError] = useState('');
   const [emailError, setEmailError] = useState('');
@@ -51,24 +52,24 @@ const ProfileUpdateForm = ({ user, onSave, onCancel, isSubmitting = false }) => 
    */
   const handleImageChange = e => {
     const file = e.target.files[0];
-    
+
     // 이전 상태 초기화
     setProfileImage(null);
     setProfileImageFile(null);
     setProfileImageValidation(null);
     setProfileImageError('');
-    
+
     if (file) {
       // 파일 유효성 검사
       const validationResults = validateFiles([file], 'profileImage');
       const [validation] = validationResults;
-      
+
       setProfileImageValidation(validation);
-      
+
       if (validation.isValid) {
         setProfileImageFile(file);
         setProfileImageError('');
-        
+
         // 미리보기 생성
         const reader = new FileReader();
         reader.onloadend = () => {
@@ -89,7 +90,7 @@ const ProfileUpdateForm = ({ user, onSave, onCancel, isSubmitting = false }) => 
   const handleNameChange = e => {
     const nameValue = e.target.value;
     setUserName(nameValue);
-    
+
     // 실시간 유효성 검사
     if (!nameValue.trim()) {
       setNameError('이름을 입력해주세요.');
@@ -106,7 +107,7 @@ const ProfileUpdateForm = ({ user, onSave, onCancel, isSubmitting = false }) => 
   const handleEmailChange = e => {
     const emailValue = e.target.value;
     setUserEmail(emailValue);
-    
+
     // 실시간 유효성 검사
     if (!emailValue.trim()) {
       setEmailError('이메일을 입력해주세요.');
@@ -188,7 +189,7 @@ const ProfileUpdateForm = ({ user, onSave, onCancel, isSubmitting = false }) => 
     formData.append('userName', userName.trim());
     formData.append('userEmail', userEmail.trim());
     formData.append('userDescription', userDescription.trim());
-    
+
     // 선택된 경우 프로필 이미지 추가
     if (profileImageFile) {
       formData.append('profileImage', profileImageFile);
@@ -216,7 +217,7 @@ const ProfileUpdateForm = ({ user, onSave, onCancel, isSubmitting = false }) => 
    */
   const handleCancel = () => {
     // 폼이 수정되었는지 확인
-    const hasChanges = 
+    const hasChanges =
       userName !== (user?.userName || '') ||
       userEmail !== (user?.userEmail || '') ||
       userDescription !== (user?.userDescription || '') ||
@@ -334,8 +335,8 @@ const ProfileUpdateForm = ({ user, onSave, onCancel, isSubmitting = false }) => 
                 <div className="ms-3">
                   <div className="text-success">
                     <small>
-                      <strong>{profileImageFile?.name}</strong><br/>
-                      크기: {formatFileSize(profileImageFile?.size || 0)}<br/>
+                      <strong>{profileImageFile?.name}</strong><br />
+                      크기: {formatFileSize(profileImageFile?.size || 0)}<br />
                       상태: 검증 완료 ✓
                     </small>
                   </div>
@@ -398,9 +399,9 @@ const ProfileUpdateForm = ({ user, onSave, onCancel, isSubmitting = false }) => 
         {/* 폼 액션 */}
         <div className="row">
           <div className="col-3">
-            <button 
-              type="button" 
-              className="btn btn-secondary w-100" 
+            <button
+              type="button"
+              className="btn btn-secondary w-100"
               onClick={handleCancel}
               disabled={isSubmitting || uploadStatus === 'uploading' || uploadStatus === 'validating'}
             >
@@ -408,16 +409,16 @@ const ProfileUpdateForm = ({ user, onSave, onCancel, isSubmitting = false }) => 
             </button>
           </div>
           <div className="col-9">
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="btn btn-primary w-100"
               disabled={isSubmitting || uploadStatus === 'uploading' || uploadStatus === 'validating' || nameError || emailError || profileImageError}
             >
               {isSubmitting || uploadStatus === 'uploading' || uploadStatus === 'validating' ? (
                 <>
                   <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                  {uploadStatus === 'uploading' ? '이미지 업로드 중...' : 
-                   uploadStatus === 'validating' ? '파일 검증 중...' : '저장 중...'}
+                  {uploadStatus === 'uploading' ? '이미지 업로드 중...' :
+                    uploadStatus === 'validating' ? '파일 검증 중...' : '저장 중...'}
                 </>
               ) : (
                 '저장'

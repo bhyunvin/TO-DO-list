@@ -20,6 +20,7 @@ export const useAuthStore = create(
 
           return response;
         } catch (error) {
+          console.error('API Error:', error);
           set({ user: null });
           return {
             ok: false,

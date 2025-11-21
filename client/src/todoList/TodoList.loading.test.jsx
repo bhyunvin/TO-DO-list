@@ -1,4 +1,4 @@
-/* eslint-disable testing-library/no-wait-for-multiple-assertions */
+
 /* eslint-disable testing-library/no-node-access */
 import { render, screen, waitFor } from '@testing-library/react';
 import TodoList from './TodoList';
@@ -65,7 +65,7 @@ describe('TodoContainer Loading State', () => {
 
   test('displays loading message while fetching todos', async () => {
     // 지연된 API 응답 모킹
-    mockApi.mockImplementation(() => 
+    mockApi.mockImplementation(() =>
       new Promise(resolve => {
         setTimeout(() => {
           resolve({
@@ -133,7 +133,7 @@ describe('TodoContainer Loading State', () => {
 
   test('loading indicator has spinner', async () => {
     // 지연된 API 응답 모킹
-    mockApi.mockImplementation(() => 
+    mockApi.mockImplementation(() =>
       new Promise(resolve => {
         setTimeout(() => {
           resolve({

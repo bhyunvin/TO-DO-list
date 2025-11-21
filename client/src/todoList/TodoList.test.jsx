@@ -1,6 +1,7 @@
+
 /* eslint-disable testing-library/no-wait-for-multiple-assertions */
 /* eslint-disable testing-library/no-node-access */
-import { render, screen, waitFor, cleanup } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import TodoContainer from './TodoList';
 
@@ -71,7 +72,7 @@ jest.mock('../components/ProfileUpdateForm', () => {
           entries: jest.fn(),
           forEach: jest.fn()
         };
-        onSave({ 
+        onSave({
           userName: 'Updated Name',
           userEmail: 'updated@example.com',
           userDescription: 'Updated description',
@@ -90,7 +91,7 @@ jest.mock('../components/PasswordChangeForm', () => {
   const MockPasswordChangeForm = ({ onSave, onCancel }) => (
     <div data-testid="password-change-form">
       <h3>비밀번호 변경</h3>
-      <button onClick={() => onSave({ 
+      <button onClick={() => onSave({
         currentPassword: 'current123',
         newPassword: 'new123',
         confirmPassword: 'new123'
@@ -171,14 +172,14 @@ describe('TodoContainer Profile Update Integration', () => {
     // Open user menu and click update profile button
     const userMenuIcon = screen.getByRole('button', { name: /사용자 메뉴/ });
     await user.click(userMenuIcon);
-    
+
     const updateProfileButton = screen.getByRole('button', { name: /프로필 수정/ });
     await user.click(updateProfileButton);
 
     // Todo list elements should be hidden
     expect(screen.queryByRole('button', { name: /신규/ })).not.toBeInTheDocument();
     expect(screen.queryByTestId('date-picker')).not.toBeInTheDocument();
-    
+
     // Profile update form should be visible
     expect(screen.getByTestId('profile-update-form')).toBeInTheDocument();
   });
@@ -207,7 +208,7 @@ describe('TodoContainer Profile Update Integration', () => {
     // Open user menu and click update profile button
     const userMenuIcon = screen.getByRole('button', { name: /사용자 메뉴/ });
     await user.click(userMenuIcon);
-    
+
     const updateProfileButton = screen.getByRole('button', { name: /프로필 수정/ });
     await user.click(updateProfileButton);
 
@@ -226,14 +227,14 @@ describe('TodoContainer Profile Update Integration', () => {
 
   test('processes profile update and updates user session', async () => {
     const user = userEvent.setup();
-    
+
     // Mock successful profile update API response
     const updatedUser = {
       userName: 'Updated Name',
       userEmail: 'updated@example.com',
       userDescription: 'Updated description'
     };
-    
+
     mockApi.mockImplementation((url) => {
       if (url === '/api/user/profile') {
         return Promise.resolve({
@@ -252,7 +253,7 @@ describe('TodoContainer Profile Update Integration', () => {
     // Open user menu and click update profile button
     const userMenuIcon = screen.getByRole('button', { name: /사용자 메뉴/ });
     await user.click(userMenuIcon);
-    
+
     const updateProfileButton = screen.getByRole('button', { name: /프로필 수정/ });
     await user.click(updateProfileButton);
 
@@ -272,7 +273,7 @@ describe('TodoContainer Profile Update Integration', () => {
 
   test('handles profile update API errors', async () => {
     const user = userEvent.setup();
-    
+
     // Mock API error response
     mockApi.mockImplementation((url) => {
       if (url === '/api/user/profile') {
@@ -292,7 +293,7 @@ describe('TodoContainer Profile Update Integration', () => {
     // Open user menu and click update profile button
     const userMenuIcon = screen.getByRole('button', { name: /사용자 메뉴/ });
     await user.click(userMenuIcon);
-    
+
     const updateProfileButton = screen.getByRole('button', { name: /프로필 수정/ });
     await user.click(updateProfileButton);
 
@@ -314,7 +315,7 @@ describe('TodoContainer Profile Update Integration', () => {
 
   test('handles file upload errors in profile update', async () => {
     const user = userEvent.setup();
-    
+
     // Mock API error response with file upload errors
     mockApi.mockImplementation((url) => {
       if (url === '/api/user/profile') {
@@ -339,7 +340,7 @@ describe('TodoContainer Profile Update Integration', () => {
     // Open user menu and click update profile button
     const userMenuIcon = screen.getByRole('button', { name: /사용자 메뉴/ });
     await user.click(userMenuIcon);
-    
+
     const updateProfileButton = screen.getByRole('button', { name: /프로필 수정/ });
     await user.click(updateProfileButton);
 
@@ -363,7 +364,7 @@ describe('TodoContainer Profile Update Integration', () => {
     render(<TodoContainer />);
 
     const userMenuIcon = screen.getByRole('button', { name: /사용자 메뉴/ });
-    
+
     // Check that the icon button exists and is accessible
     expect(userMenuIcon).toBeInTheDocument();
     expect(userMenuIcon).toHaveClass('user-menu-icon');
@@ -376,7 +377,7 @@ describe('TodoContainer Profile Update Integration', () => {
     // Open user menu and start profile update
     const userMenuIcon = screen.getByRole('button', { name: /사용자 메뉴/ });
     await user.click(userMenuIcon);
-    
+
     const updateProfileButton = screen.getByRole('button', { name: /프로필 수정/ });
     await user.click(updateProfileButton);
 
@@ -393,7 +394,7 @@ describe('TodoContainer Profile Update Integration', () => {
 
   test('profile update does not interfere with todo editing flow', async () => {
     const user = userEvent.setup();
-    
+
     // Mock todos data
     mockApi.mockResolvedValue({
       ok: true,
@@ -417,7 +418,7 @@ describe('TodoContainer Profile Update Integration', () => {
     // Open user menu and start profile update
     const userMenuIcon = screen.getByRole('button', { name: /사용자 메뉴/ });
     await user.click(userMenuIcon);
-    
+
     const updateProfileButton = screen.getByRole('button', { name: /프로필 수정/ });
     await user.click(updateProfileButton);
 
@@ -448,13 +449,13 @@ describe('TodoContainer Excel Export Button Rendering', () => {
 
     const todoActions = document.querySelector('.todo-actions');
     const buttons = todoActions.querySelectorAll('button');
-    
+
     // Should have 2 buttons: Excel and 신규
     expect(buttons).toHaveLength(2);
-    
+
     // Excel button should be first (left)
     expect(buttons[0]).toHaveAttribute('aria-label', 'Excel 내보내기');
-    
+
     // 신규 button should be second (right)
     expect(buttons[1]).toHaveTextContent('신규');
   });
@@ -463,7 +464,7 @@ describe('TodoContainer Excel Export Button Rendering', () => {
     render(<TodoContainer />);
 
     const excelButton = screen.getByRole('button', { name: /Excel 내보내기/ });
-    
+
     expect(excelButton).toHaveClass('btn', 'btn-outline-success');
   });
 
@@ -471,7 +472,7 @@ describe('TodoContainer Excel Export Button Rendering', () => {
     render(<TodoContainer />);
 
     const excelButton = screen.getByRole('button', { name: /Excel 내보내기/ });
-    
+
     expect(excelButton).toBeVisible();
   });
 
@@ -490,7 +491,7 @@ describe('TodoContainer Excel Export Button Rendering', () => {
 
   test('Excel export button is hidden when in edit mode', async () => {
     const user = userEvent.setup();
-    
+
     // Mock todos data
     mockApi.mockResolvedValue({
       ok: true,
@@ -531,7 +532,7 @@ describe('TodoContainer Excel Export Button Rendering', () => {
     // Open user menu and click profile update button
     const userMenuIcon = screen.getByRole('button', { name: /사용자 메뉴/ });
     await user.click(userMenuIcon);
-    
+
     const updateProfileButton = screen.getByRole('button', { name: /프로필 수정/ });
     await user.click(updateProfileButton);
 
@@ -547,7 +548,7 @@ describe('TodoContainer Excel Export Button Rendering', () => {
     // Open user menu and click password change button
     const userMenuIcon = screen.getByRole('button', { name: /사용자 메뉴/ });
     await user.click(userMenuIcon);
-    
+
     const changePasswordButton = screen.getByRole('button', { name: /비밀번호 변경/ });
     await user.click(changePasswordButton);
 
@@ -564,7 +565,7 @@ describe('TodoContainer Date Range Modal Functionality', () => {
       ok: true,
       json: () => Promise.resolve([])
     });
-    
+
     // Reset SweetAlert mock to return cancelled by default
     const Swal = require('sweetalert2');
     Swal.fire.mockResolvedValue({ isConfirmed: false });
@@ -573,7 +574,7 @@ describe('TodoContainer Date Range Modal Functionality', () => {
   test('displays date range modal when Excel export button is clicked', async () => {
     const user = userEvent.setup();
     const Swal = require('sweetalert2');
-    
+
     render(<TodoContainer />);
 
     const excelButton = screen.getByRole('button', { name: /Excel 내보내기/ });
@@ -595,7 +596,7 @@ describe('TodoContainer Date Range Modal Functionality', () => {
   test('modal displays with date pickers for start and end dates', async () => {
     const user = userEvent.setup();
     const Swal = require('sweetalert2');
-    
+
     render(<TodoContainer />);
 
     const excelButton = screen.getByRole('button', { name: /Excel 내보내기/ });
@@ -615,11 +616,11 @@ describe('TodoContainer Date Range Modal Functionality', () => {
   test('date validation prevents empty date fields', async () => {
     const user = userEvent.setup();
     const Swal = require('sweetalert2');
-    
+
     // Mock DOM elements for validation test
     const mockStartDateInput = { value: '' };
     const mockEndDateInput = { value: '2024-01-31' };
-    
+
     const originalGetElementById = document.getElementById;
     document.getElementById = jest.fn((id) => {
       if (id === 'startDate') return mockStartDateInput;
@@ -628,7 +629,7 @@ describe('TodoContainer Date Range Modal Functionality', () => {
     });
 
     Swal.showValidationMessage = jest.fn();
-    
+
     render(<TodoContainer />);
 
     const excelButton = screen.getByRole('button', { name: /Excel 내보내기/ });
@@ -643,7 +644,7 @@ describe('TodoContainer Date Range Modal Functionality', () => {
       expect(Swal.showValidationMessage).toHaveBeenCalledWith('날짜를 선택해주세요');
       expect(result).toBe(false);
     });
-    
+
     // Restore original function
     document.getElementById = originalGetElementById;
   });
@@ -651,11 +652,11 @@ describe('TodoContainer Date Range Modal Functionality', () => {
   test('date validation prevents startDate after endDate', async () => {
     const user = userEvent.setup();
     const Swal = require('sweetalert2');
-    
+
     // Mock DOM elements with invalid date range
     const mockStartDateInput = { value: '2024-02-01' };
     const mockEndDateInput = { value: '2024-01-31' };
-    
+
     const originalGetElementById = document.getElementById;
     document.getElementById = jest.fn((id) => {
       if (id === 'startDate') return mockStartDateInput;
@@ -664,7 +665,7 @@ describe('TodoContainer Date Range Modal Functionality', () => {
     });
 
     Swal.showValidationMessage = jest.fn();
-    
+
     render(<TodoContainer />);
 
     const excelButton = screen.getByRole('button', { name: /Excel 내보내기/ });
@@ -679,7 +680,7 @@ describe('TodoContainer Date Range Modal Functionality', () => {
       expect(Swal.showValidationMessage).toHaveBeenCalledWith('시작일은 종료일보다 이전이어야 합니다');
       expect(result).toBe(false);
     });
-    
+
     // Restore original function
     document.getElementById = originalGetElementById;
   });
@@ -687,18 +688,18 @@ describe('TodoContainer Date Range Modal Functionality', () => {
   test('modal confirms with valid dates', async () => {
     const user = userEvent.setup();
     const Swal = require('sweetalert2');
-    
+
     // Mock DOM elements with valid date range
     const mockStartDateInput = { value: '2024-01-01' };
     const mockEndDateInput = { value: '2024-01-31' };
-    
+
     const originalGetElementById = document.getElementById;
     document.getElementById = jest.fn((id) => {
       if (id === 'startDate') return mockStartDateInput;
       if (id === 'endDate') return mockEndDateInput;
       return originalGetElementById.call(document, id);
     });
-    
+
     render(<TodoContainer />);
 
     const excelButton = screen.getByRole('button', { name: /Excel 내보내기/ });
@@ -715,7 +716,7 @@ describe('TodoContainer Date Range Modal Functionality', () => {
         endDate: '2024-01-31'
       });
     });
-    
+
     // Restore original function
     document.getElementById = originalGetElementById;
   });
@@ -723,10 +724,10 @@ describe('TodoContainer Date Range Modal Functionality', () => {
   test('cancel button closes modal without triggering export', async () => {
     const user = userEvent.setup();
     const Swal = require('sweetalert2');
-    
+
     // Mock user cancelling the modal
     Swal.fire.mockResolvedValueOnce({ isConfirmed: false });
-    
+
     render(<TodoContainer />);
 
     const excelButton = screen.getByRole('button', { name: /Excel 내보내기/ });
@@ -763,8 +764,8 @@ describe('TodoContainer File Download Handler', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    cleanup(); // Clean up any previous renders
-    
+    // Clean up any previous renders
+
     mockApi.mockResolvedValue({
       ok: true,
       json: () => Promise.resolve([])
@@ -773,15 +774,15 @@ describe('TodoContainer File Download Handler', () => {
     // Mock URL methods for file download
     window.URL.createObjectURL = jest.fn(() => 'blob:mock-url');
     window.URL.revokeObjectURL = jest.fn();
-    
+
     // Mock SweetAlert to return cancelled by default
     const Swal = require('sweetalert2');
     Swal.fire.mockResolvedValue({ isConfirmed: false });
   });
 
   afterEach(() => {
-    cleanup(); // Clean up after each test
-    
+    // Clean up after each test
+
     // Restore original functions if they were mocked
     if (document.createElement !== originalCreateElement) {
       document.createElement = originalCreateElement;
@@ -799,7 +800,7 @@ describe('TodoContainer File Download Handler', () => {
   test('successful download flow with correct API call', async () => {
     const user = userEvent.setup();
     const Swal = require('sweetalert2');
-    
+
     // Mock successful API response with blob
     const mockBlob = new Blob(['mock excel data'], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     mockApi.mockResolvedValueOnce({
@@ -814,7 +815,7 @@ describe('TodoContainer File Download Handler', () => {
     Swal.fire
       .mockResolvedValueOnce({ isConfirmed: true, value: { startDate: '2024-01-01', endDate: '2024-01-31' } })
       .mockResolvedValueOnce({ isConfirmed: true });
-    
+
     render(<TodoContainer />);
 
     const excelButton = screen.getByRole('button', { name: /Excel 내보내기/ });
@@ -840,7 +841,7 @@ describe('TodoContainer File Download Handler', () => {
   test('file naming convention follows pattern todos_YYYY-MM-DD_to_YYYY-MM-DD.xlsx', async () => {
     const user = userEvent.setup();
     const Swal = require('sweetalert2');
-    
+
     const mockAnchor = {
       href: '',
       download: '',
@@ -866,7 +867,7 @@ describe('TodoContainer File Download Handler', () => {
     Swal.fire
       .mockResolvedValueOnce({ isConfirmed: true, value: { startDate: '2024-01-01', endDate: '2024-01-31' } })
       .mockResolvedValueOnce({ isConfirmed: true });
-    
+
     render(<TodoContainer />);
 
     const excelButton = screen.getByRole('button', { name: /Excel 내보내기/ });
@@ -876,7 +877,7 @@ describe('TodoContainer File Download Handler', () => {
     await waitFor(() => {
       expect(mockAnchor.download).toBe('todos_2024-01-01_to_2024-01-31.xlsx');
     });
-    
+
     // Restore
     document.createElement = originalCreateElementFn;
   });
@@ -897,7 +898,7 @@ describe('TodoContainer File Download Handler', () => {
     Swal.fire
       .mockResolvedValueOnce({ isConfirmed: true, value: { startDate: '2024-01-01', endDate: '2024-01-31' } })
       .mockResolvedValueOnce({ isConfirmed: true });
-    
+
     render(<TodoContainer />);
 
     const excelButton = screen.getByRole('button', { name: /Excel 내보내기/ });
@@ -923,7 +924,7 @@ describe('TodoContainer File Download Handler', () => {
     });
 
     Swal.fire.mockResolvedValueOnce({ isConfirmed: true, value: { startDate: '2024-01-01', endDate: '2024-01-31' } });
-    
+
     render(<TodoContainer />);
 
     const excelButton = screen.getByRole('button', { name: /Excel 내보내기/ });
@@ -949,7 +950,7 @@ describe('TodoContainer File Download Handler', () => {
     });
 
     Swal.fire.mockResolvedValueOnce({ isConfirmed: true, value: { startDate: '2024-01-01', endDate: '2024-01-31' } });
-    
+
     render(<TodoContainer />);
 
     const excelButton = screen.getByRole('button', { name: /Excel 내보내기/ });
@@ -975,7 +976,7 @@ describe('TodoContainer File Download Handler', () => {
     });
 
     Swal.fire.mockResolvedValueOnce({ isConfirmed: true, value: { startDate: '2024-01-01', endDate: '2024-01-31' } });
-    
+
     render(<TodoContainer />);
 
     const excelButton = screen.getByRole('button', { name: /Excel 내보내기/ });
@@ -999,7 +1000,7 @@ describe('TodoContainer File Download Handler', () => {
     }).mockRejectedValueOnce(networkError);
 
     Swal.fire.mockResolvedValueOnce({ isConfirmed: true, value: { startDate: '2024-01-01', endDate: '2024-01-31' } });
-    
+
     render(<TodoContainer />);
 
     const excelButton = screen.getByRole('button', { name: /Excel 내보내기/ });
@@ -1027,7 +1028,7 @@ describe('TodoContainer File Download Handler', () => {
     Swal.fire
       .mockResolvedValueOnce({ isConfirmed: true, value: { startDate: '2024-01-01', endDate: '2024-01-31' } })
       .mockResolvedValueOnce({ isConfirmed: true });
-    
+
     render(<TodoContainer />);
 
     const excelButton = screen.getByRole('button', { name: /Excel 내보내기/ });
@@ -1048,7 +1049,7 @@ describe('TodoContainer File Download Handler', () => {
 describe('TodoContainer Password Change Integration', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     // Mock successful API responses
     mockApi.mockResolvedValue({
       ok: true,
@@ -1082,14 +1083,14 @@ describe('TodoContainer Password Change Integration', () => {
     // Open user menu and click change password button
     const userMenuIcon = screen.getByRole('button', { name: /사용자 메뉴/ });
     await user.click(userMenuIcon);
-    
+
     const changePasswordButton = screen.getByRole('button', { name: /비밀번호 변경/ });
     await user.click(changePasswordButton);
 
     // Todo list elements should be hidden
     expect(screen.queryByRole('button', { name: /신규/ })).not.toBeInTheDocument();
     expect(screen.queryByTestId('date-picker')).not.toBeInTheDocument();
-    
+
     // Password change form should be visible
     expect(screen.getByTestId('password-change-form')).toBeInTheDocument();
   });
@@ -1104,15 +1105,15 @@ describe('TodoContainer Password Change Integration', () => {
 
     const changePasswordButton = screen.getByRole('button', { name: /비밀번호 변경/ });
     screen.getByRole('button', { name: /프로필 수정/ });
-    
+
     await user.click(changePasswordButton);
 
     // Reopen menu to check button states
     await user.click(userMenuIcon);
-    
+
     const disabledPasswordButton = screen.getByRole('button', { name: /비밀번호 변경/ });
     const disabledProfileButton = screen.getByRole('button', { name: /프로필 수정/ });
-    
+
     expect(disabledPasswordButton).toBeDisabled();
     expect(disabledProfileButton).toBeDisabled();
   });
@@ -1124,7 +1125,7 @@ describe('TodoContainer Password Change Integration', () => {
     // Open user menu and click change password button
     const userMenuIcon = screen.getByRole('button', { name: /사용자 메뉴/ });
     await user.click(userMenuIcon);
-    
+
     const changePasswordButton = screen.getByRole('button', { name: /비밀번호 변경/ });
     await user.click(changePasswordButton);
 
@@ -1143,13 +1144,13 @@ describe('TodoContainer Password Change Integration', () => {
 
   test('password change form can be submitted', async () => {
     const user = userEvent.setup();
-    
+
     render(<TodoContainer />);
 
     // Open user menu and click change password button
     const userMenuIcon = screen.getByRole('button', { name: /사용자 메뉴/ });
     await user.click(userMenuIcon);
-    
+
     const changePasswordButton = screen.getByRole('button', { name: /비밀번호 변경/ });
     await user.click(changePasswordButton);
 

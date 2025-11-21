@@ -1,4 +1,5 @@
-/* eslint-disable testing-library/no-wait-for-multiple-assertions */
+
+
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import TodoList from './TodoList';
@@ -97,7 +98,7 @@ describe('TodoContainer Sorting Behavior', () => {
     });
 
     // Todo 3 (첫 번째 항목)을 완료로 토글 - 체크박스가 아닌 셀 클릭
-    const checkboxCells = screen.getAllByRole('cell').filter(cell => 
+    const checkboxCells = screen.getAllByRole('cell').filter(cell =>
       cell.classList.contains('checkbox-cell')
     );
     await user.click(checkboxCells[0]);
@@ -152,7 +153,7 @@ describe('TodoContainer Sorting Behavior', () => {
     });
 
     // Todo 1 (마지막 항목)을 미완료로 토글 - 셀 클릭
-    const checkboxCells = screen.getAllByRole('cell').filter(cell => 
+    const checkboxCells = screen.getAllByRole('cell').filter(cell =>
       cell.classList.contains('checkbox-cell')
     );
     await user.click(checkboxCells[2]); // Todo 1 체크박스 셀
@@ -205,7 +206,7 @@ describe('TodoContainer Sorting Behavior', () => {
     });
 
     // Todo 2 토글 시도 - 셀 클릭
-    const checkboxCells = screen.getAllByRole('cell').filter(cell => 
+    const checkboxCells = screen.getAllByRole('cell').filter(cell =>
       cell.classList.contains('checkbox-cell')
     );
     await user.click(checkboxCells[0]);

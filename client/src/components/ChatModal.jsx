@@ -4,7 +4,7 @@ import ChatMessage from './ChatMessage';
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
 import './ChatModal.css';
 
-const ChatModal = ({ isOpen, onClose, user, messages, onSendMessage, isLoading, error, onRetry, onClearError, onInputFocus, onInputBlur }) => {
+const ChatModal = ({ isOpen, onClose, messages, onSendMessage, isLoading, error, onRetry, onClearError, onInputFocus, onInputBlur }) => {
   const [inputValue, setInputValue] = useState('');
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);

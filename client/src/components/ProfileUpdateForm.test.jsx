@@ -1,4 +1,4 @@
-/* eslint-disable testing-library/no-wait-for-multiple-assertions */
+
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ProfileUpdateForm from './ProfileUpdateForm';
@@ -114,7 +114,7 @@ describe('ProfileUpdateForm', () => {
 
     const nameInput = screen.getByLabelText(/이름/);
     const submitButton = screen.getByRole('button', { name: /저장/ });
-    
+
     // maxLength를 초과하는 매우 긴 이름을 지우고 추가
     await user.clear(nameInput);
     // maxLength가 200자 이상 입력을 방지하므로, 긴 값을 수동으로 설정하고
@@ -140,7 +140,7 @@ describe('ProfileUpdateForm', () => {
 
     const emailInput = screen.getByLabelText(/이메일/);
     const submitButton = screen.getByRole('button', { name: /저장/ });
-    
+
     // maxLength를 초과하는 매우 긴 이메일을 지우고 추가
     await user.clear(emailInput);
     // maxLength가 100자 이상 입력을 방지하므로, 긴 값을 수동으로 설정하고

@@ -70,20 +70,20 @@ const test1_PageReloadPersistence = async () => {
   console.log('2. Reload the page (F5 or Ctrl+R)');
   console.log('3. Verify theme is still dark');
   console.log('\nAutomated verification:');
-  
+
   const storedTheme = TestUtils.getStoredTheme();
   const currentTheme = TestUtils.getCurrentTheme();
-  
+
   console.log(`Stored theme: ${storedTheme}`);
   console.log(`Current theme: ${currentTheme}`);
-  
+
   const passed = storedTheme === currentTheme;
   TestUtils.logResult(
     'Page reload persistence',
     passed,
     passed ? 'Theme matches stored preference' : 'Theme does not match stored preference'
   );
-  
+
   return passed;
 };
 
@@ -97,20 +97,20 @@ const test2_LogoutLoginPersistence = async () => {
   console.log('4. Login again');
   console.log('5. Verify theme is still dark');
   console.log('\nAutomated verification:');
-  
+
   const storedTheme = TestUtils.getStoredTheme();
   const currentTheme = TestUtils.getCurrentTheme();
-  
+
   console.log(`Stored theme: ${storedTheme}`);
   console.log(`Current theme: ${currentTheme}`);
-  
+
   const passed = storedTheme !== null && storedTheme === currentTheme;
   TestUtils.logResult(
     'Logout/Login persistence',
     passed,
     passed ? 'Theme persists across sessions' : 'Theme does not persist across sessions'
   );
-  
+
   return passed;
 };
 
@@ -126,20 +126,20 @@ const test3_MultipleTabsPersistence = async () => {
   console.log('6. Reload Tab 1');
   console.log('7. Verify Tab 1 now shows light theme');
   console.log('\nAutomated verification:');
-  
+
   const storedTheme = TestUtils.getStoredTheme();
   const currentTheme = TestUtils.getCurrentTheme();
-  
+
   console.log(`Stored theme: ${storedTheme}`);
   console.log(`Current theme: ${currentTheme}`);
-  
+
   const passed = storedTheme === currentTheme;
   TestUtils.logResult(
     'Multiple tabs persistence',
     passed,
     passed ? 'Theme syncs across tabs' : 'Theme does not sync across tabs'
   );
-  
+
   return passed;
 };
 
@@ -152,32 +152,32 @@ const test4_DefaultThemeNoPreference = async () => {
   console.log('1. Clear localStorage');
   console.log('2. Reload the page');
   console.log('3. Verify default theme is applied');
-  
+
   // 현재 저장된 테마 확인
   const beforeClear = TestUtils.getStoredTheme();
   console.log(`Theme before clear: ${beforeClear}`);
-  
+
   // localStorage 초기화
   TestUtils.clearStorage();
-  
+
   const afterClear = TestUtils.getStoredTheme();
   console.log(`Theme after clear: ${afterClear}`);
-  
+
   console.log('\n⚠ Please reload the page now to complete this test');
   console.log('After reload, run: test4_DefaultThemeNoPreference_Verify()');
-  
+
   return null;
 };
 
 const test4_DefaultThemeNoPreference_Verify = () => {
   console.log('\n=== Test 4 Verification: Default theme check ===');
-  
+
   const storedTheme = TestUtils.getStoredTheme();
   const currentTheme = TestUtils.getCurrentTheme();
-  
+
   console.log(`Stored theme: ${storedTheme}`);
   console.log(`Current theme: ${currentTheme}`);
-  
+
   // 기본 테마는 'light' 또는 시스템 선호도에 따라 'dark'일 수 있음
   const passed = currentTheme === 'light' || currentTheme === 'dark';
   TestUtils.logResult(
@@ -185,7 +185,7 @@ const test4_DefaultThemeNoPreference_Verify = () => {
     passed,
     passed ? `Default theme (${currentTheme}) was applied` : 'No theme was applied'
   );
-  
+
   return passed;
 };
 
@@ -203,7 +203,7 @@ const test5_SystemPreferenceDetection = async () => {
   console.log('7. Reload the page');
   console.log('8. Verify app uses light theme');
   console.log('\nAutomated verification:');
-  
+
   // 시스템 선호도 확인
   let systemPreference = 'light';
   try {
@@ -211,17 +211,17 @@ const test5_SystemPreferenceDetection = async () => {
       systemPreference = 'dark';
     }
   } catch (error) {
-    console.warn('System preference detection not supported');
+    console.warn('System preference detection not supported', error);
   }
-  
+
   console.log(`System preference: ${systemPreference}`);
-  
+
   const storedTheme = TestUtils.getStoredTheme();
   const currentTheme = TestUtils.getCurrentTheme();
-  
+
   console.log(`Stored theme: ${storedTheme}`);
   console.log(`Current theme: ${currentTheme}`);
-  
+
   // 저장된 테마가 있으면 그것을 사용해야 함
   if (storedTheme) {
     const passed = currentTheme === storedTheme;
@@ -248,33 +248,33 @@ const runAllAutomatedTests = async () => {
   console.log('\n╔════════════════════════════════════════════════╗');
   console.log('║  Theme Persistence Verification Test Suite    ║');
   console.log('╚════════════════════════════════════════════════╝\n');
-  
+
   const results = [];
-  
+
   results.push(await test1_PageReloadPersistence());
   await TestUtils.wait(500);
-  
+
   results.push(await test2_LogoutLoginPersistence());
   await TestUtils.wait(500);
-  
+
   results.push(await test3_MultipleTabsPersistence());
   await TestUtils.wait(500);
-  
+
   results.push(await test5_SystemPreferenceDetection());
-  
+
   console.log('\n╔════════════════════════════════════════════════╗');
   console.log('║  Test Summary                                  ║');
   console.log('╚════════════════════════════════════════════════╝\n');
-  
+
   const passed = results.filter(r => r === true).length;
   const failed = results.filter(r => r === false).length;
   const skipped = results.filter(r => r === null).length;
-  
+
   console.log(`Total tests: ${results.length}`);
   console.log(`%cPassed: ${passed}`, 'color: green; font-weight: bold');
   console.log(`%cFailed: ${failed}`, 'color: red; font-weight: bold');
   console.log(`Skipped: ${skipped}`);
-  
+
   console.log('\n⚠ Note: Test 4 (Default theme) requires manual execution:');
   console.log('   1. Run: test4_DefaultThemeNoPreference()');
   console.log('   2. Reload the page');
