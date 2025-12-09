@@ -9,18 +9,11 @@ import './loginForm.css';
 
 const SignupForm = ({ onSignupComplete }) => {
   const { api } = useAuthStore();
-  const {
-    validateFiles,
-    formatFileSize,
-    getUploadPolicy,
-  } = useFileUploadValidator();
+  const { validateFiles, formatFileSize, getUploadPolicy } =
+    useFileUploadValidator();
 
-  const {
-    uploadStatus,
-    uploadProgress,
-    uploadErrors,
-    resetUploadState,
-  } = useFileUploadProgress();
+  const { uploadStatus, uploadProgress, uploadErrors, resetUploadState } =
+    useFileUploadProgress();
 
   const [idError, setIdError] = useState('');
   const [passwordError, setPasswordError] = useState('');
@@ -206,7 +199,11 @@ const SignupForm = ({ onSignupComplete }) => {
       return false;
     }
 
-    if (profileImageFile && profileImageValidation && !profileImageValidation.isValid) {
+    if (
+      profileImageFile &&
+      profileImageValidation &&
+      !profileImageValidation.isValid
+    ) {
       setProfileImageError(profileImageValidation.errorMessage);
       return false;
     }
@@ -245,7 +242,7 @@ const SignupForm = ({ onSignupComplete }) => {
               </div>
             `,
             icon: 'success',
-            confirmButtonText: '로그인하기'
+            confirmButtonText: '로그인하기',
           }).then(() => {
             resetUploadState();
             onSignupComplete();
@@ -258,17 +255,21 @@ const SignupForm = ({ onSignupComplete }) => {
         const errorData = await response.json().catch(() => ({}));
 
         if (errorData.errors && Array.isArray(errorData.errors)) {
-          const errorMessages = errorData.errors.map((err) =>
-            `${err.fileName}: ${err.errorMessage}`
-          ).join('<br>');
+          const errorMessages = errorData.errors
+            .map((err) => `${err.fileName}: ${err.errorMessage}`)
+            .join('<br>');
 
           Swal.fire({
             title: '파일 업로드 오류',
             html: errorMessages,
-            icon: 'error'
+            icon: 'error',
           });
         } else {
-          Swal.fire('회원가입 실패', errorData.message || '서버 오류가 발생했습니다.', 'error');
+          Swal.fire(
+            '회원가입 실패',
+            errorData.message || '서버 오류가 발생했습니다.',
+            'error',
+          );
         }
       }
     } catch (error) {
@@ -428,7 +429,8 @@ const SignupForm = ({ onSignupComplete }) => {
               onChange={handleImageChange}
             />
             <small className="form-text text-muted">
-              허용 파일: JPG, JPEG, PNG, GIF, WEBP | 최대 크기: {formatFileSize(getUploadPolicy('profileImage')?.maxSize || 0)}
+              허용 파일: JPG, JPEG, PNG, GIF, WEBP | 최대 크기:{' '}
+              {formatFileSize(getUploadPolicy('profileImage')?.maxSize || 0)}
             </small>
             {profileImageError && (
               <div className="text-danger mt-1">
@@ -437,7 +439,10 @@ const SignupForm = ({ onSignupComplete }) => {
             )}
             {profileImageValidation?.isValid && (
               <div className="text-success mt-1">
-                <small>✓ 유효한 이미지 파일입니다 ({formatFileSize(profileImageFile?.size || 0)})</small>
+                <small>
+                  ✓ 유효한 이미지 파일입니다 (
+                  {formatFileSize(profileImageFile?.size || 0)})
+                </small>
               </div>
             )}
           </div>
@@ -457,14 +462,16 @@ const SignupForm = ({ onSignupComplete }) => {
                     height: '100px',
                     objectFit: 'cover',
                     border: '2px solid #28a745',
-                    borderRadius: '8px'
+                    borderRadius: '8px',
                   }}
                 />
                 <div className="ms-3">
                   <div className="text-success">
                     <small>
-                      <strong>{profileImageFile?.name}</strong><br />
-                      크기: {formatFileSize(profileImageFile?.size || 0)}<br />
+                      <strong>{profileImageFile?.name}</strong>
+                      <br />
+                      크기: {formatFileSize(profileImageFile?.size || 0)}
+                      <br />
                       상태: 검증 완료 ✓
                     </small>
                   </div>
@@ -492,7 +499,10 @@ const SignupForm = ({ onSignupComplete }) => {
                   // 프로필 이미지의 경우 유효성 검사만 재설정
                   if (failedFiles.length > 0) {
                     const file = failedFiles[0];
-                    const validationResults = validateFiles([file], 'profileImage');
+                    const validationResults = validateFiles(
+                      [file],
+                      'profileImage',
+                    );
                     setProfileImageValidation(validationResults[0]);
                   }
                 }}
@@ -522,7 +532,11 @@ const SignupForm = ({ onSignupComplete }) => {
         <div className="row">
           {/* 취소 버튼 */}
           <div className="col-3">
-            <button type="button" className="btn btn-secondary full-width" onClick={onCancel}>
+            <button
+              type="button"
+              className="btn btn-secondary full-width"
+              onClick={onCancel}
+            >
               취소
             </button>
           </div>
@@ -531,13 +545,26 @@ const SignupForm = ({ onSignupComplete }) => {
             <button
               type="submit"
               className="btn btn-primary"
-              disabled={isSubmitting || uploadStatus === 'uploading' || uploadStatus === 'validating'}
+              disabled={
+                isSubmitting ||
+                uploadStatus === 'uploading' ||
+                uploadStatus === 'validating'
+              }
             >
-              {isSubmitting || uploadStatus === 'uploading' || uploadStatus === 'validating' ? (
+              {isSubmitting ||
+              uploadStatus === 'uploading' ||
+              uploadStatus === 'validating' ? (
                 <>
-                  <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                  {uploadStatus === 'uploading' ? '이미지 업로드 중...' :
-                    uploadStatus === 'validating' ? '파일 검증 중...' : '가입 중...'}
+                  <span
+                    className="spinner-border spinner-border-sm me-2"
+                    role="status"
+                    aria-hidden="true"
+                  ></span>
+                  {uploadStatus === 'uploading'
+                    ? '이미지 업로드 중...'
+                    : uploadStatus === 'validating'
+                      ? '파일 검증 중...'
+                      : '가입 중...'}
                 </>
               ) : (
                 '회원가입'

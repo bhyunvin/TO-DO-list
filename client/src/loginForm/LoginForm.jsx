@@ -112,7 +112,11 @@ const LoginForm = () => {
         <button type="submit" className="btn btn-primary mt-3">
           로그인
         </button>
-        <button type="button" className="btn btn-secondary mt-3 full-width" onClick={handleSignup}>
+        <button
+          type="button"
+          className="btn btn-secondary mt-3 full-width"
+          onClick={handleSignup}
+        >
           회원가입
         </button>
       </form>

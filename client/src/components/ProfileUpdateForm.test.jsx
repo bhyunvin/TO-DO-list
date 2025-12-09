@@ -1,21 +1,28 @@
-
-import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  within,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ProfileUpdateForm from './ProfileUpdateForm';
 
 // SweetAlert2 모킹
 jest.mock('sweetalert2', () => ({
-  fire: jest.fn(() => Promise.resolve({ isConfirmed: true }))
+  fire: jest.fn(() => Promise.resolve({ isConfirmed: true })),
 }));
 
 // 파일 업로드 훅 모킹
 jest.mock('../hooks/useFileUploadValidator', () => ({
   useFileUploadValidator: () => ({
-    validateFiles: jest.fn(() => [{ isValid: true, file: {}, fileName: 'test.jpg', fileSize: 1000 }]),
+    validateFiles: jest.fn(() => [
+      { isValid: true, file: {}, fileName: 'test.jpg', fileSize: 1000 },
+    ]),
     formatFileSize: jest.fn((size) => `${size} bytes`),
     getUploadPolicy: jest.fn(() => ({ maxSize: 10485760 })),
-    FILE_VALIDATION_ERRORS: {}
-  })
+    FILE_VALIDATION_ERRORS: {},
+  }),
 }));
 
 jest.mock('../hooks/useFileUploadProgress', () => ({
@@ -24,13 +31,15 @@ jest.mock('../hooks/useFileUploadProgress', () => ({
     uploadProgress: {},
     uploadErrors: [],
     validationResults: [],
-    resetUploadState: jest.fn()
-  })
+    resetUploadState: jest.fn(),
+  }),
 }));
 
 // FileUploadProgress 컴포넌트 모킹
 jest.mock('./FileUploadProgress', () => {
-  const MockFileUploadProgress = () => <div data-testid="file-upload-progress">File Upload Progress</div>;
+  const MockFileUploadProgress = () => (
+    <div data-testid="file-upload-progress">File Upload Progress</div>
+  );
   return MockFileUploadProgress;
 });
 
@@ -38,7 +47,7 @@ describe('ProfileUpdateForm', () => {
   const mockUser = {
     userName: 'Test User',
     userEmail: 'test@example.com',
-    userDescription: 'Test description'
+    userDescription: 'Test description',
   };
 
   const mockOnSave = jest.fn();
@@ -54,7 +63,7 @@ describe('ProfileUpdateForm', () => {
         user={mockUser}
         onSave={mockOnSave}
         onCancel={mockOnCancel}
-      />
+      />,
     );
 
     expect(screen.getByDisplayValue('Test User')).toBeInTheDocument();
@@ -70,7 +79,7 @@ describe('ProfileUpdateForm', () => {
         user={mockUser}
         onSave={mockOnSave}
         onCancel={mockOnCancel}
-      />
+      />,
     );
 
     const nameInput = screen.getByLabelText(/이름/);
@@ -89,7 +98,7 @@ describe('ProfileUpdateForm', () => {
         user={mockUser}
         onSave={mockOnSave}
         onCancel={mockOnCancel}
-      />
+      />,
     );
 
     const emailInput = screen.getByLabelText(/이메일/);
@@ -98,7 +107,9 @@ describe('ProfileUpdateForm', () => {
     await user.tab();
 
     await waitFor(() => {
-      expect(screen.getByText('올바른 이메일 형식을 입력해주세요.')).toBeInTheDocument();
+      expect(
+        screen.getByText('올바른 이메일 형식을 입력해주세요.'),
+      ).toBeInTheDocument();
     });
   });
 
@@ -109,7 +120,7 @@ describe('ProfileUpdateForm', () => {
         user={mockUser}
         onSave={mockOnSave}
         onCancel={mockOnCancel}
-      />
+      />,
     );
 
     const nameInput = screen.getByLabelText(/이름/);
@@ -123,7 +134,9 @@ describe('ProfileUpdateForm', () => {
     fireEvent.blur(nameInput);
 
     await waitFor(() => {
-      expect(screen.getByText('이름은 200자 이내로 입력해주세요.')).toBeInTheDocument();
+      expect(
+        screen.getByText('이름은 200자 이내로 입력해주세요.'),
+      ).toBeInTheDocument();
     });
     expect(submitButton).toBeDisabled();
   });
@@ -135,7 +148,7 @@ describe('ProfileUpdateForm', () => {
         user={mockUser}
         onSave={mockOnSave}
         onCancel={mockOnCancel}
-      />
+      />,
     );
 
     const emailInput = screen.getByLabelText(/이메일/);
@@ -145,11 +158,15 @@ describe('ProfileUpdateForm', () => {
     await user.clear(emailInput);
     // maxLength가 100자 이상 입력을 방지하므로, 긴 값을 수동으로 설정하고
     // 검증을 트리거하여 검증 로직을 테스트합니다
-    fireEvent.change(emailInput, { target: { value: 'a'.repeat(95) + '@test.com' } });
+    fireEvent.change(emailInput, {
+      target: { value: 'a'.repeat(95) + '@test.com' },
+    });
     fireEvent.blur(emailInput);
 
     await waitFor(() => {
-      expect(screen.getByText('이메일은 100자 이내로 입력해주세요.')).toBeInTheDocument();
+      expect(
+        screen.getByText('이메일은 100자 이내로 입력해주세요.'),
+      ).toBeInTheDocument();
     });
     expect(submitButton).toBeDisabled();
   });
@@ -161,7 +178,7 @@ describe('ProfileUpdateForm', () => {
         user={mockUser}
         onSave={mockOnSave}
         onCancel={mockOnCancel}
-      />
+      />,
     );
 
     const fileInput = screen.getByLabelText(/프로필 이미지/);
@@ -179,7 +196,7 @@ describe('ProfileUpdateForm', () => {
         user={mockUser}
         onSave={mockOnSave}
         onCancel={mockOnCancel}
-      />
+      />,
     );
 
     expect(screen.getByText('16/4000 자')).toBeInTheDocument();
@@ -192,7 +209,7 @@ describe('ProfileUpdateForm', () => {
         user={mockUser}
         onSave={mockOnSave}
         onCancel={mockOnCancel}
-      />
+      />,
     );
 
     const descriptionInput = screen.getByLabelText(/추가 설명/);
@@ -209,7 +226,7 @@ describe('ProfileUpdateForm', () => {
         user={mockUser}
         onSave={mockOnSave}
         onCancel={mockOnCancel}
-      />
+      />,
     );
 
     const nameInput = screen.getByLabelText(/이름/);
@@ -233,8 +250,8 @@ describe('ProfileUpdateForm', () => {
           userEmail: 'updated@example.com',
           userDescription: 'Updated description',
           profileImageFile: null,
-          formData: expect.any(FormData)
-        })
+          formData: expect.any(FormData),
+        }),
       );
     });
   });
@@ -246,7 +263,7 @@ describe('ProfileUpdateForm', () => {
         user={mockUser}
         onSave={mockOnSave}
         onCancel={mockOnCancel}
-      />
+      />,
     );
 
     const nameInput = screen.getByLabelText(/이름/);
@@ -269,7 +286,7 @@ describe('ProfileUpdateForm', () => {
         user={mockUser}
         onSave={mockOnSave}
         onCancel={mockOnCancel}
-      />
+      />,
     );
 
     const nameInput = screen.getByLabelText(/이름/);
@@ -290,7 +307,7 @@ describe('ProfileUpdateForm', () => {
         user={mockUser}
         onSave={mockOnSave}
         onCancel={mockOnCancel}
-      />
+      />,
     );
 
     const cancelButton = screen.getByRole('button', { name: /취소/ });
@@ -306,13 +323,15 @@ describe('ProfileUpdateForm', () => {
         onSave={mockOnSave}
         onCancel={mockOnCancel}
         isSubmitting={true}
-      />
+      />,
     );
 
     const submitButton = screen.getByRole('button', { name: /저장 중.../ });
     expect(submitButton).toBeDisabled();
     expect(screen.getByText('저장 중...')).toBeInTheDocument();
-    expect(within(submitButton).getByRole('status', { hidden: true })).toBeInTheDocument();
+    expect(
+      within(submitButton).getByRole('status', { hidden: true }),
+    ).toBeInTheDocument();
   });
 
   test('trims whitespace from form inputs', async () => {
@@ -322,7 +341,7 @@ describe('ProfileUpdateForm', () => {
         user={mockUser}
         onSave={mockOnSave}
         onCancel={mockOnCancel}
-      />
+      />,
     );
 
     const nameInput = screen.getByLabelText(/이름/);
@@ -344,8 +363,8 @@ describe('ProfileUpdateForm', () => {
         expect.objectContaining({
           userName: 'Trimmed Name',
           userEmail: 'trimmed@example.com',
-          userDescription: 'Trimmed description'
-        })
+          userDescription: 'Trimmed description',
+        }),
       );
     });
   });

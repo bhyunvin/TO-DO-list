@@ -138,47 +138,56 @@ npm run lint -- --fix
 ## 주요 컴포넌트
 
 ### App.js
+
 - 메인 애플리케이션 컴포넌트
 - 인증 상태에 따른 라우팅
 - 로그인/회원가입 폼 또는 Todo 리스트 표시
 
 ### LoginForm / SignupForm
+
 - 사용자 인증 폼
 - 입력 유효성 검사
 - 에러 처리 및 알림
 
 ### TodoList
+
 - 날짜별 Todo 관리
 - Todo 생성, 수정, 삭제
 - 날짜 선택기 통합
 
 ### ChatComponent
+
 - AI 채팅 인터페이스
 - 마크다운 렌더링
 - 실시간 메시지 스트리밍
 
 ### FileUploadComponent
+
 - 파일 업로드 인터페이스
 - 진행률 표시
 - 드래그 앤 드롭 지원
 
 ### ProfileComponent
+
 - 사용자 프로필 관리
 - 프로필 이미지 업로드
 - 비밀번호 변경
 
 ### FloatingActionButton
+
 - 플로팅 액션 버튼
 - 채팅 및 프로필 모달 토글
 
 ## 상태 관리
 
 ### authStore (Zustand)
+
 - 사용자 인증 상태
 - 로그인/로그아웃 액션
 - 세션 확인
 
 ### chatStore (Zustand)
+
 - 채팅 메시지 상태
 - 메시지 추가/삭제
 - 채팅 히스토리 관리
@@ -186,9 +195,11 @@ npm run lint -- --fix
 ## API 통신
 
 ### setupProxy.js
+
 개발 환경에서 백엔드 API로의 프록시를 설정합니다.
 
 ### Axios 설정
+
 - 자동 쿠키 전송
 - 에러 처리 인터셉터
 - 응답 데이터 변환
@@ -242,6 +253,7 @@ npm run build
 ### 배포
 
 빌드된 파일을 정적 파일 서버에 배포:
+
 - Nginx
 - Apache
 - AWS S3 + CloudFront
@@ -251,15 +263,18 @@ npm run build
 ## 문제 해결
 
 ### 프록시 오류
+
 - 백엔드 서버가 실행 중인지 확인 (포트 3001)
 - `setupProxy.js` 설정 확인
 
 ### 빌드 오류
+
 - Node 버전 확인 (`nvm use 24`)
 - `node_modules` 삭제 후 재설치
 - 캐시 정리: `npm cache clean --force`
 
 ### 스타일 오류
+
 - Bootstrap CSS가 올바르게 임포트되었는지 확인
 - 브라우저 캐시 정리
 
@@ -415,47 +430,56 @@ npm run lint -- --fix
 ## Main Components
 
 ### App.js
+
 - Main application component
 - Routing based on authentication state
 - Displays login/signup forms or Todo list
 
 ### LoginForm / SignupForm
+
 - User authentication forms
 - Input validation
 - Error handling and notifications
 
 ### TodoList
+
 - Date-based Todo management
 - Todo creation, editing, deletion
 - Date picker integration
 
 ### ChatComponent
+
 - AI chat interface
 - Markdown rendering
 - Real-time message streaming
 
 ### FileUploadComponent
+
 - File upload interface
 - Progress tracking
 - Drag and drop support
 
 ### ProfileComponent
+
 - User profile management
 - Profile image upload
 - Password change
 
 ### FloatingActionButton
+
 - Floating action button
 - Toggle chat and profile modals
 
 ## State Management
 
 ### authStore (Zustand)
+
 - User authentication state
 - Login/logout actions
 - Session verification
 
 ### chatStore (Zustand)
+
 - Chat message state
 - Message add/delete
 - Chat history management
@@ -463,9 +487,11 @@ npm run lint -- --fix
 ## API Communication
 
 ### setupProxy.js
+
 Configures proxy for backend API in development environment.
 
 ### Axios Configuration
+
 - Automatic cookie transmission
 - Error handling interceptors
 - Response data transformation
@@ -519,6 +545,7 @@ Built files are generated in the `build/` directory.
 ### Deployment
 
 Deploy built files to a static file server:
+
 - Nginx
 - Apache
 - AWS S3 + CloudFront
@@ -528,15 +555,18 @@ Deploy built files to a static file server:
 ## Troubleshooting
 
 ### Proxy Error
+
 - Verify backend server is running (port 3001)
 - Check `setupProxy.js` configuration
 
 ### Build Error
+
 - Check Node version (`nvm use 24`)
 - Delete `node_modules` and reinstall
 - Clear cache: `npm cache clean --force`
 
 ### Style Error
+
 - Verify Bootstrap CSS is properly imported
 - Clear browser cache
 

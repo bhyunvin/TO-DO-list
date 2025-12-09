@@ -14,7 +14,7 @@ describe('ThemeToggle', () => {
   beforeEach(() => {
     // 각 테스트 전에 mock 함수 초기화
     mockToggleTheme = jest.fn();
-    
+
     // useThemeStore의 기본 mock 구현
     useThemeStore.mockReturnValue({
       theme: 'light',
@@ -29,27 +29,27 @@ describe('ThemeToggle', () => {
   describe('Component Rendering', () => {
     test('renders with correct label "다크 모드"', () => {
       render(<ThemeToggle />);
-      
+
       expect(screen.getByText('다크 모드')).toBeInTheDocument();
     });
 
     test('renders custom switch component', () => {
       render(<ThemeToggle />);
-      
+
       const switchElement = screen.getByRole('switch');
       expect(switchElement).toBeInTheDocument();
     });
 
     test('has correct aria-label for accessibility', () => {
       render(<ThemeToggle />);
-      
+
       const switchElement = screen.getByRole('switch');
       expect(switchElement).toHaveAttribute('aria-label', '다크 모드 전환');
     });
 
     test('displays sun icon when theme is light', () => {
       render(<ThemeToggle />);
-      
+
       const sunIcon = document.querySelector('.bi-sun-fill');
       expect(sunIcon).toBeInTheDocument();
     });
@@ -61,7 +61,7 @@ describe('ThemeToggle', () => {
       });
 
       render(<ThemeToggle />);
-      
+
       const moonIcon = document.querySelector('.bi-moon-fill');
       expect(moonIcon).toBeInTheDocument();
     });
@@ -75,10 +75,10 @@ describe('ThemeToggle', () => {
       });
 
       render(<ThemeToggle />);
-      
+
       const switchElement = screen.getByRole('switch');
       expect(switchElement).toHaveAttribute('aria-checked', 'false');
-      
+
       const slider = document.querySelector('.theme-toggle-slider');
       expect(slider).toHaveClass('light');
     });
@@ -90,10 +90,10 @@ describe('ThemeToggle', () => {
       });
 
       render(<ThemeToggle />);
-      
+
       const switchElement = screen.getByRole('switch');
       expect(switchElement).toHaveAttribute('aria-checked', 'true');
-      
+
       const slider = document.querySelector('.theme-toggle-slider');
       expect(slider).toHaveClass('dark');
     });
@@ -102,28 +102,32 @@ describe('ThemeToggle', () => {
   describe('Toggle Functionality', () => {
     test('calls toggleTheme when wrapper is clicked', () => {
       render(<ThemeToggle />);
-      
-      const wrapper = screen.getByText('다크 모드').closest('.theme-toggle-wrapper');
+
+      const wrapper = screen
+        .getByText('다크 모드')
+        .closest('.theme-toggle-wrapper');
       fireEvent.click(wrapper);
-      
+
       expect(mockToggleTheme).toHaveBeenCalledTimes(1);
     });
 
     test('calls toggleTheme when switch is clicked', () => {
       render(<ThemeToggle />);
-      
+
       const switchElement = screen.getByRole('switch');
       fireEvent.click(switchElement);
-      
+
       expect(mockToggleTheme).toHaveBeenCalledTimes(1);
     });
 
     test('calls toggleTheme only once when clicked', () => {
       render(<ThemeToggle />);
-      
-      const wrapper = screen.getByText('다크 모드').closest('.theme-toggle-wrapper');
+
+      const wrapper = screen
+        .getByText('다크 모드')
+        .closest('.theme-toggle-wrapper');
       fireEvent.click(wrapper);
-      
+
       expect(mockToggleTheme).toHaveBeenCalledTimes(1);
       expect(mockToggleTheme).toHaveBeenCalledWith();
     });
@@ -132,16 +136,16 @@ describe('ThemeToggle', () => {
   describe('Event Propagation', () => {
     test('stops event propagation when wrapper is clicked', () => {
       const mockParentClick = jest.fn();
-      
+
       const { container } = render(
         <div onClick={mockParentClick}>
           <ThemeToggle />
-        </div>
+        </div>,
       );
-      
+
       const toggleWrapper = container.querySelector('.theme-toggle-wrapper');
       fireEvent.click(toggleWrapper);
-      
+
       // toggleTheme은 호출되어야 함
       expect(mockToggleTheme).toHaveBeenCalledTimes(1);
       // 부모 클릭 핸들러는 호출되지 않아야 함 (이벤트 전파 중지)
@@ -150,16 +154,16 @@ describe('ThemeToggle', () => {
 
     test('prevents dropdown from closing when toggle is clicked', () => {
       const mockDropdownClick = jest.fn();
-      
+
       const { container } = render(
         <div className="dropdown-menu" onClick={mockDropdownClick}>
           <ThemeToggle />
-        </div>
+        </div>,
       );
-      
+
       const toggleWrapper = container.querySelector('.theme-toggle-wrapper');
       fireEvent.click(toggleWrapper);
-      
+
       // 드롭다운 클릭 핸들러는 호출되지 않아야 함
       expect(mockDropdownClick).not.toHaveBeenCalled();
     });
@@ -168,34 +172,34 @@ describe('ThemeToggle', () => {
   describe('Keyboard Accessibility', () => {
     test('switch is focusable', () => {
       render(<ThemeToggle />);
-      
+
       const switchElement = screen.getByRole('switch');
       switchElement.focus();
-      
+
       expect(switchElement).toHaveFocus();
     });
 
     test('can be activated with Space key', async () => {
       const user = userEvent.setup();
       render(<ThemeToggle />);
-      
+
       const switchElement = screen.getByRole('switch');
       switchElement.focus();
-      
+
       await user.keyboard(' ');
-      
+
       expect(mockToggleTheme).toHaveBeenCalledTimes(1);
     });
 
     test('can be activated with Enter key', async () => {
       const user = userEvent.setup();
       render(<ThemeToggle />);
-      
+
       const switchElement = screen.getByRole('switch');
       switchElement.focus();
-      
+
       await user.keyboard('{Enter}');
-      
+
       expect(mockToggleTheme).toHaveBeenCalledTimes(1);
     });
 
@@ -206,15 +210,15 @@ describe('ThemeToggle', () => {
           <button>Previous Element</button>
           <ThemeToggle />
           <button>Next Element</button>
-        </div>
+        </div>,
       );
-      
+
       const switchElement = screen.getByRole('switch');
-      
+
       // Tab으로 스위치로 이동
       await user.tab();
       await user.tab();
-      
+
       expect(switchElement).toHaveFocus();
     });
   });
@@ -222,21 +226,21 @@ describe('ThemeToggle', () => {
   describe('Integration Scenarios', () => {
     test('updates visual state when theme changes', () => {
       const { rerender } = render(<ThemeToggle />);
-      
+
       // 초기 상태: light 테마
       let switchElement = screen.getByRole('switch');
       expect(switchElement).toHaveAttribute('aria-checked', 'false');
       let slider = document.querySelector('.theme-toggle-slider');
       expect(slider).toHaveClass('light');
-      
+
       // 테마를 dark로 변경
       useThemeStore.mockReturnValue({
         theme: 'dark',
         toggleTheme: mockToggleTheme,
       });
-      
+
       rerender(<ThemeToggle />);
-      
+
       // 스위치가 dark 상태로 변경됨
       switchElement = screen.getByRole('switch');
       expect(switchElement).toHaveAttribute('aria-checked', 'true');
@@ -246,31 +250,33 @@ describe('ThemeToggle', () => {
 
     test('handles multiple rapid clicks', () => {
       render(<ThemeToggle />);
-      
-      const wrapper = screen.getByText('다크 모드').closest('.theme-toggle-wrapper');
-      
+
+      const wrapper = screen
+        .getByText('다크 모드')
+        .closest('.theme-toggle-wrapper');
+
       // 빠른 연속 클릭
       fireEvent.click(wrapper);
       fireEvent.click(wrapper);
       fireEvent.click(wrapper);
-      
+
       expect(mockToggleTheme).toHaveBeenCalledTimes(3);
     });
 
     test('maintains accessibility attributes across theme changes', () => {
       const { rerender } = render(<ThemeToggle />);
-      
+
       let switchElement = screen.getByRole('switch');
       expect(switchElement).toHaveAttribute('aria-label', '다크 모드 전환');
-      
+
       // 테마 변경
       useThemeStore.mockReturnValue({
         theme: 'dark',
         toggleTheme: mockToggleTheme,
       });
-      
+
       rerender(<ThemeToggle />);
-      
+
       switchElement = screen.getByRole('switch');
       expect(switchElement).toHaveAttribute('aria-label', '다크 모드 전환');
     });
@@ -279,24 +285,24 @@ describe('ThemeToggle', () => {
   describe('Component Structure', () => {
     test('renders with theme-toggle-wrapper class', () => {
       const { container } = render(<ThemeToggle />);
-      
+
       const toggleWrapper = container.querySelector('.theme-toggle-wrapper');
       expect(toggleWrapper).toBeInTheDocument();
     });
 
     test('renders with theme-toggle-switch class', () => {
       const { container } = render(<ThemeToggle />);
-      
+
       const toggleSwitch = container.querySelector('.theme-toggle-switch');
       expect(toggleSwitch).toBeInTheDocument();
     });
 
     test('label is displayed alongside switch', () => {
       render(<ThemeToggle />);
-      
+
       const label = screen.getByText('다크 모드');
       const switchElement = screen.getByRole('switch');
-      
+
       // label과 switch가 모두 렌더링되어 있는지 확인
       expect(label).toBeInTheDocument();
       expect(switchElement).toBeInTheDocument();
@@ -304,7 +310,7 @@ describe('ThemeToggle', () => {
 
     test('renders slider with correct initial class', () => {
       const { container } = render(<ThemeToggle />);
-      
+
       const slider = container.querySelector('.theme-toggle-slider');
       expect(slider).toBeInTheDocument();
       expect(slider).toHaveClass('light');

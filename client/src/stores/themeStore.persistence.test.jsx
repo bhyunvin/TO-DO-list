@@ -1,8 +1,8 @@
 /**
  * 테마 지속성 기능 검증 스크립트
- * 
+ *
  * 이 스크립트는 브라우저 콘솔에서 실행하여 테마 지속성 기능을 수동으로 검증합니다.
- * 
+ *
  * 사용 방법:
  * 1. 애플리케이션을 실행합니다 (npm start)
  * 2. 브라우저 개발자 도구를 엽니다 (F12)
@@ -42,7 +42,7 @@ const TestUtils = {
   setTheme: (theme) => {
     const stored = {
       state: { theme },
-      version: 0
+      version: 0,
     };
     localStorage.setItem('theme-storage', JSON.stringify(stored));
     console.log(`✓ Theme set to: ${theme}`);
@@ -51,7 +51,9 @@ const TestUtils = {
   // 결과 출력
   logResult: (testName, passed, message) => {
     const icon = passed ? '✓' : '✗';
-    const style = passed ? 'color: green; font-weight: bold' : 'color: red; font-weight: bold';
+    const style = passed
+      ? 'color: green; font-weight: bold'
+      : 'color: red; font-weight: bold';
     console.log(`%c${icon} ${testName}`, style);
     if (message) {
       console.log(`  ${message}`);
@@ -59,7 +61,7 @@ const TestUtils = {
   },
 
   // 대기 함수
-  wait: (ms) => new Promise(resolve => setTimeout(resolve, ms))
+  wait: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
 };
 
 // 테스트 1: 페이지 새로고침 후 테마 지속성
@@ -81,7 +83,9 @@ const test1_PageReloadPersistence = async () => {
   TestUtils.logResult(
     'Page reload persistence',
     passed,
-    passed ? 'Theme matches stored preference' : 'Theme does not match stored preference'
+    passed
+      ? 'Theme matches stored preference'
+      : 'Theme does not match stored preference',
   );
 
   return passed;
@@ -108,7 +112,9 @@ const test2_LogoutLoginPersistence = async () => {
   TestUtils.logResult(
     'Logout/Login persistence',
     passed,
-    passed ? 'Theme persists across sessions' : 'Theme does not persist across sessions'
+    passed
+      ? 'Theme persists across sessions'
+      : 'Theme does not persist across sessions',
   );
 
   return passed;
@@ -137,7 +143,7 @@ const test3_MultipleTabsPersistence = async () => {
   TestUtils.logResult(
     'Multiple tabs persistence',
     passed,
-    passed ? 'Theme syncs across tabs' : 'Theme does not sync across tabs'
+    passed ? 'Theme syncs across tabs' : 'Theme does not sync across tabs',
   );
 
   return passed;
@@ -147,7 +153,9 @@ const test3_MultipleTabsPersistence = async () => {
 const test4_DefaultThemeNoPreference = async () => {
   console.log('\n=== Test 4: Default theme when no preference exists ===');
   console.log('This test will clear localStorage and reload the page.');
-  console.log('Run this test in a new incognito/private window for best results.');
+  console.log(
+    'Run this test in a new incognito/private window for best results.',
+  );
   console.log('\nSteps:');
   console.log('1. Clear localStorage');
   console.log('2. Reload the page');
@@ -183,7 +191,9 @@ const test4_DefaultThemeNoPreference_Verify = () => {
   TestUtils.logResult(
     'Default theme applied',
     passed,
-    passed ? `Default theme (${currentTheme}) was applied` : 'No theme was applied'
+    passed
+      ? `Default theme (${currentTheme}) was applied`
+      : 'No theme was applied',
   );
 
   return passed;
@@ -192,7 +202,9 @@ const test4_DefaultThemeNoPreference_Verify = () => {
 // 테스트 5: 시스템 선호도 감지
 const test5_SystemPreferenceDetection = async () => {
   console.log('\n=== Test 5: System preference detection ===');
-  console.log('This test checks if the app respects system dark mode preference.');
+  console.log(
+    'This test checks if the app respects system dark mode preference.',
+  );
   console.log('\nManual steps:');
   console.log('1. Clear localStorage (run TestUtils.clearStorage())');
   console.log('2. Change your OS to dark mode');
@@ -207,7 +219,10 @@ const test5_SystemPreferenceDetection = async () => {
   // 시스템 선호도 확인
   let systemPreference = 'light';
   try {
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    if (
+      window.matchMedia &&
+      window.matchMedia('(prefers-color-scheme: dark)').matches
+    ) {
       systemPreference = 'dark';
     }
   } catch (error) {
@@ -228,7 +243,7 @@ const test5_SystemPreferenceDetection = async () => {
     TestUtils.logResult(
       'System preference (with stored preference)',
       passed,
-      'Stored preference takes precedence over system preference'
+      'Stored preference takes precedence over system preference',
     );
     return passed;
   } else {
@@ -237,7 +252,9 @@ const test5_SystemPreferenceDetection = async () => {
     TestUtils.logResult(
       'System preference (no stored preference)',
       passed,
-      passed ? 'System preference is respected' : 'System preference is not respected'
+      passed
+        ? 'System preference is respected'
+        : 'System preference is not respected',
     );
     return passed;
   }
@@ -266,9 +283,9 @@ const runAllAutomatedTests = async () => {
   console.log('║  Test Summary                                  ║');
   console.log('╚════════════════════════════════════════════════╝\n');
 
-  const passed = results.filter(r => r === true).length;
-  const failed = results.filter(r => r === false).length;
-  const skipped = results.filter(r => r === null).length;
+  const passed = results.filter((r) => r === true).length;
+  const failed = results.filter((r) => r === false).length;
+  const skipped = results.filter((r) => r === null).length;
 
   console.log(`Total tests: ${results.length}`);
   console.log(`%cPassed: ${passed}`, 'color: green; font-weight: bold');
@@ -290,16 +307,24 @@ window.ThemePersistenceTests = {
   test4_DefaultThemeNoPreference_Verify,
   test5_SystemPreferenceDetection,
   runAllAutomatedTests,
-  TestUtils
+  TestUtils,
 };
 
 console.log('\n✓ Theme Persistence Test Suite loaded!');
 console.log('\nAvailable commands:');
-console.log('  ThemePersistenceTests.runAllAutomatedTests() - Run all automated tests');
+console.log(
+  '  ThemePersistenceTests.runAllAutomatedTests() - Run all automated tests',
+);
 console.log('  ThemePersistenceTests.test1_PageReloadPersistence() - Test 1');
 console.log('  ThemePersistenceTests.test2_LogoutLoginPersistence() - Test 2');
 console.log('  ThemePersistenceTests.test3_MultipleTabsPersistence() - Test 3');
-console.log('  ThemePersistenceTests.test4_DefaultThemeNoPreference() - Test 4 (Part 1)');
-console.log('  ThemePersistenceTests.test4_DefaultThemeNoPreference_Verify() - Test 4 (Part 2)');
-console.log('  ThemePersistenceTests.test5_SystemPreferenceDetection() - Test 5');
+console.log(
+  '  ThemePersistenceTests.test4_DefaultThemeNoPreference() - Test 4 (Part 1)',
+);
+console.log(
+  '  ThemePersistenceTests.test4_DefaultThemeNoPreference_Verify() - Test 4 (Part 2)',
+);
+console.log(
+  '  ThemePersistenceTests.test5_SystemPreferenceDetection() - Test 5',
+);
 console.log('  ThemePersistenceTests.TestUtils - Utility functions');

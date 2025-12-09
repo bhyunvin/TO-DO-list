@@ -9,30 +9,28 @@ import FileUploadProgress from './FileUploadProgress';
  * ProfileUpdateForm 컴포넌트
  * 사용자가 이름, 이메일, 설명 및 프로필 이미지를 포함한 프로필 정보를 업데이트할 수 있도록 합니다
  */
-const ProfileUpdateForm = ({ user, onSave, onCancel, isSubmitting = false }) => {
-  const {
-    validateFiles,
-    formatFileSize,
-    getUploadPolicy
-  } = useFileUploadValidator();
+const ProfileUpdateForm = ({
+  user,
+  onSave,
+  onCancel,
+  isSubmitting = false,
+}) => {
+  const { validateFiles, formatFileSize, getUploadPolicy } =
+    useFileUploadValidator();
 
-  const {
-    uploadStatus,
-    uploadProgress,
-    uploadErrors,
-    resetUploadState,
-  } = useFileUploadProgress();
+  const { uploadStatus, uploadProgress, uploadErrors, resetUploadState } =
+    useFileUploadProgress();
 
   // 폼 상태
   const [userName, setUserName] = useState(user?.userName || '');
   const [userEmail, setUserEmail] = useState(user?.userEmail || '');
 
-  const [userDescription, setUserDescription] = useState(user?.userDescription || '');
+  const [userDescription, setUserDescription] = useState(
+    user?.userDescription || '',
+  );
   // API Key는 보안상 서버에서 내려주지 않거나 마스킹되어 내려올 수 있음.
   // 여기서는 수정 시에만 입력받는 것으로 처리하거나, 기존 값이 있으면 placeholder로 표시
   const [aiApiKey, setAiApiKey] = useState('');
-
-
 
   // 프로필 이미지 상태
   const [profileImage, setProfileImage] = useState(null);
@@ -56,7 +54,7 @@ const ProfileUpdateForm = ({ user, onSave, onCancel, isSubmitting = false }) => 
   /**
    * 프로필 이미지 파일 선택 및 유효성 검사 처리
    */
-  const handleImageChange = e => {
+  const handleImageChange = (e) => {
     const file = e.target.files[0];
 
     // 이전 상태 초기화
@@ -93,7 +91,7 @@ const ProfileUpdateForm = ({ user, onSave, onCancel, isSubmitting = false }) => 
   /**
    * 유효성 검사와 함께 이름 입력 변경 처리
    */
-  const handleNameChange = e => {
+  const handleNameChange = (e) => {
     const nameValue = e.target.value;
     setUserName(nameValue);
 
@@ -110,7 +108,7 @@ const ProfileUpdateForm = ({ user, onSave, onCancel, isSubmitting = false }) => 
   /**
    * 유효성 검사와 함께 이메일 입력 변경 처리
    */
-  const handleEmailChange = e => {
+  const handleEmailChange = (e) => {
     const emailValue = e.target.value;
     setUserEmail(emailValue);
 
@@ -129,7 +127,7 @@ const ProfileUpdateForm = ({ user, onSave, onCancel, isSubmitting = false }) => 
   /**
    * 설명 입력 변경 처리
    */
-  const handleDescriptionChange = e => {
+  const handleDescriptionChange = (e) => {
     const descriptionValue = e.target.value;
     setUserDescription(descriptionValue);
   };
@@ -166,7 +164,11 @@ const ProfileUpdateForm = ({ user, onSave, onCancel, isSubmitting = false }) => 
     }
 
     // 프로필 이미지가 제공된 경우 유효성 검사
-    if (profileImageFile && profileImageValidation && !profileImageValidation.isValid) {
+    if (
+      profileImageFile &&
+      profileImageValidation &&
+      !profileImageValidation.isValid
+    ) {
       setProfileImageError(profileImageValidation.errorMessage);
       isValid = false;
     }
@@ -182,7 +184,7 @@ const ProfileUpdateForm = ({ user, onSave, onCancel, isSubmitting = false }) => 
   /**
    * API 통합과 함께 폼 제출 처리
    */
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     // 폼 유효성 검사
@@ -213,7 +215,7 @@ const ProfileUpdateForm = ({ user, onSave, onCancel, isSubmitting = false }) => 
       userDescription: userDescription.trim(),
       aiApiKey: aiApiKey.trim(),
       profileImageFile,
-      formData // API 호출을 위한 FormData 포함
+      formData, // API 호출을 위한 FormData 포함
     };
 
     try {
@@ -247,7 +249,7 @@ const ProfileUpdateForm = ({ user, onSave, onCancel, isSubmitting = false }) => 
         cancelButtonColor: '#6C757D',
         confirmButtonText: '확인',
         cancelButtonText: '계속 수정',
-      }).then(result => {
+      }).then((result) => {
         if (result.isConfirmed) {
           resetUploadState();
           onCancel();
@@ -319,7 +321,8 @@ const ProfileUpdateForm = ({ user, onSave, onCancel, isSubmitting = false }) => 
               onChange={handleImageChange}
             />
             <small className="form-text text-muted">
-              허용 파일: JPG, JPEG, PNG, GIF, WEBP | 최대 크기: {formatFileSize(getUploadPolicy('profileImage')?.maxSize || 0)}
+              허용 파일: JPG, JPEG, PNG, GIF, WEBP | 최대 크기:{' '}
+              {formatFileSize(getUploadPolicy('profileImage')?.maxSize || 0)}
             </small>
             {profileImageError && (
               <div className="invalid-feedback d-block">
@@ -328,7 +331,8 @@ const ProfileUpdateForm = ({ user, onSave, onCancel, isSubmitting = false }) => 
             )}
             {profileImageValidation?.isValid && (
               <div className="valid-feedback d-block">
-                ✓ 유효한 이미지 파일입니다 ({formatFileSize(profileImageFile?.size || 0)})
+                ✓ 유효한 이미지 파일입니다 (
+                {formatFileSize(profileImageFile?.size || 0)})
               </div>
             )}
           </div>
@@ -348,8 +352,10 @@ const ProfileUpdateForm = ({ user, onSave, onCancel, isSubmitting = false }) => 
                 <div className="ms-3">
                   <div className="text-success">
                     <small>
-                      <strong>{profileImageFile?.name}</strong><br />
-                      크기: {formatFileSize(profileImageFile?.size || 0)}<br />
+                      <strong>{profileImageFile?.name}</strong>
+                      <br />
+                      크기: {formatFileSize(profileImageFile?.size || 0)}
+                      <br />
                       상태: 검증 완료 ✓
                     </small>
                   </div>
@@ -373,11 +379,14 @@ const ProfileUpdateForm = ({ user, onSave, onCancel, isSubmitting = false }) => 
                 showValidation={false}
                 showProgress={true}
                 showDetailedStatus={true}
-                onRetryUpload={async failedFiles => {
+                onRetryUpload={async (failedFiles) => {
                   // 프로필 이미지의 경우 유효성 검사만 재설정
                   if (failedFiles.length > 0) {
                     const file = failedFiles[0];
-                    const validationResults = validateFiles([file], 'profileImage');
+                    const validationResults = validateFiles(
+                      [file],
+                      'profileImage',
+                    );
                     setProfileImageValidation(validationResults[0]);
                   }
                 }}
@@ -402,7 +411,8 @@ const ProfileUpdateForm = ({ user, onSave, onCancel, isSubmitting = false }) => 
               autoComplete="off"
             />
             <small className="form-text text-muted">
-              Google AI Studio에서 발급받은 API Key를 입력해주세요. 입력하지 않으면 기존 키가 유지됩니다.
+              Google AI Studio에서 발급받은 API Key를 입력해주세요. 입력하지
+              않으면 기존 키가 유지됩니다.
             </small>
           </div>
         </div>
@@ -437,7 +447,11 @@ const ProfileUpdateForm = ({ user, onSave, onCancel, isSubmitting = false }) => 
               type="button"
               className="btn btn-secondary w-100"
               onClick={handleCancel}
-              disabled={isSubmitting || uploadStatus === 'uploading' || uploadStatus === 'validating'}
+              disabled={
+                isSubmitting ||
+                uploadStatus === 'uploading' ||
+                uploadStatus === 'validating'
+              }
             >
               취소
             </button>
@@ -446,13 +460,29 @@ const ProfileUpdateForm = ({ user, onSave, onCancel, isSubmitting = false }) => 
             <button
               type="submit"
               className="btn btn-primary w-100"
-              disabled={isSubmitting || uploadStatus === 'uploading' || uploadStatus === 'validating' || nameError || emailError || profileImageError}
+              disabled={
+                isSubmitting ||
+                uploadStatus === 'uploading' ||
+                uploadStatus === 'validating' ||
+                nameError ||
+                emailError ||
+                profileImageError
+              }
             >
-              {isSubmitting || uploadStatus === 'uploading' || uploadStatus === 'validating' ? (
+              {isSubmitting ||
+              uploadStatus === 'uploading' ||
+              uploadStatus === 'validating' ? (
                 <>
-                  <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                  {uploadStatus === 'uploading' ? '이미지 업로드 중...' :
-                    uploadStatus === 'validating' ? '파일 검증 중...' : '저장 중...'}
+                  <span
+                    className="spinner-border spinner-border-sm me-2"
+                    role="status"
+                    aria-hidden="true"
+                  ></span>
+                  {uploadStatus === 'uploading'
+                    ? '이미지 업로드 중...'
+                    : uploadStatus === 'validating'
+                      ? '파일 검증 중...'
+                      : '저장 중...'}
                 </>
               ) : (
                 '저장'

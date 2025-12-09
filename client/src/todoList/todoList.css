@@ -14,7 +14,7 @@
   --color-primary-dark: var(--color-primary-dark);
   --color-danger: var(--color-danger);
   --color-danger-dark: var(--color-danger-dark);
-  
+
   /* 레이아웃 및 스타일 변수 (테마 독립적) */
   --border-radius-default: 8px;
   --border-radius-small: 4px;
@@ -425,7 +425,7 @@
   background-color: var(--bg-tertiary);
 }
 
-.checkbox-cell input[type="checkbox"] {
+.checkbox-cell input[type='checkbox'] {
   pointer-events: none;
 }
 
@@ -465,31 +465,49 @@
     transform: translateZ(0);
     max-height: 50vh;
   }
-  
+
   .todo-container .todo-list {
     min-width: var(--table-min-width-mobile);
     width: auto;
     table-layout: auto;
   }
-  
+
   .todo-container {
     overflow: visible;
     overflow-x: visible;
   }
-  
+
   .todo-list th,
   .todo-list td {
     white-space: nowrap;
     min-width: fit-content;
   }
-  
+
   /* 특정 컬럼 너비 설정 */
-  .todo-list th:nth-child(1), .todo-list td:nth-child(1) { min-width: 60px; }
-  .todo-list th:nth-child(2), .todo-list td:nth-child(2) { min-width: 60px; }
-  .todo-list th:nth-child(3), .todo-list td:nth-child(3) { min-width: 200px; }
-  .todo-list th:nth-child(4), .todo-list td:nth-child(4) { min-width: 140px; }
-  .todo-list th:nth-child(5), .todo-list td:nth-child(5) { min-width: 150px; }
-  .todo-list th:nth-child(6), .todo-list td:nth-child(6) { min-width: 80px; }
+  .todo-list th:nth-child(1),
+  .todo-list td:nth-child(1) {
+    min-width: 60px;
+  }
+  .todo-list th:nth-child(2),
+  .todo-list td:nth-child(2) {
+    min-width: 60px;
+  }
+  .todo-list th:nth-child(3),
+  .todo-list td:nth-child(3) {
+    min-width: 200px;
+  }
+  .todo-list th:nth-child(4),
+  .todo-list td:nth-child(4) {
+    min-width: 140px;
+  }
+  .todo-list th:nth-child(5),
+  .todo-list td:nth-child(5) {
+    min-width: 150px;
+  }
+  .todo-list th:nth-child(6),
+  .todo-list td:nth-child(6) {
+    min-width: 80px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -497,7 +515,6 @@
     min-width: var(--table-min-width-small);
   }
 }
-
 
 /* ============================================
    다크 모드 명시적 오버라이드

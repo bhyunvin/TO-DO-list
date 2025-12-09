@@ -1,5 +1,3 @@
-
-
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import TodoList from './TodoList';
@@ -67,9 +65,27 @@ describe('TodoContainer Sorting Behavior', () => {
 
     // 초기 todos: 모두 미완료
     const initialTodos = [
-      { todoSeq: 3, todoContent: 'Todo 3', completeDtm: null, todoNote: '', todoDate: '2025-11-13' },
-      { todoSeq: 2, todoContent: 'Todo 2', completeDtm: null, todoNote: '', todoDate: '2025-11-13' },
-      { todoSeq: 1, todoContent: 'Todo 1', completeDtm: null, todoNote: '', todoDate: '2025-11-13' },
+      {
+        todoSeq: 3,
+        todoContent: 'Todo 3',
+        completeDtm: null,
+        todoNote: '',
+        todoDate: '2025-11-13',
+      },
+      {
+        todoSeq: 2,
+        todoContent: 'Todo 2',
+        completeDtm: null,
+        todoNote: '',
+        todoDate: '2025-11-13',
+      },
+      {
+        todoSeq: 1,
+        todoContent: 'Todo 1',
+        completeDtm: null,
+        todoNote: '',
+        todoDate: '2025-11-13',
+      },
     ];
 
     // 초기 fetch 모킹
@@ -98,9 +114,9 @@ describe('TodoContainer Sorting Behavior', () => {
     });
 
     // Todo 3 (첫 번째 항목)을 완료로 토글 - 체크박스가 아닌 셀 클릭
-    const checkboxCells = screen.getAllByRole('cell').filter(cell =>
-      cell.classList.contains('checkbox-cell')
-    );
+    const checkboxCells = screen
+      .getAllByRole('cell')
+      .filter((cell) => cell.classList.contains('checkbox-cell'));
     await user.click(checkboxCells[0]);
 
     // 낙관적 업데이트 및 정렬 대기
@@ -122,9 +138,27 @@ describe('TodoContainer Sorting Behavior', () => {
 
     // 초기 todos: 하나는 완료, 두 개는 미완료
     const initialTodos = [
-      { todoSeq: 3, todoContent: 'Todo 3', completeDtm: null, todoNote: '', todoDate: '2025-11-13' },
-      { todoSeq: 2, todoContent: 'Todo 2', completeDtm: null, todoNote: '', todoDate: '2025-11-13' },
-      { todoSeq: 1, todoContent: 'Todo 1', completeDtm: '2025-11-13T10:00:00Z', todoNote: '', todoDate: '2025-11-13' },
+      {
+        todoSeq: 3,
+        todoContent: 'Todo 3',
+        completeDtm: null,
+        todoNote: '',
+        todoDate: '2025-11-13',
+      },
+      {
+        todoSeq: 2,
+        todoContent: 'Todo 2',
+        completeDtm: null,
+        todoNote: '',
+        todoDate: '2025-11-13',
+      },
+      {
+        todoSeq: 1,
+        todoContent: 'Todo 1',
+        completeDtm: '2025-11-13T10:00:00Z',
+        todoNote: '',
+        todoDate: '2025-11-13',
+      },
     ];
 
     // 초기 fetch 모킹
@@ -153,9 +187,9 @@ describe('TodoContainer Sorting Behavior', () => {
     });
 
     // Todo 1 (마지막 항목)을 미완료로 토글 - 셀 클릭
-    const checkboxCells = screen.getAllByRole('cell').filter(cell =>
-      cell.classList.contains('checkbox-cell')
-    );
+    const checkboxCells = screen
+      .getAllByRole('cell')
+      .filter((cell) => cell.classList.contains('checkbox-cell'));
     await user.click(checkboxCells[2]); // Todo 1 체크박스 셀
 
     // 낙관적 업데이트 및 정렬 대기
@@ -177,8 +211,20 @@ describe('TodoContainer Sorting Behavior', () => {
 
     // 초기 todos
     const initialTodos = [
-      { todoSeq: 2, todoContent: 'Todo 2', completeDtm: null, todoNote: '', todoDate: '2025-11-13' },
-      { todoSeq: 1, todoContent: 'Todo 1', completeDtm: null, todoNote: '', todoDate: '2025-11-13' },
+      {
+        todoSeq: 2,
+        todoContent: 'Todo 2',
+        completeDtm: null,
+        todoNote: '',
+        todoDate: '2025-11-13',
+      },
+      {
+        todoSeq: 1,
+        todoContent: 'Todo 1',
+        completeDtm: null,
+        todoNote: '',
+        todoDate: '2025-11-13',
+      },
     ];
 
     // 초기 fetch 모킹
@@ -206,9 +252,9 @@ describe('TodoContainer Sorting Behavior', () => {
     });
 
     // Todo 2 토글 시도 - 셀 클릭
-    const checkboxCells = screen.getAllByRole('cell').filter(cell =>
-      cell.classList.contains('checkbox-cell')
-    );
+    const checkboxCells = screen
+      .getAllByRole('cell')
+      .filter((cell) => cell.classList.contains('checkbox-cell'));
     await user.click(checkboxCells[0]);
 
     // 롤백 대기

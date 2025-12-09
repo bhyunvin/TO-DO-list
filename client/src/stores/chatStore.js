@@ -18,10 +18,12 @@ const ERROR_MESSAGES = {
   API_ERROR: 'AI 서비스에 일시적인 문제가 발생했습니다.',
   AUTH_ERROR: '로그인이 필요합니다.',
   RATE_LIMIT: 'AI 서비스 요청 한도를 초과했습니다. 잠시 후 다시 시도해주세요.',
-  SERVER_ERROR: 'AI 서비스에 일시적인 문제가 발생했습니다. 잠시 후 다시 시도해주세요.',
+  SERVER_ERROR:
+    'AI 서비스에 일시적인 문제가 발생했습니다. 잠시 후 다시 시도해주세요.',
   TIMEOUT_ERROR: '요청 시간이 초과되었습니다. 다시 시도해주세요.',
   GENERIC_ERROR: '문제가 발생했습니다. 다시 시도해주세요.',
-  RETRY_EXHAUSTED: '여러 번 시도했지만 실패했습니다. 잠시 후 다시 시도해주세요.'
+  RETRY_EXHAUSTED:
+    '여러 번 시도했지만 실패했습니다. 잠시 후 다시 시도해주세요.',
 };
 
 export const useChatStore = create(
@@ -59,14 +61,18 @@ export const useChatStore = create(
             // API Key가 없으면 에러 메시지 설정하고 메시지 추가 안 함 (또는 시스템 메시지로 경고)
             // 여기서는 에러 상태로 설정하여 UI에서 처리하도록 유도하거나, 경고 메시지 추가
             set((state) => ({
-              messages: [...state.messages, {
-                id: `${Date.now()}-system-warning`,
-                content: "API Key가 설정되지 않았습니다. 프로필에서 API Key를 등록해주세요.",
-                isUser: false,
-                timestamp: new Date(),
-                isHtml: false
-              }],
-              isLoading: false
+              messages: [
+                ...state.messages,
+                {
+                  id: `${Date.now()}-system-warning`,
+                  content:
+                    'API Key가 설정되지 않았습니다. 프로필에서 API Key를 등록해주세요.',
+                  isUser: false,
+                  timestamp: new Date(),
+                  isHtml: false,
+                },
+              ],
+              isLoading: false,
             }));
             return;
           }
@@ -142,7 +148,7 @@ export const useChatStore = create(
           isUser: false,
           timestamp: new Date(),
           isHtml: true, // HTML로 렌더링
-          type: hasApiKey ? 'welcome' : 'warning' // 메시지 타입 구분 (선택 사항)
+          type: hasApiKey ? 'welcome' : 'warning', // 메시지 타입 구분 (선택 사항)
         };
 
         set((state) => ({
@@ -155,15 +161,19 @@ export const useChatStore = create(
         set((state) => ({
           isLoading: loading,
           requestInProgress: loading,
-          lastRequestTime: lastRequestTime !== undefined ? lastRequestTime : state.lastRequestTime
+          lastRequestTime:
+            lastRequestTime !== undefined
+              ? lastRequestTime
+              : state.lastRequestTime,
         }));
       },
 
       setError: (error, errorType = 'GENERIC_ERROR') => {
-        const errorMessage = ERROR_MESSAGES[errorType] || error || ERROR_MESSAGES.GENERIC_ERROR;
+        const errorMessage =
+          ERROR_MESSAGES[errorType] || error || ERROR_MESSAGES.GENERIC_ERROR;
         set({
           error: errorMessage,
-          isLoading: false
+          isLoading: false,
         });
       },
 
@@ -174,7 +184,7 @@ export const useChatStore = create(
           retryCount: 0,
           lastFailedMessage: null,
           requestInProgress: false,
-          lastRequestTime: 0
+          lastRequestTime: 0,
         });
 
         // 메시지를 지운 후 환영 메시지 다시 추가
@@ -237,7 +247,7 @@ export const useChatStore = create(
         const now = Date.now();
         const minInterval = 1000; // 요청 간 최소 1초 간격
 
-        return !requestInProgress && (now - lastRequestTime) >= minInterval;
+        return !requestInProgress && now - lastRequestTime >= minInterval;
       },
 
       // 재시도 기능
@@ -248,13 +258,15 @@ export const useChatStore = create(
         return lastFailedMessage;
       },
 
-      incrementRetryCount: () => set((state) => ({ retryCount: state.retryCount + 1 })),
+      incrementRetryCount: () =>
+        set((state) => ({ retryCount: state.retryCount + 1 })),
 
-      resetRetryState: () => set({
-        retryCount: 0,
-        lastFailedMessage: null,
-        requestInProgress: false
-      }),
+      resetRetryState: () =>
+        set({
+          retryCount: 0,
+          lastFailedMessage: null,
+          requestInProgress: false,
+        }),
 
       // 컨텍스트를 위한 최근 메시지 가져오기 헬퍼
       getRecentMessages: (count = 10) => {
@@ -264,9 +276,10 @@ export const useChatStore = create(
 
       // Todo 목록 새로고침 트리거
       todoRefreshTrigger: 0,
-      triggerTodoRefresh: () => set((state) => ({
-        todoRefreshTrigger: state.todoRefreshTrigger + 1
-      })),
+      triggerTodoRefresh: () =>
+        set((state) => ({
+          todoRefreshTrigger: state.todoRefreshTrigger + 1,
+        })),
     }),
     {
       name: 'chat-storage', // sessionStorage 키 이름
@@ -275,6 +288,6 @@ export const useChatStore = create(
       partialize: (state) => ({
         messages: state.messages,
       }),
-    }
-  )
+    },
+  ),
 );

@@ -5,7 +5,7 @@ import TodoContainer from './TodoList';
 
 // Mock SweetAlert2
 jest.mock('sweetalert2', () => ({
-  fire: jest.fn(() => Promise.resolve({ isConfirmed: true }))
+  fire: jest.fn(() => Promise.resolve({ isConfirmed: true })),
 }));
 
 // Mock auth store
@@ -15,22 +15,24 @@ jest.mock('../authStore/authStore', () => ({
     user: {
       userName: 'Test User',
       userEmail: 'test@example.com',
-      userDescription: 'Test description'
+      userDescription: 'Test description',
     },
     login: jest.fn(),
     logout: jest.fn(),
-    api: mockApi
-  })
+    api: mockApi,
+  }),
 }));
 
 // Mock file upload hooks
 jest.mock('../hooks/useFileUploadValidator', () => ({
   useFileUploadValidator: () => ({
-    validateFiles: jest.fn(() => [{ isValid: true, file: {}, fileName: 'test.jpg', fileSize: 1000 }]),
+    validateFiles: jest.fn(() => [
+      { isValid: true, file: {}, fileName: 'test.jpg', fileSize: 1000 },
+    ]),
     formatFileSize: jest.fn((size) => `${size} bytes`),
     getUploadPolicy: jest.fn(() => ({ maxSize: 10485760, maxCount: 5 })),
-    FILE_VALIDATION_ERRORS: {}
-  })
+    FILE_VALIDATION_ERRORS: {},
+  }),
 }));
 
 jest.mock('../hooks/useFileUploadProgress', () => ({
@@ -39,26 +41,32 @@ jest.mock('../hooks/useFileUploadProgress', () => ({
     uploadProgress: {},
     uploadErrors: [],
     validationResults: [],
-    resetUploadState: jest.fn()
-  })
+    resetUploadState: jest.fn(),
+  }),
 }));
 
 // Mock components
 jest.mock('../components/FileUploadProgress', () => {
-  const MockFileUploadProgress = () => <div data-testid="file-upload-progress">File Upload Progress</div>;
+  const MockFileUploadProgress = () => (
+    <div data-testid="file-upload-progress">File Upload Progress</div>
+  );
   return MockFileUploadProgress;
 });
 
 jest.mock('../components/ProfileUpdateForm', () => {
   const MockProfileUpdateForm = ({ onCancel }) => (
-    <div data-testid="profile-update-form"><button onClick={onCancel}>Cancel</button></div>
+    <div data-testid="profile-update-form">
+      <button onClick={onCancel}>Cancel</button>
+    </div>
   );
   return MockProfileUpdateForm;
 });
 
 jest.mock('../components/PasswordChangeForm', () => {
   const MockPasswordChangeForm = ({ onCancel }) => (
-    <div data-testid="password-change-form"><button onClick={onCancel}>Cancel</button></div>
+    <div data-testid="password-change-form">
+      <button onClick={onCancel}>Cancel</button>
+    </div>
   );
   return MockPasswordChangeForm;
 });
@@ -79,35 +87,43 @@ describe('TodoContainer Checkbox Cell Click Functionality', () => {
     jest.clearAllMocks();
     const Swal = require('sweetalert2');
     Swal.fire.mockResolvedValue({ isConfirmed: true });
-    
+
     // 초기 todos fetch 모킹
     mockApi.mockResolvedValue({
       ok: true,
-      json: () => Promise.resolve([
-        {
-          todoSeq: 1,
-          todoContent: 'Test todo 1',
-          todoNote: 'Note 1',
-          completeDtm: null,
-          todoDate: '2024-01-01'
-        }
-      ])
+      json: () =>
+        Promise.resolve([
+          {
+            todoSeq: 1,
+            todoContent: 'Test todo 1',
+            todoNote: 'Note 1',
+            completeDtm: null,
+            todoDate: '2024-01-01',
+          },
+        ]),
     });
   });
 
   test('clicking the checkbox cell toggles the todo completion', async () => {
     const user = userEvent.setup();
-    
+
     mockApi
       .mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve([
-          { todoSeq: 1, todoContent: 'Test todo 1', todoNote: 'Note 1', completeDtm: null, todoDate: '2024-01-01' }
-        ])
+        json: () =>
+          Promise.resolve([
+            {
+              todoSeq: 1,
+              todoContent: 'Test todo 1',
+              todoNote: 'Note 1',
+              completeDtm: null,
+              todoDate: '2024-01-01',
+            },
+          ]),
       })
       .mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({})
+        json: () => Promise.resolve({}),
       });
 
     render(<TodoContainer />);
@@ -119,7 +135,7 @@ describe('TodoContainer Checkbox Cell Click Functionality', () => {
 
     const checkbox = screen.getAllByRole('checkbox')[0];
     const checkboxCell = checkbox.closest('td');
-    
+
     expect(checkbox).not.toBeChecked();
     expect(checkboxCell).toHaveClass('checkbox-cell');
 
@@ -135,8 +151,8 @@ describe('TodoContainer Checkbox Cell Click Functionality', () => {
     expect(mockApi).toHaveBeenCalledWith(
       '/api/todo/1',
       expect.objectContaining({
-        method: 'PATCH'
-      })
+        method: 'PATCH',
+      }),
     );
   });
 
@@ -156,19 +172,26 @@ describe('TodoContainer Checkbox Cell Click Functionality', () => {
 
   test('checkbox cell has not-allowed cursor when disabled', async () => {
     const user = userEvent.setup();
-    
+
     // 느린 API 응답 모킹
     let resolveApiCall;
     const apiPromise = new Promise((resolve) => {
       resolveApiCall = resolve;
     });
-    
+
     mockApi
       .mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve([
-          { todoSeq: 1, todoContent: 'Test todo 1', todoNote: 'Note 1', completeDtm: null, todoDate: '2024-01-01' }
-        ])
+        json: () =>
+          Promise.resolve([
+            {
+              todoSeq: 1,
+              todoContent: 'Test todo 1',
+              todoNote: 'Note 1',
+              completeDtm: null,
+              todoDate: '2024-01-01',
+            },
+          ]),
       })
       .mockReturnValueOnce(apiPromise);
 
@@ -190,7 +213,7 @@ describe('TodoContainer Checkbox Cell Click Functionality', () => {
     // API 호출 해결
     resolveApiCall({
       ok: true,
-      json: () => Promise.resolve({})
+      json: () => Promise.resolve({}),
     });
 
     // 셀은 다시 pointer 커서를 가져야 함
@@ -214,19 +237,26 @@ describe('TodoContainer Checkbox Cell Click Functionality', () => {
 
   test('cell click does not trigger when todo is being toggled', async () => {
     const user = userEvent.setup();
-    
+
     // 느린 API 응답 모킹
     let resolveApiCall;
     const apiPromise = new Promise((resolve) => {
       resolveApiCall = resolve;
     });
-    
+
     mockApi
       .mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve([
-          { todoSeq: 1, todoContent: 'Test todo 1', todoNote: 'Note 1', completeDtm: null, todoDate: '2024-01-01' }
-        ])
+        json: () =>
+          Promise.resolve([
+            {
+              todoSeq: 1,
+              todoContent: 'Test todo 1',
+              todoNote: 'Note 1',
+              completeDtm: null,
+              todoDate: '2024-01-01',
+            },
+          ]),
       })
       .mockReturnValueOnce(apiPromise);
 
@@ -252,7 +282,7 @@ describe('TodoContainer Checkbox Cell Click Functionality', () => {
     // API 호출 해결
     resolveApiCall({
       ok: true,
-      json: () => Promise.resolve({})
+      json: () => Promise.resolve({}),
     });
   });
 });

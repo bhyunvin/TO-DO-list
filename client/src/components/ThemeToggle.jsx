@@ -33,15 +33,17 @@ const ThemeToggle = () => {
   return (
     <div className="theme-toggle-wrapper" onClick={handleToggle}>
       <span className="theme-toggle-label">다크 모드</span>
-      <div 
-        className="theme-toggle-switch" 
-        role="switch" 
-        aria-checked={theme === 'dark'} 
-        aria-label="다크 모드 전환" 
+      <div
+        className="theme-toggle-switch"
+        role="switch"
+        aria-checked={theme === 'dark'}
+        aria-label="다크 모드 전환"
         tabIndex={0}
         onKeyDown={handleKeyDown}
       >
-        <div className={`theme-toggle-slider ${theme === 'dark' ? 'dark' : 'light'}`}>
+        <div
+          className={`theme-toggle-slider ${theme === 'dark' ? 'dark' : 'light'}`}
+        >
           <div className="theme-toggle-icon">
             {theme === 'dark' ? (
               <i className="bi bi-moon-fill"></i>

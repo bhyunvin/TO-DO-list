@@ -18,11 +18,8 @@ import 'react-datepicker/dist/react-datepicker.css';
 
 // 신규 TODO 항목 추가 폼 컴포넌트
 function CreateTodoForm({ onAddTodo, onCancel }) {
-  const {
-    validateFiles,
-    formatFileSize,
-    getUploadPolicy
-  } = useFileUploadValidator();
+  const { validateFiles, formatFileSize, getUploadPolicy } =
+    useFileUploadValidator();
 
   const {
     uploadStatus,
@@ -84,7 +81,9 @@ function CreateTodoForm({ onAddTodo, onCancel }) {
 
   const removeFile = (index) => {
     const newFiles = todoFiles.filter((_, i) => i !== index);
-    const newValidationResults = fileValidationResults.filter((_, i) => i !== index);
+    const newValidationResults = fileValidationResults.filter(
+      (_, i) => i !== index,
+    );
 
     setTodoFiles(newFiles);
     setFileValidationResults(newValidationResults);
@@ -107,9 +106,15 @@ function CreateTodoForm({ onAddTodo, onCancel }) {
 
     // 파일이 선택된 경우 유효성 검사
     if (todoFiles.length > 0) {
-      const invalidFiles = fileValidationResults.filter(({ isValid }) => !isValid);
+      const invalidFiles = fileValidationResults.filter(
+        ({ isValid }) => !isValid,
+      );
       if (invalidFiles.length > 0) {
-        Swal.fire('파일 오류', '유효하지 않은 파일이 있습니다. 파일을 다시 선택해주세요.', 'error');
+        Swal.fire(
+          '파일 오류',
+          '유효하지 않은 파일이 있습니다. 파일을 다시 선택해주세요.',
+          'error',
+        );
         return;
       }
     }
@@ -142,7 +147,9 @@ function CreateTodoForm({ onAddTodo, onCancel }) {
     <div className="create-todo-form">
       <h3>새로운 TO-DO 항목추가</h3>
       <form onSubmit={handleSubmit}>
-        <label className="mb-1" htmlFor="todoContent">할 일</label>
+        <label className="mb-1" htmlFor="todoContent">
+          할 일
+        </label>
         <textarea
           id="todoContent"
           type="text"
@@ -156,7 +163,9 @@ function CreateTodoForm({ onAddTodo, onCancel }) {
           rows={3}
           style={{ resize: 'none' }}
         />
-        <label className="mb-1" htmlFor="todoNote">비고</label>
+        <label className="mb-1" htmlFor="todoNote">
+          비고
+        </label>
         <textarea
           id="todoNote"
           type="text"
@@ -169,7 +178,9 @@ function CreateTodoForm({ onAddTodo, onCancel }) {
           rows={3}
           style={{ resize: 'none' }}
         />
-        <label className="mb-1" htmlFor="todoFiles">첨부파일</label>
+        <label className="mb-1" htmlFor="todoFiles">
+          첨부파일
+        </label>
         <input
           id="todoFiles"
           type="file"
@@ -180,7 +191,9 @@ function CreateTodoForm({ onAddTodo, onCancel }) {
           name="TODO_FILES"
         />
         <small className="form-text text-muted">
-          허용 파일: XLSX, PPTX, DOCX, PDF, HWP, TXT | 최대 크기: {formatFileSize(policy?.maxSize || 0)} | 최대 {policy?.maxCount || 0}개
+          허용 파일: XLSX, PPTX, DOCX, PDF, HWP, TXT | 최대 크기:{' '}
+          {formatFileSize(policy?.maxSize || 0)} | 최대 {policy?.maxCount || 0}
+          개
         </small>
         {fileError && (
           <div className="text-danger mt-1">
@@ -201,7 +214,10 @@ function CreateTodoForm({ onAddTodo, onCancel }) {
               onRemoveFile={removeFile}
               onRetryUpload={async (failedFiles) => {
                 // 재시도를 위한 유효성 검사 초기화
-                const retryValidation = validateFiles(failedFiles, 'todoAttachment');
+                const retryValidation = validateFiles(
+                  failedFiles,
+                  'todoAttachment',
+                );
                 setFileValidationResults(retryValidation);
                 setTodoFiles(failedFiles);
                 setFileError('');
@@ -217,13 +233,24 @@ function CreateTodoForm({ onAddTodo, onCancel }) {
           <button
             type="submit"
             className="btn btn-success"
-            disabled={isSubmitting || uploadStatus === 'uploading' || uploadStatus === 'validating'}
+            disabled={
+              isSubmitting ||
+              uploadStatus === 'uploading' ||
+              uploadStatus === 'validating'
+            }
           >
             {isSubmitting || uploadStatus === 'uploading' ? (
               <>
-                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                {uploadStatus === 'uploading' ? '업로드 중...' :
-                  uploadStatus === 'validating' ? '검증 중...' : '추가 중...'}
+                <span
+                  className="spinner-border spinner-border-sm me-2"
+                  role="status"
+                  aria-hidden="true"
+                ></span>
+                {uploadStatus === 'uploading'
+                  ? '업로드 중...'
+                  : uploadStatus === 'validating'
+                    ? '검증 중...'
+                    : '추가 중...'}
               </>
             ) : (
               '추가'
@@ -304,8 +331,15 @@ function TodoList({
             {isLoadingTodos ? (
               <tr>
                 <td colSpan={6} className="text-center">
-                  <div className="d-flex justify-content-center align-items-center" style={{ padding: '2rem' }}>
-                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  <div
+                    className="d-flex justify-content-center align-items-center"
+                    style={{ padding: '2rem' }}
+                  >
+                    <span
+                      className="spinner-border spinner-border-sm me-2"
+                      role="status"
+                      aria-hidden="true"
+                    ></span>
                     <span>불러오는 중...</span>
                   </div>
                 </td>
@@ -314,10 +348,7 @@ function TodoList({
               todos.map((todo, index) => {
                 const { todoSeq, completeDtm, todoContent, todoNote } = todo;
                 return (
-                  <tr
-                    key={todoSeq}
-                    className={completeDtm ? 'completed' : ''}
-                  >
+                  <tr key={todoSeq} className={completeDtm ? 'completed' : ''}>
                     <td
                       className="text-center checkbox-cell"
                       onClick={() => {
@@ -325,27 +356,47 @@ function TodoList({
                           onToggleComplete(todoSeq, !!completeDtm);
                         }
                       }}
-                      style={{ cursor: togglingTodoSeq === todoSeq ? 'not-allowed' : 'pointer' }}
+                      style={{
+                        cursor:
+                          togglingTodoSeq === todoSeq
+                            ? 'not-allowed'
+                            : 'pointer',
+                      }}
                     >
                       <input
                         type="checkbox"
                         className="form-check-input"
                         checked={!!completeDtm}
                         disabled={togglingTodoSeq === todoSeq}
-                        onChange={() => onToggleComplete(todoSeq, !!completeDtm)}
+                        onChange={() =>
+                          onToggleComplete(todoSeq, !!completeDtm)
+                        }
                         style={{ pointerEvents: 'none' }}
                       />
                     </td>
                     <td className="text-center">{index + 1}</td>
                     <td className="todo-content">
-                      <span className="text-truncate" title={todoContent}>{todoContent}</span>
+                      <span className="text-truncate" title={todoContent}>
+                        {todoContent}
+                      </span>
                     </td>
-                    <td className="text-center">{formatDateTime(completeDtm)}</td>
+                    <td className="text-center">
+                      {formatDateTime(completeDtm)}
+                    </td>
                     <td>
-                      <span className="text-truncate" title={todoNote}>{todoNote}</span>
+                      <span className="text-truncate" title={todoNote}>
+                        {todoNote}
+                      </span>
                     </td>
                     <td className="todo-actions-cell">
-                      <button className="more-actions-btn" onClick={() => setOpenActionMenu(openActionMenu === todoSeq ? null : todoSeq)}>
+                      <button
+                        className="more-actions-btn"
+                        onClick={() =>
+                          setOpenActionMenu(
+                            openActionMenu === todoSeq ? null : todoSeq,
+                          )
+                        }
+                      >
                         <i className="bi bi-three-dots-vertical"></i>
                       </button>
                       {openActionMenu === todoSeq && (
@@ -364,7 +415,9 @@ function TodoList({
                             className="btn btn-sm btn-outline-danger"
                             onClick={() => onDeleteTodo(todoSeq)}
                             title="삭제"
-                          ><i className="bi bi-trash-fill"></i></button>
+                          >
+                            <i className="bi bi-trash-fill"></i>
+                          </button>
                         </div>
                       )}
                     </td>
@@ -373,7 +426,9 @@ function TodoList({
               })
             ) : (
               <tr>
-                <td colSpan={6} className="text-center">할 일이 없습니다.</td>
+                <td colSpan={6} className="text-center">
+                  할 일이 없습니다.
+                </td>
               </tr>
             )}
           </tbody>
@@ -385,11 +440,8 @@ function TodoList({
 
 // ToDo 항목 수정을 위한 폼 컴포넌트
 function EditTodoForm({ todo, onSave, onCancel }) {
-  const {
-    validateFiles,
-    formatFileSize,
-    getUploadPolicy
-  } = useFileUploadValidator();
+  const { validateFiles, formatFileSize, getUploadPolicy } =
+    useFileUploadValidator();
 
   const {
     uploadStatus,
@@ -452,7 +504,9 @@ function EditTodoForm({ todo, onSave, onCancel }) {
 
   const removeFile = (index) => {
     const newFiles = todoFiles.filter((_, i) => i !== index);
-    const newValidationResults = fileValidationResults.filter((_, i) => i !== index);
+    const newValidationResults = fileValidationResults.filter(
+      (_, i) => i !== index,
+    );
 
     setTodoFiles(newFiles);
     setFileValidationResults(newValidationResults);
@@ -470,9 +524,15 @@ function EditTodoForm({ todo, onSave, onCancel }) {
 
     // 파일이 선택된 경우 유효성 검사
     if (todoFiles.length > 0) {
-      const invalidFiles = fileValidationResults.filter(({ isValid }) => !isValid);
+      const invalidFiles = fileValidationResults.filter(
+        ({ isValid }) => !isValid,
+      );
       if (invalidFiles.length > 0) {
-        Swal.fire('파일 오류', '유효하지 않은 파일이 있습니다. 파일을 다시 선택해주세요.', 'error');
+        Swal.fire(
+          '파일 오류',
+          '유효하지 않은 파일이 있습니다. 파일을 다시 선택해주세요.',
+          'error',
+        );
         return;
       }
     }
@@ -481,7 +541,11 @@ function EditTodoForm({ todo, onSave, onCancel }) {
 
     try {
       const { todoSeq } = todo;
-      const result = await onSave(todoSeq, { todoContent, todoNote, todoFiles });
+      const result = await onSave(todoSeq, {
+        todoContent,
+        todoNote,
+        todoFiles,
+      });
 
       if (result && result.success) {
         resetUploadState();
@@ -499,7 +563,9 @@ function EditTodoForm({ todo, onSave, onCancel }) {
     <div className="edit-todo-form">
       <h3>TO-DO 항목수정</h3>
       <form onSubmit={handleSubmit}>
-        <label className="mb-1" htmlFor="todoContent">할 일</label>
+        <label className="mb-1" htmlFor="todoContent">
+          할 일
+        </label>
         <textarea
           id="todoContent"
           name="TODO_CONTENT"
@@ -509,7 +575,9 @@ function EditTodoForm({ todo, onSave, onCancel }) {
           maxLength={4000}
           required
         />
-        <label className="mb-1" htmlFor="todoNote">비고</label>
+        <label className="mb-1" htmlFor="todoNote">
+          비고
+        </label>
         <textarea
           id="todoNote"
           name="TODO_NOTE"
@@ -518,7 +586,9 @@ function EditTodoForm({ todo, onSave, onCancel }) {
           onChange={handleChange}
           maxLength={4000}
         />
-        <label className="mb-1" htmlFor="todoFiles">첨부파일</label>
+        <label className="mb-1" htmlFor="todoFiles">
+          첨부파일
+        </label>
         <input
           id="todoFiles"
           type="file"
@@ -529,7 +599,9 @@ function EditTodoForm({ todo, onSave, onCancel }) {
           name="TODO_FILES"
         />
         <small className="form-text text-muted">
-          허용 파일: XLSX, PPTX, DOCX, PDF, HWP, TXT | 최대 크기: {formatFileSize(policy?.maxSize || 0)} | 최대 {policy?.maxCount || 0}개
+          허용 파일: XLSX, PPTX, DOCX, PDF, HWP, TXT | 최대 크기:{' '}
+          {formatFileSize(policy?.maxSize || 0)} | 최대 {policy?.maxCount || 0}
+          개
         </small>
         {fileError && (
           <div className="text-danger mt-1">
@@ -550,7 +622,10 @@ function EditTodoForm({ todo, onSave, onCancel }) {
               onRemoveFile={removeFile}
               onRetryUpload={async (failedFiles) => {
                 // 재시도를 위한 유효성 검사 초기화
-                const retryValidation = validateFiles(failedFiles, 'todoAttachment');
+                const retryValidation = validateFiles(
+                  failedFiles,
+                  'todoAttachment',
+                );
                 setFileValidationResults(retryValidation);
                 setTodoFiles(failedFiles);
                 setFileError('');
@@ -566,19 +641,34 @@ function EditTodoForm({ todo, onSave, onCancel }) {
           <button
             type="submit"
             className="btn btn-success"
-            disabled={isSubmitting || uploadStatus === 'uploading' || uploadStatus === 'validating'}
+            disabled={
+              isSubmitting ||
+              uploadStatus === 'uploading' ||
+              uploadStatus === 'validating'
+            }
           >
             {isSubmitting || uploadStatus === 'uploading' ? (
               <>
-                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                {uploadStatus === 'uploading' ? '업로드 중...' :
-                  uploadStatus === 'validating' ? '검증 중...' : '수정 중...'}
+                <span
+                  className="spinner-border spinner-border-sm me-2"
+                  role="status"
+                  aria-hidden="true"
+                ></span>
+                {uploadStatus === 'uploading'
+                  ? '업로드 중...'
+                  : uploadStatus === 'validating'
+                    ? '검증 중...'
+                    : '수정 중...'}
               </>
             ) : (
               '수정'
             )}
           </button>
-          <button type="button" className="btn btn-secondary ms-2" onClick={onCancel}>
+          <button
+            type="button"
+            className="btn btn-secondary ms-2"
+            onClick={onCancel}
+          >
             취소
           </button>
         </div>
@@ -626,7 +716,7 @@ function TodoContainer() {
     resetRetryState,
     canSendRequest,
     todoRefreshTrigger,
-    triggerTodoRefresh
+    triggerTodoRefresh,
   } = useChatStore();
 
   const [todos, setTodos] = useState([]);
@@ -660,7 +750,11 @@ function TodoContainer() {
         const data = await response.json();
         setTodos(data);
       } else {
-        Swal.fire('오류', '로그아웃되었거나<br>서버와의 통신 중 문제가 발생했습니다.', 'error');
+        Swal.fire(
+          '오류',
+          '로그아웃되었거나<br>서버와의 통신 중 문제가 발생했습니다.',
+          'error',
+        );
       }
     } catch (error) {
       console.error('Fetch Todos Error:', error);
@@ -732,7 +826,7 @@ function TodoContainer() {
               ${todoFiles && todoFiles.length > 0 ? `<p>✓ ${todoFiles.length}개 파일이 업로드되었습니다.</p>` : ''}
             </div>
           `,
-          icon: 'success'
+          icon: 'success',
         });
         setIsCreating(false);
         fetchTodos();
@@ -742,17 +836,21 @@ function TodoContainer() {
 
         // 파일 업로드 오류를 구체적으로 처리
         if (errorData.errors && Array.isArray(errorData.errors)) {
-          const errorMessages = errorData.errors.map(({ fileName, errorMessage }) =>
-            `${fileName}: ${errorMessage}`
-          ).join('<br>');
+          const errorMessages = errorData.errors
+            .map(({ fileName, errorMessage }) => `${fileName}: ${errorMessage}`)
+            .join('<br>');
 
           Swal.fire({
             title: '파일 업로드 오류',
             html: errorMessages,
-            icon: 'error'
+            icon: 'error',
           });
         } else {
-          Swal.fire('오류', errorData.message || '할 일 추가에 실패했습니다.', 'error');
+          Swal.fire(
+            '오류',
+            errorData.message || '할 일 추가에 실패했습니다.',
+            'error',
+          );
         }
         return { success: false, errors: errorData.errors || [] };
       }
@@ -780,11 +878,11 @@ function TodoContainer() {
 
   // 낙관적 업데이트를 위한 헬퍼 함수
   const updateTodoOptimistically = (todoSeq, newCompleteDtm) => {
-    setTodos(prevTodos => {
-      const updatedTodos = prevTodos.map(todo =>
+    setTodos((prevTodos) => {
+      const updatedTodos = prevTodos.map((todo) =>
         todo.todoSeq === todoSeq
           ? { ...todo, completeDtm: newCompleteDtm }
-          : todo
+          : todo,
       );
       // 업데이트 후 정렬
       return sortTodos(updatedTodos);
@@ -793,11 +891,11 @@ function TodoContainer() {
 
   // 롤백을 위한 헬퍼 함수
   const rollbackTodoUpdate = (todoSeq, originalCompleteDtm) => {
-    setTodos(prevTodos => {
-      const rolledBackTodos = prevTodos.map(todo =>
+    setTodos((prevTodos) => {
+      const rolledBackTodos = prevTodos.map((todo) =>
         todo.todoSeq === todoSeq
           ? { ...todo, completeDtm: originalCompleteDtm }
-          : todo
+          : todo,
       );
       // 롤백 후 정렬
       return sortTodos(rolledBackTodos);
@@ -839,12 +937,12 @@ function TodoContainer() {
     // 낙관적 UI 업데이트
     updateTodoOptimistically(todoSeq, newCompleteDtm);
 
-    setOptimisticUpdates(prev => {
+    setOptimisticUpdates((prev) => {
       const newMap = new Map(prev);
       newMap.set(todoSeq, {
         originalCompleteDtm,
         newCompleteDtm,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
       return newMap;
     });
@@ -868,7 +966,7 @@ function TodoContainer() {
       clearTimeout(timeoutId);
 
       if (response.ok) {
-        setOptimisticUpdates(prev => {
+        setOptimisticUpdates((prev) => {
           const newMap = new Map(prev);
           newMap.delete(todoSeq);
           return newMap;
@@ -877,7 +975,7 @@ function TodoContainer() {
         // 실패: 롤백
         rollbackTodoUpdate(todoSeq, originalCompleteDtm);
 
-        setOptimisticUpdates(prev => {
+        setOptimisticUpdates((prev) => {
           const newMap = new Map(prev);
           newMap.delete(todoSeq);
           return newMap;
@@ -892,7 +990,7 @@ function TodoContainer() {
           title: errorMessage,
           showConfirmButton: false,
           timer: 4000,
-          timerProgressBar: true
+          timerProgressBar: true,
         });
 
         console.error('Todo toggle failed:', {
@@ -901,7 +999,7 @@ function TodoContainer() {
           status: response.status,
           originalState: originalCompleteDtm,
           attemptedState: newCompleteDtm,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
       }
     } catch (error) {
@@ -910,7 +1008,7 @@ function TodoContainer() {
       // 에러 발생: 롤백
       rollbackTodoUpdate(todoSeq, originalCompleteDtm);
 
-      setOptimisticUpdates(prev => {
+      setOptimisticUpdates((prev) => {
         const newMap = new Map(prev);
         newMap.delete(todoSeq);
         return newMap;
@@ -925,7 +1023,7 @@ function TodoContainer() {
         title: errorMessage,
         showConfirmButton: false,
         timer: 4000,
-        timerProgressBar: true
+        timerProgressBar: true,
       });
 
       const { name, message } = error;
@@ -935,7 +1033,7 @@ function TodoContainer() {
         errorName: name,
         originalState: originalCompleteDtm,
         attemptedState: newCompleteDtm,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     } finally {
       setTogglingTodoSeq(null);
@@ -947,13 +1045,13 @@ function TodoContainer() {
     // 사용자에게 삭제 확인을 받음
     const result = await Swal.fire({
       title: '정말로 삭제하시겠습니까?',
-      text: "삭제된 데이터는 복구할 수 없습니다.",
+      text: '삭제된 데이터는 복구할 수 없습니다.',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#3085d6',
       cancelButtonColor: '#d33',
       confirmButtonText: '네, 삭제합니다!',
-      cancelButtonText: '아니오'
+      cancelButtonText: '아니오',
     });
 
     // 사용자가 '네'를 클릭한 경우에만 삭제를 진행
@@ -965,11 +1063,19 @@ function TodoContainer() {
         });
 
         if (response.ok) {
-          Swal.fire('삭제 완료!', '할 일이 성공적으로 삭제되었습니다.', 'success');
+          Swal.fire(
+            '삭제 완료!',
+            '할 일이 성공적으로 삭제되었습니다.',
+            'success',
+          );
           fetchTodos();
         } else {
           const errorData = await response.json();
-          Swal.fire('오류', `삭제에 실패했습니다: ${errorData.message}`, 'error');
+          Swal.fire(
+            '오류',
+            `삭제에 실패했습니다: ${errorData.message}`,
+            'error',
+          );
         }
       } catch (error) {
         console.error('Delete Todo Error:', error);
@@ -1015,7 +1121,7 @@ function TodoContainer() {
               ${todoFiles && todoFiles.length > 0 ? `<p>✓ ${todoFiles.length}개 파일이 업로드되었습니다.</p>` : ''}
             </div>
           `,
-          icon: 'success'
+          icon: 'success',
         });
         setEditingTodo(null);
         fetchTodos();
@@ -1025,17 +1131,21 @@ function TodoContainer() {
 
         // 파일 업로드 오류를 구체적으로 처리
         if (errorData.errors && Array.isArray(errorData.errors)) {
-          const errorMessages = errorData.errors.map(({ fileName, errorMessage }) =>
-            `${fileName}: ${errorMessage}`
-          ).join('<br>');
+          const errorMessages = errorData.errors
+            .map(({ fileName, errorMessage }) => `${fileName}: ${errorMessage}`)
+            .join('<br>');
 
           Swal.fire({
             title: '파일 업로드 오류',
             html: errorMessages,
-            icon: 'error'
+            icon: 'error',
           });
         } else {
-          Swal.fire('오류', errorData.message || '수정에 실패했습니다.', 'error');
+          Swal.fire(
+            '오류',
+            errorData.message || '수정에 실패했습니다.',
+            'error',
+          );
         }
         return { success: false, errors: errorData.errors || [] };
       }
@@ -1112,7 +1222,7 @@ function TodoContainer() {
             </div>
           `,
           icon: 'success',
-          confirmButtonText: '확인'
+          confirmButtonText: '확인',
         }).then(() => {
           setIsUpdatingProfile(false);
         });
@@ -1120,17 +1230,21 @@ function TodoContainer() {
         const errorData = await response.json().catch(() => ({}));
 
         if (errorData.errors && Array.isArray(errorData.errors)) {
-          const errorMessages = errorData.errors.map(({ fileName, errorMessage }) =>
-            `${fileName}: ${errorMessage}`
-          ).join('<br>');
+          const errorMessages = errorData.errors
+            .map(({ fileName, errorMessage }) => `${fileName}: ${errorMessage}`)
+            .join('<br>');
 
           Swal.fire({
             title: '파일 업로드 오류',
             html: errorMessages,
-            icon: 'error'
+            icon: 'error',
           });
         } else {
-          Swal.fire('프로필 수정 실패', errorData.message || '서버 오류가 발생했습니다.', 'error');
+          Swal.fire(
+            '프로필 수정 실패',
+            errorData.message || '서버 오류가 발생했습니다.',
+            'error',
+          );
         }
       }
     } catch (error) {
@@ -1167,7 +1281,7 @@ function TodoContainer() {
             </div>
           `,
           icon: 'success',
-          confirmButtonText: '확인'
+          confirmButtonText: '확인',
         }).then(() => {
           setIsChangingPassword(false);
           // 비밀번호 변경 후 로그아웃 처리
@@ -1204,7 +1318,7 @@ function TodoContainer() {
       confirmButtonColor: '#3085d6',
       cancelButtonColor: '#d33',
       confirmButtonText: '네, 로그아웃합니다',
-      cancelButtonText: '취소'
+      cancelButtonText: '취소',
     });
 
     // 사용자가 취소를 선택한 경우 로그아웃을 중단
@@ -1225,12 +1339,20 @@ function TodoContainer() {
       // 서버 응답이 정상이 아니더라도 클라이언트에서는 로그아웃을 진행
       // 사용자에게는 실패 사실을 알림
       if (!response.ok) {
-        await Swal.fire('로그아웃 실패', '서버와 통신에 실패했지만, 클라이언트에서 로그아웃합니다.', 'error');
+        await Swal.fire(
+          '로그아웃 실패',
+          '서버와 통신에 실패했지만, 클라이언트에서 로그아웃합니다.',
+          'error',
+        );
       }
     } catch (error) {
       console.error('Logout Error : ', error);
       // 네트워크 오류 등이 발생해도 사용자에게 알린 후 로그아웃을 진행
-      await Swal.fire('오류 발생', '서버와의 연결에 문제가 발생했습니다.', 'error');
+      await Swal.fire(
+        '오류 발생',
+        '서버와의 연결에 문제가 발생했습니다.',
+        'error',
+      );
     } finally {
       logout();
     }
@@ -1296,13 +1418,19 @@ function TodoContainer() {
       // 멀티턴 대화를 위한 history 생성
       // 환영 메시지를 제외하고 최근 10개의 메시지만 컨텍스트로 전송
       const recentMessages = messages
-        .filter(msg => !msg.id.startsWith('welcome-')) // 환영 메시지 제외
+        .filter((msg) => !msg.id.startsWith('welcome-')) // 환영 메시지 제외
         .slice(-10); // 최근 10개만
 
       // Gemini API 형식으로 변환
-      const history = recentMessages.map(msg => ({
+      const history = recentMessages.map((msg) => ({
         role: msg.isUser ? 'user' : 'model',
-        parts: [{ text: msg.isHtml ? msg.content.replace(/<[^>]*>/g, '') : msg.content }] // HTML 태그 제거
+        parts: [
+          {
+            text: msg.isHtml
+              ? msg.content.replace(/<[^>]*>/g, '')
+              : msg.content,
+          },
+        ], // HTML 태그 제거
       }));
 
       const response = await api('/api/assistance/chat', {
@@ -1335,7 +1463,10 @@ function TodoContainer() {
 
           triggerTodoRefresh();
         } else {
-          const { shouldRetry } = handleApiError(new Error(apiError || 'API Error'), response);
+          const { shouldRetry } = handleApiError(
+            new Error(apiError || 'API Error'),
+            response,
+          );
 
           if (!shouldRetry) {
             addMessage({
@@ -1348,10 +1479,15 @@ function TodoContainer() {
         // HTTP 오류 응답 처리
         const errorData = await response.json().catch(() => ({}));
         const { error: apiError } = errorData;
-        const { shouldRetry } = handleApiError(new Error(apiError || 'HTTP Error'), response);
+        const { shouldRetry } = handleApiError(
+          new Error(apiError || 'HTTP Error'),
+          response,
+        );
 
         if (!shouldRetry) {
-          const errorMessage = apiError || '죄송합니다. 일시적인 문제가 발생했습니다. 잠시 후 다시 시도해주세요.';
+          const errorMessage =
+            apiError ||
+            '죄송합니다. 일시적인 문제가 발생했습니다. 잠시 후 다시 시도해주세요.';
           addMessage({
             content: errorMessage,
             isUser: false,
@@ -1455,7 +1591,7 @@ function TodoContainer() {
         }
 
         return { startDate, endDate };
-      }
+      },
     });
 
     return result;
@@ -1477,7 +1613,7 @@ function TodoContainer() {
         {
           method: 'GET',
           credentials: 'include',
-        }
+        },
       );
 
       if (response.ok) {
@@ -1502,7 +1638,8 @@ function TodoContainer() {
         let errorMessage = 'Excel 내보내기에 실패했습니다.';
 
         if (status === 400) {
-          errorMessage = message || '잘못된 요청입니다. 날짜 형식을 확인해주세요.';
+          errorMessage =
+            message || '잘못된 요청입니다. 날짜 형식을 확인해주세요.';
         } else if (status === 401) {
           errorMessage = '인증이 필요합니다. 다시 로그인해주세요.';
         } else if (status === 500) {
@@ -1615,10 +1752,7 @@ function TodoContainer() {
               <div className="dropdown-divider"></div>
               <ThemeToggle />
               <div className="dropdown-divider"></div>
-              <button
-                className="dropdown-item"
-                onClick={handleLogout}
-              >
+              <button className="dropdown-item" onClick={handleLogout}>
                 로그아웃
               </button>
             </div>
@@ -1628,45 +1762,61 @@ function TodoContainer() {
 
       {/* '신규' 버튼을 오른쪽으로 배치하기 위한 컨테이너 */}
       <div className="todo-actions">
-        {!isCreating && !editingTodo && !isUpdatingProfile && !isChangingPassword && (
-          <>
-            <button
-              className="btn btn-outline-success"
-              onClick={handleExcelExport}
-              aria-label="Excel 내보내기"
-            >
-              <i className="bi bi-file-earmark-spreadsheet"></i>
-            </button>
-            <button className="btn btn-primary" onClick={handleToggleCreate}>
-              신규
-            </button>
-          </>
-        )}
+        {!isCreating &&
+          !editingTodo &&
+          !isUpdatingProfile &&
+          !isChangingPassword && (
+            <>
+              <button
+                className="btn btn-outline-success"
+                onClick={handleExcelExport}
+                aria-label="Excel 내보내기"
+              >
+                <i className="bi bi-file-earmark-spreadsheet"></i>
+              </button>
+              <button className="btn btn-primary" onClick={handleToggleCreate}>
+                신규
+              </button>
+            </>
+          )}
       </div>
 
       {/* 할 일 목록을 볼 때만 DatePicker를 표시 */}
-      {!isCreating && !editingTodo && !isUpdatingProfile && !isChangingPassword && (
-        <div className="date-navigator">
-          <button onClick={handlePrevDay} className="date-nav-btn" aria-label="이전 날짜">
-            <i className="bi bi-chevron-left"></i>
-          </button>
-          <DatePicker
-            locale={ko}
-            selected={selectedDate}
-            onChange={(date) => setSelectedDate(date)}
-            dateFormat="yyyy-MM-dd"
-            className="date-display"
-            showMonthDropdown
-            showYearDropdown
-            dropdownMode="select"
-            withPortal
-          />
-          <button onClick={handleNextDay} className="date-nav-btn" aria-label="다음 날짜">
-            <i className="bi bi-chevron-right"></i>
-          </button>
-          <button onClick={handleToday} className="date-today-btn">오늘</button>
-        </div>
-      )}
+      {!isCreating &&
+        !editingTodo &&
+        !isUpdatingProfile &&
+        !isChangingPassword && (
+          <div className="date-navigator">
+            <button
+              onClick={handlePrevDay}
+              className="date-nav-btn"
+              aria-label="이전 날짜"
+            >
+              <i className="bi bi-chevron-left"></i>
+            </button>
+            <DatePicker
+              locale={ko}
+              selected={selectedDate}
+              onChange={(date) => setSelectedDate(date)}
+              dateFormat="yyyy-MM-dd"
+              className="date-display"
+              showMonthDropdown
+              showYearDropdown
+              dropdownMode="select"
+              withPortal
+            />
+            <button
+              onClick={handleNextDay}
+              className="date-nav-btn"
+              aria-label="다음 날짜"
+            >
+              <i className="bi bi-chevron-right"></i>
+            </button>
+            <button onClick={handleToday} className="date-today-btn">
+              오늘
+            </button>
+          </div>
+        )}
       {/* 할 일 목록 또는 할 일 생성/수정 폼을 보여주는 부분 */}
       {renderContent()}
 

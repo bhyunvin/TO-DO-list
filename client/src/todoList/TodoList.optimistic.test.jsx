@@ -6,7 +6,7 @@ import TodoContainer from './TodoList';
 
 // SweetAlert2 모킹
 jest.mock('sweetalert2', () => ({
-  fire: jest.fn(() => Promise.resolve({ isConfirmed: true }))
+  fire: jest.fn(() => Promise.resolve({ isConfirmed: true })),
 }));
 
 // auth store 모킹
@@ -16,22 +16,24 @@ jest.mock('../authStore/authStore', () => ({
     user: {
       userName: 'Test User',
       userEmail: 'test@example.com',
-      userDescription: 'Test description'
+      userDescription: 'Test description',
     },
     login: jest.fn(),
     logout: jest.fn(),
-    api: mockApi
-  })
+    api: mockApi,
+  }),
 }));
 
 // 파일 업로드 hooks 모킹
 jest.mock('../hooks/useFileUploadValidator', () => ({
   useFileUploadValidator: () => ({
-    validateFiles: jest.fn(() => [{ isValid: true, file: {}, fileName: 'test.jpg', fileSize: 1000 }]),
+    validateFiles: jest.fn(() => [
+      { isValid: true, file: {}, fileName: 'test.jpg', fileSize: 1000 },
+    ]),
     formatFileSize: jest.fn((size) => `${size} bytes`),
     getUploadPolicy: jest.fn(() => ({ maxSize: 10485760, maxCount: 5 })),
-    FILE_VALIDATION_ERRORS: {}
-  })
+    FILE_VALIDATION_ERRORS: {},
+  }),
 }));
 
 jest.mock('../hooks/useFileUploadProgress', () => ({
@@ -40,26 +42,32 @@ jest.mock('../hooks/useFileUploadProgress', () => ({
     uploadProgress: {},
     uploadErrors: [],
     validationResults: [],
-    resetUploadState: jest.fn()
-  })
+    resetUploadState: jest.fn(),
+  }),
 }));
 
 // 컴포넌트 모킹
 jest.mock('../components/FileUploadProgress', () => {
-  const MockFileUploadProgress = () => <div data-testid="file-upload-progress">File Upload Progress</div>;
+  const MockFileUploadProgress = () => (
+    <div data-testid="file-upload-progress">File Upload Progress</div>
+  );
   return MockFileUploadProgress;
 });
 
 jest.mock('../components/ProfileUpdateForm', () => {
   const MockProfileUpdateForm = ({ onCancel }) => (
-    <div data-testid="profile-update-form"><button onClick={onCancel}>Cancel</button></div>
+    <div data-testid="profile-update-form">
+      <button onClick={onCancel}>Cancel</button>
+    </div>
   );
   return MockProfileUpdateForm;
 });
 
 jest.mock('../components/PasswordChangeForm', () => {
   const MockPasswordChangeForm = ({ onCancel }) => (
-    <div data-testid="password-change-form"><button onClick={onCancel}>Cancel</button></div>
+    <div data-testid="password-change-form">
+      <button onClick={onCancel}>Cancel</button>
+    </div>
   );
   return MockPasswordChangeForm;
 });
@@ -80,44 +88,52 @@ describe('TodoContainer Optimistic UI Pattern', () => {
     jest.clearAllMocks();
     const Swal = require('sweetalert2');
     Swal.fire.mockResolvedValue({ isConfirmed: true });
-    
+
     // 초기 todos fetch 모킹
     mockApi.mockResolvedValue({
       ok: true,
-      json: () => Promise.resolve([
-        {
-          todoSeq: 1,
-          todoContent: 'Test todo 1',
-          todoNote: 'Note 1',
-          completeDtm: null,
-          todoDate: '2024-01-01'
-        },
-        {
-          todoSeq: 2,
-          todoContent: 'Test todo 2',
-          todoNote: 'Note 2',
-          completeDtm: '2024-01-01T10:00:00.000Z',
-          todoDate: '2024-01-01'
-        }
-      ])
+      json: () =>
+        Promise.resolve([
+          {
+            todoSeq: 1,
+            todoContent: 'Test todo 1',
+            todoNote: 'Note 1',
+            completeDtm: null,
+            todoDate: '2024-01-01',
+          },
+          {
+            todoSeq: 2,
+            todoContent: 'Test todo 2',
+            todoNote: 'Note 2',
+            completeDtm: '2024-01-01T10:00:00.000Z',
+            todoDate: '2024-01-01',
+          },
+        ]),
     });
   });
 
   test('checkbox updates immediately when clicked (optimistic update)', async () => {
     const user = userEvent.setup();
-    
+
     // 느린 API 응답 모킹
     let resolveApiCall;
     const apiPromise = new Promise((resolve) => {
       resolveApiCall = resolve;
     });
-    
+
     mockApi
       .mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve([
-          { todoSeq: 1, todoContent: 'Test todo 1', todoNote: 'Note 1', completeDtm: null, todoDate: '2024-01-01' }
-        ])
+        json: () =>
+          Promise.resolve([
+            {
+              todoSeq: 1,
+              todoContent: 'Test todo 1',
+              todoNote: 'Note 1',
+              completeDtm: null,
+              todoDate: '2024-01-01',
+            },
+          ]),
       })
       .mockReturnValueOnce(apiPromise);
 
@@ -143,14 +159,14 @@ describe('TodoContainer Optimistic UI Pattern', () => {
       '/api/todo/1',
       expect.objectContaining({
         method: 'PATCH',
-        body: expect.stringContaining('completeDtm')
-      })
+        body: expect.stringContaining('completeDtm'),
+      }),
     );
 
     // API 호출 해결
     resolveApiCall({
       ok: true,
-      json: () => Promise.resolve({})
+      json: () => Promise.resolve({}),
     });
 
     // API 성공 후 체크박스가 체크된 상태로 유지되어야 함
@@ -161,18 +177,25 @@ describe('TodoContainer Optimistic UI Pattern', () => {
 
   test('checkbox reverts to original state on API failure (rollback)', async () => {
     const user = userEvent.setup();
-    
+
     mockApi
       .mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve([
-          { todoSeq: 1, todoContent: 'Test todo 1', todoNote: 'Note 1', completeDtm: null, todoDate: '2024-01-01' }
-        ])
+        json: () =>
+          Promise.resolve([
+            {
+              todoSeq: 1,
+              todoContent: 'Test todo 1',
+              todoNote: 'Note 1',
+              completeDtm: null,
+              todoDate: '2024-01-01',
+            },
+          ]),
       })
       .mockResolvedValueOnce({
         ok: false,
         status: 500,
-        json: () => Promise.resolve({})
+        json: () => Promise.resolve({}),
       });
 
     render(<TodoContainer />);
@@ -191,11 +214,14 @@ describe('TodoContainer Optimistic UI Pattern', () => {
     await user.click(checkboxCell);
 
     // API 실패 및 롤백 대기 - 체크박스가 체크 해제되어야 함
-    await waitFor(() => {
-      checkbox = screen.getAllByRole('checkbox')[0];
-      expect(checkbox).not.toBeChecked();
-      expect(checkbox).not.toBeDisabled();
-    }, { timeout: 2000 });
+    await waitFor(
+      () => {
+        checkbox = screen.getAllByRole('checkbox')[0];
+        expect(checkbox).not.toBeChecked();
+        expect(checkbox).not.toBeDisabled();
+      },
+      { timeout: 2000 },
+    );
 
     // 오류 토스트가 표시되어야 함
     await waitFor(() => {
@@ -204,27 +230,34 @@ describe('TodoContainer Optimistic UI Pattern', () => {
         expect.objectContaining({
           toast: true,
           icon: 'error',
-          position: 'top-end'
-        })
+          position: 'top-end',
+        }),
       );
     });
   });
 
   test('prevents duplicate clicks on same todo while request is pending', async () => {
     const user = userEvent.setup();
-    
+
     // 느린 API 응답 모킹
     let resolveApiCall;
     const apiPromise = new Promise((resolve) => {
       resolveApiCall = resolve;
     });
-    
+
     mockApi
       .mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve([
-          { todoSeq: 1, todoContent: 'Test todo 1', todoNote: 'Note 1', completeDtm: null, todoDate: '2024-01-01' }
-        ])
+        json: () =>
+          Promise.resolve([
+            {
+              todoSeq: 1,
+              todoContent: 'Test todo 1',
+              todoNote: 'Note 1',
+              completeDtm: null,
+              todoDate: '2024-01-01',
+            },
+          ]),
       })
       .mockReturnValueOnce(apiPromise);
 
@@ -251,24 +284,37 @@ describe('TodoContainer Optimistic UI Pattern', () => {
     // API 호출 해결
     resolveApiCall({
       ok: true,
-      json: () => Promise.resolve({})
+      json: () => Promise.resolve({}),
     });
   });
 
   test('allows toggling different todos independently', async () => {
     const user = userEvent.setup();
-    
+
     mockApi
       .mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve([
-          { todoSeq: 1, todoContent: 'Test todo 1', todoNote: 'Note 1', completeDtm: null, todoDate: '2024-01-01' },
-          { todoSeq: 2, todoContent: 'Test todo 2', todoNote: 'Note 2', completeDtm: null, todoDate: '2024-01-01' }
-        ])
+        json: () =>
+          Promise.resolve([
+            {
+              todoSeq: 1,
+              todoContent: 'Test todo 1',
+              todoNote: 'Note 1',
+              completeDtm: null,
+              todoDate: '2024-01-01',
+            },
+            {
+              todoSeq: 2,
+              todoContent: 'Test todo 2',
+              todoNote: 'Note 2',
+              completeDtm: null,
+              todoDate: '2024-01-01',
+            },
+          ]),
       })
       .mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve({})
+        json: () => Promise.resolve({}),
       });
 
     render(<TodoContainer />);
@@ -300,13 +346,20 @@ describe('TodoContainer Optimistic UI Pattern', () => {
 
   test('displays toast notification on network error', async () => {
     const user = userEvent.setup();
-    
+
     mockApi
       .mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve([
-          { todoSeq: 1, todoContent: 'Test todo 1', todoNote: 'Note 1', completeDtm: null, todoDate: '2024-01-01' }
-        ])
+        json: () =>
+          Promise.resolve([
+            {
+              todoSeq: 1,
+              todoContent: 'Test todo 1',
+              todoNote: 'Note 1',
+              completeDtm: null,
+              todoDate: '2024-01-01',
+            },
+          ]),
       })
       .mockRejectedValueOnce(new TypeError('Failed to fetch'));
 
@@ -332,8 +385,8 @@ describe('TodoContainer Optimistic UI Pattern', () => {
           icon: 'error',
           title: expect.stringContaining('네트워크'),
           timer: 4000,
-          timerProgressBar: true
-        })
+          timerProgressBar: true,
+        }),
       );
     });
 
@@ -343,14 +396,21 @@ describe('TodoContainer Optimistic UI Pattern', () => {
 
   test('handles timeout error with AbortController', async () => {
     const user = userEvent.setup();
-    
+
     // 해결되지 않는 API 모킹 (타임아웃 시뮬레이션)
     mockApi
       .mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve([
-          { todoSeq: 1, todoContent: 'Test todo 1', todoNote: 'Note 1', completeDtm: null, todoDate: '2024-01-01' }
-        ])
+        json: () =>
+          Promise.resolve([
+            {
+              todoSeq: 1,
+              todoContent: 'Test todo 1',
+              todoNote: 'Note 1',
+              completeDtm: null,
+              todoDate: '2024-01-01',
+            },
+          ]),
       })
       .mockImplementationOnce(() => {
         return new Promise((resolve, reject) => {
@@ -377,16 +437,19 @@ describe('TodoContainer Optimistic UI Pattern', () => {
     await user.click(checkboxCell);
 
     // 타임아웃 오류 대기
-    await waitFor(() => {
-      const Swal = require('sweetalert2');
-      expect(Swal.fire).toHaveBeenCalledWith(
-        expect.objectContaining({
-          toast: true,
-          icon: 'error',
-          title: expect.stringContaining('시간이 초과')
-        })
-      );
-    }, { timeout: 3000 });
+    await waitFor(
+      () => {
+        const Swal = require('sweetalert2');
+        expect(Swal.fire).toHaveBeenCalledWith(
+          expect.objectContaining({
+            toast: true,
+            icon: 'error',
+            title: expect.stringContaining('시간이 초과'),
+          }),
+        );
+      },
+      { timeout: 3000 },
+    );
 
     // 체크박스가 롤백되어야 함
     expect(checkbox).not.toBeChecked();
@@ -394,17 +457,34 @@ describe('TodoContainer Optimistic UI Pattern', () => {
 
   test('maintains correct state when multiple todos fail independently', async () => {
     const user = userEvent.setup();
-    
+
     mockApi
       .mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve([
-          { todoSeq: 1, todoContent: 'Test todo 1', todoNote: 'Note 1', completeDtm: null, todoDate: '2024-01-01' },
-          { todoSeq: 2, todoContent: 'Test todo 2', todoNote: 'Note 2', completeDtm: null, todoDate: '2024-01-01' }
-        ])
+        json: () =>
+          Promise.resolve([
+            {
+              todoSeq: 1,
+              todoContent: 'Test todo 1',
+              todoNote: 'Note 1',
+              completeDtm: null,
+              todoDate: '2024-01-01',
+            },
+            {
+              todoSeq: 2,
+              todoContent: 'Test todo 2',
+              todoNote: 'Note 2',
+              completeDtm: null,
+              todoDate: '2024-01-01',
+            },
+          ]),
       })
       .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({}) }) // Todo 1 성공
-      .mockResolvedValueOnce({ ok: false, status: 500, json: () => Promise.resolve({}) }); // Todo 2 실패
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        json: () => Promise.resolve({}),
+      }); // Todo 2 실패
 
     render(<TodoContainer />);
 
@@ -433,19 +513,26 @@ describe('TodoContainer Optimistic UI Pattern', () => {
 
   test('checkbox is disabled during pending request', async () => {
     const user = userEvent.setup();
-    
+
     // 느린 API 응답 모킹
     let resolveApiCall;
     const apiPromise = new Promise((resolve) => {
       resolveApiCall = resolve;
     });
-    
+
     mockApi
       .mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve([
-          { todoSeq: 1, todoContent: 'Test todo 1', todoNote: 'Note 1', completeDtm: null, todoDate: '2024-01-01' }
-        ])
+        json: () =>
+          Promise.resolve([
+            {
+              todoSeq: 1,
+              todoContent: 'Test todo 1',
+              todoNote: 'Note 1',
+              completeDtm: null,
+              todoDate: '2024-01-01',
+            },
+          ]),
       })
       .mockReturnValueOnce(apiPromise);
 
@@ -468,7 +555,7 @@ describe('TodoContainer Optimistic UI Pattern', () => {
     // API 호출 해결
     resolveApiCall({
       ok: true,
-      json: () => Promise.resolve({})
+      json: () => Promise.resolve({}),
     });
 
     // 체크박스가 다시 활성화되어야 함

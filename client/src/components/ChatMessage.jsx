@@ -2,11 +2,11 @@ import DOMPurify from 'dompurify';
 import './ChatMessage.css';
 
 const ChatMessage = ({ message, isUser }) => {
-  const formatTimestamp = timestamp => {
+  const formatTimestamp = (timestamp) => {
     const date = new Date(timestamp);
     const now = new Date();
     const diffInMinutes = Math.floor((now - date) / (1000 * 60));
-    
+
     if (diffInMinutes < 1) {
       return '방금 전';
     } else if (diffInMinutes < 60) {
@@ -19,7 +19,7 @@ const ChatMessage = ({ message, isUser }) => {
         month: 'short',
         day: 'numeric',
         hour: '2-digit',
-        minute: '2-digit'
+        minute: '2-digit',
       });
     }
   };
@@ -29,15 +29,29 @@ const ChatMessage = ({ message, isUser }) => {
       // 사용자 메시지는 일반 텍스트
       return <div className="message-text">{message.content}</div>;
     }
-    
+
     // AI 메시지는 HTML을 포함할 수 있으므로 렌더링 전에 새니타이즈
     const sanitizedContent = DOMPurify.sanitize(message.content, {
-      ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'],
-      ALLOWED_ATTR: []
+      ALLOWED_TAGS: [
+        'p',
+        'br',
+        'strong',
+        'em',
+        'ul',
+        'ol',
+        'li',
+        'h1',
+        'h2',
+        'h3',
+        'h4',
+        'h5',
+        'h6',
+      ],
+      ALLOWED_ATTR: [],
     });
-    
+
     return (
-      <div 
+      <div
         className="message-text"
         dangerouslySetInnerHTML={{ __html: sanitizedContent }}
       />
@@ -45,7 +59,7 @@ const ChatMessage = ({ message, isUser }) => {
   };
 
   return (
-    <div 
+    <div
       className={`chat-message ${isUser ? 'user-message' : 'ai-message'}`}
       role="article"
       aria-label={`${isUser ? '사용자' : 'AI 어시스턴트'} 메시지`}
@@ -58,7 +72,10 @@ const ChatMessage = ({ message, isUser }) => {
         )}
         <div className="message-bubble">
           {renderContent()}
-          <div className="message-timestamp" aria-label={`전송 시간: ${formatTimestamp(message.timestamp)}`}>
+          <div
+            className="message-timestamp"
+            aria-label={`전송 시간: ${formatTimestamp(message.timestamp)}`}
+          >
             {formatTimestamp(message.timestamp)}
           </div>
         </div>

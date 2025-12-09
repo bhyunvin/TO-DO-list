@@ -18,7 +18,7 @@
   --chat-modal-transition: all 0.2s ease;
   --chat-modal-scrollbar-width: 6px;
   --chat-modal-scrollbar-radius: 3px;
-  
+
   /* 테마 인식 색상 변수 - 전역 테마 변수 참조 */
   --chat-modal-color-primary: var(--color-primary);
   --chat-modal-color-primary-dark: var(--color-primary-dark);
@@ -34,7 +34,7 @@
   --chat-modal-color-danger: var(--color-danger);
   --chat-modal-shadow: var(--shadow-medium);
   --chat-modal-shadow-light: var(--shadow-light);
-  
+
   /* 채팅 모달 전용 색상 */
   --chat-modal-color-danger-border: #f5c6cb;
   --chat-modal-color-danger-bg: #f8d7da;
@@ -81,8 +81,13 @@
   border-bottom: 1px solid var(--chat-modal-color-border);
   padding: var(--chat-modal-padding);
   flex-shrink: 0;
-  background: linear-gradient(135deg, var(--chat-modal-color-bg-secondary) 0%, var(--chat-modal-color-bg-primary) 100%);
-  border-radius: var(--chat-modal-border-radius) var(--chat-modal-border-radius) 0 0;
+  background: linear-gradient(
+    135deg,
+    var(--chat-modal-color-bg-secondary) 0%,
+    var(--chat-modal-color-bg-primary) 100%
+  );
+  border-radius: var(--chat-modal-border-radius) var(--chat-modal-border-radius)
+    0 0;
 }
 
 .chat-modal-header .modal-title {
@@ -144,7 +149,12 @@
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgb(0 123 255 / 0.1), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(0 123 255 / 0.1),
+    transparent
+  );
   animation: shimmer 2s infinite;
 }
 
@@ -170,7 +180,9 @@
 }
 
 @keyframes typing {
-  0%, 80%, 100% {
+  0%,
+  80%,
+  100% {
     transform: scale(0.8);
     opacity: 0.5;
   }
@@ -199,8 +211,13 @@
   border-top: 1px solid var(--chat-modal-color-border);
   padding: var(--chat-modal-padding);
   flex-shrink: 0;
-  background: linear-gradient(135deg, var(--chat-modal-color-bg-primary) 0%, var(--chat-modal-color-bg-secondary) 100%);
-  border-radius: 0 0 var(--chat-modal-border-radius) var(--chat-modal-border-radius);
+  background: linear-gradient(
+    135deg,
+    var(--chat-modal-color-bg-primary) 0%,
+    var(--chat-modal-color-bg-secondary) 100%
+  );
+  border-radius: 0 0 var(--chat-modal-border-radius)
+    var(--chat-modal-border-radius);
 }
 
 .chat-input-container {
@@ -358,24 +375,24 @@
     height: var(--chat-modal-height-tablet);
     margin: var(--chat-modal-margin);
   }
-  
+
   .chat-modal-header,
   .chat-modal-footer {
     padding: var(--chat-modal-padding-tablet);
   }
-  
+
   .chat-messages {
     padding: var(--chat-modal-gap-small);
   }
-  
+
   .welcome-message i {
     font-size: 2.5rem;
   }
-  
+
   .welcome-message p {
     font-size: 1rem;
   }
-  
+
   .chat-input {
     font-size: 16px;
   }
@@ -391,23 +408,23 @@
     left: 0;
     transform: none;
   }
-  
+
   .chat-modal .modal-content {
     border-radius: 0;
     height: 100vh;
     max-height: 100vh;
   }
-  
+
   .chat-modal-header {
     border-radius: 0;
     padding: var(--chat-modal-padding-mobile);
   }
-  
+
   .chat-modal-footer {
     border-radius: 0;
     padding: var(--chat-modal-padding-mobile);
   }
-  
+
   .chat-messages {
     padding: var(--chat-modal-padding-small);
   }
@@ -486,28 +503,28 @@ body.modal-open,
   .chat-modal .modal-content {
     border: 2px solid currentColor;
   }
-  
+
   .chat-modal-header,
   .chat-modal-footer {
     background: none;
   }
-  
+
   .chat-send-button:disabled {
     background-color: #666;
     border-color: #666;
     color: var(--chat-modal-color-bg-primary);
   }
-  
+
   .typing-indicator {
     border: 1px solid currentColor;
   }
-  
+
   .error-message {
     border-width: 2px;
     background-color: var(--chat-modal-color-bg-primary);
     color: var(--chat-modal-color-text-primary);
   }
-  
+
   .error-content i {
     color: #d00;
   }
@@ -520,19 +537,17 @@ body.modal-open,
     transform: none;
     transition: none;
   }
-  
+
   .typing-indicator::before {
     animation: none;
   }
-  
+
   .typing-dots span {
     animation: none;
     opacity: 0.7;
   }
-  
+
   .error-message {
     animation: none;
   }
 }
-
-

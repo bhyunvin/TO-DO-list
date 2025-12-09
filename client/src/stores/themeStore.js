@@ -50,7 +50,10 @@ export const useThemeStore = create(
         let initialTheme = 'dark';
 
         try {
-          if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          if (
+            window.matchMedia &&
+            window.matchMedia('(prefers-color-scheme: dark)').matches
+          ) {
             initialTheme = 'dark';
           }
         } catch (error) {
@@ -65,6 +68,6 @@ export const useThemeStore = create(
     {
       name: 'theme-storage', // localStorage 키 이름
       storage: createJSONStorage(() => localStorage),
-    }
-  )
+    },
+  ),
 );

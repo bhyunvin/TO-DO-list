@@ -1,4 +1,3 @@
-
 /* eslint-disable testing-library/no-node-access */
 import { render, screen, waitFor } from '@testing-library/react';
 import TodoList from './TodoList';
@@ -65,15 +64,16 @@ describe('TodoContainer Loading State', () => {
 
   test('displays loading message while fetching todos', async () => {
     // 지연된 API 응답 모킹
-    mockApi.mockImplementation(() =>
-      new Promise(resolve => {
-        setTimeout(() => {
-          resolve({
-            ok: true,
-            json: async () => [],
-          });
-        }, 100);
-      })
+    mockApi.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          setTimeout(() => {
+            resolve({
+              ok: true,
+              json: async () => [],
+            });
+          }, 100);
+        }),
     );
 
     render(<TodoList />);
@@ -109,7 +109,13 @@ describe('TodoContainer Loading State', () => {
 
   test('displays todos after loading when todos exist', async () => {
     const mockTodos = [
-      { todoSeq: 1, todoContent: 'Test Todo', completeDtm: null, todoNote: '', todoDate: '2025-11-13' },
+      {
+        todoSeq: 1,
+        todoContent: 'Test Todo',
+        completeDtm: null,
+        todoNote: '',
+        todoDate: '2025-11-13',
+      },
     ];
 
     // todos와 함께 API 응답 모킹
@@ -133,15 +139,16 @@ describe('TodoContainer Loading State', () => {
 
   test('loading indicator has spinner', async () => {
     // 지연된 API 응답 모킹
-    mockApi.mockImplementation(() =>
-      new Promise(resolve => {
-        setTimeout(() => {
-          resolve({
-            ok: true,
-            json: async () => [],
-          });
-        }, 100);
-      })
+    mockApi.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          setTimeout(() => {
+            resolve({
+              ok: true,
+              json: async () => [],
+            });
+          }, 100);
+        }),
     );
 
     render(<TodoList />);
@@ -162,7 +169,13 @@ describe('TodoContainer Loading State', () => {
     mockApi.mockResolvedValueOnce({
       ok: true,
       json: async () => [
-        { todoSeq: 1, todoContent: 'Todo 1', completeDtm: null, todoNote: '', todoDate: '2025-11-13' },
+        {
+          todoSeq: 1,
+          todoContent: 'Todo 1',
+          completeDtm: null,
+          todoNote: '',
+          todoDate: '2025-11-13',
+        },
       ],
     });
 

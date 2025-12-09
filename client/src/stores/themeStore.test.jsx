@@ -33,12 +33,12 @@ const createMatchMediaMock = (matches) => () => ({
 
 describe('themeStore', () => {
   let originalMatchMedia;
-  
+
   // 각 테스트 전에 localStorage와 document.documentElement 초기화
   beforeEach(() => {
     // matchMedia 원본 저장
     originalMatchMedia = window.matchMedia;
-    
+
     // localStorage 초기화
     localStorageMock.clear();
     Object.defineProperty(window, 'localStorage', {
@@ -46,13 +46,13 @@ describe('themeStore', () => {
       writable: true,
       configurable: true,
     });
-    
+
     // document.documentElement 초기화
     document.documentElement.removeAttribute('data-theme');
-    
+
     // Zustand persist 스토어 초기화
     localStorage.removeItem('theme-storage');
-    
+
     // 스토어 테마를 light로 리셋 (함수는 유지)
     act(() => {
       useThemeStore.getState().setTheme('light');
@@ -70,25 +70,25 @@ describe('themeStore', () => {
   describe('Initial State', () => {
     test('should have light theme as initial state', () => {
       const theme = useThemeStore.getState().theme;
-      
+
       expect(theme).toBe('light');
     });
 
     test('should provide toggleTheme function', () => {
       const toggleTheme = useThemeStore.getState().toggleTheme;
-      
+
       expect(typeof toggleTheme).toBe('function');
     });
 
     test('should provide setTheme function', () => {
       const setTheme = useThemeStore.getState().setTheme;
-      
+
       expect(typeof setTheme).toBe('function');
     });
 
     test('should provide initializeTheme function', () => {
       const initializeTheme = useThemeStore.getState().initializeTheme;
-      
+
       expect(typeof initializeTheme).toBe('function');
     });
   });
@@ -98,7 +98,7 @@ describe('themeStore', () => {
       act(() => {
         useThemeStore.getState().toggleTheme();
       });
-      
+
       expect(useThemeStore.getState().theme).toBe('dark');
     });
 
@@ -107,12 +107,12 @@ describe('themeStore', () => {
       act(() => {
         useThemeStore.getState().setTheme('dark');
       });
-      
+
       // light로 토글
       act(() => {
         useThemeStore.getState().toggleTheme();
       });
-      
+
       expect(useThemeStore.getState().theme).toBe('light');
     });
 
@@ -120,29 +120,29 @@ describe('themeStore', () => {
       act(() => {
         useThemeStore.getState().toggleTheme();
       });
-      
+
       expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
-      
+
       act(() => {
         useThemeStore.getState().toggleTheme();
       });
-      
+
       expect(document.documentElement.getAttribute('data-theme')).toBe('light');
     });
 
     test('should toggle multiple times correctly', () => {
       expect(useThemeStore.getState().theme).toBe('light');
-      
+
       act(() => {
         useThemeStore.getState().toggleTheme();
       });
       expect(useThemeStore.getState().theme).toBe('dark');
-      
+
       act(() => {
         useThemeStore.getState().toggleTheme();
       });
       expect(useThemeStore.getState().theme).toBe('light');
-      
+
       act(() => {
         useThemeStore.getState().toggleTheme();
       });
@@ -155,7 +155,7 @@ describe('themeStore', () => {
       act(() => {
         useThemeStore.getState().setTheme('dark');
       });
-      
+
       expect(useThemeStore.getState().theme).toBe('dark');
     });
 
@@ -164,12 +164,12 @@ describe('themeStore', () => {
       act(() => {
         useThemeStore.getState().setTheme('dark');
       });
-      
+
       // light로 변경
       act(() => {
         useThemeStore.getState().setTheme('light');
       });
-      
+
       expect(useThemeStore.getState().theme).toBe('light');
     });
 
@@ -177,28 +177,28 @@ describe('themeStore', () => {
       act(() => {
         useThemeStore.getState().setTheme('dark');
       });
-      
+
       expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
-      
+
       act(() => {
         useThemeStore.getState().setTheme('light');
       });
-      
+
       expect(document.documentElement.getAttribute('data-theme')).toBe('light');
     });
 
     test('should handle invalid theme value by defaulting to light', () => {
       const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
-      
+
       act(() => {
         useThemeStore.getState().setTheme('invalid');
       });
-      
+
       expect(useThemeStore.getState().theme).toBe('light');
       expect(consoleWarnSpy).toHaveBeenCalledWith(
-        'Invalid theme: invalid. Using \'light\' as default.'
+        "Invalid theme: invalid. Using 'light' as default.",
       );
-      
+
       consoleWarnSpy.mockRestore();
     });
   });
@@ -209,10 +209,10 @@ describe('themeStore', () => {
       act(() => {
         useThemeStore.getState().toggleTheme();
       });
-      
+
       // 스토어 상태가 dark로 변경되었는지 확인
       expect(useThemeStore.getState().theme).toBe('dark');
-      
+
       // persist 미들웨어가 localStorage에 저장하는지 확인
       // (실제 persist 동작은 Zustand 라이브러리가 담당하므로 스토어 상태 확인으로 충분)
     });
@@ -222,7 +222,7 @@ describe('themeStore', () => {
       act(() => {
         useThemeStore.getState().setTheme('dark');
       });
-      
+
       // 스토어 상태가 dark로 설정되었는지 확인
       expect(useThemeStore.getState().theme).toBe('dark');
     });
@@ -233,13 +233,13 @@ describe('themeStore', () => {
         useThemeStore.getState().setTheme('dark');
       });
       expect(useThemeStore.getState().theme).toBe('dark');
-      
+
       // 두 번째 변경
       act(() => {
         useThemeStore.getState().setTheme('light');
       });
       expect(useThemeStore.getState().theme).toBe('light');
-      
+
       // 세 번째 변경
       act(() => {
         useThemeStore.getState().toggleTheme();
@@ -254,15 +254,15 @@ describe('themeStore', () => {
       act(() => {
         useThemeStore.getState().setTheme('dark');
       });
-      
+
       // 스토어가 dark 테마를 유지하는지 확인
       expect(useThemeStore.getState().theme).toBe('dark');
-      
+
       // initializeTheme 호출 시 저장된 테마 유지
       act(() => {
         useThemeStore.getState().initializeTheme();
       });
-      
+
       expect(useThemeStore.getState().theme).toBe('dark');
     });
 
@@ -271,15 +271,15 @@ describe('themeStore', () => {
       act(() => {
         useThemeStore.getState().setTheme('light');
       });
-      
+
       // 스토어가 light 테마를 유지하는지 확인
       expect(useThemeStore.getState().theme).toBe('light');
-      
+
       // initializeTheme 호출 시 저장된 테마 유지
       act(() => {
         useThemeStore.getState().initializeTheme();
       });
-      
+
       expect(useThemeStore.getState().theme).toBe('light');
     });
 
@@ -288,15 +288,15 @@ describe('themeStore', () => {
       act(() => {
         useThemeStore.getState().setTheme('dark');
       });
-      
+
       // document element 초기화
       document.documentElement.removeAttribute('data-theme');
-      
+
       // initializeTheme 호출 시 document element에 테마 적용
       act(() => {
         useThemeStore.getState().initializeTheme();
       });
-      
+
       expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
     });
   });
@@ -305,20 +305,20 @@ describe('themeStore', () => {
     test('should use system dark preference when no stored theme exists', () => {
       // 시스템 다크 모드 선호도 mock
       window.matchMedia = createMatchMediaMock(true);
-      
+
       // 스토어 테마를 light로 설정 (저장된 테마 없음 시뮬레이션)
       act(() => {
         useThemeStore.getState().setTheme('light');
       });
-      
+
       // document element 초기화
       document.documentElement.removeAttribute('data-theme');
-      
+
       // initializeTheme 호출 - 저장된 테마가 있으므로 시스템 선호도 무시
       act(() => {
         useThemeStore.getState().initializeTheme();
       });
-      
+
       // 저장된 테마(light)가 유지됨
       expect(useThemeStore.getState().theme).toBe('light');
       expect(document.documentElement.getAttribute('data-theme')).toBe('light');
@@ -327,11 +327,11 @@ describe('themeStore', () => {
     test('should use system light preference when no stored theme exists', () => {
       // 시스템 라이트 모드 선호도 mock
       window.matchMedia = createMatchMediaMock(false);
-      
+
       act(() => {
         useThemeStore.getState().initializeTheme();
       });
-      
+
       expect(useThemeStore.getState().theme).toBe('light');
       expect(document.documentElement.getAttribute('data-theme')).toBe('light');
     });
@@ -341,14 +341,14 @@ describe('themeStore', () => {
       act(() => {
         useThemeStore.getState().setTheme('light');
       });
-      
+
       // 시스템은 다크 모드 선호
       window.matchMedia = createMatchMediaMock(true);
-      
+
       act(() => {
         useThemeStore.getState().initializeTheme();
       });
-      
+
       // 저장된 light 테마가 시스템 선호도보다 우선
       expect(useThemeStore.getState().theme).toBe('light');
       expect(document.documentElement.getAttribute('data-theme')).toBe('light');
@@ -357,11 +357,11 @@ describe('themeStore', () => {
     test('should fallback to light theme when matchMedia is not supported', () => {
       // matchMedia를 undefined로 설정
       window.matchMedia = undefined;
-      
+
       act(() => {
         useThemeStore.getState().initializeTheme();
       });
-      
+
       expect(useThemeStore.getState().theme).toBe('light');
       expect(document.documentElement.getAttribute('data-theme')).toBe('light');
     });
@@ -371,16 +371,16 @@ describe('themeStore', () => {
       window.matchMedia = jest.fn(() => {
         throw new Error('matchMedia error');
       });
-      
+
       const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
-      
+
       act(() => {
         useThemeStore.getState().initializeTheme();
       });
-      
+
       // 에러 발생 시 현재 테마 유지 (light)
       expect(useThemeStore.getState().theme).toBe('light');
-      
+
       consoleWarnSpy.mockRestore();
     });
   });
@@ -389,21 +389,21 @@ describe('themeStore', () => {
     test('should maintain theme consistency across multiple operations', () => {
       // 초기 상태 확인
       expect(useThemeStore.getState().theme).toBe('light');
-      
+
       // dark로 토글
       act(() => {
         useThemeStore.getState().toggleTheme();
       });
       expect(useThemeStore.getState().theme).toBe('dark');
       expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
-      
+
       // light로 명시적 설정
       act(() => {
         useThemeStore.getState().setTheme('light');
       });
       expect(useThemeStore.getState().theme).toBe('light');
       expect(document.documentElement.getAttribute('data-theme')).toBe('light');
-      
+
       // 다시 dark로 토글
       act(() => {
         useThemeStore.getState().toggleTheme();
@@ -419,7 +419,7 @@ describe('themeStore', () => {
         useThemeStore.getState().toggleTheme();
         useThemeStore.getState().toggleTheme();
       });
-      
+
       // 3번 토글하면 light -> dark -> light -> dark
       expect(useThemeStore.getState().theme).toBe('dark');
       expect(document.documentElement.getAttribute('data-theme')).toBe('dark');

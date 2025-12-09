@@ -18,9 +18,10 @@
   box-shadow: var(--shadow-medium);
   background-color: var(--bg-primary);
   color: var(--text-primary);
-  transition: background-color var(--transition-duration) var(--transition-timing),
-              color var(--transition-duration) var(--transition-timing),
-              border-color var(--transition-duration) var(--transition-timing);
+  transition:
+    background-color var(--transition-duration) var(--transition-timing),
+    color var(--transition-duration) var(--transition-timing),
+    border-color var(--transition-duration) var(--transition-timing);
 }
 
 .login-container {
@@ -53,7 +54,6 @@
 .btn-secondary.full-width {
   width: 100%;
 }
-
 
 /* ============================================
    다크 모드 명시적 오버라이드

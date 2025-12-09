@@ -24,7 +24,7 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
   /**
    * 유효성 검사와 함께 현재 비밀번호 입력 변경 처리
    */
-  const handleCurrentPasswordChange = e => {
+  const handleCurrentPasswordChange = (e) => {
     const passwordValue = e.target.value;
     setCurrentPassword(passwordValue);
 
@@ -39,7 +39,7 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
   /**
    * 유효성 검사와 함께 새 비밀번호 입력 변경 처리
    */
-  const handleNewPasswordChange = e => {
+  const handleNewPasswordChange = (e) => {
     const passwordValue = e.target.value;
     setNewPassword(passwordValue);
 
@@ -50,8 +50,14 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
       setNewPasswordError('새 비밀번호는 최소 8자 이상이어야 합니다.');
     } else if (passwordValue.length > 100) {
       setNewPasswordError('새 비밀번호는 최대 100자까지 입력 가능합니다.');
-    } else if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/.test(passwordValue)) {
-      setNewPasswordError('새 비밀번호는 대문자, 소문자, 숫자, 특수문자(@$!%*?&)를 각각 하나 이상 포함해야 합니다.');
+    } else if (
+      !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/.test(
+        passwordValue,
+      )
+    ) {
+      setNewPasswordError(
+        '새 비밀번호는 대문자, 소문자, 숫자, 특수문자(@$!%*?&)를 각각 하나 이상 포함해야 합니다.',
+      );
     } else if (passwordValue === currentPassword) {
       setNewPasswordError('새 비밀번호는 현재 비밀번호와 달라야 합니다.');
     } else {
@@ -61,7 +67,9 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
     // 이미 입력된 경우 비밀번호 확인 재검증
     if (confirmPassword) {
       if (passwordValue !== confirmPassword) {
-        setConfirmPasswordError('새 비밀번호와 비밀번호 확인이 일치하지 않습니다.');
+        setConfirmPasswordError(
+          '새 비밀번호와 비밀번호 확인이 일치하지 않습니다.',
+        );
       } else {
         setConfirmPasswordError('');
       }
@@ -71,7 +79,7 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
   /**
    * 유효성 검사와 함께 비밀번호 확인 입력 변경 처리
    */
-  const handleConfirmPasswordChange = e => {
+  const handleConfirmPasswordChange = (e) => {
     const passwordValue = e.target.value;
     setConfirmPassword(passwordValue);
 
@@ -79,7 +87,9 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
     if (!passwordValue.trim()) {
       setConfirmPasswordError('새 비밀번호 확인을 입력해주세요.');
     } else if (passwordValue !== newPassword) {
-      setConfirmPasswordError('새 비밀번호와 비밀번호 확인이 일치하지 않습니다.');
+      setConfirmPasswordError(
+        '새 비밀번호와 비밀번호 확인이 일치하지 않습니다.',
+      );
     } else {
       setConfirmPasswordError('');
     }
@@ -109,8 +119,14 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
     } else if (newPassword.length > 100) {
       setNewPasswordError('새 비밀번호는 최대 100자까지 입력 가능합니다.');
       isValid = false;
-    } else if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/.test(newPassword)) {
-      setNewPasswordError('새 비밀번호는 대문자, 소문자, 숫자, 특수문자(@$!%*?&)를 각각 하나 이상 포함해야 합니다.');
+    } else if (
+      !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/.test(
+        newPassword,
+      )
+    ) {
+      setNewPasswordError(
+        '새 비밀번호는 대문자, 소문자, 숫자, 특수문자(@$!%*?&)를 각각 하나 이상 포함해야 합니다.',
+      );
       isValid = false;
     } else if (newPassword === currentPassword) {
       setNewPasswordError('새 비밀번호는 현재 비밀번호와 달라야 합니다.');
@@ -124,7 +140,9 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
       setConfirmPasswordError('새 비밀번호 확인을 입력해주세요.');
       isValid = false;
     } else if (confirmPassword !== newPassword) {
-      setConfirmPasswordError('새 비밀번호와 비밀번호 확인이 일치하지 않습니다.');
+      setConfirmPasswordError(
+        '새 비밀번호와 비밀번호 확인이 일치하지 않습니다.',
+      );
       isValid = false;
     } else {
       setConfirmPasswordError('');
@@ -136,7 +154,7 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
   /**
    * 폼 제출 처리
    */
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     // 폼 유효성 검사
@@ -148,7 +166,7 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
     const passwordData = {
       currentPassword: currentPassword.trim(),
       newPassword: newPassword.trim(),
-      confirmPassword: confirmPassword.trim()
+      confirmPassword: confirmPassword.trim(),
     };
 
     try {
@@ -177,7 +195,7 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
         cancelButtonColor: '#6C757D',
         confirmButtonText: '확인',
         cancelButtonText: '계속 수정',
-      }).then(result => {
+      }).then((result) => {
         if (result.isConfirmed) {
           onCancel();
         }
@@ -190,17 +208,17 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
   /**
    * 비밀번호 강도 표시기 가져오기
    */
-  const getPasswordStrength = password => {
+  const getPasswordStrength = (password) => {
     if (!password) return { strength: 0, text: '', color: '' };
 
     let strength = 0;
     const checks = [
       /[a-z]/.test(password), // 소문자
       /[A-Z]/.test(password), // 대문자
-      /\d/.test(password),    // 숫자
+      /\d/.test(password), // 숫자
       /[@$!%*?&]/.test(password), // 특수문자
-      password.length >= 8,   // 길이
-      password.length >= 12   // 적절한 길이
+      password.length >= 8, // 길이
+      password.length >= 12, // 적절한 길이
     ];
 
     strength = checks.filter(Boolean).length;
@@ -224,7 +242,7 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
           <div className="col-9">
             <div className="input-group">
               <input
-                type={showCurrentPassword ? "text" : "password"}
+                type={showCurrentPassword ? 'text' : 'password'}
                 className={`form-control ${currentPasswordError ? 'is-invalid' : currentPassword.trim() ? 'is-valid' : ''}`}
                 id="currentPassword"
                 placeholder="현재 비밀번호를 입력해주세요."
@@ -238,10 +256,18 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
                 className="btn btn-outline-secondary"
                 onClick={() => setShowCurrentPassword(!showCurrentPassword)}
               >
-                {showCurrentPassword ? <i className="bi bi-eye-slash"></i> : <i className="bi bi-eye"></i>}
+                {showCurrentPassword ? (
+                  <i className="bi bi-eye-slash"></i>
+                ) : (
+                  <i className="bi bi-eye"></i>
+                )}
               </button>
             </div>
-            {currentPasswordError && <div className="invalid-feedback d-block">{currentPasswordError}</div>}
+            {currentPasswordError && (
+              <div className="invalid-feedback d-block">
+                {currentPasswordError}
+              </div>
+            )}
           </div>
         </div>
 
@@ -253,7 +279,7 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
           <div className="col-9">
             <div className="input-group">
               <input
-                type={showNewPassword ? "text" : "password"}
+                type={showNewPassword ? 'text' : 'password'}
                 className={`form-control ${newPasswordError ? 'is-invalid' : newPassword.trim() && !newPasswordError ? 'is-valid' : ''}`}
                 id="newPassword"
                 placeholder="새 비밀번호를 입력해주세요."
@@ -268,10 +294,16 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
                 className="btn btn-outline-secondary"
                 onClick={() => setShowNewPassword(!showNewPassword)}
               >
-                {showNewPassword ? <i className="bi bi-eye-slash"></i> : <i className="bi bi-eye"></i>}
+                {showNewPassword ? (
+                  <i className="bi bi-eye-slash"></i>
+                ) : (
+                  <i className="bi bi-eye"></i>
+                )}
               </button>
             </div>
-            {newPasswordError && <div className="invalid-feedback d-block">{newPasswordError}</div>}
+            {newPasswordError && (
+              <div className="invalid-feedback d-block">{newPasswordError}</div>
+            )}
             {newPassword && !newPasswordError && (
               <div className={`text-${passwordStrength.color} mt-1`}>
                 <small>
@@ -279,14 +311,17 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
                   <div className="progress mt-1" style={{ height: '4px' }}>
                     <div
                       className={`progress-bar bg-${passwordStrength.color}`}
-                      style={{ width: `${(passwordStrength.strength / 6) * 100}%` }}
+                      style={{
+                        width: `${(passwordStrength.strength / 6) * 100}%`,
+                      }}
                     ></div>
                   </div>
                 </small>
               </div>
             )}
             <small className="form-text text-muted">
-              8자 이상, 대문자, 소문자, 숫자, 특수문자(@$!%*?&) 각각 하나 이상 포함
+              8자 이상, 대문자, 소문자, 숫자, 특수문자(@$!%*?&) 각각 하나 이상
+              포함
             </small>
           </div>
         </div>
@@ -299,7 +334,7 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
           <div className="col-9">
             <div className="input-group">
               <input
-                type={showConfirmPassword ? "text" : "password"}
+                type={showConfirmPassword ? 'text' : 'password'}
                 className={`form-control ${confirmPasswordError ? 'is-invalid' : confirmPassword.trim() && !confirmPasswordError ? 'is-valid' : ''}`}
                 id="confirmPassword"
                 placeholder="새 비밀번호를 다시 입력해주세요."
@@ -314,15 +349,25 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
                 className="btn btn-outline-secondary"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               >
-                {showConfirmPassword ? <i className="bi bi-eye-slash"></i> : <i className="bi bi-eye"></i>}
+                {showConfirmPassword ? (
+                  <i className="bi bi-eye-slash"></i>
+                ) : (
+                  <i className="bi bi-eye"></i>
+                )}
               </button>
             </div>
-            {confirmPasswordError && <div className="invalid-feedback d-block">{confirmPasswordError}</div>}
-            {confirmPassword && !confirmPasswordError && newPassword === confirmPassword && (
-              <div className="valid-feedback d-block">
-                ✓ 비밀번호가 일치합니다.
+            {confirmPasswordError && (
+              <div className="invalid-feedback d-block">
+                {confirmPasswordError}
               </div>
             )}
+            {confirmPassword &&
+              !confirmPasswordError &&
+              newPassword === confirmPassword && (
+                <div className="valid-feedback d-block">
+                  ✓ 비밀번호가 일치합니다.
+                </div>
+              )}
           </div>
         </div>
 
@@ -332,7 +377,9 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
           <ul className="mb-0">
             <li>비밀번호는 정기적으로 변경하는 것이 좋습니다.</li>
             <li>다른 사이트와 동일한 비밀번호 사용을 피해주세요.</li>
-            <li>비밀번호 변경 후 모든 기기에서 다시 로그인해야 할 수 있습니다.</li>
+            <li>
+              비밀번호 변경 후 모든 기기에서 다시 로그인해야 할 수 있습니다.
+            </li>
           </ul>
         </div>
 
@@ -352,11 +399,23 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
             <button
               type="submit"
               className="btn btn-primary w-100"
-              disabled={isSubmitting || currentPasswordError || newPasswordError || confirmPasswordError || !currentPassword || !newPassword || !confirmPassword}
+              disabled={
+                isSubmitting ||
+                currentPasswordError ||
+                newPasswordError ||
+                confirmPasswordError ||
+                !currentPassword ||
+                !newPassword ||
+                !confirmPassword
+              }
             >
               {isSubmitting ? (
                 <>
-                  <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  <span
+                    className="spinner-border spinner-border-sm me-2"
+                    role="status"
+                    aria-hidden="true"
+                  ></span>
                   비밀번호 변경 중...
                 </>
               ) : (

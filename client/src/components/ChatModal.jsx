@@ -4,7 +4,18 @@ import ChatMessage from './ChatMessage';
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
 import './ChatModal.css';
 
-const ChatModal = ({ isOpen, onClose, messages, onSendMessage, isLoading, error, onRetry, onClearError, onInputFocus, onInputBlur }) => {
+const ChatModal = ({
+  isOpen,
+  onClose,
+  messages,
+  onSendMessage,
+  isLoading,
+  error,
+  onRetry,
+  onClearError,
+  onInputFocus,
+  onInputBlur,
+}) => {
   const [inputValue, setInputValue] = useState('');
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
@@ -45,7 +56,10 @@ const ChatModal = ({ isOpen, onClose, messages, onSendMessage, isLoading, error,
       }, 150);
     } else {
       // 모달이 닫힐 때 이전에 포커스된 요소로 포커스 복원
-      if (previousFocusRef.current && typeof previousFocusRef.current.focus === 'function') {
+      if (
+        previousFocusRef.current &&
+        typeof previousFocusRef.current.focus === 'function'
+      ) {
         setTimeout(() => {
           previousFocusRef.current.focus();
         }, 100);
@@ -68,14 +82,14 @@ const ChatModal = ({ isOpen, onClose, messages, onSendMessage, isLoading, error,
     }
   };
 
-  const handleInputKeyDown = e => {
+  const handleInputKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
     }
   };
 
-  const handleKeyDown = e => {
+  const handleKeyDown = (e) => {
     if (e.key === 'Escape') {
       onClose();
     }
@@ -86,7 +100,7 @@ const ChatModal = ({ isOpen, onClose, messages, onSendMessage, isLoading, error,
       if (!modal) return;
 
       const focusableElements = modal.querySelectorAll(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
       );
 
       const [firstElement] = focusableElements;
@@ -138,7 +152,7 @@ const ChatModal = ({ isOpen, onClose, messages, onSendMessage, isLoading, error,
           aria-label="채팅 메시지"
           aria-atomic="false"
         >
-          {messages.map(message => (
+          {messages.map((message) => (
             <ChatMessage
               key={message.id}
               message={message}
@@ -152,13 +166,18 @@ const ChatModal = ({ isOpen, onClose, messages, onSendMessage, isLoading, error,
                 <span></span>
                 <span></span>
               </div>
-              <span className="typing-text">AI가 응답을 준비하고 있습니다...</span>
+              <span className="typing-text">
+                AI가 응답을 준비하고 있습니다...
+              </span>
             </div>
           )}
           {error && (
             <div className="error-message" role="alert" aria-live="assertive">
               <div className="error-content">
-                <i className="bi bi-exclamation-triangle-fill me-2" aria-hidden="true"></i>
+                <i
+                  className="bi bi-exclamation-triangle-fill me-2"
+                  aria-hidden="true"
+                ></i>
                 <span className="error-text">{error}</span>
               </div>
               {onRetry && (
@@ -195,7 +214,7 @@ const ChatModal = ({ isOpen, onClose, messages, onSendMessage, isLoading, error,
               className="form-control chat-input"
               placeholder="할 일에 대해 질문해보세요..."
               value={inputValue}
-              onChange={e => setInputValue(e.target.value)}
+              onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={handleInputKeyDown}
               onFocus={onInputFocus}
               onBlur={onInputBlur}
@@ -207,10 +226,14 @@ const ChatModal = ({ isOpen, onClose, messages, onSendMessage, isLoading, error,
               className="btn btn-primary chat-send-button"
               onClick={handleSendMessage}
               disabled={!inputValue.trim() || isLoading}
-              aria-label={isLoading ? "메시지 전송 중..." : "메시지 보내기"}
+              aria-label={isLoading ? '메시지 전송 중...' : '메시지 보내기'}
             >
               {isLoading ? (
-                <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                <span
+                  className="spinner-border spinner-border-sm"
+                  role="status"
+                  aria-hidden="true"
+                ></span>
               ) : (
                 <i className="bi bi-send"></i>
               )}

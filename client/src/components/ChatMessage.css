@@ -18,7 +18,7 @@
   --chat-msg-timestamp-size: 0.75rem;
   --chat-msg-timestamp-size-mobile: 0.7rem;
   --chat-msg-transition: all 0.2s ease;
-  
+
   /* 테마 인식 색상 변수 - 전역 테마 변수 참조 */
   --chat-msg-color-primary: var(--color-primary);
   --chat-msg-color-primary-dark: var(--color-primary-dark);
@@ -29,7 +29,7 @@
   --chat-msg-color-bg-light: var(--bg-primary);
   --chat-msg-color-bg-lighter: var(--bg-secondary);
   --chat-msg-color-border: var(--border-medium);
-  
+
   /* 채팅 메시지 전용 색상 */
   --chat-msg-color-success-dark: #1e7e34;
   --chat-msg-shadow: var(--shadow-light);
@@ -101,11 +101,19 @@
 }
 
 .ai-message .message-avatar {
-  background: linear-gradient(135deg, var(--chat-msg-color-primary) 0%, var(--chat-msg-color-primary-dark) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--chat-msg-color-primary) 0%,
+    var(--chat-msg-color-primary-dark) 100%
+  );
 }
 
 .user-message .message-avatar {
-  background: linear-gradient(135deg, var(--chat-msg-color-success) 0%, var(--chat-msg-color-success-dark) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--chat-msg-color-success) 0%,
+    var(--chat-msg-color-success-dark) 100%
+  );
 }
 
 .message-bubble {
@@ -120,14 +128,22 @@
 }
 
 .user-message .message-bubble {
-  background: linear-gradient(135deg, var(--chat-msg-color-primary) 0%, var(--chat-msg-color-primary-dark) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--chat-msg-color-primary) 0%,
+    var(--chat-msg-color-primary-dark) 100%
+  );
   color: white;
   border-bottom-right-radius: var(--chat-msg-border-radius-small);
   box-shadow: var(--chat-msg-shadow-user);
 }
 
 .ai-message .message-bubble {
-  background: linear-gradient(135deg, var(--chat-msg-color-bg-light) 0%, var(--chat-msg-color-bg-lighter) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--chat-msg-color-bg-light) 0%,
+    var(--chat-msg-color-bg-lighter) 100%
+  );
   color: var(--chat-msg-color-text);
   border: 1px solid var(--chat-msg-color-border);
   border-bottom-left-radius: var(--chat-msg-border-radius-small);
@@ -138,7 +154,9 @@
   margin: 0;
   line-height: 1.5;
   font-size: var(--chat-msg-font-size);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
+    Arial, sans-serif;
 }
 
 /* AI 메시지의 HTML 콘텐츠를 위한 향상된 스타일링 */
@@ -184,12 +202,20 @@
   line-height: 1.3;
 }
 
-.ai-message .message-text h1 { font-size: 1.25rem; }
-.ai-message .message-text h2 { font-size: 1.15rem; }
-.ai-message .message-text h3 { font-size: 1.1rem; }
+.ai-message .message-text h1 {
+  font-size: 1.25rem;
+}
+.ai-message .message-text h2 {
+  font-size: 1.15rem;
+}
+.ai-message .message-text h3 {
+  font-size: 1.1rem;
+}
 .ai-message .message-text h4,
 .ai-message .message-text h5,
-.ai-message .message-text h6 { font-size: 1rem; }
+.ai-message .message-text h6 {
+  font-size: 1rem;
+}
 
 .message-timestamp {
   font-size: var(--chat-msg-timestamp-size);
@@ -214,47 +240,53 @@
   .message-container {
     max-width: var(--chat-msg-max-width-tablet);
   }
-  
+
   .message-bubble {
     padding: var(--chat-msg-padding-tablet);
   }
-  
+
   .message-text {
     font-size: var(--chat-msg-font-size-tablet);
     line-height: 1.5;
   }
-  
+
   .message-avatar {
     width: var(--chat-msg-avatar-size-tablet);
     height: var(--chat-msg-avatar-size-tablet);
     font-size: 12px;
   }
-  
-  .ai-message .message-text h1 { font-size: 1.1rem; }
-  .ai-message .message-text h2 { font-size: 1.05rem; }
-  .ai-message .message-text h3 { font-size: 1rem; }
+
+  .ai-message .message-text h1 {
+    font-size: 1.1rem;
+  }
+  .ai-message .message-text h2 {
+    font-size: 1.05rem;
+  }
+  .ai-message .message-text h3 {
+    font-size: 1rem;
+  }
 }
 
 @media (max-width: 480px) {
   .message-container {
     max-width: var(--chat-msg-max-width-mobile);
   }
-  
+
   .message-bubble {
     padding: var(--chat-msg-padding-mobile);
   }
-  
+
   .message-text {
     font-size: var(--chat-msg-font-size-mobile);
     line-height: 1.4;
   }
-  
+
   .message-avatar {
     width: var(--chat-msg-avatar-size-mobile);
     height: var(--chat-msg-avatar-size-mobile);
     font-size: 11px;
   }
-  
+
   .message-timestamp {
     font-size: var(--chat-msg-timestamp-size-mobile);
   }
@@ -298,7 +330,7 @@
   .message-avatar {
     border: 2px solid currentColor;
   }
-  
+
   .user-message .message-bubble,
   .ai-message .message-bubble {
     background: none;
@@ -310,16 +342,13 @@
   .chat-message {
     animation: none;
   }
-  
+
   .message-bubble:hover,
   .message-avatar {
     transform: none;
     transition: none;
   }
 }
-
-
-
 
 /* 라이트 테마 명시적 스타일 */
 [data-theme='light'] .message-avatar {
