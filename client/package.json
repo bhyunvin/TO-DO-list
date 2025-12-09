@@ -9,10 +9,10 @@
     "bootstrap-icons": "^1.13.1",
     "date-fns": "^4.1.0",
     "dompurify": "^3.3.0",
-    "react": "^19.2.0",
+    "react": "^19.2.1",
     "react-bootstrap": "^2.10.10",
     "react-datepicker": "^8.7.0",
-    "react-dom": "^19.2.0",
+    "react-dom": "^19.2.1",
     "sweetalert2": "^11.22.5",
     "web-vitals": "^5.1.0",
     "zustand": "^5.0.8"
