@@ -12,7 +12,7 @@
     "start:server": "cd src && npm run start:dev",
     "start:client": "cd client && npm run dev",
     "build": "concurrently \"cd src && npm run build\" \"cd client && npm run build\"",
-    "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
+    "format": "prettier --write \"{src,client}/**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
     "lint": "concurrently \"npm:lint:server\" \"npm:lint:client\"",
     "lint:server": "cd src && npm run lint",
     "lint:client": "cd client && npm run lint",
