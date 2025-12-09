@@ -28,6 +28,9 @@ export class UserEntity {
   @Column({ name: 'user_profile_image_file_group_no' })
   userProfileImageFileGroupNo: number;
 
+  @Column({ name: 'ai_api_key', type: 'text', nullable: true })
+  aiApiKey: string;
+
   @Column({ name: 'admin_yn', length: 1 })
   adminYn: string;
 

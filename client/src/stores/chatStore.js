@@ -39,6 +39,35 @@ export const useChatStore = create(
 
       // 액션
       addMessage: (messageData) => {
+        // 사용자 메시지인 경우 API Key 확인
+        if (messageData.isUser) {
+          let hasApiKey = false;
+          try {
+            const authStorage = JSON.parse(sessionStorage.getItem('auth-storage') || '{}');
+            if (authStorage.state && authStorage.state.user && authStorage.state.user.aiApiKey) {
+              hasApiKey = true;
+            }
+          } catch (e) {
+            console.error('Failed to check auth storage', e);
+          }
+
+          if (!hasApiKey) {
+            // API Key가 없으면 에러 메시지 설정하고 메시지 추가 안 함 (또는 시스템 메시지로 경고)
+            // 여기서는 에러 상태로 설정하여 UI에서 처리하도록 유도하거나, 경고 메시지 추가
+            set((state) => ({
+              messages: [...state.messages, {
+                id: `${Date.now()}-system-warning`,
+                content: "API Key가 설정되지 않았습니다. 프로필에서 API Key를 등록해주세요.",
+                isUser: false,
+                timestamp: new Date(),
+                isHtml: false
+              }],
+              isLoading: false
+            }));
+            return;
+          }
+        }
+
         const message = {
           id: `${Date.now()}${Math.random().toString(36).substr(2, 9)}`,
           timestamp: new Date(),
@@ -62,7 +91,36 @@ export const useChatStore = create(
           return;
         }
 
-        const welcomeContent = `<p>안녕하세요! 🤖 AI 비서입니다.</p>
+        // authStore에서 사용자 정보 확인
+        // 주의: zustand store 밖에서 다른 store를 사용할 때는 import한 hook이 아니라 getState() 등을 사용해야 함.
+        // 하지만 여기서는 간단히 sessionStorage를 직접 확인하거나, 파라미터로 받는 방식을 고려해야 함.
+        // 또는 useAuthStore를 import해서 사용.
+
+        let hasApiKey = false;
+        try {
+          const authStorage = JSON.parse(sessionStorage.getItem('auth-storage') || '{}');
+          if (authStorage.state && authStorage.state.user && authStorage.state.user.aiApiKey) {
+            hasApiKey = true;
+          }
+        } catch (e) {
+          console.error('Failed to check auth storage', e);
+        }
+
+        let welcomeContent = '';
+
+        if (!hasApiKey) {
+          welcomeContent = `<p>안녕하세요! 🤖 AI 비서입니다.</p>
+<p>AI 서비스를 이용하시려면 <strong>API Key 설정</strong>이 필요합니다.</p>
+<hr>
+<h2>🔑 API Key 발급 및 등록 방법</h2>
+<ol>
+<li><a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio</a>에 접속하여 API Key를 발급받으세요.</li>
+<li>우측 상단 <strong>프로필 > 프로필 수정</strong> 메뉴로 이동하세요.</li>
+<li><strong>AI API Key</strong> 필드에 키를 입력하고 저장해주세요.</li>
+</ol>
+<p>키를 등록하시면 바로 채팅을 시작할 수 있습니다!</p>`;
+        } else {
+          welcomeContent = `<p>안녕하세요! 🤖 AI 비서입니다.</p>
 <p>무엇을 도와드릴까요?</p>
 <p>편하게 말씀만 하시면 제가 할 일 관리를 도와드릴게요.</p>
 <hr>
@@ -84,6 +142,7 @@ export const useChatStore = create(
 </ul>
 <hr>
 <p>언제든지 편하게 요청해주세요!</p>`;
+        }
 
         const welcomeMessage = {
           id: `welcome-${Date.now()}`,
@@ -91,6 +150,7 @@ export const useChatStore = create(
           isUser: false,
           timestamp: new Date(),
           isHtml: true, // HTML로 렌더링
+          type: hasApiKey ? 'welcome' : 'warning' // 메시지 타입 구분 (선택 사항)
         };
 
         set((state) => ({

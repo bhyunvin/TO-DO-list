@@ -24,6 +24,8 @@ export class UserDto {
 
   userProfileImageFileGroupNo: number; //사용자프로필이미지파일그룹번호
 
+  aiApiKey?: string; // AI API Key
+
   adminYn: string; //관리자여부
 }
 
@@ -65,6 +67,11 @@ export class UpdateUserDto {
   @MaxLength(4000, { message: '사용자설명은 최대 4000자까지 입력 가능합니다.' })
   @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   userDescription?: string; //사용자설명
+
+  @IsOptional()
+  @IsString({ message: 'API Key는 문자열이어야 합니다.' })
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
+  aiApiKey?: string; // AI API Key
 }
 
 export class ChangePasswordDto {

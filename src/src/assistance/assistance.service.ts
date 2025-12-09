@@ -4,6 +4,8 @@ import {
   OnModuleInit,
   InternalServerErrorException,
   ServiceUnavailableException,
+  UnauthorizedException,
+  BadRequestException,
 } from '@nestjs/common';
 import { RequestAssistanceDto } from './assistance.dto';
 import { HttpService } from '@nestjs/axios';
@@ -18,12 +20,15 @@ import { TodoService } from '../todo/todo.service';
 import { CreateTodoDto } from '../todo/todo.dto';
 import { UserEntity } from '../user/user.entity';
 import { ConfigService } from '@nestjs/config';
+import { decryptSymmetric } from '../utils/cryptUtil';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class AssistanceService implements OnModuleInit {
   private readonly logger = new Logger(AssistanceService.name);
 
-  private geminiApiKey: string;
+
 
   private readonly getTodosTool = {
     functionDeclarations: [
@@ -121,7 +126,9 @@ export class AssistanceService implements OnModuleInit {
     private readonly httpService: HttpService,
     private readonly todoService: TodoService,
     private readonly configService: ConfigService,
-  ) {}
+    @InjectRepository(UserEntity)
+    private readonly userRepository: Repository<UserEntity>,
+  ) { }
 
   /**
    * 한국 표준시 기준 현재 날짜 가져오기
@@ -182,25 +189,10 @@ export class AssistanceService implements OnModuleInit {
   }
 
   /**
-   * 모듈 초기화 시 실행
-   * 환경 변수에서 API 키를 불러와 저장
+   * 모듈 초기화
    */
   async onModuleInit() {
-    this.logger.log('AssistanceService 모듈 초기화 중...');
-    try {
-      this.geminiApiKey = this.configService.get<string>('GEMINI_API_KEY');
-
-      if (!this.geminiApiKey) {
-        throw new Error('GEMINI_API_KEY가 환경 변수에 설정되지 않았습니다.');
-      }
-
-      this.logger.log('✅ Gemini API 키 로드 완료.');
-    } catch (error) {
-      this.logger.error(
-        '🚨 FATAL: Gemini API 키 로드 실패. AI 비서 기능이 작동하지 않을 수 있습니다. GEMINI_API_KEY를 .env 파일에 설정해주세요.',
-        error,
-      );
-    }
+    this.logger.log('AssistanceService 모듈 초기화 완료');
   }
 
   /**
@@ -219,16 +211,23 @@ export class AssistanceService implements OnModuleInit {
     userName?: string,
     userId?: string,
   ): Promise<RequestAssistanceDto> {
-    if (!this.geminiApiKey) {
-      this.logger.error(
-        'Gemini API 키가 로드되지 않았습니다. onModuleInit 로그를 확인하세요.',
-      );
-      throw new InternalServerErrorException(
-        'AI 비서가 현재 설정되지 않았습니다.',
-      );
+    if (!userSeq) {
+      throw new UnauthorizedException('로그인이 필요합니다.');
     }
 
-    const apiKey = this.geminiApiKey;
+    // 사용자 정보 최신 조회 (API Key 확인용)
+    const user = await this.userRepository.findOne({ where: { userSeq } });
+
+    if (!user || !user.aiApiKey) {
+      throw new BadRequestException('AI API Key가 설정되지 않았습니다. 프로필 설정에서 등록해주세요.');
+    }
+
+    const apiKey = decryptSymmetric(user.aiApiKey);
+    if (!apiKey) {
+      this.logger.error(`API Key decryption failed for user ${userSeq}`);
+      throw new InternalServerErrorException('API Key 처리 중 오류가 발생했습니다.');
+    }
+
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
     let systemPrompt = '';
 

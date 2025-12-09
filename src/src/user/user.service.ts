@@ -9,7 +9,7 @@ import { InjectRepository, InjectDataSource } from '@nestjs/typeorm';
 import { Repository, DataSource, Not } from 'typeorm';
 import { UserEntity } from './user.entity';
 import { UserDto, UpdateUserDto, ChangePasswordDto } from './user.dto';
-import { encrypt, isHashValid } from '../utils/cryptUtil';
+import { encrypt, isHashValid, encryptSymmetric } from '../utils/cryptUtil';
 import { FileUploadUtil } from '../fileUpload/fileUploadUtil';
 import { FileValidationService } from '../fileUpload/validation/file-validation.service';
 import { InputSanitizerService } from '../utils/inputSanitizer';
@@ -27,7 +27,7 @@ export class UserService {
     private inputSanitizer: InputSanitizerService,
     @InjectDataSource()
     private readonly dataSource: DataSource,
-  ) {}
+  ) { }
 
   // 로그인 로직 (컨트롤러에서 세션 처리)
   async login(userDto: UserDto): Promise<Omit<UserEntity, 'userPassword'>> {
@@ -254,11 +254,13 @@ export class UserService {
         userName: newName,
         userEmail: newUserEmail,
         userDescription: newDescription,
+        aiApiKey: newApiKey,
       } = sanitizedDto;
       const {
         userName: currentName,
         userEmail: currentUserEmail,
         userDescription: currentDescription,
+        aiApiKey: currentApiKey,
       } = currentUser;
 
       if (newName !== undefined && newName !== currentName) {
@@ -283,6 +285,24 @@ export class UserService {
       ) {
         currentUser.userDescription = newDescription;
         updatedFields.push('userDescription');
+      }
+
+      if (newApiKey !== undefined) {
+        // 빈 문자열인 경우 키 삭제로 간주, 값이 있는 경우 암호화하여 저장
+        if (newApiKey === '') {
+          if (currentApiKey !== null) {
+            currentUser.aiApiKey = null;
+            updatedFields.push('aiApiKey');
+          }
+        } else {
+          // 새 키가 입력된 경우 (기존 키와 다른지 비교는 암호화 되어있어 어려우므로 무조건 업데이트하거나, 복호화해서 비교할 수 있음. 
+          // 여기서는 보안상 입력되면 무조건 업데이트)
+          const encryptedKey = encryptSymmetric(newApiKey);
+          if (currentUser.aiApiKey !== encryptedKey) {
+            currentUser.aiApiKey = encryptedKey;
+            updatedFields.push('aiApiKey');
+          }
+        }
       }
 
       // 추가 보안 검사를 포함한 향상된 프로필 이미지 처리

@@ -26,7 +26,19 @@ const ProfileUpdateForm = ({ user, onSave, onCancel, isSubmitting = false }) => 
   // 폼 상태
   const [userName, setUserName] = useState(user?.userName || '');
   const [userEmail, setUserEmail] = useState(user?.userEmail || '');
+
   const [userDescription, setUserDescription] = useState(user?.userDescription || '');
+  // API Key는 보안상 서버에서 내려주지 않거나 마스킹되어 내려올 수 있음.
+  // 여기서는 수정 시에만 입력받는 것으로 처리하거나, 기존 값이 있으면 placeholder로 표시
+  const [aiApiKey, setAiApiKey] = useState('');
+
+  // user prop 변경 시 초기화 로직은 그대로 두고, API Key는 빈 값으로 시작 (보안상 노출 최소화)
+  useEffect(() => {
+    if (user) {
+      // user 객체에 aiApiKey가 포함되어 있다면(마스킹 된 상태로라도) 설정 가능하지만, 
+      // 보통은 보안상 별도 입력만 받음. 여기서는 입력 필드가 비어있으면 변경 안 함으로 처리.
+    }
+  }, [user]);
 
   // 프로필 이미지 상태
   const [profileImage, setProfileImage] = useState(null);
@@ -190,6 +202,11 @@ const ProfileUpdateForm = ({ user, onSave, onCancel, isSubmitting = false }) => 
     formData.append('userEmail', userEmail.trim());
     formData.append('userDescription', userDescription.trim());
 
+    // API Key 추가 (빈 문자열도 전송하여 삭제 처리 가능하게 함)
+    if (aiApiKey !== undefined) {
+      formData.append('aiApiKey', aiApiKey.trim());
+    }
+
     // 선택된 경우 프로필 이미지 추가
     if (profileImageFile) {
       formData.append('profileImage', profileImageFile);
@@ -200,6 +217,7 @@ const ProfileUpdateForm = ({ user, onSave, onCancel, isSubmitting = false }) => 
       userName: userName.trim(),
       userEmail: userEmail.trim(),
       userDescription: userDescription.trim(),
+      aiApiKey: aiApiKey.trim(),
       profileImageFile,
       formData // API 호출을 위한 FormData 포함
     };
@@ -221,6 +239,7 @@ const ProfileUpdateForm = ({ user, onSave, onCancel, isSubmitting = false }) => 
       userName !== (user?.userName || '') ||
       userEmail !== (user?.userEmail || '') ||
       userDescription !== (user?.userDescription || '') ||
+      aiApiKey !== '' ||
       profileImageFile !== null;
 
     if (hasChanges) {
