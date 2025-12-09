@@ -38,19 +38,22 @@ export const useChatStore = create(
       requestInProgress: false,
       lastRequestTime: 0,
 
+      // API Key 확인 헬퍼
+      hasApiKey: () => {
+        try {
+          const user = useAuthStore.getState().user;
+          return !!(user && user.aiApiKey);
+        } catch (e) {
+          console.error('Failed to check auth store', e);
+          return false;
+        }
+      },
+
       // 액션
       addMessage: (messageData) => {
         // 사용자 메시지인 경우 API Key 확인
         if (messageData.isUser) {
-          let hasApiKey = false;
-          try {
-            const user = useAuthStore.getState().user;
-            if (user && user.aiApiKey) {
-              hasApiKey = true;
-            }
-          } catch (e) {
-            console.error('Failed to check auth store', e);
-          }
+          const hasApiKey = get().hasApiKey();
 
           if (!hasApiKey) {
             // API Key가 없으면 에러 메시지 설정하고 메시지 추가 안 함 (또는 시스템 메시지로 경고)
@@ -93,16 +96,7 @@ export const useChatStore = create(
         }
 
         // authStore에서 사용자 정보 확인
-        // zustand store의 getState()를 사용하여 컴포넌트 외부에서도 상태에 접근할 수 있습니다.
-        let hasApiKey = false;
-        try {
-          const user = useAuthStore.getState().user;
-          if (user && user.aiApiKey) {
-            hasApiKey = true;
-          }
-        } catch (e) {
-          console.error('Failed to check auth store', e);
-        }
+        const hasApiKey = get().hasApiKey();
 
         let welcomeContent = '';
 

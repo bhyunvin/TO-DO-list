@@ -32,13 +32,7 @@ const ProfileUpdateForm = ({ user, onSave, onCancel, isSubmitting = false }) => 
   // 여기서는 수정 시에만 입력받는 것으로 처리하거나, 기존 값이 있으면 placeholder로 표시
   const [aiApiKey, setAiApiKey] = useState('');
 
-  // user prop 변경 시 초기화 로직은 그대로 두고, API Key는 빈 값으로 시작 (보안상 노출 최소화)
-  useEffect(() => {
-    if (user) {
-      // user 객체에 aiApiKey가 포함되어 있다면(마스킹 된 상태로라도) 설정 가능하지만, 
-      // 보통은 보안상 별도 입력만 받음. 여기서는 입력 필드가 비어있으면 변경 안 함으로 처리.
-    }
-  }, [user]);
+
 
   // 프로필 이미지 상태
   const [profileImage, setProfileImage] = useState(null);

@@ -7,6 +7,10 @@ const ENCRYPTION_KEY =
   process.env.ENCRYPTION_KEY || '01234567890123456789012345678901'; // 32 chars for examples
 const IV_LENGTH = 16;
 
+if (Buffer.from(ENCRYPTION_KEY).length !== 32) {
+  throw new Error('ENCRYPTION_KEY must be 32 bytes long for AES-256');
+}
+
 // 단방향 암호화 (비밀번호용)
 export const encrypt = async (rawText: string): Promise<string> => {
   const saltOrRounds = 10;
