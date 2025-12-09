@@ -392,6 +392,27 @@ const ProfileUpdateForm = ({ user, onSave, onCancel, isSubmitting = false }) => 
           </div>
         )}
 
+        {/* AI API Key 필드 */}
+        <div className="form-group row mb-3">
+          <label htmlFor="aiApiKey" className="col-3 col-form-label">
+            AI API Key
+          </label>
+          <div className="col-9">
+            <input
+              type="password"
+              className="form-control"
+              id="aiApiKey"
+              placeholder="Gemini API Key를 입력하세요 (변경 시에만 입력)"
+              value={aiApiKey}
+              onChange={(e) => setAiApiKey(e.target.value)}
+              autoComplete="off"
+            />
+            <small className="form-text text-muted">
+              Google AI Studio에서 발급받은 API Key를 입력해주세요. 입력하지 않으면 기존 키가 유지됩니다.
+            </small>
+          </div>
+        </div>
+
         {/* 설명 필드 */}
         <div className="form-group row mb-3">
           <label htmlFor="userDescription" className="col-3 col-form-label">

@@ -27,7 +27,7 @@ export class UserService {
     private inputSanitizer: InputSanitizerService,
     @InjectDataSource()
     private readonly dataSource: DataSource,
-  ) { }
+  ) {}
 
   // 로그인 로직 (컨트롤러에서 세션 처리)
   async login(userDto: UserDto): Promise<Omit<UserEntity, 'userPassword'>> {
@@ -295,7 +295,7 @@ export class UserService {
             updatedFields.push('aiApiKey');
           }
         } else {
-          // 새 키가 입력된 경우 (기존 키와 다른지 비교는 암호화 되어있어 어려우므로 무조건 업데이트하거나, 복호화해서 비교할 수 있음. 
+          // 새 키가 입력된 경우 (기존 키와 다른지 비교는 암호화 되어있어 어려우므로 무조건 업데이트하거나, 복호화해서 비교할 수 있음.
           // 여기서는 보안상 입력되면 무조건 업데이트)
           const encryptedKey = encryptSymmetric(newApiKey);
           if (currentUser.aiApiKey !== encryptedKey) {

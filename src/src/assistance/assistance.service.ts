@@ -28,8 +28,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 export class AssistanceService implements OnModuleInit {
   private readonly logger = new Logger(AssistanceService.name);
 
-
-
   private readonly getTodosTool = {
     functionDeclarations: [
       {
@@ -128,7 +126,7 @@ export class AssistanceService implements OnModuleInit {
     private readonly configService: ConfigService,
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
-  ) { }
+  ) {}
 
   /**
    * 한국 표준시 기준 현재 날짜 가져오기
@@ -219,13 +217,17 @@ export class AssistanceService implements OnModuleInit {
     const user = await this.userRepository.findOne({ where: { userSeq } });
 
     if (!user || !user.aiApiKey) {
-      throw new BadRequestException('AI API Key가 설정되지 않았습니다. 프로필 설정에서 등록해주세요.');
+      throw new BadRequestException(
+        'AI API Key가 설정되지 않았습니다. 프로필 설정에서 등록해주세요.',
+      );
     }
 
     const apiKey = decryptSymmetric(user.aiApiKey);
     if (!apiKey) {
       this.logger.error(`API Key decryption failed for user ${userSeq}`);
-      throw new InternalServerErrorException('API Key 처리 중 오류가 발생했습니다.');
+      throw new InternalServerErrorException(
+        'API Key 처리 중 오류가 발생했습니다.',
+      );
     }
 
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
