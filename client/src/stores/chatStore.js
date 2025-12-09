@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { useAuthStore } from '../authStore/authStore';
 
 // 채팅 메시지 인터페이스 구조
 // {
@@ -43,12 +44,12 @@ export const useChatStore = create(
         if (messageData.isUser) {
           let hasApiKey = false;
           try {
-            const authStorage = JSON.parse(sessionStorage.getItem('auth-storage') || '{}');
-            if (authStorage.state && authStorage.state.user && authStorage.state.user.aiApiKey) {
+            const user = useAuthStore.getState().user;
+            if (user && user.aiApiKey) {
               hasApiKey = true;
             }
           } catch (e) {
-            console.error('Failed to check auth storage', e);
+            console.error('Failed to check auth store', e);
           }
 
           if (!hasApiKey) {
@@ -92,18 +93,15 @@ export const useChatStore = create(
         }
 
         // authStore에서 사용자 정보 확인
-        // 주의: zustand store 밖에서 다른 store를 사용할 때는 import한 hook이 아니라 getState() 등을 사용해야 함.
-        // 하지만 여기서는 간단히 sessionStorage를 직접 확인하거나, 파라미터로 받는 방식을 고려해야 함.
-        // 또는 useAuthStore를 import해서 사용.
-
+        // zustand store의 getState()를 사용하여 컴포넌트 외부에서도 상태에 접근할 수 있습니다.
         let hasApiKey = false;
         try {
-          const authStorage = JSON.parse(sessionStorage.getItem('auth-storage') || '{}');
-          if (authStorage.state && authStorage.state.user && authStorage.state.user.aiApiKey) {
+          const user = useAuthStore.getState().user;
+          if (user && user.aiApiKey) {
             hasApiKey = true;
           }
         } catch (e) {
-          console.error('Failed to check auth storage', e);
+          console.error('Failed to check auth store', e);
         }
 
         let welcomeContent = '';
