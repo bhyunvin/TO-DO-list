@@ -440,7 +440,7 @@ export class UserService {
     updateUserDto: UpdateUserDto,
   ): UpdateUserDto {
     const sanitized: UpdateUserDto = {};
-    const { userName, userEmail, userDescription } = updateUserDto;
+    const { userName, userEmail, userDescription, aiApiKey } = updateUserDto;
 
     // 이름 새니타이즈
     if (userName !== undefined) {
@@ -486,6 +486,11 @@ export class UserService {
           errorCode: 'DESCRIPTION_TOO_LONG',
         });
       }
+    }
+    
+    // API Key 전달 (별도 새니타이즈 불필요, DTO 레벨에서 처리됨)
+    if (aiApiKey !== undefined) {
+      sanitized.aiApiKey = aiApiKey;
     }
 
     return sanitized;
