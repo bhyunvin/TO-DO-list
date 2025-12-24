@@ -185,20 +185,15 @@ export class TodoService {
 
     try {
       const { savedFiles, fileGroupNo } =
-        await this.fileUploadUtil.saveFileInfo(
-          files,
-          auditSettings,
-          'todo_attachment',
-        );
+        await this.fileUploadUtil.saveFileInfo(files, auditSettings);
 
       const attachmentResponses: FileAttachmentResponseDto[] = savedFiles.map(
         (file) => ({
           fileNo: file.fileNo,
-          originalFileName: file.originalFileName,
+          originalFileName: file.saveFileName,
           fileSize: file.fileSize,
           fileExt: file.fileExt,
           uploadDate: file.auditColumns.regDtm.toISOString(),
-          validationStatus: file.validationStatus,
         }),
       );
 
@@ -238,11 +233,7 @@ export class TodoService {
 
       try {
         const { savedFiles, fileGroupNo: uploadedFileGroupNo } =
-          await this.fileUploadUtil.saveFileInfo(
-            files,
-            auditSettings,
-            'todo_attachment',
-          );
+          await this.fileUploadUtil.saveFileInfo(files, auditSettings);
 
         fileGroupNo = uploadedFileGroupNo;
 
@@ -251,11 +242,10 @@ export class TodoService {
 
         attachments = savedFiles.map((file) => ({
           fileNo: file.fileNo,
-          originalFileName: file.originalFileName,
+          originalFileName: file.saveFileName,
           fileSize: file.fileSize,
           fileExt: file.fileExt,
           uploadDate: file.auditColumns.regDtm.toISOString(),
-          validationStatus: file.validationStatus,
         }));
       } catch (error) {
         console.error('File upload failed during TODO creation:', error);
@@ -312,11 +302,7 @@ export class TodoService {
 
       if (!fileGroupNo) {
         const { savedFiles, fileGroupNo: newFileGroupNo } =
-          await this.fileUploadUtil.saveFileInfo(
-            files,
-            auditSettings,
-            'todo_attachment',
-          );
+          await this.fileUploadUtil.saveFileInfo(files, auditSettings);
 
         fileGroupNo = newFileGroupNo;
         todo.todoFileGroupNo = fileGroupNo;
@@ -325,11 +311,10 @@ export class TodoService {
         const attachmentResponses: FileAttachmentResponseDto[] = savedFiles.map(
           (file) => ({
             fileNo: file.fileNo,
-            originalFileName: file.originalFileName,
+            originalFileName: file.saveFileName,
             fileSize: file.fileSize,
             fileExt: file.fileExt,
             uploadDate: file.auditColumns.regDtm.toISOString(),
-            validationStatus: file.validationStatus,
           }),
         );
 
@@ -344,16 +329,11 @@ export class TodoService {
         const savedFiles: FileInfoEntity[] = [];
 
         for (const file of files) {
-          const { path, filename, originalname, size } = file;
+          const { path, filename } = file;
           let newFile = this.fileInfoRepository.create({
             fileGroupNo,
             filePath: path,
             saveFileName: filename,
-            originalFileName: originalname,
-            fileExt: originalname.split('.').pop() || '',
-            fileSize: size,
-            fileCategory: 'todo_attachment',
-            validationStatus: 'validated',
           });
 
           auditSettings.entity = newFile;
@@ -366,11 +346,10 @@ export class TodoService {
         const attachmentResponses: FileAttachmentResponseDto[] = savedFiles.map(
           (file) => ({
             fileNo: file.fileNo,
-            originalFileName: file.originalFileName,
+            originalFileName: file.saveFileName,
             fileSize: file.fileSize,
             fileExt: file.fileExt,
             uploadDate: file.auditColumns.regDtm.toISOString(),
-            validationStatus: file.validationStatus,
           }),
         );
 
@@ -409,18 +388,16 @@ export class TodoService {
     const files = await this.fileInfoRepository.find({
       where: {
         fileGroupNo: todoFileGroupNo,
-        fileCategory: 'todo_attachment',
       },
       order: { fileNo: 'ASC' },
     });
 
     return files.map((file) => ({
       fileNo: file.fileNo,
-      originalFileName: file.originalFileName,
+      originalFileName: file.saveFileName,
       fileSize: file.fileSize,
       fileExt: file.fileExt,
       uploadDate: file.auditColumns.regDtm.toISOString(),
-      validationStatus: file.validationStatus,
     }));
   }
 

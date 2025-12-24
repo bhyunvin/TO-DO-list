@@ -18,14 +18,12 @@ export class FileUploadUtil {
   constructor(
     @InjectRepository(FileInfoEntity)
     private readonly fileInfoRepository: Repository<FileInfoEntity>,
-    private readonly fileValidationService: FileValidationService,
   ) {}
 
   // 파일 정보를 DB에 저장하는 함수
   async saveFileInfo(
     files: Express.Multer.File[],
     setting: AuditSettings,
-    fileCategory: FileCategory = 'todo_attachment',
   ): Promise<{ savedFiles: FileInfoEntity[]; fileGroupNo: number }> {
     const savedFiles: FileInfoEntity[] = [];
     let fileGroupNo: number | null = null;
@@ -34,13 +32,11 @@ export class FileUploadUtil {
       // 첫 번째 파일을 DB에 저장하여 fileGroupNo를 설정합니다.
       const [firstFile] = files;
       let newFirstFile = this.fileInfoRepository.create({
+        fileGroupNo: 0, // 임시값: 저장 후 fileNo로 업데이트됨
         filePath: firstFile.path,
         saveFileName: firstFile.filename,
-        originalFileName: firstFile.originalname,
         fileExt: extname(firstFile.originalname).substring(1),
         fileSize: firstFile.size,
-        fileCategory,
-        validationStatus: 'validated',
       });
 
       setting.entity = newFirstFile;
@@ -67,11 +63,8 @@ export class FileUploadUtil {
           fileGroupNo, // 모든 파일에 같은 fileGroupNo 설정
           filePath: file.path,
           saveFileName: file.filename,
-          originalFileName: file.originalname,
           fileExt: extname(file.originalname).substring(1),
           fileSize: file.size,
-          fileCategory,
-          validationStatus: 'validated',
         });
 
         setting.entity = newFile;

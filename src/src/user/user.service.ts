@@ -124,7 +124,6 @@ export class UserService {
           const fileUploadResult = await this.fileUploadUtil.saveFileInfo(
             [profileImageFile],
             { entity: null, id: userId, ip },
-            'profile_image', // 파일 카테고리 지정
           );
 
           const { fileGroupNo } = fileUploadResult;
@@ -343,7 +342,6 @@ export class UserService {
           const fileUploadResult = await this.fileUploadUtil.saveFileInfo(
             [profileImageFile],
             { entity: null, id: currentUserId, ip },
-            'profile_image',
           );
 
           const { fileGroupNo } = fileUploadResult;

@@ -29,7 +29,6 @@ export class FileAttachmentResponseDto {
   fileSize: number;
   fileExt: string;
   uploadDate: string;
-  validationStatus: string;
 }
 
 // TODO 생성 응답 DTO (파일 포함)
