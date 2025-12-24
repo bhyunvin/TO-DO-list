@@ -94,20 +94,14 @@ export const useChatStore = create(
 
       // 환영 메시지 추가 (채팅 세션 시작 시)
       addWelcomeMessage: () => {
-        const { messages } = get();
+        const { messages, hasApiKey } = get();
+        const hasKey = hasApiKey();
 
-        // 이미 메시지가 있으면 환영 메시지를 추가하지 않음
-        if (messages.length > 0) {
-          return;
-        }
-
-        // authStore에서 사용자 정보 확인
-        const hasApiKey = get().hasApiKey();
-
-        let welcomeContent = '';
-
-        if (!hasApiKey) {
-          welcomeContent = `<p>안녕하세요! 🤖 AI 비서입니다.</p>
+        // 메시지 생성 헬퍼 함수
+        const createWelcomeMessage = (type) => {
+          let content = '';
+          if (type === 'warning') {
+            content = `<p>안녕하세요! 🤖 AI 비서입니다.</p>
 <p>AI 서비스를 이용하시려면 <strong>API Key 설정</strong>이 필요합니다.</p>
 <hr>
 <h2>🔑 API Key 발급 및 등록 방법</h2>
@@ -117,8 +111,8 @@ export const useChatStore = create(
 <li><strong>AI API Key</strong> 필드에 키를 입력하고 저장해주세요.</li>
 </ol>
 <p>키를 등록하시면 바로 채팅을 시작할 수 있습니다!</p>`;
-        } else {
-          welcomeContent = `<p>안녕하세요! 🤖 AI 비서입니다.</p>
+          } else {
+            content = `<p>안녕하세요! 🤖 AI 비서입니다.</p>
 <p>무엇을 도와드릴까요?</p>
 <p>편하게 말씀만 하시면 제가 할 일 관리를 도와드릴게요.</p>
 <hr>
@@ -140,19 +134,49 @@ export const useChatStore = create(
 </ul>
 <hr>
 <p>언제든지 편하게 요청해주세요!</p>`;
-        }
+          }
 
-        const welcomeMessage = {
-          id: `welcome-${Date.now()}`,
-          content: welcomeContent,
-          isUser: false,
-          timestamp: new Date(),
-          isHtml: true, // HTML로 렌더링
-          type: hasApiKey ? 'welcome' : 'warning', // 메시지 타입 구분 (선택 사항)
+          return {
+            id: `welcome-${Date.now()}`,
+            content,
+            isUser: false,
+            timestamp: new Date(),
+            isHtml: true,
+            type,
+          };
         };
 
+        // 이미 메시지가 있는 경우 확인
+        if (messages.length > 0) {
+          const firstMessage = messages[0];
+
+          // 첫 번째 메시지가 환영/경고 메시지인지 확인
+          if (
+            firstMessage.type === 'welcome' ||
+            firstMessage.type === 'warning'
+          ) {
+            const currentType = hasKey ? 'welcome' : 'warning';
+
+            // 상태가 변경되었으면 메시지 교체 (예: 경고 -> 환영)
+            if (firstMessage.type !== currentType) {
+              // 메시지가 딱 하나뿐이거나(환영메시지만 있음), 사용자가 아직 대화를 시작하지 않았다고 판단될 때 교체
+              // 여기서는 첫번째 메시지만 교체하는 전략 사용
+              const newWelcomeMessage = createWelcomeMessage(currentType);
+
+              // ID는 유지하거나 새로 생성할 수 있음. 여기서는 새로 생성하여 리렌더링 유도
+              const newMessages = [...messages];
+              newMessages[0] = newWelcomeMessage;
+
+              set({ messages: newMessages });
+            }
+          }
+          return;
+        }
+
+        // 메시지가 없는 경우 새 메시지 추가
+        const type = hasKey ? 'welcome' : 'warning';
         set((state) => ({
-          messages: [welcomeMessage],
+          messages: [createWelcomeMessage(type)],
         }));
       },
 

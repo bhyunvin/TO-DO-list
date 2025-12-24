@@ -1380,8 +1380,8 @@ function TodoContainer() {
     const willOpen = !isChatOpen;
     setIsChatOpen(willOpen);
 
-    // 채팅을 열 때 환영 메시지 추가 (메시지가 없는 경우에만)
-    if (willOpen && messages.length === 0) {
+    // 채팅을 열 때 환영 메시지 추가 (메시지가 이미 있어도 최신 상태 반영을 위해 호출)
+    if (willOpen) {
       addWelcomeMessage();
     }
 
