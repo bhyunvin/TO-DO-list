@@ -50,14 +50,8 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
       setNewPasswordError('새 비밀번호는 최소 8자 이상이어야 합니다.');
     } else if (passwordValue.length > 100) {
       setNewPasswordError('새 비밀번호는 최대 100자까지 입력 가능합니다.');
-    } else if (
-      !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/.test(
-        passwordValue,
-      )
-    ) {
-      setNewPasswordError(
-        '새 비밀번호는 대문자, 소문자, 숫자, 특수문자(@$!%*?&)를 각각 하나 이상 포함해야 합니다.',
-      );
+    } else if (!/[@$!%*?&]/.test(passwordValue)) {
+      setNewPasswordError('새 비밀번호는 특수문자(@$!%*?&)를 하나 이상 포함해야 합니다.');
     } else if (passwordValue === currentPassword) {
       setNewPasswordError('새 비밀번호는 현재 비밀번호와 달라야 합니다.');
     } else {
@@ -119,14 +113,8 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
     } else if (newPassword.length > 100) {
       setNewPasswordError('새 비밀번호는 최대 100자까지 입력 가능합니다.');
       isValid = false;
-    } else if (
-      !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/.test(
-        newPassword,
-      )
-    ) {
-      setNewPasswordError(
-        '새 비밀번호는 대문자, 소문자, 숫자, 특수문자(@$!%*?&)를 각각 하나 이상 포함해야 합니다.',
-      );
+    } else if (!/[@$!%*?&]/.test(newPassword)) {
+      setNewPasswordError('새 비밀번호는 특수문자(@$!%*?&)를 하나 이상 포함해야 합니다.');
       isValid = false;
     } else if (newPassword === currentPassword) {
       setNewPasswordError('새 비밀번호는 현재 비밀번호와 달라야 합니다.');
@@ -320,8 +308,7 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
               </div>
             )}
             <small className="form-text text-muted">
-              8자 이상, 대문자, 소문자, 숫자, 특수문자(@$!%*?&) 각각 하나 이상
-              포함
+              8자 이상, 특수문자(@$!%*?&) 하나 이상 포함
             </small>
           </div>
         </div>

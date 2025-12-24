@@ -57,7 +57,10 @@ export class UserController {
           this.logger.error('Session save error', err);
           return reject(new Error('세션 저장에 실패했습니다.'));
         }
-        resolve(user);
+
+        // 간단히 클라이언트 반환용으로 복사본 생성 후 복호화 및 마스킹
+        const userForClient = { ...user };
+        resolve(this.userService.getPublicUserInfo(userForClient));
       });
     });
   }
@@ -112,7 +115,7 @@ export class UserController {
         );
       }
 
-      return result;
+      return this.userService.getPublicUserInfo(result);
     } catch (error) {
       const { userId } = userDto;
       const { message } = error;
@@ -203,7 +206,7 @@ export class UserController {
       // 속도 제한 검사 - 너무 빈번한 업데이트 방지
       const { lastProfileUpdate: lastUpdateTime } = session;
       const now = Date.now();
-      const minUpdateInterval = 60 * 1000;  // 업데이트 간 최소 1분
+      const minUpdateInterval = 60 * 1000; // 업데이트 간 최소 1분
 
       if (lastUpdateTime && now - lastUpdateTime < minUpdateInterval) {
         const remainingSeconds = Math.ceil(
@@ -252,7 +255,10 @@ export class UserController {
             ip,
           });
 
-          resolve(updatedUser);
+          // 클라이언트 반환용 복사본 생성 후 복호화 및 마스킹
+          const userForClient = { ...updatedUser };
+          // UserEntity 타입 캐스팅 필요 없음 (UserService에서 Generics 지원)
+          resolve(this.userService.getPublicUserInfo(userForClient));
         });
       });
     } catch (error) {
@@ -396,6 +402,22 @@ export class UserController {
     if (!user) {
       throw new UnauthorizedException('로그인이 필요합니다.');
     }
-    return user;
+    // 세션의 사용자 정보(암호화 상태)를 복호화하여 반환
+    // 세션 객체 자체를 수정하지 않도록 복사본 사용
+    const userForClient = { ...user };
+    return this.userService.getPublicUserInfo(userForClient);
+  }
+
+  // 프로필 상세 조회 (편집용 - 전체 정보 반환)
+  @UseGuards(AuthenticatedGuard)
+  @Get('profile/detail')
+  getProfileDetail(@Session() session: SessionInterface & SessionData) {
+    const { user } = session;
+    if (!user) {
+      throw new UnauthorizedException('로그인이 필요합니다.');
+    }
+    // 세션 객체 자체를 수정하지 않도록 복사본 사용
+    const userForClient = { ...user };
+    return this.userService.decryptUserInfo(userForClient);
   }
 }

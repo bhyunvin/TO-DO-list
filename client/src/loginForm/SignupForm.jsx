@@ -171,6 +171,12 @@ const SignupForm = ({ onSignupComplete }) => {
     if (!userPassword) {
       setPasswordError('비밀번호를 확인해주세요.');
       return false;
+    } else if (userPassword.length < 8) {
+      setPasswordError('비밀번호는 최소 8자 이상이어야 합니다.');
+      return false;
+    } else if (!/[@$!%*?&]/.test(userPassword)) {
+      setPasswordError('비밀번호는 특수문자(@$!%*?&)를 하나 이상 포함해야 합니다.');
+      return false;
     }
 
     if (!confirmUserPassword || userPassword !== confirmUserPassword) {

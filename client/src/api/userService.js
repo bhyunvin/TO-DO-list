@@ -11,6 +11,15 @@ const userService = {
   },
 
   /**
+   * 사용자 상세 프로필 가져오기 (암호화 해제된 전체 정보)
+   * @returns {Promise<object>}
+   */
+  async getUserProfileDetail() {
+    const response = await apiClient.get('/user/profile/detail');
+    return response.data;
+  },
+
+  /**
    * 사용자 프로필 업데이트
    * @param {FormData} formData
    * @returns {Promise<object>}

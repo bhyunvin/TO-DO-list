@@ -9,7 +9,14 @@ import { InjectRepository, InjectDataSource } from '@nestjs/typeorm';
 import { Repository, DataSource, Not } from 'typeorm';
 import { UserEntity } from './user.entity';
 import { UserDto, UpdateUserDto, ChangePasswordDto } from './user.dto';
-import { encrypt, isHashValid, encryptSymmetric } from '../utils/cryptUtil';
+import {
+  encrypt,
+  isHashValid,
+  encryptSymmetric,
+  decryptSymmetric,
+  encryptSymmetricDeterministic,
+  decryptSymmetricDeterministic,
+} from '../utils/cryptUtil';
 import { FileUploadUtil } from '../fileUpload/fileUploadUtil';
 import { FileValidationService } from '../fileUpload/validation/file-validation.service';
 import { InputSanitizerService } from '../utils/inputSanitizer';
@@ -28,6 +35,35 @@ export class UserService {
     @InjectDataSource()
     private readonly dataSource: DataSource,
   ) {}
+
+  // 사용자 정보 복호화 헬퍼 메소드
+  decryptUserInfo<T extends Partial<UserEntity>>(user: T): T {
+    if (!user) return user;
+
+    // 이메일 복호화 (결정적 암호화 사용)
+    if (user.userEmail) {
+      user.userEmail = decryptSymmetricDeterministic(user.userEmail);
+    }
+
+    // API Key 복호화 (일반 양방향 암호화 사용)
+    if (user.aiApiKey) {
+      user.aiApiKey = decryptSymmetric(user.aiApiKey);
+    }
+
+    return user;
+  }
+
+  // 클라이언트 반환용 사용자 정보 (민감정보 암호화 상태 유지)
+  getPublicUserInfo<T extends Partial<UserEntity>>(user: T): T {
+    if (!user) return user;
+
+    // 복호화를 수행하지 않고 그대로 반환합니다.
+    // DB에 저장된 암호문(Ciphertext) 상태로 클라이언트에 전달되어
+    // 브라우저 세션 스토리지 등 평문 저장을 방지합니다.
+    // 필요한 경우 /user/profile/detail 엔드포인트를 통해 복호화된 정보를 조회합니다.
+
+    return user;
+  }
 
   // 로그인 로직 (컨트롤러에서 세션 처리)
   async login(
@@ -73,12 +109,14 @@ export class UserService {
     ip: string,
   ): Promise<UserDto> {
     return this.dataSource.transaction(async (transactionalEntityManager) => {
-      // 이메일 고유성 확인
+      // 이메일 고유성 확인 (결정적 암호화 값으로 조회)
       const { userEmail, userPassword, userId } = userDto;
+      const encryptedEmail = encryptSymmetricDeterministic(userEmail);
+
       const existingUserWithEmail = await transactionalEntityManager.findOne(
         UserEntity,
         {
-          where: { userEmail },
+          where: { userEmail: encryptedEmail },
         },
       );
 
@@ -87,6 +125,7 @@ export class UserService {
       }
 
       userDto.userPassword = await encrypt(userPassword); // 비밀번호 암호화
+      userDto.userEmail = encryptedEmail; // 이메일 암호화하여 저장
 
       // 유저 정보를 저장합니다.
       let newUser = this.userRepository.create(userDto);
@@ -226,12 +265,14 @@ export class UserService {
           });
         }
 
-        // 이메일 고유성 확인
+        // 이메일 고유성 확인 (결정적 암호화 값으로 조회)
+        const encryptedNewEmail = encryptSymmetricDeterministic(newEmail);
+
         const existingUser = await transactionalEntityManager.findOne(
           UserEntity,
           {
             where: {
-              userEmail: newEmail,
+              userEmail: encryptedNewEmail,
               userSeq: Not(userSeq), // 현재 사용자 제외
             },
           },
@@ -281,7 +322,9 @@ export class UserService {
       if (newUserEmail !== undefined && newUserEmail !== currentUserEmail) {
         // userEmail이 undefined가 아니고 실제로 값이 있을 때만 업데이트
         if (newUserEmail && newUserEmail.trim().length > 0) {
-          currentUser.userEmail = newUserEmail;
+          // 이미 위에서 중복 검사를 위해 암호화했으므로 다시 암호화
+          // (위의 encryptedNewEmail 변수를 스코프 문제로 다시 생성하거나 재사용)
+          currentUser.userEmail = encryptSymmetricDeterministic(newUserEmail);
           updatedFields.push('userEmail');
         }
       }

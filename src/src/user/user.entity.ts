@@ -19,7 +19,7 @@ export class UserEntity {
   @Column({ name: 'user_password', type: 'text' })
   userPassword: string;
 
-  @Column({ name: 'user_email', length: 100 })
+  @Column({ name: 'user_email', type: 'text' })
   userEmail: string;
 
   @Column({ name: 'user_description', length: 4000 })
