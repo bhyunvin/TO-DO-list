@@ -5,7 +5,7 @@ import LoginForm from './loginForm/LoginForm';
 import TodoList from './todoList/TodoList';
 import './App.css';
 
-function App() {
+const App = () => {
   const { user } = useAuthStore();
   const initializeTheme = useThemeStore((state) => state.initializeTheme);
 
@@ -15,6 +15,6 @@ function App() {
   }, [initializeTheme]);
 
   return <>{user ? <TodoList /> : <LoginForm />}</>;
-}
+};
 
 export default App;

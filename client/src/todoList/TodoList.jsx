@@ -21,7 +21,7 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 import 'react-datepicker/dist/react-datepicker.css';
 
 // 신규 TODO 항목 추가 폼 컴포넌트
-function CreateTodoForm({ onAddTodo, onCancel }) {
+const CreateTodoForm = ({ onAddTodo, onCancel }) => {
   const { validateFiles, formatFileSize, getUploadPolicy } =
     useFileUploadValidator();
 
@@ -282,7 +282,8 @@ function CreateTodoForm({ onAddTodo, onCancel }) {
 }
 
 // TODO 항목 목록을 표시하는 컴포넌트
-function TodoList({
+// TODO 항목 목록을 표시하는 컴포넌트
+const TodoList = ({
   todos,
   isLoadingTodos,
   onToggleComplete,
@@ -291,7 +292,7 @@ function TodoList({
   togglingTodoSeq,
   openActionMenu,
   setOpenActionMenu,
-}) {
+}) => {
   const menuRef = useRef(null);
 
   // 메뉴 외부 클릭 시 닫기 처리
@@ -451,7 +452,8 @@ function TodoList({
 }
 
 // ToDo 항목 수정을 위한 폼 컴포넌트
-function EditTodoForm({ todo, onSave, onCancel }) {
+// 항목 수정 폼 컴포넌트
+const EditTodoForm = ({ todo, onSave, onCancel }) => {
   const { validateFiles, formatFileSize, getUploadPolicy } =
     useFileUploadValidator();
 
@@ -712,7 +714,8 @@ const formatDateTime = (isoString) => {
 };
 
 // TODO 리스트 및 폼을 조건부로 렌더링하는 컨테이너 컴포넌트
-function TodoContainer() {
+// 메인 컨테이너 컴포넌트
+const TodoContainer = () => {
   const { user, logout, login } = useAuthStore();
   const {
     messages,

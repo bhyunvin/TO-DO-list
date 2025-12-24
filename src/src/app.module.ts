@@ -61,7 +61,7 @@ const envSchema = z.object({
 // 2. ConfigModule에 전달할 유효성 검사 함수
 // ==================================================================
 
-function validate(config: Record<string, unknown>) {
+const validate = (config: Record<string, unknown>) => {
   try {
     const validatedConfig = envSchema.parse(config);
     return validatedConfig;
@@ -77,7 +77,7 @@ function validate(config: Record<string, unknown>) {
       '환경 변수 설정이 올바르지 않습니다. .env 또는 .env.example 파일을 확인하세요.',
     );
   }
-}
+};
 
 // ==================================================================
 // 3. 메인 앱 모듈 (AppModule)
