@@ -30,7 +30,9 @@ export class UserService {
   ) {}
 
   // 로그인 로직 (컨트롤러에서 세션 처리)
-  async login(userDto: UserDto): Promise<Omit<UserEntity, 'userPassword'>> {
+  async login(
+    userDto: UserDto,
+  ): Promise<Omit<UserEntity, 'userPassword' | 'setProfileImage'>> {
     const { userId } = userDto;
     const selectedUser = await this.userRepository.findOne({
       where: { userId },
@@ -50,6 +52,9 @@ export class UserService {
     }
 
     const { userPassword: _, ...userToStore } = selectedUser;
+
+    // @AfterLoad에 의해 profileImage가 이미 설정되어 있음
+
     return userToStore;
   }
 
@@ -160,6 +165,9 @@ export class UserService {
         }
       }
 
+      // 프로필 이미지 URL 설정 (Entity 메서드 호출)
+      savedUser.setProfileImage();
+
       return savedUser;
     });
   }
@@ -170,7 +178,7 @@ export class UserService {
     updateUserDto: UpdateUserDto,
     profileImageFile: Express.Multer.File,
     ip: string,
-  ): Promise<Omit<UserEntity, 'userPassword'>> {
+  ): Promise<Omit<UserEntity, 'userPassword' | 'setProfileImage'>> {
     return this.dataSource.transaction(async (transactionalEntityManager) => {
       // 향상된 사용자 검증
       const currentUser = await transactionalEntityManager.findOne(UserEntity, {
@@ -413,6 +421,14 @@ export class UserService {
 
       // 비밀번호 없이 사용자 반환
       const { userPassword: _, ...userToReturn } = savedUser;
+
+      // 프로필 이미지 URL 설정 (@AfterLoad는 save 후 호출되지 않을 수 있으므로 수동 호출이나 로직 중복)
+      // savedUser는 Entity 인스턴스이므로 메서드가 있음
+      savedUser.setProfileImage();
+
+      // userToReturn은 plain object이므로 수동 할당 필요하거나, savedUser에서 가져와야 함.
+      (userToReturn as any).profileImage = savedUser.profileImage;
+
       return userToReturn;
     });
   }

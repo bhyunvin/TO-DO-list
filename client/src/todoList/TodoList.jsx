@@ -1731,7 +1731,21 @@ function TodoContainer() {
             onClick={handleUserMenuToggle}
             aria-label="사용자 메뉴"
           >
-            <i className="bi bi-person-circle"></i>
+            {user?.profileImage ? (
+              <img
+                src={user.profileImage}
+                alt="프로필"
+                loading="lazy"
+                style={{
+                  width: '1.5rem',
+                  height: '1.5rem',
+                  borderRadius: '50%',
+                  objectFit: 'cover',
+                }}
+              />
+            ) : (
+              <i className="bi bi-person-circle"></i>
+            )}
           </button>
           {isUserMenuOpen && (
             <div className="user-dropdown-menu">

@@ -48,6 +48,9 @@ const ProfileUpdateForm = ({
       setUserName(user.userName || '');
       setUserEmail(user.userEmail || '');
       setUserDescription(user.userDescription || '');
+      if (user.profileImage) {
+        setProfileImage(user.profileImage);
+      }
     }
   }, [user]);
 
@@ -339,31 +342,50 @@ const ProfileUpdateForm = ({
         </div>
 
         {/* 이미지 미리보기 */}
-        {profileImage && profileImageValidation?.isValid && (
-          <div className="form-group row mb-3">
-            <label className="col-3 col-form-label">미리보기</label>
-            <div className="col-9">
-              <div className="d-flex align-items-center">
-                <img
-                  src={profileImage}
-                  alt="프로필 미리보기"
-                  className="profile-preview-image"
-                />
-                <div className="ms-3">
-                  <div className="text-success">
-                    <small>
-                      <strong>{profileImageFile?.name}</strong>
-                      <br />
-                      크기: {formatFileSize(profileImageFile?.size || 0)}
-                      <br />
-                      상태: 검증 완료 ✓
-                    </small>
+        {profileImage &&
+          (!profileImageFile || profileImageValidation?.isValid) && (
+            <div className="form-group row mb-3">
+              <label className="col-3 col-form-label">미리보기</label>
+              <div className="col-9">
+                <div className="d-flex align-items-center">
+                  <img
+                    src={profileImage}
+                    alt="프로필 미리보기"
+                    style={{
+                      width: '100px',
+                      height: '100px',
+                      objectFit: 'cover',
+                      border: '2px solid #28a745',
+                      borderRadius: '8px',
+                    }}
+                  />
+                  <div className="ms-3">
+                    <div className="text-success">
+                      <small>
+                        {profileImageFile ? (
+                          <>
+                            <strong>{profileImageFile.name}</strong>
+                            <br />
+                            크기: {formatFileSize(profileImageFile.size)}
+                            <br />
+                            상태: 검증 완료 ✓
+                          </>
+                        ) : (
+                          <>
+                            <strong>현재 프로필 이미지</strong>
+                            <br />
+                            <span className="text-muted">
+                              서버에 저장된 이미지입니다.
+                            </span>
+                          </>
+                        )}
+                      </small>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
         {/* 파일 업로드 진행 상황 */}
         {profileImageFile && (uploadStatus !== 'idle' || isSubmitting) && (

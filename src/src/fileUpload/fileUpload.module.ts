@@ -10,6 +10,7 @@ import {
   ProfileImageValidationInterceptor,
   TodoAttachmentValidationInterceptor,
 } from './validation';
+import { FileController } from './file.controller';
 
 @Module({
   imports: [TypeOrmModule.forFeature([FileInfoEntity])],
@@ -20,6 +21,7 @@ import {
     ProfileImageValidationInterceptor,
     TodoAttachmentValidationInterceptor,
   ],
+  controllers: [FileController],
   exports: [
     FileUploadUtil,
     FileValidationService,

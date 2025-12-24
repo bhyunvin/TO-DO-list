@@ -23,6 +23,7 @@ describe('UserService - Profile Update', () => {
     userDescription: 'Test description',
     userPassword: 'hashedpassword',
     userProfileImageFileGroupNo: 1,
+    aiApiKey: null,
     adminYn: 'N',
     auditColumns: {
       regId: 'testuser',
@@ -32,6 +33,7 @@ describe('UserService - Profile Update', () => {
       regIp: '127.0.0.1',
       updIp: '127.0.0.1',
     },
+    setProfileImage: jest.fn(),
   };
 
   beforeEach(async () => {

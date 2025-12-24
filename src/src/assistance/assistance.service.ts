@@ -636,7 +636,7 @@ export class AssistanceService implements OnModuleInit {
         userProfileImageFileGroupNo: null,
         adminYn: 'N',
         auditColumns: null,
-      } as Omit<UserEntity, 'userPassword'>;
+      } as Omit<UserEntity, 'userPassword' | 'setProfileImage'>;
 
       const createTodoDto: CreateTodoDto = {
         todoContent,
@@ -738,7 +738,7 @@ export class AssistanceService implements OnModuleInit {
         userProfileImageFileGroupNo: null,
         adminYn: 'N',
         auditColumns: null,
-      } as Omit<UserEntity, 'userPassword'>;
+      } as Omit<UserEntity, 'userPassword' | 'setProfileImage'>;
 
       const updateTodoDto: any = {};
       if (updateData?.todoContent !== undefined) {

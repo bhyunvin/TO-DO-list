@@ -1,5 +1,5 @@
 import { AuditColumns } from '../utils/auditColumns';
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, AfterLoad } from 'typeorm';
 
 @Entity('nj_user_info')
 export class UserEntity {
@@ -36,4 +36,14 @@ export class UserEntity {
 
   @Column(() => AuditColumns) // 복합 엔티티를 포함
   auditColumns: AuditColumns;
+
+  // DB 컬럼이 아닌 응답용 가상 프로퍼티
+  profileImage?: string;
+
+  @AfterLoad()
+  setProfileImage() {
+    if (this.userProfileImageFileGroupNo) {
+      this.profileImage = `/api/file/${this.userProfileImageFileGroupNo}`;
+    }
+  }
 }

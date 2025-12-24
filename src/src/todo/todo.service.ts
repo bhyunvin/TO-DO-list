@@ -93,7 +93,7 @@ export class TodoService {
   }
 
   async create(
-    user: Omit<UserEntity, 'userPassword'>,
+    user: Omit<UserEntity, 'userPassword' | 'setProfileImage'>,
     ip: string,
     createTodoDto: CreateTodoDto,
   ): Promise<TodoEntity> {
@@ -114,7 +114,7 @@ export class TodoService {
 
   async update(
     id: number,
-    user: Omit<UserEntity, 'userPassword'>,
+    user: Omit<UserEntity, 'userPassword' | 'setProfileImage'>,
     ip: string,
     updateTodoDto: UpdateTodoDto,
   ): Promise<TodoEntity> {
@@ -139,7 +139,7 @@ export class TodoService {
   }
 
   async delete(
-    user: Omit<UserEntity, 'userPassword'>,
+    user: Omit<UserEntity, 'userPassword' | 'setProfileImage'>,
     ip: string,
     todoId: number,
   ): Promise<void> {
@@ -164,7 +164,7 @@ export class TodoService {
   }
 
   async uploadAttachments(
-    user: Omit<UserEntity, 'userPassword'>,
+    user: Omit<UserEntity, 'userPassword' | 'setProfileImage'>,
     ip: string,
     files: Express.Multer.File[],
   ): Promise<FileUploadResponseDto> {
@@ -213,7 +213,7 @@ export class TodoService {
   }
 
   async createWithFiles(
-    user: Omit<UserEntity, 'userPassword'>,
+    user: Omit<UserEntity, 'userPassword' | 'setProfileImage'>,
     ip: string,
     createTodoDto: CreateTodoWithFilesDto,
     files: Express.Multer.File[],
@@ -266,7 +266,7 @@ export class TodoService {
 
   async addAttachments(
     todoId: number,
-    user: Omit<UserEntity, 'userPassword'>,
+    user: Omit<UserEntity, 'userPassword' | 'setProfileImage'>,
     ip: string,
     files: Express.Multer.File[],
   ): Promise<FileUploadResponseDto> {

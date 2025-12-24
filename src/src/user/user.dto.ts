@@ -27,6 +27,9 @@ export class UserDto {
   aiApiKey?: string; // AI API Key
 
   adminYn: string; //관리자여부
+
+  @IsOptional()
+  profileImage?: string; // 프로필 이미지 URL (응답용)
 }
 
 export class UpdateUserDto {
