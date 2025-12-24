@@ -201,8 +201,8 @@ const ProfileUpdateForm = ({
     formData.append('userEmail', userEmail.trim());
     formData.append('userDescription', userDescription.trim());
 
-    // API Key 추가 (빈 문자열도 전송하여 삭제 처리 가능하게 함)
-    if (aiApiKey !== undefined) {
+    // API Key 추가 (빈 문자열이면 전송하지 않음 -> 기존 값 유지)
+    if (aiApiKey && aiApiKey.trim().length > 0) {
       formData.append('aiApiKey', aiApiKey.trim());
     }
 
@@ -238,7 +238,8 @@ const ProfileUpdateForm = ({
       userName !== (user?.userName || '') ||
       userEmail !== (user?.userEmail || '') ||
       userDescription !== (user?.userDescription || '') ||
-      aiApiKey !== '' ||
+      userDescription !== (user?.userDescription || '') ||
+      (aiApiKey !== '' && aiApiKey.trim().length > 0) ||
       profileImageFile !== null;
 
     if (hasChanges) {

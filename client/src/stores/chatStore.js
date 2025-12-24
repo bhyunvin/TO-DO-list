@@ -240,11 +240,19 @@ export const useChatStore = create(
           }
         } else if (error) {
           // 네트워크 또는 기타 오류
-          const { name, message } = error;
-          if (name === 'TypeError' && message.includes('fetch')) {
+          const { name, message, code } = error;
+          if (
+            (name === 'TypeError' && message.includes('fetch')) ||
+            message === 'Network Error' ||
+            code === 'ERR_NETWORK'
+          ) {
             errorType = 'NETWORK_ERROR';
             shouldRetry = retryCount < 2; // 네트워크 오류의 경우 최대 2회 재시도 허용
-          } else if (name === 'AbortError' || message.includes('timeout')) {
+          } else if (
+            name === 'AbortError' ||
+            message.includes('timeout') ||
+            code === 'ECONNABORTED'
+          ) {
             errorType = 'TIMEOUT_ERROR';
             shouldRetry = retryCount < 1; // 타임아웃의 경우 1회 재시도 허용
           }

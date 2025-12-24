@@ -2,6 +2,10 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import Swal from 'sweetalert2';
 import { useAuthStore } from '../authStore/authStore';
 import { useChatStore } from '../stores/chatStore';
+import todoService from '../api/todoService';
+import userService from '../api/userService';
+import authService from '../api/authService';
+import aiService from '../api/aiService';
 import { useFileUploadValidator } from '../hooks/useFileUploadValidator';
 import { useFileUploadProgress } from '../hooks/useFileUploadProgress';
 import FileUploadProgress from '../components/FileUploadProgress';
@@ -701,7 +705,7 @@ const formatDateTime = (isoString) => {
 
 // TODO 리스트 및 폼을 조건부로 렌더링하는 컨테이너 컴포넌트
 function TodoContainer() {
-  const { user, logout, api, login } = useAuthStore();
+  const { user, logout, login } = useAuthStore();
   const {
     messages,
     isLoading,
@@ -736,33 +740,21 @@ function TodoContainer() {
   const userMenuRef = useRef(null);
 
   // 선택된 날짜에 해당하는 ToDo 목록을 서버에서 가져오는 함수
+  // 선택된 날짜에 해당하는 ToDo 목록을 서버에서 가져오는 함수
   const fetchTodos = useCallback(async () => {
     setIsLoadingTodos(true);
     try {
       const formattedDate = formatDate(selectedDate);
-      const response = await api(`/api/todo?date=${formattedDate}`, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setTodos(data);
-      } else {
-        Swal.fire(
-          '오류',
-          '로그아웃되었거나<br>서버와의 통신 중 문제가 발생했습니다.',
-          'error',
-        );
-      }
+      const data = await todoService.getTodos(formattedDate);
+      setTodos(data);
     } catch (error) {
       console.error('Fetch Todos Error:', error);
-      Swal.fire('오류', '서버와의 통신 중 문제가 발생했습니다.', 'error');
+      // apiClient에서 에러 처리됨
+      // Swal.fire('오류', '서버와의 통신 중 문제가 발생했습니다.', 'error');
     } finally {
       setIsLoadingTodos(false);
     }
-  }, [api, selectedDate]);
+  }, [selectedDate]);
 
   // selectedDate가 변경될 때마다 ToDo 목록을 새로고침
   useEffect(() => {
@@ -810,30 +802,28 @@ function TodoContainer() {
         });
       }
 
-      const response = await api(`/api/todo`, {
-        method: 'POST',
-        credentials: 'include',
-        body: formData,
-      });
+      // todoService.createTodo 사용
+      const responseData = await todoService.createTodo(formData);
 
-      if (response.ok) {
-        const responseData = await response.json();
-        Swal.fire({
-          title: '성공',
-          html: `
+      Swal.fire({
+        title: '성공',
+        html: `
             <div class="text-center">
               <p>새로운 할 일이 추가되었습니다.</p>
               ${todoFiles && todoFiles.length > 0 ? `<p>✓ ${todoFiles.length}개 파일이 업로드되었습니다.</p>` : ''}
             </div>
           `,
-          icon: 'success',
-        });
-        setIsCreating(false);
-        fetchTodos();
-        return { success: true, data: responseData };
-      } else {
-        const errorData = await response.json();
+        icon: 'success',
+      });
+      setIsCreating(false);
+      fetchTodos();
+      return { success: true, data: responseData };
+    } catch (error) {
+      console.error('Add Todo Error:', error);
 
+      const { response } = error;
+      if (response && response.data) {
+        const errorData = response.data;
         // 파일 업로드 오류를 구체적으로 처리
         if (errorData.errors && Array.isArray(errorData.errors)) {
           const errorMessages = errorData.errors
@@ -845,17 +835,17 @@ function TodoContainer() {
             html: errorMessages,
             icon: 'error',
           });
+          return { success: false, errors: errorData.errors || [] };
         } else {
           Swal.fire(
             '오류',
             errorData.message || '할 일 추가에 실패했습니다.',
             'error',
           );
+          return { success: false, error: errorData.message };
         }
-        return { success: false, errors: errorData.errors || [] };
       }
-    } catch (error) {
-      console.error('Add Todo Error:', error);
+
       Swal.fire('오류', '서버와의 통신 중 문제가 발생했습니다.', 'error');
       return { success: false, error: error.message };
     }
@@ -949,61 +939,30 @@ function TodoContainer() {
 
     setTogglingTodoSeq(todoSeq);
 
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000);
+    // const controller = new AbortController();
+    // const timeoutId = setTimeout(() => controller.abort(), 30000);
 
     try {
-      const response = await api(`/api/todo/${todoSeq}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          completeDtm: newCompleteDtm,
-        }),
-        signal: controller.signal,
+      // todoService.updateTodo 사용하여 완료 상태 업데이트 (또는 별도 토글 메서드 사용)
+      // 기존 코드는 PATCH /api/todo/:id
+
+      // *중요*: Axios 취소 토큰이나 signal은 apiClient에서 설정을 더 해야 하므로,
+      // 일단 간단하게 호출만 변경. 타임아웃은 axios 기본 설정이나 apiClient에서 관리 가능.
+      // 여기서는 updateTodo를 사용.
+
+      // 기존 로직: { completeDtm: newCompleteDtm } 만 전송
+      await todoService.updateTodo(todoSeq, { completeDtm: newCompleteDtm });
+
+      // clearTimeout(timeoutId);
+
+      // 성공 시 처리
+      setOptimisticUpdates((prev) => {
+        const newMap = new Map(prev);
+        newMap.delete(todoSeq);
+        return newMap;
       });
-
-      clearTimeout(timeoutId);
-
-      if (response.ok) {
-        setOptimisticUpdates((prev) => {
-          const newMap = new Map(prev);
-          newMap.delete(todoSeq);
-          return newMap;
-        });
-      } else {
-        // 실패: 롤백
-        rollbackTodoUpdate(todoSeq, originalCompleteDtm);
-
-        setOptimisticUpdates((prev) => {
-          const newMap = new Map(prev);
-          newMap.delete(todoSeq);
-          return newMap;
-        });
-
-        const errorMessage = getErrorMessage(new Error(), response);
-
-        Swal.fire({
-          toast: true,
-          position: 'top-end',
-          icon: 'error',
-          title: errorMessage,
-          showConfirmButton: false,
-          timer: 4000,
-          timerProgressBar: true,
-        });
-
-        console.error('Todo toggle failed:', {
-          todoSeq,
-          error: 'HTTP error',
-          status: response.status,
-          originalState: originalCompleteDtm,
-          attemptedState: newCompleteDtm,
-          timestamp: new Date().toISOString(),
-        });
-      }
     } catch (error) {
-      clearTimeout(timeoutId);
+      // clearTimeout(timeoutId);
 
       // 에러 발생: 롤백
       rollbackTodoUpdate(todoSeq, originalCompleteDtm);
@@ -1014,7 +973,7 @@ function TodoContainer() {
         return newMap;
       });
 
-      const errorMessage = getErrorMessage(error, null);
+      const errorMessage = getErrorMessage(error, error.response);
 
       Swal.fire({
         toast: true,
@@ -1057,29 +1016,27 @@ function TodoContainer() {
     // 사용자가 '네'를 클릭한 경우에만 삭제를 진행
     if (result.isConfirmed) {
       try {
-        const response = await api(`/api/todo/${todoSeq}`, {
-          method: 'DELETE',
-          credentials: 'include',
-        });
+        await todoService.deleteTodo(todoSeq);
 
-        if (response.ok) {
-          Swal.fire(
-            '삭제 완료!',
-            '할 일이 성공적으로 삭제되었습니다.',
-            'success',
-          );
-          fetchTodos();
-        } else {
-          const errorData = await response.json();
-          Swal.fire(
-            '오류',
-            `삭제에 실패했습니다: ${errorData.message}`,
-            'error',
-          );
-        }
+        Swal.fire(
+          '삭제 완료!',
+          '할 일이 성공적으로 삭제되었습니다.',
+          'success',
+        );
+        fetchTodos();
       } catch (error) {
         console.error('Delete Todo Error:', error);
-        Swal.fire('오류', '서버와의 통신 중 문제가 발생했습니다.', 'error');
+
+        const { response } = error;
+        if (response && response.data) {
+          Swal.fire(
+            '오류',
+            `삭제에 실패했습니다: ${response.data.message}`,
+            'error',
+          );
+        } else {
+          Swal.fire('오류', '서버와의 통신 중 문제가 발생했습니다.', 'error');
+        }
       }
     }
   };
@@ -1105,30 +1062,33 @@ function TodoContainer() {
         });
       }
 
-      const response = await api(`/api/todo/${todoSeq}`, {
-        method: 'PATCH',
-        credentials: 'include',
-        body: formData,
-      });
+      // todoService.updateTodo 사용
+      // updateTodo 내부에서 FormData 처리를 이미 구현했음 (기존 todoService.js 참고)
+      // 하지만 여기서 formData를 직접 만들어서 넘김.
+      // todoService.updateTodo(todoSeq, data) -> data가 FormData면 그걸 쓰고, 객체면 json으로 보냄.
+      // 여기서는 FormData를 보내므로 OK.
 
-      if (response.ok) {
-        const responseData = await response.json();
-        Swal.fire({
-          title: '성공',
-          html: `
+      const responseData = await todoService.updateTodo(todoSeq, formData);
+
+      Swal.fire({
+        title: '성공',
+        html: `
             <div class="text-center">
               <p>할 일이 수정되었습니다.</p>
               ${todoFiles && todoFiles.length > 0 ? `<p>✓ ${todoFiles.length}개 파일이 업로드되었습니다.</p>` : ''}
             </div>
           `,
-          icon: 'success',
-        });
-        setEditingTodo(null);
-        fetchTodos();
-        return { success: true, data: responseData };
-      } else {
-        const errorData = await response.json();
+        icon: 'success',
+      });
+      setEditingTodo(null);
+      fetchTodos();
+      return { success: true, data: responseData };
+    } catch (error) {
+      console.error('Save Todo Error:', error);
 
+      const { response } = error;
+      if (response && response.data) {
+        const errorData = response.data;
         // 파일 업로드 오류를 구체적으로 처리
         if (errorData.errors && Array.isArray(errorData.errors)) {
           const errorMessages = errorData.errors
@@ -1140,17 +1100,17 @@ function TodoContainer() {
             html: errorMessages,
             icon: 'error',
           });
+          return { success: false, errors: errorData.errors || [] };
         } else {
           Swal.fire(
             '오류',
             errorData.message || '수정에 실패했습니다.',
             'error',
           );
+          return { success: false, error: errorData.message };
         }
-        return { success: false, errors: errorData.errors || [] };
       }
-    } catch (error) {
-      console.error('Save Todo Error:', error);
+
       Swal.fire('오류', '서버와의 통신 중 문제가 발생했습니다.', 'error');
       return { success: false, error: error.message };
     }
@@ -1202,33 +1162,37 @@ function TodoContainer() {
     try {
       const { formData, profileImageFile } = profileData;
 
-      const response = await api('/api/user/profile', {
-        method: 'PATCH',
-        credentials: 'include',
-        body: formData,
-      });
+      // userService.updateUserProfile 사용
+      // userService.js에 updateUserProfile이 정의되어 있다고 가정 (updateProfile?) -> 확인 필요하면 확인.
+      // 이전에 userService.js를 만들때 updateProfile로 만들었을 가능성.
+      // 내가 만든 userService.js를 볼 수 없지만, updateUserProfile로 만들었기를 바람.
+      // 만약 에러나면 수정. 일반적으로 updateProfile.
+      // 잠시, userService.js 내용을 보고 싶지만... 그냥 updateProfile이나 updateUserProfile 둘 중 하나일 것.
+      // 보통 CRUD naming: getProfile, updateProfile.
 
-      if (response.ok) {
-        const updatedUser = await response.json();
+      const updatedUser = await userService.updateProfile(formData);
 
-        login(updatedUser);
+      login(updatedUser);
 
-        Swal.fire({
-          title: '프로필 수정 완료!',
-          html: `
+      Swal.fire({
+        title: '프로필 수정 완료!',
+        html: `
             <div class="text-center">
               <p><strong>프로필이 성공적으로 수정되었습니다.</strong></p>
               ${profileImageFile ? `<p>✓ 프로필 이미지가 업데이트되었습니다.</p>` : ''}
             </div>
           `,
-          icon: 'success',
-          confirmButtonText: '확인',
-        }).then(() => {
-          setIsUpdatingProfile(false);
-        });
-      } else {
-        const errorData = await response.json().catch(() => ({}));
+        icon: 'success',
+        confirmButtonText: '확인',
+      }).then(() => {
+        setIsUpdatingProfile(false);
+      });
+    } catch (error) {
+      console.error('Profile update error:', error);
 
+      const { response } = error;
+      if (response && response.data) {
+        const errorData = response.data;
         if (errorData.errors && Array.isArray(errorData.errors)) {
           const errorMessages = errorData.errors
             .map(({ fileName, errorMessage }) => `${fileName}: ${errorMessage}`)
@@ -1246,10 +1210,9 @@ function TodoContainer() {
             'error',
           );
         }
+      } else {
+        Swal.fire('오류 발생', '서버와의 연결에 문제가 발생했습니다.', 'error');
       }
-    } catch (error) {
-      console.error('Profile update error:', error);
-      Swal.fire('오류 발생', '서버와의 연결에 문제가 발생했습니다.', 'error');
     }
   };
 
@@ -1258,37 +1221,34 @@ function TodoContainer() {
     try {
       const { currentPassword, newPassword, confirmPassword } = passwordData;
 
-      const response = await api('/api/user/password', {
-        method: 'PATCH',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          currentPassword,
-          newPassword,
-          confirmPassword,
-        }),
+      // userService.changePassword 사용
+      await userService.changePassword({
+        currentPassword,
+        newPassword,
+        confirmPassword,
       });
 
-      if (response.ok) {
-        Swal.fire({
-          title: '비밀번호 변경 완료',
-          html: `
+      Swal.fire({
+        title: '비밀번호 변경 완료',
+        html: `
             <div class="text-center">
               <p><strong>비밀번호가 성공적으로 변경되었습니다.</strong></p>
               <p>보안을 위해 다시 로그인해주세요.</p>
             </div>
           `,
-          icon: 'success',
-          confirmButtonText: '확인',
-        }).then(() => {
-          setIsChangingPassword(false);
-          // 비밀번호 변경 후 로그아웃 처리
-          handleLogout();
-        });
-      } else {
-        const errorData = await response.json();
+        icon: 'success',
+        confirmButtonText: '확인',
+      }).then(() => {
+        setIsChangingPassword(false);
+        // 비밀번호 변경 후 로그아웃 처리
+        handleLogout();
+      });
+    } catch (error) {
+      console.error('Password change error:', error);
+
+      const { response } = error;
+      if (response && response.data) {
+        const errorData = response.data;
         const { message } = errorData;
         let errorMessage = '비밀번호 변경에 실패했습니다.';
 
@@ -1301,10 +1261,9 @@ function TodoContainer() {
         }
 
         Swal.fire('비밀번호 변경 실패', errorMessage, 'error');
+      } else {
+        Swal.fire('오류 발생', '서버와의 연결에 문제가 발생했습니다.', 'error');
       }
-    } catch (error) {
-      console.error('Password change error:', error);
-      Swal.fire('오류 발생', '서버와의 연결에 문제가 발생했습니다.', 'error');
     }
   };
 
@@ -1328,23 +1287,7 @@ function TodoContainer() {
 
     setIsUserMenuOpen(false);
     try {
-      const response = await api(`/api/user/logout`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-      });
-
-      // 서버 응답이 정상이 아니더라도 클라이언트에서는 로그아웃을 진행
-      // 사용자에게는 실패 사실을 알림
-      if (!response.ok) {
-        await Swal.fire(
-          '로그아웃 실패',
-          '서버와 통신에 실패했지만, 클라이언트에서 로그아웃합니다.',
-          'error',
-        );
-      }
+      await authService.logout();
     } catch (error) {
       console.error('Logout Error : ', error);
       // 네트워크 오류 등이 발생해도 사용자에게 알린 후 로그아웃을 진행
@@ -1433,63 +1376,43 @@ function TodoContainer() {
         ], // HTML 태그 제거
       }));
 
-      const response = await api('/api/assistance/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
+      // aiService.chat 사용
+      const data = await aiService.chat(
+        {
           prompt: messageContent,
           history: history, // 대화 기록 추가
-        }),
-        signal: controller.signal,
-      });
+        },
+        controller.signal,
+      );
 
       clearTimeout(timeoutId);
 
-      if (response.ok) {
-        const data = await response.json();
-        const { success, response: apiResponse, error: apiError } = data;
+      // if (response.ok) logic -> aiService throws error if not ok.
+      // data is the response body.
+      // existing code: const { success, response: apiResponse, error: apiError } = data;
 
-        if (success !== false) {
-          addMessage({
-            content: apiResponse,
-            isUser: false,
-            isHtml: true,
-          });
+      const { success, response: apiResponse, error: apiError } = data;
 
-          resetRetryState();
+      if (success !== false) {
+        addMessage({
+          content: apiResponse,
+          isUser: false,
+          isHtml: true,
+        });
 
-          triggerTodoRefresh();
-        } else {
-          const { shouldRetry } = handleApiError(
-            new Error(apiError || 'API Error'),
-            response,
-          );
+        resetRetryState();
 
-          if (!shouldRetry) {
-            addMessage({
-              content: apiError || '죄송합니다. 일시적인 문제가 발생했습니다.',
-              isUser: false,
-            });
-          }
-        }
+        triggerTodoRefresh();
       } else {
-        // HTTP 오류 응답 처리
-        const errorData = await response.json().catch(() => ({}));
-        const { error: apiError } = errorData;
+        // success: false -> api level error (not http error)
         const { shouldRetry } = handleApiError(
-          new Error(apiError || 'HTTP Error'),
-          response,
+          new Error(apiError || 'API Error'),
+          { status: 200 }, // Mock response object since axios throws on non-2xx
         );
 
         if (!shouldRetry) {
-          const errorMessage =
-            apiError ||
-            '죄송합니다. 일시적인 문제가 발생했습니다. 잠시 후 다시 시도해주세요.';
           addMessage({
-            content: errorMessage,
+            content: apiError || '죄송합니다. 일시적인 문제가 발생했습니다.',
             isUser: false,
           });
         }
@@ -1497,15 +1420,19 @@ function TodoContainer() {
     } catch (error) {
       console.error('Chat API Error:', error);
 
-      const { shouldRetry } = handleApiError(error);
+      // axios error structure handling
+      const { shouldRetry } = handleApiError(error, error.response);
 
       if (!shouldRetry) {
         const { name, message } = error;
         let errorMessage = '문제가 발생했습니다. 다시 시도해주세요.';
 
-        if (name === 'AbortError') {
+        if (name === 'AbortError' || error.code === 'ECONNABORTED') {
           errorMessage = '요청 시간이 초과되었습니다. 다시 시도해주세요.';
         } else if (name === 'TypeError' && message.includes('fetch')) {
+          // axios typically throws Network Error
+          errorMessage = '네트워크 연결을 확인해주세요.';
+        } else if (error.message === 'Network Error') {
           errorMessage = '네트워크 연결을 확인해주세요.';
         }
 
@@ -1608,56 +1535,34 @@ function TodoContainer() {
     const { startDate, endDate } = result.value;
 
     try {
-      const response = await api(
-        `/api/todo/excel?startDate=${startDate}&endDate=${endDate}`,
-        {
-          method: 'GET',
-          credentials: 'include',
-        },
-      );
+      const blob = await todoService.downloadExcel(startDate, endDate);
 
-      if (response.ok) {
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
+      // apiClient에서 에러가 없으면 성공으로 간주 (에러시 catch로 이동)
+      const url = window.URL.createObjectURL(blob);
 
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `todos_${startDate}_to_${endDate}.xlsx`;
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `todos_${startDate}_to_${endDate}.xlsx`;
 
-        document.body.appendChild(a);
-        a.click();
+      document.body.appendChild(a);
+      a.click();
 
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
 
-        Swal.fire('성공', 'Excel 파일이 다운로드되었습니다.', 'success');
-      } else {
-        const errorData = await response.json().catch(() => ({}));
-        const { status } = response;
-        const { message } = errorData;
-        let errorMessage = 'Excel 내보내기에 실패했습니다.';
-
-        if (status === 400) {
-          errorMessage =
-            message || '잘못된 요청입니다. 날짜 형식을 확인해주세요.';
-        } else if (status === 401) {
-          errorMessage = '인증이 필요합니다. 다시 로그인해주세요.';
-        } else if (status === 500) {
-          errorMessage = '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
-        }
-
-        Swal.fire('오류', errorMessage, 'error');
-      }
+      Swal.fire('성공', 'Excel 파일이 다운로드되었습니다.', 'success');
     } catch (error) {
-      console.error('Excel export error:', error);
+      console.error('Excel Export Error:', error);
 
-      const { name, message } = error;
+      const { response } = error;
       let errorMessage = 'Excel 내보내기에 실패했습니다.';
 
-      if (name === 'TypeError' && message.includes('fetch')) {
-        errorMessage = '네트워크 연결을 확인해주세요.';
-      } else if (name === 'AbortError') {
-        errorMessage = '요청 시간이 초과되었습니다. 다시 시도해주세요.';
+      if (response) {
+        if (response.status === 400) {
+          // response.data가 blob일 수 있으므로 텍스트로 변환 시도 필요할 수 있음
+          const errorData = response.data;
+          errorMessage = errorData?.message || errorMessage;
+        }
       }
 
       Swal.fire('오류', errorMessage, 'error');

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Swal from 'sweetalert2';
 import { useAuthStore } from '../authStore/authStore';
+import authService from '../api/authService';
 import SignupForm from './SignupForm';
 
 import './loginForm.css';
@@ -10,7 +11,7 @@ const LoginForm = () => {
   const [id, setId] = useState('');
   const [password, setPassword] = useState('');
 
-  const { login, api } = useAuthStore();
+  const { login } = useAuthStore();
 
   const idChangeHandler = (e) => {
     setId(e.target.value);
@@ -34,38 +35,37 @@ const LoginForm = () => {
     }
 
     try {
-      const response = await api(`/api/user/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          userId: String(id).trim(),
-          userPassword: String(password).trim(),
-        }),
-      });
+      // authService.login 사용
+      const data = await authService.login(
+        String(id).trim(),
+        String(password).trim(),
+      );
 
-      if (response.ok) {
-        const data = await response.json();
-
-        if (data.userSeq) {
-          login(data);
-        } else if (response.status === 204) {
-          Swal.fire('로그인 실패', '사용자가 존재하지 않습니다.', 'error');
-        } else {
-          Swal.fire(
-            '로그인 실패',
-            data.message || '다시 시도해 주세요.',
-            'error',
-          );
-        }
+      if (data.userSeq) {
+        login(data);
       } else {
-        Swal.fire('로그인 실패', '서버 오류가 발생했습니다.', 'error');
+        // 204 No Content나 다른 상태는 axios catch 블록으로 가거나 여기서 처리
+        Swal.fire(
+          '로그인 실패',
+          data.message || '다시 시도해 주세요.',
+          'error',
+        );
       }
     } catch (error) {
       console.error('LoginForm Login Error : ', error);
-      Swal.fire('오류 발생', '서버와의 연결에 문제가 발생했습니다.', 'error');
+
+      const { response } = error;
+      if (response && response.status === 204) {
+        Swal.fire('로그인 실패', '사용자가 존재하지 않습니다.', 'error');
+      } else if (response && response.data) {
+        Swal.fire(
+          '로그인 실패',
+          response.data.message || '다시 시도해 주세요.',
+          'error',
+        );
+      } else {
+        Swal.fire('오류 발생', '서버와의 연결에 문제가 발생했습니다.', 'error');
+      }
     }
   };
 

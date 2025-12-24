@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import Swal from 'sweetalert2';
-import { useAuthStore } from '../authStore/authStore';
+import authService from '../api/authService';
 import { useFileUploadValidator } from '../hooks/useFileUploadValidator';
 import { useFileUploadProgress } from '../hooks/useFileUploadProgress';
 import FileUploadProgress from '../components/FileUploadProgress';
@@ -8,7 +8,6 @@ import FileUploadProgress from '../components/FileUploadProgress';
 import './loginForm.css';
 
 const SignupForm = ({ onSignupComplete }) => {
-  const { api } = useAuthStore();
   const { validateFiles, formatFileSize, getUploadPolicy } =
     useFileUploadValidator();
 
@@ -83,25 +82,14 @@ const SignupForm = ({ onSignupComplete }) => {
     setIdError('');
 
     try {
-      const response = await api(`/api/user/duplicate/${userId}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const isDuplicated = await authService.checkDuplicateId(userId);
 
-      if (response.ok) {
-        const data = await response.json();
+      setIsIdDuplicated(isDuplicated);
 
-        setIsIdDuplicated(data);
-
-        if (!data) {
-          setIdDuplicatedResult('사용하실 수 있는 아이디입니다.');
-        } else {
-          setIdDuplicatedResult('중복된 아이디가 있습니다.');
-        }
+      if (!isDuplicated) {
+        setIdDuplicatedResult('사용하실 수 있는 아이디입니다.');
       } else {
-        Swal.fire('아이디 중복체크 실패', '서버 오류가 발생했습니다.', 'error');
+        setIdDuplicatedResult('중복된 아이디가 있습니다.');
       }
     } catch (error) {
       console.error('SignupForm Error : ', error);
@@ -223,36 +211,34 @@ const SignupForm = ({ onSignupComplete }) => {
       signupFormData.append('profileImage', profileImageFile);
 
     try {
-      const response = await api(`/api/user/signup`, {
-        method: 'POST',
-        body: signupFormData,
-      });
+      const data = await authService.signup(signupFormData);
 
-      if (response.ok) {
-        const data = await response.json();
-
-        if (data.userSeq) {
-          Swal.fire({
-            title: '회원가입 완료!',
-            html: `
+      if (data.userSeq) {
+        Swal.fire({
+          title: '회원가입 완료!',
+          html: `
               <div class="text-center">
                 <p><strong>환영합니다, ${userName}님!</strong></p>
                 <p>회원가입이 성공적으로 완료되었습니다.</p>
                 ${profileImageFile ? `<p>✓ 프로필 이미지가 업로드되었습니다.</p>` : ''}
               </div>
             `,
-            icon: 'success',
-            confirmButtonText: '로그인하기',
-          }).then(() => {
-            resetUploadState();
-            onSignupComplete();
-          });
-        } else {
-          console.error('회원가입 실패 : ', data);
-          Swal.fire('', '회원가입에 실패했습니다.', 'error');
-        }
+          icon: 'success',
+          confirmButtonText: '로그인하기',
+        }).then(() => {
+          resetUploadState();
+          onSignupComplete();
+        });
       } else {
-        const errorData = await response.json().catch(() => ({}));
+        console.error('회원가입 실패 : ', data);
+        Swal.fire('', '회원가입에 실패했습니다.', 'error');
+      }
+    } catch (error) {
+      console.error('SignupForm Error : ', error);
+
+      // authService/apiClient 에러 처리: 에러 응답이 있으면 data 사용
+      if (error.response && error.response.data) {
+        const errorData = error.response.data;
 
         if (errorData.errors && Array.isArray(errorData.errors)) {
           const errorMessages = errorData.errors
@@ -271,10 +257,9 @@ const SignupForm = ({ onSignupComplete }) => {
             'error',
           );
         }
+      } else {
+        Swal.fire('오류 발생', '서버와의 연결에 문제가 발생했습니다.', 'error');
       }
-    } catch (error) {
-      console.error('SignupForm Error : ', error);
-      Swal.fire('오류 발생', '서버와의 연결에 문제가 발생했습니다.', 'error');
     }
   };
 

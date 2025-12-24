@@ -203,9 +203,12 @@ export class UserController {
       // 속도 제한 검사 - 너무 빈번한 업데이트 방지
       const { lastProfileUpdate: lastUpdateTime } = session;
       const now = Date.now();
-      const minUpdateInterval = 60000; // 업데이트 간 최소 1분
+      const minUpdateInterval = 60 * 1000;  // 업데이트 간 최소 1분
 
       if (lastUpdateTime && now - lastUpdateTime < minUpdateInterval) {
+        const remainingSeconds = Math.ceil(
+          (minUpdateInterval - (now - lastUpdateTime)) / 1000,
+        );
         this.logger.warn('Profile update rate limit exceeded', {
           userSeq,
           lastUpdate: new Date(lastUpdateTime),
@@ -213,7 +216,7 @@ export class UserController {
           ip,
         });
         throw new ForbiddenException(
-          '프로필 업데이트가 너무 빈번합니다. 잠시 후 다시 시도해주세요.',
+          `프로필 업데이트가 너무 빈번합니다. ${remainingSeconds}초 후에 다시 시도해주세요.`,
         );
       }
 
@@ -383,5 +386,16 @@ export class UserController {
       // 전역 예외 필터에서 처리하도록 오류 재발생
       throw error;
     }
+  }
+
+  //프로필 조회
+  @UseGuards(AuthenticatedGuard)
+  @Get('profile')
+  getProfile(@Session() session: SessionInterface & SessionData) {
+    const { user } = session;
+    if (!user) {
+      throw new UnauthorizedException('로그인이 필요합니다.');
+    }
+    return user;
   }
 }
