@@ -1693,7 +1693,10 @@ function TodoContainer() {
               >
                 <i className="bi bi-file-earmark-spreadsheet"></i>
               </button>
-              <button className="btn btn-primary" onClick={handleToggleCreate}>
+              <button
+                className="btn btn-outline-light"
+                onClick={handleToggleCreate}
+              >
                 신규
               </button>
             </>
