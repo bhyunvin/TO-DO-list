@@ -487,7 +487,7 @@ export class UserService {
         });
       }
     }
-    
+
     // API Key 전달 (별도 새니타이즈 불필요, DTO 레벨에서 처리됨)
     if (aiApiKey !== undefined) {
       sanitized.aiApiKey = aiApiKey;

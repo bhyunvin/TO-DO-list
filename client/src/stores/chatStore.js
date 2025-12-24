@@ -112,7 +112,7 @@ export const useChatStore = create(
 <hr>
 <h2>🔑 API Key 발급 및 등록 방법</h2>
 <ol>
-<li><a href="https://aistudio.google.com/app/api-keys" target="_blank">Google AI Studio</a>에 접속하여 API Key를 발급받으세요.</li>
+<li><a href="https://aistudio.google.com/app/api-keys" target="_blank" rel="noopener noreferrer">Google AI Studio</a>에 접속하여 API Key를 발급받으세요.</li>
 <li>우측 상단 <strong>프로필 > 프로필 수정</strong> 메뉴로 이동하세요.</li>
 <li><strong>AI API Key</strong> 필드에 키를 입력하고 저장해주세요.</li>
 </ol>
