@@ -23,7 +23,7 @@ export class TodoEntity {
   @Column({ name: 'todo_date', type: 'date', nullable: true })
   todoDate: string;
 
-  @Column({ name: 'complete_dtm', type: 'timestamp', nullable: true })
+  @Column({ name: 'complete_dtm', type: 'timestamptz', nullable: true })
   completeDtm: string;
 
   @Column({ name: 'todo_note', type: 'text', nullable: true })

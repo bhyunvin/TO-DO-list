@@ -13,10 +13,10 @@ export class UserEntity {
   @Column({ name: 'user_id', length: 40 })
   userId: string;
 
-  @Column({ name: 'user_name', length: 200 })
+  @Column({ name: 'user_name', length: 40 })
   userName: string;
 
-  @Column({ name: 'user_password', length: 500 })
+  @Column({ name: 'user_password', type: 'text' })
   userPassword: string;
 
   @Column({ name: 'user_email', length: 100 })

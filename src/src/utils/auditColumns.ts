@@ -7,7 +7,7 @@ export class CreateAuditColumns {
   @Column({ name: 'reg_ip', length: 40, nullable: true })
   regIp: string;
 
-  @CreateDateColumn({ name: 'reg_dtm', type: 'timestamp' })
+  @CreateDateColumn({ name: 'reg_dtm', type: 'timestamptz' })
   regDtm: Date;
 }
 
@@ -18,7 +18,7 @@ export class AuditColumns extends CreateAuditColumns {
   @Column({ name: 'upd_ip', length: 40, nullable: true })
   updIp: string;
 
-  @UpdateDateColumn({ name: 'upd_dtm', type: 'timestamp' })
+  @UpdateDateColumn({ name: 'upd_dtm', type: 'timestamptz' })
   updDtm: Date;
 }
 
