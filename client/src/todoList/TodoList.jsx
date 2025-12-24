@@ -137,6 +137,12 @@ function CreateTodoForm({ onAddTodo, onCancel }) {
         setFileValidationResults([]);
         setFileError('');
         resetUploadState();
+        Swal.fire({
+          icon: 'success',
+          title: '할 일이 추가되었습니다.',
+          showConfirmButton: false,
+          timer: 1500,
+        });
       }
     } catch (error) {
       console.error('Submit error:', error);
@@ -233,17 +239,26 @@ function CreateTodoForm({ onAddTodo, onCancel }) {
           </div>
         )}
 
-        <div className="form-actions">
+        <div className="d-flex justify-content-end gap-2">
+          <button
+            type="button"
+            className="btn btn-outline-secondary"
+            onClick={onCancel}
+          >
+            취소
+          </button>
           <button
             type="submit"
-            className="btn btn-success"
+            className="btn btn-outline-primary"
             disabled={
               isSubmitting ||
               uploadStatus === 'uploading' ||
               uploadStatus === 'validating'
             }
           >
-            {isSubmitting || uploadStatus === 'uploading' ? (
+            {isSubmitting ||
+            uploadStatus === 'uploading' ||
+            uploadStatus === 'validating' ? (
               <>
                 <span
                   className="spinner-border spinner-border-sm me-2"
@@ -254,18 +269,11 @@ function CreateTodoForm({ onAddTodo, onCancel }) {
                   ? '업로드 중...'
                   : uploadStatus === 'validating'
                     ? '검증 중...'
-                    : '추가 중...'}
+                    : '추가'}
               </>
             ) : (
               '추가'
             )}
-          </button>
-          <button
-            type="button"
-            className="btn btn-secondary ms-2"
-            onClick={onCancel}
-          >
-            취소
           </button>
         </div>
       </form>
@@ -1002,43 +1010,50 @@ function TodoContainer() {
   // ToDo 항목을 삭제하는 함수
   const handleDeleteTodo = async (todoSeq) => {
     // 사용자에게 삭제 확인을 받음
-    const result = await Swal.fire({
+    // 사용자에게 삭제 확인을 받음
+    await Swal.fire({
       title: '정말로 삭제하시겠습니까?',
       text: '삭제된 데이터는 복구할 수 없습니다.',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: '네, 삭제합니다!',
-      cancelButtonText: '아니오',
-    });
+      reverseButtons: true, // 버튼 순서 반전 (취소 | 삭제)
+      confirmButtonColor: 'transparent',
+      cancelButtonColor: 'transparent',
+      customClass: {
+        confirmButton: 'btn btn-outline-danger',
+        cancelButton: 'btn btn-outline-secondary me-2',
+      },
+      buttonsStyling: false,
+      confirmButtonText: '삭제',
+      cancelButtonText: '취소',
+    }).then(async (result) => {
+      // 사용자가 '네'를 클릭한 경우에만 삭제를 진행
+      if (result.isConfirmed) {
+        try {
+          await todoService.deleteTodo(todoSeq);
 
-    // 사용자가 '네'를 클릭한 경우에만 삭제를 진행
-    if (result.isConfirmed) {
-      try {
-        await todoService.deleteTodo(todoSeq);
-
-        Swal.fire(
-          '삭제 완료!',
-          '할 일이 성공적으로 삭제되었습니다.',
-          'success',
-        );
-        fetchTodos();
-      } catch (error) {
-        console.error('Delete Todo Error:', error);
-
-        const { response } = error;
-        if (response && response.data) {
           Swal.fire(
-            '오류',
-            `삭제에 실패했습니다: ${response.data.message}`,
-            'error',
+            '삭제 완료!',
+            '할 일이 성공적으로 삭제되었습니다.',
+            'success',
           );
-        } else {
-          Swal.fire('오류', '서버와의 통신 중 문제가 발생했습니다.', 'error');
+          fetchTodos();
+        } catch (error) {
+          console.error('Delete Todo Error:', error);
+
+          const { response } = error;
+          if (response && response.data) {
+            Swal.fire(
+              '오류',
+              `삭제에 실패했습니다: ${response.data.message}`,
+              'error',
+            );
+          } else {
+            Swal.fire('오류', '서버와의 통신 중 문제가 발생했습니다.', 'error');
+          }
         }
       }
-    }
+    });
   };
 
   // ToDo 항목 수정을 시작하는 함수
@@ -1269,36 +1284,43 @@ function TodoContainer() {
 
   const handleLogout = async () => {
     // 로그아웃 확인 다이얼로그 표시
-    const result = await Swal.fire({
-      title: '로그아웃',
-      text: '정말로 로그아웃하시겠습니까?',
-      icon: 'question',
+    await Swal.fire({
+      title: '로그아웃 하시겠습니까?',
+      icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: '네, 로그아웃합니다',
+      reverseButtons: true,
+      confirmButtonColor: 'transparent',
+      cancelButtonColor: 'transparent',
+      customClass: {
+        confirmButton: 'btn btn-outline-primary',
+        cancelButton: 'btn btn-outline-secondary me-2',
+      },
+      buttonsStyling: false,
+      confirmButtonText: '로그아웃',
       cancelButtonText: '취소',
+    }).then((result) => {
+      // 사용자가 취소를 선택한 경우 로그아웃을 중단
+      if (!result.isConfirmed) {
+        return;
+      }
+
+      return (async () => {
+        setIsUserMenuOpen(false);
+        try {
+          await authService.logout();
+        } catch (error) {
+          console.error('Logout Error : ', error);
+          // 네트워크 오류 등이 발생해도 사용자에게 알린 후 로그아웃을 진행
+          Swal.fire(
+            '오류 발생',
+            '서버와의 연결에 문제가 발생했습니다.',
+            'error',
+          );
+        } finally {
+          logout();
+        }
+      })();
     });
-
-    // 사용자가 취소를 선택한 경우 로그아웃을 중단
-    if (!result.isConfirmed) {
-      return;
-    }
-
-    setIsUserMenuOpen(false);
-    try {
-      await authService.logout();
-    } catch (error) {
-      console.error('Logout Error : ', error);
-      // 네트워크 오류 등이 발생해도 사용자에게 알린 후 로그아웃을 진행
-      await Swal.fire(
-        '오류 발생',
-        '서버와의 연결에 문제가 발생했습니다.',
-        'error',
-      );
-    } finally {
-      logout();
-    }
   };
 
   // 이전/다음 날짜로 변경하는 핸들러 함수
@@ -1500,8 +1522,16 @@ function TodoContainer() {
         </div>
       `,
       showCancelButton: true,
-      confirmButtonText: '내보내기',
+      reverseButtons: true,
+      confirmButtonText: '확인',
       cancelButtonText: '취소',
+      confirmButtonColor: 'transparent',
+      cancelButtonColor: 'transparent',
+      customClass: {
+        confirmButton: 'btn btn-outline-primary',
+        cancelButton: 'btn btn-outline-secondary me-2',
+      },
+      buttonsStyling: false,
       focusConfirm: false,
       preConfirm: () => {
         const startDate = document.getElementById('startDate').value;

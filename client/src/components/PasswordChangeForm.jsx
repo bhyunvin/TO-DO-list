@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import Swal from 'sweetalert2';
+import { useAuthStore } from '../authStore/authStore';
 
 /**
  * PasswordChangeForm 컴포넌트
  * 사용자가 비밀번호를 변경할 수 있도록 합니다
  */
 const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
+  const { user } = useAuthStore();
   // 폼 상태
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -51,7 +53,9 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
     } else if (passwordValue.length > 100) {
       setNewPasswordError('새 비밀번호는 최대 100자까지 입력 가능합니다.');
     } else if (!/[@$!%*?&]/.test(passwordValue)) {
-      setNewPasswordError('새 비밀번호는 특수문자(@$!%*?&)를 하나 이상 포함해야 합니다.');
+      setNewPasswordError(
+        '새 비밀번호는 특수문자(@$!%*?&)를 하나 이상 포함해야 합니다.',
+      );
     } else if (passwordValue === currentPassword) {
       setNewPasswordError('새 비밀번호는 현재 비밀번호와 달라야 합니다.');
     } else {
@@ -114,7 +118,9 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
       setNewPasswordError('새 비밀번호는 최대 100자까지 입력 가능합니다.');
       isValid = false;
     } else if (!/[@$!%*?&]/.test(newPassword)) {
-      setNewPasswordError('새 비밀번호는 특수문자(@$!%*?&)를 하나 이상 포함해야 합니다.');
+      setNewPasswordError(
+        '새 비밀번호는 특수문자(@$!%*?&)를 하나 이상 포함해야 합니다.',
+      );
       isValid = false;
     } else if (newPassword === currentPassword) {
       setNewPasswordError('새 비밀번호는 현재 비밀번호와 달라야 합니다.');
@@ -179,8 +185,13 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
         icon: 'warning',
         showCancelButton: true,
         reverseButtons: true,
-        confirmButtonColor: '#0d6efd',
-        cancelButtonColor: '#6C757D',
+        confirmButtonColor: 'transparent',
+        cancelButtonColor: 'transparent',
+        customClass: {
+          confirmButton: 'btn btn-outline-primary',
+          cancelButton: 'btn btn-outline-secondary me-2',
+        },
+        buttonsStyling: false,
         confirmButtonText: '확인',
         cancelButtonText: '계속 수정',
       }).then((result) => {
@@ -221,7 +232,18 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
   return (
     <div className="password-change-form">
       <h2>비밀번호 변경</h2>
+
       <form onSubmit={handleSubmit}>
+        {/* 브라우저 접근성 경고 해결을 위한 숨겨진 Username 필드 */}
+        <input
+          type="text"
+          name="username"
+          autoComplete="username"
+          value={user?.userId || ''}
+          readOnly
+          style={{ display: 'none' }}
+        />
+
         {/* 현재 비밀번호 필드 */}
         <div className="form-group row mb-3">
           <label htmlFor="currentPassword" className="col-3 col-form-label">
@@ -375,7 +397,7 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
           <div className="col-3">
             <button
               type="button"
-              className="btn btn-secondary w-100"
+              className="btn btn-outline-secondary w-100"
               onClick={handleCancel}
               disabled={isSubmitting}
             >
@@ -385,7 +407,7 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
           <div className="col-9">
             <button
               type="submit"
-              className="btn btn-primary w-100"
+              className="btn btn-outline-primary w-100"
               disabled={
                 isSubmitting ||
                 currentPasswordError ||

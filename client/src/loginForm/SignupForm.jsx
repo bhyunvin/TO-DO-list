@@ -175,7 +175,9 @@ const SignupForm = ({ onSignupComplete }) => {
       setPasswordError('비밀번호는 최소 8자 이상이어야 합니다.');
       return false;
     } else if (!/[@$!%*?&]/.test(userPassword)) {
-      setPasswordError('비밀번호는 특수문자(@$!%*?&)를 하나 이상 포함해야 합니다.');
+      setPasswordError(
+        '비밀번호는 특수문자(@$!%*?&)를 하나 이상 포함해야 합니다.',
+      );
       return false;
     }
 
@@ -275,11 +277,16 @@ const SignupForm = ({ onSignupComplete }) => {
       text: '작성중인 내용이 사라집니다.',
       icon: 'warning',
       showCancelButton: true,
-      reverseButtons: true,
-      confirmButtonColor: '#0d6efd',
-      cancelButtonColor: '#6C757D',
+      reverseButtons: true, // 버튼 순서 반전: (취소 | 확인)
+      confirmButtonColor: 'transparent',
+      cancelButtonColor: 'transparent',
+      customClass: {
+        confirmButton: 'btn btn-outline-primary',
+        cancelButton: 'btn btn-outline-secondary me-2',
+      },
+      buttonsStyling: false,
       confirmButtonText: '확인',
-      cancelButtonText: '취소',
+      cancelButtonText: '계속작성',
     }).then((result) => {
       if (result.isConfirmed) {
         onSignupComplete();
@@ -525,8 +532,13 @@ const SignupForm = ({ onSignupComplete }) => {
           <div className="col-3">
             <button
               type="button"
-              className="btn btn-secondary full-width"
+              className="btn btn-outline-secondary w-100"
               onClick={onCancel}
+              disabled={
+                isSubmitting ||
+                uploadStatus === 'uploading' ||
+                uploadStatus === 'validating'
+              }
             >
               취소
             </button>
@@ -535,7 +547,7 @@ const SignupForm = ({ onSignupComplete }) => {
           <div className="col-9">
             <button
               type="submit"
-              className="btn btn-primary"
+              className="btn btn-outline-primary w-100"
               disabled={
                 isSubmitting ||
                 uploadStatus === 'uploading' ||

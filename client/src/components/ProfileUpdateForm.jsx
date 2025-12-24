@@ -42,7 +42,7 @@ const ProfileUpdateForm = ({
   const [emailError, setEmailError] = useState('');
   const [profileImageError, setProfileImageError] = useState('');
   const [isLoadingDetail, setIsLoadingDetail] = useState(true);
-  
+
   // 변경 감지를 위한 원본 데이터 (복호화된 상태)
   const [originalUser, setOriginalUser] = useState(null);
 
@@ -71,11 +71,11 @@ const ProfileUpdateForm = ({
           setUserName(detailUser.userName || '');
           setUserEmail(detailUser.userEmail || '');
           setUserDescription(detailUser.userDescription || '');
-          
+
           if (detailUser.profileImage) {
             setProfileImage(detailUser.profileImage);
           }
-          
+
           // 변경 감지를 위해 원본 데이터 저장
           setOriginalUser(detailUser);
         }
@@ -277,7 +277,7 @@ const ProfileUpdateForm = ({
     // 폼이 수정되었는지 확인
     // originalUser(상세 조회된 복호화 데이터)가 있으면 그것과 비교, 없으면 props user와 비교
     const comparisonUser = originalUser || user;
-    
+
     const hasChanges =
       userName !== (comparisonUser?.userName || '') ||
       userEmail !== (comparisonUser?.userEmail || '') ||
@@ -292,8 +292,13 @@ const ProfileUpdateForm = ({
         icon: 'warning',
         showCancelButton: true,
         reverseButtons: true,
-        confirmButtonColor: '#0d6efd',
-        cancelButtonColor: '#6C757D',
+        confirmButtonColor: 'transparent',
+        cancelButtonColor: 'transparent',
+        customClass: {
+          confirmButton: 'btn btn-outline-primary',
+          cancelButton: 'btn btn-outline-secondary me-2',
+        },
+        buttonsStyling: false,
         confirmButtonText: '확인',
         cancelButtonText: '계속 수정',
       }).then((result) => {
@@ -528,7 +533,7 @@ const ProfileUpdateForm = ({
             <div className="col-3">
               <button
                 type="button"
-                className="btn btn-secondary w-100"
+                className="btn btn-outline-secondary w-100"
                 onClick={handleCancel}
                 disabled={
                   isSubmitting ||
@@ -542,7 +547,7 @@ const ProfileUpdateForm = ({
             <div className="col-9">
               <button
                 type="submit"
-                className="btn btn-primary w-100"
+                className="btn btn-outline-primary w-100"
                 disabled={
                   isSubmitting ||
                   uploadStatus === 'uploading' ||
