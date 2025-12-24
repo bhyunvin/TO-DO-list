@@ -46,8 +46,10 @@ const ChatMessage = ({ message, isUser }) => {
         'h4',
         'h5',
         'h6',
+        'a',
+        'hr',
       ],
-      ALLOWED_ATTR: [],
+      ALLOWED_ATTR: ['href', 'target', 'rel'],
     });
 
     return (

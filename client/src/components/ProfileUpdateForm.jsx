@@ -433,8 +433,11 @@ const ProfileUpdateForm = ({
               autoComplete="off"
             />
             <small className="form-text text-muted">
-              Google AI Studio에서 발급받은 API Key를 입력해주세요. 입력하지
-              않으면 기존 키가 유지됩니다.
+              <a href="https://aistudio.google.com/app/api-keys" target="_blank">
+                Google AI Studio
+              </a>
+              에서 발급받은 API Key를 입력해주세요. 입력하지 않으면 기존 키가
+              유지됩니다.
             </small>
           </div>
         </div>
