@@ -1,15 +1,17 @@
 import { Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
-export class AuditColumns {
+export class CreateAuditColumns {
   @Column({ name: 'reg_id', length: 40, nullable: true })
   regId: string;
 
-  @Column({ name: 'reg_ip', length: 40 })
+  @Column({ name: 'reg_ip', length: 40, nullable: true })
   regIp: string;
 
   @CreateDateColumn({ name: 'reg_dtm', type: 'timestamp' })
   regDtm: Date;
+}
 
+export class AuditColumns extends CreateAuditColumns {
   @Column({ name: 'upd_id', length: 40, nullable: true })
   updId: string;
 
