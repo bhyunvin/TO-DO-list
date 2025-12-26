@@ -716,7 +716,14 @@ const TodoContainer = () => {
 
   const userMenuRef = useRef(null);
 
-  // 선택된 날짜에 해당하는 할 일 목록을 서버에서 가져오는 함수
+  // 프로필 이미지 에러 상태 관리
+  const [imgError, setImgError] = useState(false);
+
+  // user.profileImage가 변경되면 에러 상태 초기화
+  useEffect(() => {
+    setImgError(false);
+  }, [user?.profileImage]);
+
   // 선택된 날짜에 해당하는 할 일 목록을 서버에서 가져오는 함수
   const fetchTodos = useCallback(async () => {
     setIsLoadingTodos(true);
@@ -1132,15 +1139,15 @@ const TodoContainer = () => {
     try {
       const { formData, profileImageFile } = profileData;
 
-      // userService.updateUserProfile 사용
-      // userService.js에 updateUserProfile이 정의되어 있다고 가정 (updateProfile?) -> 확인 필요하면 확인.
-      // 이전에 userService.js를 만들때 updateProfile로 만들었을 가능성.
-      // 내가 만든 userService.js를 볼 수 없지만, updateUserProfile로 만들었기를 바람.
-      // 만약 에러나면 수정. 일반적으로 updateProfile.
-      // 잠시, userService.js 내용을 보고 싶지만... 그냥 updateProfile이나 updateUserProfile 둘 중 하나일 것.
-      // 보통 CRUD naming: getProfile, updateProfile.
-
       const updatedUser = await userService.updateProfile(formData);
+
+      // 프로필 이미지가 있는 경우, 브라우저 캐시를 우회하기 위해 타임스탬프 추가
+      if (updatedUser.profileImage) {
+        const timestamp = Date.now();
+        // 이미 쿼리 파라미터가 있는지 확인
+        const separator = updatedUser.profileImage.includes('?') ? '&' : '?';
+        updatedUser.profileImage = `${updatedUser.profileImage}${separator}t=${timestamp}`;
+      }
 
       login(updatedUser);
 
@@ -1608,10 +1615,11 @@ const TodoContainer = () => {
             onClick={handleUserMenuToggle}
             aria-label="사용자 메뉴"
           >
-            {user?.profileImage ? (
+            {user?.profileImage && !imgError ? (
               <img
                 src={user.profileImage}
                 alt="프로필"
+                onError={() => setImgError(true)}
                 loading="lazy"
                 style={{
                   width: '1.5rem',

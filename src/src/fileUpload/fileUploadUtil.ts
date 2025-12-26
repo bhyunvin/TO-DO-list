@@ -12,8 +12,6 @@ import { FILE_UPLOAD_POLICY } from './validation/file-validation.constants';
 
 import { AuditSettings, setAuditColumn } from '../utils/auditColumns';
 
-
-
 @Injectable()
 export class FileUploadUtil {
   constructor(
@@ -108,7 +106,9 @@ export const createFileFilter =
 export const profileImageMulterOptions = {
   storage: diskStorage({
     destination: (req, file, callback) => {
-      const uploadPath = process.env.UPLOAD_FILE_DIRECTORY || resolve(process.cwd(), '../upload');
+      const uploadPath =
+        process.env.UPLOAD_FILE_DIRECTORY ||
+        resolve(process.cwd(), '../upload');
       if (!fs.existsSync(uploadPath)) {
         fs.mkdirSync(uploadPath, { recursive: true });
       }
@@ -132,7 +132,9 @@ export const profileImageMulterOptions = {
 export const todoAttachmentMulterOptions = {
   storage: diskStorage({
     destination: (req, file, callback) => {
-      const uploadPath = process.env.UPLOAD_FILE_DIRECTORY || resolve(process.cwd(), '../upload');
+      const uploadPath =
+        process.env.UPLOAD_FILE_DIRECTORY ||
+        resolve(process.cwd(), '../upload');
       if (!fs.existsSync(uploadPath)) {
         fs.mkdirSync(uploadPath, { recursive: true });
       }
