@@ -20,7 +20,7 @@ import { ko } from 'date-fns/locale';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import 'react-datepicker/dist/react-datepicker.css';
 
-// 신규 TODO 항목 추가 폼 컴포넌트
+// 신규 할 일 항목 추가 폼 컴포넌트
 const CreateTodoForm = ({ onAddTodo, onCancel }) => {
   const { validateFiles, formatFileSize, getUploadPolicy } =
     useFileUploadValidator();
@@ -281,8 +281,7 @@ const CreateTodoForm = ({ onAddTodo, onCancel }) => {
   );
 };
 
-// TODO 항목 목록을 표시하는 컴포넌트
-// TODO 항목 목록을 표시하는 컴포넌트
+// 할 일 항목 목록을 표시하는 컴포넌트
 const TodoList = ({
   todos,
   isLoadingTodos,
@@ -451,8 +450,7 @@ const TodoList = ({
   );
 };
 
-// ToDo 항목 수정을 위한 폼 컴포넌트
-// 항목 수정 폼 컴포넌트
+// 할 일 항목 수정을 위한 폼 컴포넌트
 const EditTodoForm = ({ todo, onSave, onCancel }) => {
   const { validateFiles, formatFileSize, getUploadPolicy } =
     useFileUploadValidator();
@@ -713,8 +711,7 @@ const formatDateTime = (isoString) => {
   return `${year}-${month}-${day} ${hours}:${minutes}`;
 };
 
-// TODO 리스트 및 폼을 조건부로 렌더링하는 컨테이너 컴포넌트
-// 메인 컨테이너 컴포넌트
+// 할 일 리스트 및 폼을 조건부로 렌더링하는 컨테이너 컴포넌트
 const TodoContainer = () => {
   const { user, logout, login } = useAuthStore();
   const {
@@ -750,8 +747,8 @@ const TodoContainer = () => {
 
   const userMenuRef = useRef(null);
 
-  // 선택된 날짜에 해당하는 ToDo 목록을 서버에서 가져오는 함수
-  // 선택된 날짜에 해당하는 ToDo 목록을 서버에서 가져오는 함수
+  // 선택된 날짜에 해당하는 할 일 목록을 서버에서 가져오는 함수
+  // 선택된 날짜에 해당하는 할 일 목록을 서버에서 가져오는 함수
   const fetchTodos = useCallback(async () => {
     setIsLoadingTodos(true);
     try {
@@ -767,12 +764,12 @@ const TodoContainer = () => {
     }
   }, [selectedDate]);
 
-  // selectedDate가 변경될 때마다 ToDo 목록을 새로고침
+  // selectedDate가 변경될 때마다 할 일 목록을 새로고침
   useEffect(() => {
     fetchTodos();
   }, [fetchTodos]);
 
-  // AI 채팅에서 todo 생성/업데이트 시 자동 새로고침
+  // AI 채팅에서 할 일 생성/업데이트 시 자동 새로고침
   useEffect(() => {
     if (todoRefreshTrigger > 0) {
       fetchTodos();
@@ -919,14 +916,14 @@ const TodoContainer = () => {
     return '상태 변경에 실패했습니다. 다시 시도해주세요.';
   };
 
-  // ToDo 항목의 완료 상태를 토글하는 함수 (낙관적 UI 패턴)
+  // 할 일 항목의 완료 상태를 토글하는 함수 (낙관적 UI 패턴)
   const handleToggleComplete = async (todoSeq, isCompleted) => {
     // 중복 요청 방지
     if (togglingTodoSeq === todoSeq || optimisticUpdates.has(todoSeq)) {
       return;
     }
 
-    // 원본 todo 항목 찾기
+    // 원본 할 일 항목 찾기
     const originalTodo = todos.find(({ todoSeq: seq }) => seq === todoSeq);
     if (!originalTodo) {
       return;
@@ -955,7 +952,7 @@ const TodoContainer = () => {
 
     try {
       // todoService.updateTodo 사용하여 완료 상태 업데이트 (또는 별도 토글 메서드 사용)
-      // 기존 코드는 PATCH /api/todo/:id
+      // 기존 코드는 PATCH /api/할 일/:id
 
       // *중요*: Axios 취소 토큰이나 signal은 apiClient에서 설정을 더 해야 하므로,
       // 일단 간단하게 호출만 변경. 타임아웃은 axios 기본 설정이나 apiClient에서 관리 가능.
@@ -1010,7 +1007,7 @@ const TodoContainer = () => {
     }
   };
 
-  // ToDo 항목을 삭제하는 함수
+  // 할 일 항목을 삭제하는 함수
   const handleDeleteTodo = async (todoSeq) => {
     // 사용자에게 삭제 확인을 받음
     // 사용자에게 삭제 확인을 받음
@@ -1059,12 +1056,12 @@ const TodoContainer = () => {
     });
   };
 
-  // ToDo 항목 수정을 시작하는 함수
+  // 할 일 항목 수정을 시작하는 함수
   const handleEditTodo = (todo) => {
     setEditingTodo(todo);
   };
 
-  // ToDo 항목 수정을 저장하는 함수
+  // 할 일 항목 수정을 저장하는 함수
   const handleSaveTodo = async (todoSeq, updatedData) => {
     try {
       const { todoContent, todoNote, todoFiles } = updatedData;
