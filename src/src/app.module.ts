@@ -55,6 +55,14 @@ const envSchema = z.object({
 
   // --- 파일 업로드 ---
   UPLOAD_FILE_DIRECTORY: z.string().default('./upload'),
+
+  // --- 암호화 (Encryption) ---
+  ENCRYPTION_KEY: z
+    .string()
+    .length(64, 'ENCRYPTION_KEY는 32byte hex string이어야 합니다 (64자).'),
+  DETERMINISTIC_IV: z
+    .string()
+    .length(32, 'DETERMINISTIC_IV는 16byte hex string이어야 합니다 (32자).'),
 });
 
 // ==================================================================

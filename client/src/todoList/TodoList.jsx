@@ -279,7 +279,7 @@ const CreateTodoForm = ({ onAddTodo, onCancel }) => {
       </form>
     </div>
   );
-}
+};
 
 // TODO 항목 목록을 표시하는 컴포넌트
 // TODO 항목 목록을 표시하는 컴포넌트
@@ -449,7 +449,7 @@ const TodoList = ({
       </div>
     </div>
   );
-}
+};
 
 // ToDo 항목 수정을 위한 폼 컴포넌트
 // 항목 수정 폼 컴포넌트
@@ -689,7 +689,7 @@ const EditTodoForm = ({ todo, onSave, onCancel }) => {
       </form>
     </div>
   );
-}
+};
 
 // 날짜를 YYYY-MM-DD 형식의 문자열로 변환하는 헬퍼 함수
 const formatDate = (date) => {
@@ -1797,6 +1797,6 @@ const TodoContainer = () => {
       />
     </div>
   );
-}
+};
 
 export default TodoContainer;
