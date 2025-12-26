@@ -1,5 +1,6 @@
 import { diskStorage } from 'multer';
-import { extname } from 'path';
+import { extname, resolve } from 'node:path';
+import * as fs from 'node:fs';
 
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -11,7 +12,7 @@ import { FILE_UPLOAD_POLICY } from './validation/file-validation.constants';
 
 import { AuditSettings, setAuditColumn } from '../utils/auditColumns';
 
-const uploadFileDirectory = process.env.UPLOAD_FILE_DIRECTORY;
+
 
 @Injectable()
 export class FileUploadUtil {
@@ -106,7 +107,13 @@ export const createFileFilter =
 // 프로필 이미지를 위한 향상된 multer 설정
 export const profileImageMulterOptions = {
   storage: diskStorage({
-    destination: uploadFileDirectory,
+    destination: (req, file, callback) => {
+      const uploadPath = process.env.UPLOAD_FILE_DIRECTORY || resolve(process.cwd(), '../upload');
+      if (!fs.existsSync(uploadPath)) {
+        fs.mkdirSync(uploadPath, { recursive: true });
+      }
+      callback(null, uploadPath);
+    },
     filename: (req, file, callback) => {
       const uniqueSuffix = `${Date.now()}_${Math.round(Math.random() * 1e9)}`;
       const ext = extname(file.originalname);
@@ -121,10 +128,16 @@ export const profileImageMulterOptions = {
   },
 };
 
-// TODO 첨부 파일을 위한 향상된 multer 설정
+// 첨부 파일을 위한 향상된 multer 설정
 export const todoAttachmentMulterOptions = {
   storage: diskStorage({
-    destination: uploadFileDirectory,
+    destination: (req, file, callback) => {
+      const uploadPath = process.env.UPLOAD_FILE_DIRECTORY || resolve(process.cwd(), '../upload');
+      if (!fs.existsSync(uploadPath)) {
+        fs.mkdirSync(uploadPath, { recursive: true });
+      }
+      callback(null, uploadPath);
+    },
     filename: (req, file, callback) => {
       const uniqueSuffix = `${Date.now()}_${Math.round(Math.random() * 1e9)}`;
       const ext = extname(file.originalname);
