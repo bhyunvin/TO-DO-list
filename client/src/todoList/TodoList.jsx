@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import PropTypes from 'prop-types';
 import Swal from 'sweetalert2';
 import { useAuthStore } from '../authStore/authStore';
 import { useChatStore } from '../stores/chatStore';
@@ -7,6 +8,7 @@ import userService from '../api/userService';
 import authService from '../api/authService';
 import aiService from '../api/aiService';
 import { useFileUploadValidator } from '../hooks/useFileUploadValidator';
+import { useTodoFileHandler } from '../hooks/useTodoFileHandler';
 import { useFileUploadProgress } from '../hooks/useFileUploadProgress';
 import FileUploadProgress from '../components/FileUploadProgress';
 import ProfileUpdateForm from '../components/ProfileUpdateForm';
@@ -22,7 +24,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 
 // 신규 할 일 항목 추가 폼 컴포넌트
 const CreateTodoForm = ({ onAddTodo, onCancel }) => {
-  const { validateFiles, formatFileSize, getUploadPolicy } =
+  const { formatFileSize, getUploadPolicy, validateFiles } =
     useFileUploadValidator();
 
   const {
@@ -35,68 +37,28 @@ const CreateTodoForm = ({ onAddTodo, onCancel }) => {
 
   const [todoContent, setTodoContent] = useState('');
   const [todoNote, setTodoNote] = useState('');
-  const [todoFiles, setTodoFiles] = useState([]);
-  const [fileValidationResults, setFileValidationResults] = useState([]);
-  const [fileError, setFileError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleFileChange = (e) => {
-    const selectedFiles = Array.from(e.target.files);
-
-    // 이전 상태 초기화
-    setTodoFiles([]);
-    setFileValidationResults([]);
-    setFileError('');
-
-    if (selectedFiles.length > 0) {
-      // 파일 유효성 검사
-      const validationResults = validateFiles(selectedFiles, 'todoAttachment');
-      setFileValidationResults(validationResults);
-
-      // 모든 파일이 유효한지 확인
-      const invalidFiles = validationResults.filter(({ isValid }) => !isValid);
-      if (invalidFiles.length > 0) {
-        setFileError(`${invalidFiles.length}개 파일에 문제가 있습니다.`);
-        // 파일 입력 초기화
-        e.target.value = '';
-      } else {
-        setTodoFiles(selectedFiles);
-        setFileError('');
-      }
-    }
-  };
+  const {
+    todoFiles,
+    setTodoFiles,
+    fileValidationResults,
+    setFileValidationResults,
+    fileError,
+    setFileError,
+    handleFileChange,
+    removeFile,
+    resetFiles,
+  } = useTodoFileHandler();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    switch (name) {
-      case 'TODO_CONTENT':
-        setTodoContent(value);
-        break;
-      case 'TODO_NOTE':
-        setTodoNote(value);
-        break;
-      case 'TODO_FILES':
-        handleFileChange(e);
-        break;
-      default:
-        break;
-    }
-  };
-
-  const removeFile = (index) => {
-    const newFiles = todoFiles.filter((_, i) => i !== index);
-    const newValidationResults = fileValidationResults.filter(
-      (_, i) => i !== index,
-    );
-
-    setTodoFiles(newFiles);
-    setFileValidationResults(newValidationResults);
-
-    if (newFiles.length === 0) {
-      setFileError('');
-      // 파일 입력 초기화
-      const fileInput = document.getElementById('todoFiles');
-      if (fileInput) fileInput.value = '';
+    if (name === 'TODO_CONTENT') {
+      setTodoContent(value);
+    } else if (name === 'TODO_NOTE') {
+      setTodoNote(value);
+    } else if (name === 'TODO_FILES') {
+      handleFileChange(e);
     }
   };
 
@@ -133,9 +95,7 @@ const CreateTodoForm = ({ onAddTodo, onCancel }) => {
         // 성공 시 폼 초기화
         setTodoContent('');
         setTodoNote('');
-        setTodoFiles([]);
-        setFileValidationResults([]);
-        setFileError('');
+        resetFiles();
         resetUploadState();
         Swal.fire({
           icon: 'success',
@@ -152,6 +112,13 @@ const CreateTodoForm = ({ onAddTodo, onCancel }) => {
   };
 
   const policy = getUploadPolicy('todoAttachment');
+
+  let fileInputClass = 'form-control';
+  if (fileError) {
+    fileInputClass += ' is-invalid';
+  } else if (todoFiles.length > 0) {
+    fileInputClass += ' is-valid';
+  }
 
   return (
     <div className="create-todo-form">
@@ -195,7 +162,7 @@ const CreateTodoForm = ({ onAddTodo, onCancel }) => {
           id="todoFiles"
           type="file"
           multiple={true}
-          className={`form-control ${fileError ? 'is-invalid' : todoFiles.length > 0 ? 'is-valid' : ''}`}
+          className={fileInputClass}
           accept=".xlsx,.pptx,.docx,.pdf,.hwp,.txt"
           onChange={handleChange}
           name="TODO_FILES"
@@ -262,14 +229,13 @@ const CreateTodoForm = ({ onAddTodo, onCancel }) => {
               <>
                 <span
                   className="spinner-border spinner-border-sm me-2"
-                  role="status"
                   aria-hidden="true"
                 ></span>
-                {uploadStatus === 'uploading'
-                  ? '업로드 중...'
-                  : uploadStatus === 'validating'
-                    ? '검증 중...'
-                    : '추가'}
+                {uploadStatus === 'uploading' && '업로드 중...'}
+                {uploadStatus === 'validating' && '검증 중...'}
+                {uploadStatus !== 'uploading' &&
+                  uploadStatus !== 'validating' &&
+                  '추가'}
               </>
             ) : (
               '추가'
@@ -279,6 +245,11 @@ const CreateTodoForm = ({ onAddTodo, onCancel }) => {
       </form>
     </div>
   );
+};
+
+CreateTodoForm.propTypes = {
+  onAddTodo: PropTypes.func.isRequired,
+  onCancel: PropTypes.func.isRequired,
 };
 
 // 할 일 항목 목록을 표시하는 컴포넌트
@@ -317,6 +288,108 @@ const TodoList = ({
     };
   }, [openActionMenu, setOpenActionMenu]);
 
+  const renderTableBody = () => {
+    if (isLoadingTodos) {
+      return (
+        <tr>
+          <td colSpan={6} className="text-center">
+            <div
+              className="d-flex justify-content-center align-items-center"
+              style={{ padding: '2rem' }}
+            >
+              <span
+                className="spinner-border spinner-border-sm me-2"
+                aria-hidden="true"
+              ></span>
+              <span>불러오는 중...</span>
+            </div>
+          </td>
+        </tr>
+      );
+    }
+
+    if (todos.length === 0) {
+      return (
+        <tr>
+          <td colSpan={6} className="text-center">
+            할 일이 없습니다.
+          </td>
+        </tr>
+      );
+    }
+
+    return todos.map((todo, index) => {
+      const { todoSeq, completeDtm, todoContent, todoNote } = todo;
+      return (
+        <tr key={todoSeq} className={completeDtm ? 'completed' : ''}>
+          <td
+            className="text-center checkbox-cell"
+            onClick={() => {
+              if (togglingTodoSeq !== todoSeq) {
+                onToggleComplete(todoSeq, !!completeDtm);
+              }
+            }}
+            style={{
+              cursor: togglingTodoSeq === todoSeq ? 'not-allowed' : 'pointer',
+            }}
+          >
+            <input
+              type="checkbox"
+              className="form-check-input"
+              checked={!!completeDtm}
+              disabled={togglingTodoSeq === todoSeq}
+              onChange={() => onToggleComplete(todoSeq, !!completeDtm)}
+              style={{ pointerEvents: 'none' }}
+            />
+          </td>
+          <td className="text-center">{index + 1}</td>
+          <td className="todo-content">
+            <span className="text-truncate" title={todoContent}>
+              {todoContent}
+            </span>
+          </td>
+          <td className="text-center">{formatDateTime(completeDtm)}</td>
+          <td>
+            <span className="text-truncate" title={todoNote}>
+              {todoNote}
+            </span>
+          </td>
+          <td className="todo-actions-cell">
+            <button
+              className="more-actions-btn"
+              onClick={() =>
+                setOpenActionMenu(openActionMenu === todoSeq ? null : todoSeq)
+              }
+            >
+              <i className="bi bi-three-dots-vertical"></i>
+            </button>
+            {openActionMenu === todoSeq && (
+              <div className="action-menu" ref={menuRef}>
+                <button
+                  className="btn btn-sm btn-outline-success"
+                  onClick={() => {
+                    onEditTodo(todo);
+                    setOpenActionMenu(null);
+                  }}
+                  title="수정"
+                >
+                  <i className="bi bi-pencil-fill"></i>
+                </button>
+                <button
+                  className="btn btn-sm btn-outline-danger"
+                  onClick={() => onDeleteTodo(todoSeq)}
+                  title="삭제"
+                >
+                  <i className="bi bi-trash-fill"></i>
+                </button>
+              </div>
+            )}
+          </td>
+        </tr>
+      );
+    });
+  };
+
   return (
     <div className="list-wrapper">
       <div className="table-responsive-container">
@@ -339,120 +412,34 @@ const TodoList = ({
               <th className="text-center"></th>
             </tr>
           </thead>
-          <tbody>
-            {isLoadingTodos ? (
-              <tr>
-                <td colSpan={6} className="text-center">
-                  <div
-                    className="d-flex justify-content-center align-items-center"
-                    style={{ padding: '2rem' }}
-                  >
-                    <span
-                      className="spinner-border spinner-border-sm me-2"
-                      role="status"
-                      aria-hidden="true"
-                    ></span>
-                    <span>불러오는 중...</span>
-                  </div>
-                </td>
-              </tr>
-            ) : todos.length > 0 ? (
-              todos.map((todo, index) => {
-                const { todoSeq, completeDtm, todoContent, todoNote } = todo;
-                return (
-                  <tr key={todoSeq} className={completeDtm ? 'completed' : ''}>
-                    <td
-                      className="text-center checkbox-cell"
-                      onClick={() => {
-                        if (togglingTodoSeq !== todoSeq) {
-                          onToggleComplete(todoSeq, !!completeDtm);
-                        }
-                      }}
-                      style={{
-                        cursor:
-                          togglingTodoSeq === todoSeq
-                            ? 'not-allowed'
-                            : 'pointer',
-                      }}
-                    >
-                      <input
-                        type="checkbox"
-                        className="form-check-input"
-                        checked={!!completeDtm}
-                        disabled={togglingTodoSeq === todoSeq}
-                        onChange={() =>
-                          onToggleComplete(todoSeq, !!completeDtm)
-                        }
-                        style={{ pointerEvents: 'none' }}
-                      />
-                    </td>
-                    <td className="text-center">{index + 1}</td>
-                    <td className="todo-content">
-                      <span className="text-truncate" title={todoContent}>
-                        {todoContent}
-                      </span>
-                    </td>
-                    <td className="text-center">
-                      {formatDateTime(completeDtm)}
-                    </td>
-                    <td>
-                      <span className="text-truncate" title={todoNote}>
-                        {todoNote}
-                      </span>
-                    </td>
-                    <td className="todo-actions-cell">
-                      <button
-                        className="more-actions-btn"
-                        onClick={() =>
-                          setOpenActionMenu(
-                            openActionMenu === todoSeq ? null : todoSeq,
-                          )
-                        }
-                      >
-                        <i className="bi bi-three-dots-vertical"></i>
-                      </button>
-                      {openActionMenu === todoSeq && (
-                        <div className="action-menu" ref={menuRef}>
-                          <button
-                            className="btn btn-sm btn-outline-success"
-                            onClick={() => {
-                              onEditTodo(todo);
-                              setOpenActionMenu(null);
-                            }}
-                            title="수정"
-                          >
-                            <i className="bi bi-pencil-fill"></i>
-                          </button>
-                          <button
-                            className="btn btn-sm btn-outline-danger"
-                            onClick={() => onDeleteTodo(todoSeq)}
-                            title="삭제"
-                          >
-                            <i className="bi bi-trash-fill"></i>
-                          </button>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })
-            ) : (
-              <tr>
-                <td colSpan={6} className="text-center">
-                  할 일이 없습니다.
-                </td>
-              </tr>
-            )}
-          </tbody>
+          <tbody>{renderTableBody()}</tbody>
         </table>
       </div>
     </div>
   );
 };
 
+TodoList.propTypes = {
+  todos: PropTypes.arrayOf(
+    PropTypes.shape({
+      todoSeq: PropTypes.number.isRequired,
+      completeDtm: PropTypes.string,
+      todoContent: PropTypes.string.isRequired,
+      todoNote: PropTypes.string,
+    }),
+  ).isRequired,
+  isLoadingTodos: PropTypes.bool.isRequired,
+  onToggleComplete: PropTypes.func.isRequired,
+  onDeleteTodo: PropTypes.func.isRequired,
+  onEditTodo: PropTypes.func.isRequired,
+  togglingTodoSeq: PropTypes.number,
+  openActionMenu: PropTypes.number,
+  setOpenActionMenu: PropTypes.func.isRequired,
+};
+
 // 할 일 항목 수정을 위한 폼 컴포넌트
 const EditTodoForm = ({ todo, onSave, onCancel }) => {
-  const { validateFiles, formatFileSize, getUploadPolicy } =
+  const { formatFileSize, getUploadPolicy, validateFiles } =
     useFileUploadValidator();
 
   const {
@@ -466,36 +453,18 @@ const EditTodoForm = ({ todo, onSave, onCancel }) => {
   const { todoContent: initialContent, todoNote: initialNote } = todo;
   const [todoContent, setTodoContent] = useState(initialContent);
   const [todoNote, setTodoNote] = useState(initialNote);
-  const [todoFiles, setTodoFiles] = useState([]);
-  const [fileValidationResults, setFileValidationResults] = useState([]);
-  const [fileError, setFileError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleFileChange = (e) => {
-    const selectedFiles = Array.from(e.target.files);
-
-    // 이전 상태 초기화
-    setTodoFiles([]);
-    setFileValidationResults([]);
-    setFileError('');
-
-    if (selectedFiles.length > 0) {
-      // 파일 유효성 검사
-      const validationResults = validateFiles(selectedFiles, 'todoAttachment');
-      setFileValidationResults(validationResults);
-
-      // 모든 파일이 유효한지 확인
-      const invalidFiles = validationResults.filter(({ isValid }) => !isValid);
-      if (invalidFiles.length > 0) {
-        setFileError(`${invalidFiles.length}개 파일에 문제가 있습니다.`);
-        // 파일 입력 초기화
-        e.target.value = '';
-      } else {
-        setTodoFiles(selectedFiles);
-        setFileError('');
-      }
-    }
-  };
+  const {
+    todoFiles,
+    setTodoFiles,
+    fileValidationResults,
+    setFileValidationResults,
+    fileError,
+    setFileError,
+    handleFileChange,
+    removeFile,
+  } = useTodoFileHandler();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -511,23 +480,6 @@ const EditTodoForm = ({ todo, onSave, onCancel }) => {
         break;
       default:
         break;
-    }
-  };
-
-  const removeFile = (index) => {
-    const newFiles = todoFiles.filter((_, i) => i !== index);
-    const newValidationResults = fileValidationResults.filter(
-      (_, i) => i !== index,
-    );
-
-    setTodoFiles(newFiles);
-    setFileValidationResults(newValidationResults);
-
-    if (newFiles.length === 0) {
-      setFileError('');
-      // 파일 입력 초기화
-      const fileInput = document.getElementById('todoFiles');
-      if (fileInput) fileInput.value = '';
     }
   };
 
@@ -571,6 +523,13 @@ const EditTodoForm = ({ todo, onSave, onCancel }) => {
 
   const policy = getUploadPolicy('todoAttachment');
 
+  let fileInputClass = 'form-control';
+  if (fileError) {
+    fileInputClass += ' is-invalid';
+  } else if (todoFiles.length > 0) {
+    fileInputClass += ' is-valid';
+  }
+
   return (
     <div className="edit-todo-form">
       <h3>TO-DO 항목수정</h3>
@@ -605,7 +564,7 @@ const EditTodoForm = ({ todo, onSave, onCancel }) => {
           id="todoFiles"
           type="file"
           multiple={true}
-          className={`form-control ${fileError ? 'is-invalid' : todoFiles.length > 0 ? 'is-valid' : ''}`}
+          className={fileInputClass}
           accept=".xlsx,.pptx,.docx,.pdf,.hwp,.txt"
           onChange={handleChange}
           name="TODO_FILES"
@@ -663,14 +622,13 @@ const EditTodoForm = ({ todo, onSave, onCancel }) => {
               <>
                 <span
                   className="spinner-border spinner-border-sm me-2"
-                  role="status"
                   aria-hidden="true"
                 ></span>
-                {uploadStatus === 'uploading'
-                  ? '업로드 중...'
-                  : uploadStatus === 'validating'
-                    ? '검증 중...'
-                    : '수정 중...'}
+                {uploadStatus === 'uploading' && '업로드 중...'}
+                {uploadStatus === 'validating' && '검증 중...'}
+                {uploadStatus !== 'uploading' &&
+                  uploadStatus !== 'validating' &&
+                  '수정 중...'}
               </>
             ) : (
               '수정'
@@ -687,6 +645,17 @@ const EditTodoForm = ({ todo, onSave, onCancel }) => {
       </form>
     </div>
   );
+};
+
+EditTodoForm.propTypes = {
+  todo: PropTypes.shape({
+    todoSeq: PropTypes.number.isRequired,
+    todoContent: PropTypes.string,
+    todoNote: PropTypes.string,
+    completeDtm: PropTypes.string,
+  }).isRequired,
+  onSave: PropTypes.func.isRequired,
+  onCancel: PropTypes.func.isRequired,
 };
 
 // 날짜를 YYYY-MM-DD 형식의 문자열로 변환하는 헬퍼 함수
@@ -947,21 +916,8 @@ const TodoContainer = () => {
 
     setTogglingTodoSeq(todoSeq);
 
-    // const controller = new AbortController();
-    // const timeoutId = setTimeout(() => controller.abort(), 30000);
-
     try {
-      // todoService.updateTodo 사용하여 완료 상태 업데이트 (또는 별도 토글 메서드 사용)
-      // 기존 코드는 PATCH /api/할 일/:id
-
-      // *중요*: Axios 취소 토큰이나 signal은 apiClient에서 설정을 더 해야 하므로,
-      // 일단 간단하게 호출만 변경. 타임아웃은 axios 기본 설정이나 apiClient에서 관리 가능.
-      // 여기서는 updateTodo를 사용.
-
-      // 기존 로직: { completeDtm: newCompleteDtm } 만 전송
       await todoService.updateTodo(todoSeq, { completeDtm: newCompleteDtm });
-
-      // clearTimeout(timeoutId);
 
       // 성공 시 처리
       setOptimisticUpdates((prev) => {
@@ -970,8 +926,6 @@ const TodoContainer = () => {
         return newMap;
       });
     } catch (error) {
-      // clearTimeout(timeoutId);
-
       // 에러 발생: 롤백
       rollbackTodoUpdate(todoSeq, originalCompleteDtm);
 
@@ -981,6 +935,7 @@ const TodoContainer = () => {
         return newMap;
       });
 
+      // 에러 메시지 처리 및 알림 (헬퍼 함수 활용 가능)
       const errorMessage = getErrorMessage(error, error.response);
 
       Swal.fire({
@@ -1355,6 +1310,25 @@ const TodoContainer = () => {
     }
   };
 
+  const prepareChatHistory = (messages) => {
+    // 환영 메시지를 제외하고 최근 10개의 메시지만 컨텍스트로 전송
+    const recentMessages = messages
+      .filter((msg) => !msg.id.startsWith('welcome-'))
+      .slice(-10);
+
+    // Gemini API 형식으로 변환
+    return recentMessages.map((msg) => ({
+      role: msg.isUser ? 'user' : 'model',
+      parts: [
+        {
+          text: msg.isHtml
+            ? msg.content.replaceAll(/<[^>]*>/g, '')
+            : msg.content,
+        },
+      ],
+    }));
+  };
+
   const handleSendMessage = async (messageContent, isRetry = false) => {
     // 요청 전송 가능 여부 확인 (쓰로틀링)
     if (!isRetry && !canSendRequest()) {
@@ -1364,15 +1338,12 @@ const TodoContainer = () => {
     // 재시도를 위해 메시지 저장
     if (!isRetry) {
       setRetryMessage(messageContent);
-
-      // 사용자 메시지를 즉시 추가 (새 메시지만, 재시도는 제외)
       addMessage({
         content: messageContent,
         isUser: true,
       });
     }
 
-    // 로딩 상태 설정 및 이전 오류 초기화
     setLoading(true);
     clearError();
 
@@ -1380,42 +1351,21 @@ const TodoContainer = () => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000);
 
-      // 멀티턴 대화를 위한 history 생성
-      // 환영 메시지를 제외하고 최근 10개의 메시지만 컨텍스트로 전송
-      const recentMessages = messages
-        .filter((msg) => !msg.id.startsWith('welcome-')) // 환영 메시지 제외
-        .slice(-10); // 최근 10개만
+      const history = prepareChatHistory(messages);
 
-      // Gemini API 형식으로 변환
-      const history = recentMessages.map((msg) => ({
-        role: msg.isUser ? 'user' : 'model',
-        parts: [
-          {
-            text: msg.isHtml
-              ? msg.content.replace(/<[^>]*>/g, '')
-              : msg.content,
-          },
-        ], // HTML 태그 제거
-      }));
-
-      // aiService.chat 사용
       const data = await aiService.chat(
         {
           prompt: messageContent,
-          history: history, // 대화 기록 추가
+          history,
         },
         controller.signal,
       );
 
       clearTimeout(timeoutId);
 
-      // if (response.ok) logic -> aiService throws error if not ok.
-      // data is the response body.
-      // existing code: const { success, response: apiResponse, error: apiError } = data;
-
       const { success, response: apiResponse, error: apiError } = data;
 
-      if (success !== false) {
+      if (success) {
         addMessage({
           content: apiResponse,
           isUser: false,
@@ -1423,13 +1373,11 @@ const TodoContainer = () => {
         });
 
         resetRetryState();
-
         triggerTodoRefresh();
       } else {
-        // success: false -> api level error (not http error)
         const { shouldRetry } = handleApiError(
           new Error(apiError || 'API Error'),
-          { status: 200 }, // Mock response object since axios throws on non-2xx
+          { status: 200 },
         );
 
         if (!shouldRetry) {
@@ -1441,30 +1389,31 @@ const TodoContainer = () => {
       }
     } catch (error) {
       console.error('Chat API Error:', error);
-
-      // axios error structure handling
-      const { shouldRetry } = handleApiError(error, error.response);
-
-      if (!shouldRetry) {
-        const { name, message } = error;
-        let errorMessage = '문제가 발생했습니다. 다시 시도해주세요.';
-
-        if (name === 'AbortError' || error.code === 'ECONNABORTED') {
-          errorMessage = '요청 시간이 초과되었습니다. 다시 시도해주세요.';
-        } else if (name === 'TypeError' && message.includes('fetch')) {
-          // axios typically throws Network Error
-          errorMessage = '네트워크 연결을 확인해주세요.';
-        } else if (error.message === 'Network Error') {
-          errorMessage = '네트워크 연결을 확인해주세요.';
-        }
-
-        addMessage({
-          content: errorMessage,
-          isUser: false,
-        });
-      }
+      handleChatError(error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleChatError = (error) => {
+    const { shouldRetry } = handleApiError(error, error.response);
+
+    if (!shouldRetry) {
+      const { name, message } = error;
+      let errorMessage = '문제가 발생했습니다. 다시 시도해주세요.';
+
+      if (name === 'AbortError' || error.code === 'ECONNABORTED') {
+        errorMessage = '요청 시간이 초과되었습니다. 다시 시도해주세요.';
+      } else if (name === 'TypeError' && message.includes('fetch')) {
+        errorMessage = '네트워크 연결을 확인해주세요.';
+      } else if (error.message === 'Network Error') {
+        errorMessage = '네트워크 연결을 확인해주세요.';
+      }
+
+      addMessage({
+        content: errorMessage,
+        isUser: false,
+      });
     }
   };
 
@@ -1488,13 +1437,6 @@ const TodoContainer = () => {
     const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
     const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
-    const formatDateForInput = (date) => {
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
-    };
-
     const result = await Swal.fire({
       title: 'Excel 내보내기',
       html: `
@@ -1505,7 +1447,7 @@ const TodoContainer = () => {
               type="date" 
               id="startDate" 
               class="swal2-input" 
-              value="${formatDateForInput(firstDay)}"
+              value="${formatDate(firstDay)}"
               style="width: 100%; margin: 0; padding: 10px;"
             />
           </div>
@@ -1515,7 +1457,7 @@ const TodoContainer = () => {
               type="date" 
               id="endDate" 
               class="swal2-input" 
-              value="${formatDateForInput(lastDay)}"
+              value="${formatDate(lastDay)}"
               style="width: 100%; margin: 0; padding: 10px;"
             />
           </div>
@@ -1568,7 +1510,7 @@ const TodoContainer = () => {
       const blob = await todoService.downloadExcel(startDate, endDate);
 
       // apiClient에서 에러가 없으면 성공으로 간주 (에러시 catch로 이동)
-      const url = window.URL.createObjectURL(blob);
+      const url = globalThis.URL.createObjectURL(blob);
 
       const a = document.createElement('a');
       a.href = url;
@@ -1577,8 +1519,8 @@ const TodoContainer = () => {
       document.body.appendChild(a);
       a.click();
 
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+      globalThis.URL.revokeObjectURL(url);
+      a.remove();
 
       Swal.fire('성공', 'Excel 파일이 다운로드되었습니다.', 'success');
     } catch (error) {
