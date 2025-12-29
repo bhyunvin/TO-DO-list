@@ -1,8 +1,8 @@
 import bcrypt from 'bcrypt';
-import * as crypto from 'crypto';
+import * as crypto from 'node:crypto';
 
 // 암호화 설정
-const ALGORITHM = 'aes-256-cbc';
+const ALGORITHM = 'aes-256-gcm';
 const ENCRYPTION_KEY =
   process.env.ENCRYPTION_KEY || '01234567890123456789012345678901'; // 32 chars for examples
 const IV_LENGTH = 16;
@@ -37,8 +37,15 @@ export const encryptSymmetric = (text: string): string => {
   );
   let encrypted = cipher.update(text);
   encrypted = Buffer.concat([encrypted, cipher.final()]);
+  const authTag = cipher.getAuthTag();
 
-  return iv.toString('hex') + ':' + encrypted.toString('hex');
+  return (
+    iv.toString('hex') +
+    ':' +
+    authTag.toString('hex') +
+    ':' +
+    encrypted.toString('hex')
+  );
 };
 
 // 양방향 복호화
@@ -47,16 +54,18 @@ export const decryptSymmetric = (text: string): string => {
 
   try {
     const textParts = text.split(':');
-    // IV가 없는 경우 (잘못된 형식이거나 평문일 가능성) 처리
-    if (textParts.length < 2) return text;
+    // IV, AuthTag, EncryptedText 3부분이 있어야 함
+    if (textParts.length < 3) return text;
 
     const iv = Buffer.from(textParts.shift(), 'hex');
+    const authTag = Buffer.from(textParts.shift(), 'hex');
     const encryptedText = Buffer.from(textParts.join(':'), 'hex');
     const decipher = crypto.createDecipheriv(
       ALGORITHM,
       Buffer.from(ENCRYPTION_KEY),
       iv,
     );
+    decipher.setAuthTag(authTag);
     let decrypted = decipher.update(encryptedText);
     decrypted = Buffer.concat([decrypted, decipher.final()]);
 
@@ -90,10 +99,17 @@ export const encryptSymmetricDeterministic = (text: string): string => {
   );
   let encrypted = cipher.update(text);
   encrypted = Buffer.concat([encrypted, cipher.final()]);
+  const authTag = cipher.getAuthTag();
 
   // 구분을 위해 prefix 추가하지 않음 (또는 다른 방식으로 구분 가능)
-  // 여기서는 구조를 맞추기 위해 IV:Ciphertext 형식을 유지하되, IV는 고정값 사용
-  return FIXED_IV.toString('hex') + ':' + encrypted.toString('hex');
+  // 여기서는 구조를 맞추기 위해 IV:AuthTag:Ciphertext 형식을 유지하되, IV는 고정값 사용
+  return (
+    FIXED_IV.toString('hex') +
+    ':' +
+    authTag.toString('hex') +
+    ':' +
+    encrypted.toString('hex')
+  );
 };
 
 // 결정적 양방향 복호화
@@ -102,9 +118,10 @@ export const decryptSymmetricDeterministic = (text: string): string => {
 
   try {
     const textParts = text.split(':');
-    if (textParts.length < 2) return text;
+    if (textParts.length < 3) return text;
 
     const ivMsg = textParts.shift();
+    const authTag = Buffer.from(textParts.shift(), 'hex');
     const encryptedText = Buffer.from(textParts.join(':'), 'hex');
 
     const decipher = crypto.createDecipheriv(
@@ -112,6 +129,7 @@ export const decryptSymmetricDeterministic = (text: string): string => {
       Buffer.from(ENCRYPTION_KEY),
       Buffer.from(ivMsg, 'hex'), // 저장된 IV 사용 (FIXED_IV와 같아야 함)
     );
+    decipher.setAuthTag(authTag);
     let decrypted = decipher.update(encryptedText);
     decrypted = Buffer.concat([decrypted, decipher.final()]);
 
