@@ -2,7 +2,7 @@ import apiClient from './apiClient';
 
 const todoService = {
   /**
-   * Todo 목록 조회
+   * 할 일 목록 조회
    * @param {string} date - 'YYYY-MM-DD' 형식
    * @returns {Promise<Array>}
    */
@@ -12,7 +12,7 @@ const todoService = {
   },
 
   /**
-   * Todo 생성
+   * 할 일 생성
    * @param {object|FormData} data - 일반 객체 또는 파일 포함 시 FormData
    * @returns {Promise<object>}
    */
@@ -27,7 +27,7 @@ const todoService = {
   },
 
   /**
-   * Todo 수정
+   * 할 일 수정
    * @param {number|string} todoSeq
    * @param {object|FormData} data
    * @returns {Promise<object>}
@@ -38,13 +38,12 @@ const todoService = {
       ? { headers: { 'Content-Type': 'multipart/form-data' } }
       : {};
 
-    // 백엔드 경로: PATCH /todo/:id
     const response = await apiClient.patch(`/todo/${todoSeq}`, data, config);
     return response.data;
   },
 
   /**
-   * Todo 삭제
+   * 할 일 삭제
    * @param {number|string} todoSeq
    * @returns {Promise<object>}
    */

@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import DOMPurify from 'dompurify';
 import './ChatMessage.css';
 
@@ -61,9 +62,8 @@ const ChatMessage = ({ message, isUser }) => {
   };
 
   return (
-    <div
+    <article
       className={`chat-message ${isUser ? 'user-message' : 'ai-message'}`}
-      role="article"
       aria-label={`${isUser ? '사용자' : 'AI 어시스턴트'} 메시지`}
     >
       <div className="message-container">
@@ -87,8 +87,22 @@ const ChatMessage = ({ message, isUser }) => {
           </div>
         )}
       </div>
-    </div>
+    </article>
   );
+};
+
+
+
+ChatMessage.propTypes = {
+  message: PropTypes.shape({
+    content: PropTypes.string.isRequired,
+    timestamp: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.number,
+      PropTypes.instanceOf(Date),
+    ]).isRequired,
+  }).isRequired,
+  isUser: PropTypes.bool.isRequired,
 };
 
 export default ChatMessage;
