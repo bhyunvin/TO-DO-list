@@ -5,49 +5,38 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { z } from 'zod';
 import session from 'express-session'; // express-session import 추가
 
-// --- 프로젝트 모듈 Import ---
 import { TodoModule } from './todo/todo.module';
 import { UserModule } from './user/user.module';
 import { LoggingModule } from './logging/logging.module';
 import { AssistanceModule } from './assistance/assistance.module';
 import { FileUploadModule } from './fileUpload/fileUpload.module';
 
-// --- 엔티티 Import (TypeORM 설정용) ---
 import { TodoEntity } from './todo/todo.entity';
 import { UserEntity } from './user/user.entity';
 import { LogEntity } from './logging/logging.entity';
 import { FileInfoEntity } from './fileUpload/file.entity';
 
-// --- 유틸리티, 인터셉터, 필터 Import ---
 import { CustomNamingStrategy } from './utils/customNamingStrategy';
-import { APP_INTERCEPTOR, APP_FILTER } from '@nestjs/core'; // APP_INTERCEPTOR, APP_FILTER 추가
-import { LoggingInterceptor } from './interceptor/logging.interceptor'; // 경로 확인 필요
-import { HttpExceptionFilter } from './filter/http-exception.filter'; // 경로 확인 필요
-
-// ==================================================================
-// 1. Zod 환경 변수 스키마 정의
-// ==================================================================
+import { APP_INTERCEPTOR, APP_FILTER } from '@nestjs/core';
+import { LoggingInterceptor } from './interceptor/logging.interceptor';
+import { HttpExceptionFilter } from './filter/http-exception.filter';
 
 const envSchema = z.object({
-  // --- 기본 설정 (NestJS 포트 등) ---
   NODE_ENV: z
     .enum(['development', 'production', 'test'])
     .default('development'),
   PORT: z.coerce.number().default(3001),
 
-  // --- 데이터베이스 (TypeORM) ---
   DB_DEV_SERVER: z.string().default('localhost'),
   DB_DEV_PORT: z.coerce.number().default(5432),
   DB_DEV_USERNAME: z.string().min(1, 'DB_DEV_USERNAME은 필수입니다.'),
   DB_DEV_PASSWORD: z.string().min(1, 'DB_DEV_PASSWORD는 필수입니다.'),
   DB_DEV_DATABASE: z.string().min(1, 'DB_DEV_DATABASE는 필수입니다.'),
 
-  // --- 보안 (세션) ---
   SESSION_SECRET: z
     .string()
     .min(32, 'SESSION_SECRET는 최소 32자 이상이어야 합니다.'),
 
-  // --- Google AI (Assistance) ---
   GEMINI_API_KEY: z.string().min(1, 'GEMINI_API_KEY는 필수입니다.'),
   SYSTEM_PROMPT_PATH: z
     .string()
@@ -64,10 +53,6 @@ const envSchema = z.object({
     .string()
     .length(32, 'DETERMINISTIC_IV는 16byte hex string이어야 합니다 (32자).'),
 });
-
-// ==================================================================
-// 2. ConfigModule에 전달할 유효성 검사 함수
-// ==================================================================
 
 const validate = (config: Record<string, unknown>) => {
   try {
@@ -87,20 +72,14 @@ const validate = (config: Record<string, unknown>) => {
   }
 };
 
-// ==================================================================
-// 3. 메인 앱 모듈 (AppModule)
-// ==================================================================
-
 @Module({
   imports: [
-    // --- 1순위: ConfigModule 설정 ---
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
       validate,
     }),
 
-    // --- 2순위: TypeOrmModule (DB) 설정 ---
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -119,8 +98,6 @@ const validate = (config: Record<string, unknown>) => {
       }),
     }),
 
-    // --- 3순위: 나머지 비즈니스 모듈 ---
-    // AuthModule, // (이전 버전에 있었음. 필요시 주석 해제)
     TodoModule,
     UserModule,
     LoggingModule,
@@ -128,7 +105,6 @@ const validate = (config: Record<string, unknown>) => {
     FileUploadModule,
   ],
   controllers: [],
-  // --- 4. 전역 필터 및 인터셉터 (복원) ---
   providers: [
     {
       provide: APP_INTERCEPTOR,
@@ -140,17 +116,12 @@ const validate = (config: Record<string, unknown>) => {
     },
   ],
 })
-// --- 5. NestModule 구현 (복원) ---
 export class AppModule implements NestModule {
-  // --- 6. Logger 및 ConfigService 주입 (복원) ---
   private readonly logger = new Logger(AppModule.name);
 
   constructor(private readonly configService: ConfigService) {}
 
-  // --- 7. configure 메서드 (세션 미들웨어 적용) (복원) ---
   configure(consumer: MiddlewareConsumer) {
-    // Zod가 이미 시작 시점에 검증했지만, ConfigService에서 값을 가져오는지
-    // 이중으로 확인합니다.
     const sessionSecret = this.configService.get<string>('SESSION_SECRET');
 
     if (!sessionSecret) {
@@ -174,6 +145,6 @@ export class AppModule implements NestModule {
           },
         }),
       )
-      .forRoutes('*'); // 모든 라우트에 세션 적용
+      .forRoutes('*');
   }
 }

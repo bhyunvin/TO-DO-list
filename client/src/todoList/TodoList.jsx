@@ -23,7 +23,6 @@ import { showNavigationConfirmAlert } from '../utils/alertUtils';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import 'react-datepicker/dist/react-datepicker.css';
 
-// 신규 할 일 항목 추가 폼 컴포넌트
 const CreateTodoForm = ({ onAddTodo, onCancel }) => {
   const { formatFileSize, getUploadPolicy, validateFiles } =
     useFileUploadValidator();
@@ -71,7 +70,6 @@ const CreateTodoForm = ({ onAddTodo, onCancel }) => {
       return;
     }
 
-    // 파일이 선택된 경우 유효성 검사
     if (todoFiles.length > 0) {
       const invalidFiles = fileValidationResults.filter(
         ({ isValid }) => !isValid,
@@ -89,11 +87,9 @@ const CreateTodoForm = ({ onAddTodo, onCancel }) => {
     setIsSubmitting(true);
 
     try {
-      // 진행 상황 추적이 포함된 향상된 업로드 함수 사용
       const result = await onAddTodo({ todoContent, todoNote, todoFiles });
 
       if (result && result.success) {
-        // 성공 시 폼 초기화
         setTodoContent('');
         setTodoNote('');
         resetFiles();
@@ -179,7 +175,6 @@ const CreateTodoForm = ({ onAddTodo, onCancel }) => {
           </div>
         )}
 
-        {/* 향상된 파일 업로드 진행 상황 및 유효성 검사 */}
         {(fileValidationResults.length > 0 || uploadStatus !== 'idle') && (
           <div className="mt-2 mb-3">
             <FileUploadProgress
@@ -253,7 +248,6 @@ CreateTodoForm.propTypes = {
   onCancel: PropTypes.func.isRequired,
 };
 
-// 할 일 항목 목록을 표시하는 컴포넌트
 const TodoList = ({
   todos,
   isLoadingTodos,
@@ -266,7 +260,6 @@ const TodoList = ({
 }) => {
   const menuRef = useRef(null);
 
-  // 메뉴 외부 클릭 시 닫기 처리
   useEffect(() => {
     const handleClickOutside = (event) => {
       // menuRef.current가 존재하고, 클릭된 요소가 메뉴나 그 자식 요소가 아닐 때 메뉴를 닫음
@@ -438,7 +431,6 @@ TodoList.propTypes = {
   setOpenActionMenu: PropTypes.func.isRequired,
 };
 
-// 할 일 항목 수정을 위한 폼 컴포넌트
 const EditTodoForm = ({ todo, onSave, onCancel }) => {
   const { formatFileSize, getUploadPolicy, validateFiles } =
     useFileUploadValidator();
@@ -487,7 +479,6 @@ const EditTodoForm = ({ todo, onSave, onCancel }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // 파일이 선택된 경우 유효성 검사
     if (todoFiles.length > 0) {
       const invalidFiles = fileValidationResults.filter(
         ({ isValid }) => !isValid,
@@ -581,7 +572,6 @@ const EditTodoForm = ({ todo, onSave, onCancel }) => {
           </div>
         )}
 
-        {/* 향상된 파일 업로드 진행 상황 및 유효성 검사 */}
         {(fileValidationResults.length > 0 || uploadStatus !== 'idle') && (
           <div className="mt-2 mb-3">
             <FileUploadProgress
@@ -659,7 +649,6 @@ EditTodoForm.propTypes = {
   onCancel: PropTypes.func.isRequired,
 };
 
-// 날짜를 YYYY-MM-DD 형식의 문자열로 변환하는 헬퍼 함수
 const formatDate = (date) => {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -667,7 +656,6 @@ const formatDate = (date) => {
   return `${year}-${month}-${day}`;
 };
 
-// ISO 날짜 문자열을 'YYYY-MM-DD HH:mm' 형식으로 변환하는 헬퍼 함수
 const formatDateTime = (isoString) => {
   if (!isoString) {
     return '';
@@ -681,7 +669,6 @@ const formatDateTime = (isoString) => {
   return `${year}-${month}-${day} ${hours}:${minutes}`;
 };
 
-// 할 일 리스트 및 폼을 조건부로 렌더링하는 컨테이너 컴포넌트
 const TodoContainer = () => {
   const { user, logout, login } = useAuthStore();
   const {
@@ -718,15 +705,12 @@ const TodoContainer = () => {
 
   const userMenuRef = useRef(null);
 
-  // 프로필 이미지 에러 상태 관리
   const [imgError, setImgError] = useState(false);
 
-  // user.profileImage가 변경되면 에러 상태 초기화
   useEffect(() => {
     setImgError(false);
   }, [user?.profileImage]);
 
-  // 선택된 날짜에 해당하는 할 일 목록을 서버에서 가져오는 함수
   const fetchTodos = useCallback(async () => {
     setIsLoadingTodos(true);
     try {
@@ -742,19 +726,16 @@ const TodoContainer = () => {
     }
   }, [selectedDate]);
 
-  // selectedDate가 변경될 때마다 할 일 목록을 새로고침
   useEffect(() => {
     fetchTodos();
   }, [fetchTodos]);
 
-  // AI 채팅에서 할 일 생성/업데이트 시 자동 새로고침
   useEffect(() => {
     if (todoRefreshTrigger > 0) {
       fetchTodos();
     }
   }, [todoRefreshTrigger, fetchTodos]);
 
-  // 사용자 메뉴 외부 클릭 시 닫기 처리
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
@@ -771,7 +752,6 @@ const TodoContainer = () => {
     };
   }, [isUserMenuOpen]);
 
-  // CreateTodoForm에서 넘어온 Todo 요소 추가
   const handleAddTodo = async ({ todoContent, todoNote, todoFiles }) => {
     try {
       const formattedDate = formatDate(selectedDate);
@@ -788,7 +768,6 @@ const TodoContainer = () => {
         });
       }
 
-      // todoService.createTodo 사용
       const responseData = await todoService.createTodo(formData);
 
       Swal.fire({
@@ -837,7 +816,6 @@ const TodoContainer = () => {
     }
   };
 
-  // todos 배열을 서버와 동일한 방식으로 정렬하는 헬퍼 함수
   const sortTodos = (todosArray) => {
     return [...todosArray].sort((a, b) => {
       const { completeDtm: aComplete, todoSeq: aSeq } = a;
@@ -852,7 +830,6 @@ const TodoContainer = () => {
     });
   };
 
-  // 낙관적 업데이트를 위한 헬퍼 함수
   const updateTodoOptimistically = (todoSeq, newCompleteDtm) => {
     setTodos((prevTodos) => {
       const updatedTodos = prevTodos.map((todo) =>
@@ -860,12 +837,11 @@ const TodoContainer = () => {
           ? { ...todo, completeDtm: newCompleteDtm }
           : todo,
       );
-      // 업데이트 후 정렬
+
       return sortTodos(updatedTodos);
     });
   };
 
-  // 롤백을 위한 헬퍼 함수
   const rollbackTodoUpdate = (todoSeq, originalCompleteDtm) => {
     setTodos((prevTodos) => {
       const rolledBackTodos = prevTodos.map((todo) =>
@@ -873,12 +849,11 @@ const TodoContainer = () => {
           ? { ...todo, completeDtm: originalCompleteDtm }
           : todo,
       );
-      // 롤백 후 정렬
+
       return sortTodos(rolledBackTodos);
     });
   };
 
-  // 에러 메시지 생성 헬퍼 함수
   const getErrorMessage = (error, response) => {
     const { name, message } = error;
 
@@ -894,7 +869,6 @@ const TodoContainer = () => {
     return '상태 변경에 실패했습니다. 다시 시도해주세요.';
   };
 
-  // 할 일 항목의 완료 상태를 토글하는 함수 (낙관적 UI 패턴)
   const handleToggleComplete = async (todoSeq, isCompleted) => {
     // 중복 요청 방지
     if (togglingTodoSeq === todoSeq || optimisticUpdates.has(todoSeq)) {
@@ -910,7 +884,6 @@ const TodoContainer = () => {
     const { completeDtm: originalCompleteDtm } = originalTodo;
     const newCompleteDtm = isCompleted ? null : new Date().toISOString();
 
-    // 낙관적 UI 업데이트
     updateTodoOptimistically(todoSeq, newCompleteDtm);
 
     setOptimisticUpdates((prev) => {
@@ -971,9 +944,7 @@ const TodoContainer = () => {
     }
   };
 
-  // 할 일 항목을 삭제하는 함수
   const handleDeleteTodo = async (todoSeq) => {
-    // 사용자에게 삭제 확인을 받음
     // 사용자에게 삭제 확인을 받음
     await Swal.fire({
       title: '정말로 삭제하시겠습니까?',
@@ -1020,12 +991,10 @@ const TodoContainer = () => {
     });
   };
 
-  // 할 일 항목 수정을 시작하는 함수
   const handleEditTodo = (todo) => {
     setEditingTodo(todo);
   };
 
-  // 할 일 항목 수정을 저장하는 함수
   const handleSaveTodo = async (todoSeq, updatedData) => {
     try {
       const { todoContent, todoNote, todoFiles } = updatedData;
@@ -1041,7 +1010,6 @@ const TodoContainer = () => {
         });
       }
 
-      // todoService.updateTodo 사용
       // updateTodo 내부에서 FormData 처리를 이미 구현했음 (기존 todoService.js 참고)
       // 하지만 여기서 formData를 직접 만들어서 넘김.
       // todoService.updateTodo(todoSeq, data) -> data가 FormData면 그걸 쓰고, 객체면 json으로 보냄.
@@ -1095,7 +1063,6 @@ const TodoContainer = () => {
     }
   };
 
-  // 신규 버튼 클릭 여부 처리
   const handleToggleCreate = () => {
     setIsCreating((prev) => !prev);
     setEditingTodo(null);
@@ -1103,7 +1070,6 @@ const TodoContainer = () => {
     setIsChangingPassword(false);
   };
 
-  // 사용자 메뉴 토글
   const handleUserMenuToggle = () => {
     setIsUserMenuOpen((prev) => !prev);
   };
@@ -1113,7 +1079,6 @@ const TodoContainer = () => {
     setIsFormDirty(isDirty);
   };
 
-  // 프로필 수정 시작
   const handleUpdateProfile = () => {
     if (isFormDirty) {
       showNavigationConfirmAlert().then((result) => {
@@ -1136,13 +1101,11 @@ const TodoContainer = () => {
     setIsUserMenuOpen(false);
   };
 
-  // 프로필 수정 취소
   const handleCancelProfileUpdate = () => {
     setIsUpdatingProfile(false);
     setIsFormDirty(false);
   };
 
-  // 비밀번호 변경 시작
   const handleChangePassword = () => {
     if (isFormDirty) {
       showNavigationConfirmAlert().then((result) => {
@@ -1165,13 +1128,11 @@ const TodoContainer = () => {
     setIsUserMenuOpen(false);
   };
 
-  // 비밀번호 변경 취소
   const handleCancelPasswordChange = () => {
     setIsChangingPassword(false);
     setIsFormDirty(false);
   };
 
-  // 프로필 수정 저장
   const handleSaveProfile = async (profileData) => {
     try {
       const { formData, profileImageFile } = profileData;
@@ -1231,12 +1192,10 @@ const TodoContainer = () => {
     }
   };
 
-  // 비밀번호 변경 저장
   const handleSavePassword = async (passwordData) => {
     try {
       const { currentPassword, newPassword, confirmPassword } = passwordData;
 
-      // userService.changePassword 사용
       await userService.changePassword({
         currentPassword,
         newPassword,
@@ -1286,7 +1245,6 @@ const TodoContainer = () => {
   };
 
   const handleLogout = async () => {
-    // 로그아웃 확인 다이얼로그 표시
     await Swal.fire({
       title: '로그아웃 하시겠습니까?',
       icon: 'warning',
@@ -1326,7 +1284,6 @@ const TodoContainer = () => {
     });
   };
 
-  // 이전/다음 날짜로 변경하는 핸들러 함수
   const handlePrevDay = () => {
     const newDate = new Date(selectedDate);
     newDate.setDate(selectedDate.getDate() - 1);
@@ -1343,7 +1300,6 @@ const TodoContainer = () => {
     setSelectedDate(new Date());
   };
 
-  // 채팅 관련 핸들러
   const handleChatToggle = () => {
     const willOpen = !isChatOpen;
     setIsChatOpen(willOpen);
@@ -1378,7 +1334,6 @@ const TodoContainer = () => {
   };
 
   const handleSendMessage = async (messageContent, isRetry = false) => {
-    // 요청 전송 가능 여부 확인 (쓰로틀링)
     if (!isRetry && !canSendRequest()) {
       return;
     }
@@ -1465,7 +1420,6 @@ const TodoContainer = () => {
     }
   };
 
-  // 재시도 핸들러
   const handleRetry = () => {
     const lastMessage = getRetryMessage();
     if (lastMessage) {
@@ -1473,13 +1427,11 @@ const TodoContainer = () => {
     }
   };
 
-  // 오류 초기화 핸들러
   const handleClearError = () => {
     clearError();
     resetRetryState();
   };
 
-  // Excel 내보내기를 위한 날짜 범위 선택 모달 표시
   const showDateRangeModal = async () => {
     const now = new Date();
     const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -1544,7 +1496,6 @@ const TodoContainer = () => {
     return result;
   };
 
-  // 날짜 범위 선택, API 호출 및 파일 다운로드를 통한 Excel 내보내기 처리
   const handleExcelExport = async () => {
     const result = await showDateRangeModal();
 
@@ -1644,12 +1595,10 @@ const TodoContainer = () => {
 
   return (
     <div className="todo-container">
-      {/* 1. 제목을 중앙에 배치하기 위한 헤더 */}
       <div className="todo-title-header">
         <h2>TO-DO 리스트</h2>
       </div>
 
-      {/* 2. 사용자 정보를 우측에 배치하기 위한 헤더 */}
       <div className="user-info-header">
         <span>{userName}님 환영합니다.</span>
         <div className="user-menu-container" ref={userMenuRef}>
@@ -1694,7 +1643,6 @@ const TodoContainer = () => {
         </div>
       </div>
 
-      {/* '신규' 버튼을 오른쪽으로 배치하기 위한 컨테이너 */}
       <div className="todo-actions">
         {!isCreating &&
           !editingTodo &&
@@ -1718,7 +1666,6 @@ const TodoContainer = () => {
           )}
       </div>
 
-      {/* 할 일 목록을 볼 때만 DatePicker를 표시 */}
       {!isCreating &&
         !editingTodo &&
         !isUpdatingProfile &&
@@ -1754,10 +1701,9 @@ const TodoContainer = () => {
             </button>
           </div>
         )}
-      {/* 할 일 목록 또는 할 일 생성/수정 폼을 보여주는 부분 */}
+
       {renderContent()}
 
-      {/* 채팅 인터페이스 */}
       <FloatingActionButton
         isOpen={isChatOpen}
         onClick={handleChatToggle}

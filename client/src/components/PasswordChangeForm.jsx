@@ -149,7 +149,6 @@ const PasswordChangeForm = ({
   const validateForm = () => {
     let isValid = true;
 
-    // 현재 비밀번호 유효성 검사
     if (currentPassword.trim()) {
       setCurrentPasswordError('');
     } else {
@@ -157,7 +156,6 @@ const PasswordChangeForm = ({
       isValid = false;
     }
 
-    // 새 비밀번호 유효성 검사
     if (!newPassword.trim()) {
       setNewPasswordError('새 비밀번호를 입력해주세요.');
       isValid = false;
@@ -179,7 +177,6 @@ const PasswordChangeForm = ({
       setNewPasswordError('');
     }
 
-    // 비밀번호 확인 유효성 검사
     if (!confirmPassword.trim()) {
       setConfirmPasswordError('새 비밀번호 확인을 입력해주세요.');
       isValid = false;
@@ -201,12 +198,10 @@ const PasswordChangeForm = ({
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // 폼 유효성 검사
     if (!validateForm()) {
       return;
     }
 
-    // 비밀번호 데이터 준비
     const passwordData = {
       currentPassword: currentPassword.trim(),
       newPassword: newPassword.trim(),
@@ -261,7 +256,6 @@ const PasswordChangeForm = ({
           style={{ display: 'none' }}
         />
 
-        {/* 현재 비밀번호 필드 */}
         <div className="form-group row mb-3">
           <label htmlFor="currentPassword" className="col-3 col-form-label">
             현재 비밀번호 <span className="text-danger">*</span>
@@ -298,7 +292,6 @@ const PasswordChangeForm = ({
           </div>
         </div>
 
-        {/* 새 비밀번호 필드 */}
         <div className="form-group row mb-3">
           <label htmlFor="newPassword" className="col-3 col-form-label">
             새 비밀번호 <span className="text-danger">*</span>
@@ -352,7 +345,6 @@ const PasswordChangeForm = ({
           </div>
         </div>
 
-        {/* 비밀번호 확인 필드 */}
         <div className="form-group row mb-3">
           <label htmlFor="confirmPassword" className="col-3 col-form-label">
             새 비밀번호 확인 <span className="text-danger">*</span>
@@ -397,7 +389,6 @@ const PasswordChangeForm = ({
           </div>
         </div>
 
-        {/* 보안 안내 */}
         <div className="alert alert-info mb-3">
           <h6 className="alert-heading">🔒 보안 안내</h6>
           <ul className="mb-0">
@@ -409,7 +400,6 @@ const PasswordChangeForm = ({
           </ul>
         </div>
 
-        {/* 폼 액션 */}
         <div className="row">
           <div className="col-3">
             <button

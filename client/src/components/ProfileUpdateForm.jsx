@@ -277,7 +277,6 @@ const ProfileUpdateForm = ({
       isValid = false;
     }
 
-    // 설명 길이 유효성 검사
     if (userDescription && userDescription.length > 4000) {
       isValid = false;
     }
@@ -291,7 +290,6 @@ const ProfileUpdateForm = ({
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // 폼 유효성 검사
     if (!validateForm()) {
       return;
     }
@@ -471,7 +469,6 @@ const ProfileUpdateForm = ({
         </div>
       ) : (
         <form onSubmit={handleSubmit}>
-          {/* 이름 필드 */}
           <div className="form-group row mb-3">
             <label htmlFor="userName" className="col-3 col-form-label">
               이름 <span className="text-danger">*</span>
@@ -492,7 +489,6 @@ const ProfileUpdateForm = ({
             </div>
           </div>
 
-          {/* 이메일 필드 */}
           <div className="form-group row mb-3">
             <label htmlFor="userEmail" className="col-3 col-form-label">
               이메일 <span className="text-danger">*</span>
@@ -515,7 +511,6 @@ const ProfileUpdateForm = ({
             </div>
           </div>
 
-          {/* 프로필 이미지 업로드 */}
           <div className="form-group row mb-3">
             <label htmlFor="profileImage" className="col-3 col-form-label">
               프로필 이미지
@@ -546,13 +541,10 @@ const ProfileUpdateForm = ({
             </div>
           </div>
 
-          {/* 이미지 미리보기 */}
           {renderImagePreview()}
 
-          {/* 파일 업로드 진행 상황 */}
           {renderUploadStatus()}
 
-          {/* AI API Key 필드 */}
           <div className="form-group row mb-3">
             <label htmlFor="aiApiKey" className="col-3 col-form-label">
               AI API Key
@@ -581,7 +573,6 @@ const ProfileUpdateForm = ({
             </div>
           </div>
 
-          {/* 설명 필드 */}
           <div className="form-group row mb-3">
             <label htmlFor="userDescription" className="col-3 col-form-label">
               추가 설명
@@ -604,7 +595,6 @@ const ProfileUpdateForm = ({
             </div>
           </div>
 
-          {/* 폼 액션 */}
           <div className="row">
             <div className="col-3">
               <button

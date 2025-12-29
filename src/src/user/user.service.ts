@@ -36,7 +36,6 @@ export class UserService {
     private readonly dataSource: DataSource,
   ) {}
 
-  // 사용자 정보 복호화 헬퍼 메소드
   decryptUserInfo<T extends Partial<UserEntity>>(user: T): T {
     if (!user) return user;
 
@@ -53,7 +52,6 @@ export class UserService {
     return user;
   }
 
-  // 클라이언트 반환용 사용자 정보 (민감정보 암호화 상태 유지)
   getPublicUserInfo<T extends Partial<UserEntity>>(user: T): T {
     if (!user) return user;
 
@@ -64,7 +62,6 @@ export class UserService {
     return { ...user };
   }
 
-  // 로그인 로직 (컨트롤러에서 세션 처리)
   async login(
     userDto: UserDto,
   ): Promise<Omit<UserEntity, 'userPassword' | 'setProfileImage'>> {
@@ -93,7 +90,6 @@ export class UserService {
     return userToStore;
   }
 
-  // ID 중복체크
   async checkIdDuplicated(userId: string): Promise<boolean> {
     const selectedUser = await this.userRepository.findOne({
       where: { userId },
@@ -101,7 +97,6 @@ export class UserService {
     return !!selectedUser;
   }
 
-  // 회원가입
   async signup(
     userDto: UserDto,
     profileImageFile: Express.Multer.File,
@@ -134,7 +129,6 @@ export class UserService {
         newUser,
       );
 
-      // 프로필 이미지 등록 시
       if (profileImageFile) {
         try {
           // 프로필 이미지 파일 검증
@@ -163,7 +157,6 @@ export class UserService {
             });
           }
 
-          // 검증된 프로필 이미지 저장
           const fileUploadResult = await this.fileUploadUtil.saveFileInfo(
             [profileImageFile],
             { entity: null, id: userId, ip },
@@ -210,7 +203,6 @@ export class UserService {
     });
   }
 
-  // 프로필 업데이트
   async updateProfile(
     userSeq: number,
     updateUserDto: UpdateUserDto,
@@ -218,7 +210,6 @@ export class UserService {
     ip: string,
   ): Promise<Omit<UserEntity, 'userPassword' | 'setProfileImage'>> {
     return this.dataSource.transaction(async (transactionalEntityManager) => {
-      // 향상된 사용자 검증 및 활성 상태 확인
       const currentUser = await this.validateAndGetUserForUpdate(
         transactionalEntityManager,
         userSeq,
@@ -226,10 +217,8 @@ export class UserService {
       );
       const { userId: currentUserId } = currentUser;
 
-      // 입력 데이터 검증 및 새니타이즈
       const sanitizedDto = this.validateAndSanitizeUpdateData(updateUserDto);
 
-      // 이메일 고유성 검사
       await this.validateAndCheckEmail(
         transactionalEntityManager,
         userSeq,
@@ -238,10 +227,8 @@ export class UserService {
         ip,
       );
 
-      // 감사 목적으로 업데이트되는 필드 추적 및 사용자 필드 업데이트
       const updatedFields = this.updateUserFields(currentUser, sanitizedDto);
 
-      // 추가 보안 검사를 포함한 향상된 프로필 이미지 처리
       if (profileImageFile) {
         await this.handleProfileImageUpdate(
           currentUser,
@@ -251,7 +238,6 @@ export class UserService {
         );
       }
 
-      // 감사 목적으로 업데이트 시도 로깅
       this.logger.log('Profile update processing', {
         userSeq,
         userId: currentUserId,
@@ -260,7 +246,6 @@ export class UserService {
         ip,
       });
 
-      // 업데이트를 위한 감사 컬럼 설정 및 저장
       const updatedUser = setAuditColumn({
         entity: currentUser,
         id: currentUserId,
@@ -275,7 +260,6 @@ export class UserService {
 
       const { userId: savedUserId } = savedUser;
 
-      // 성공적인 업데이트 로깅
       this.logger.log('Profile update completed successfully', {
         userSeq,
         userId: savedUserId,
@@ -283,17 +267,12 @@ export class UserService {
         ip,
       });
 
-      // 비밀번호 없이 사용자 반환
-
       const { userPassword: _, ...userToReturn } = savedUser;
 
       return userToReturn;
     });
   }
 
-  /**
-   * 업데이트를 위한 사용자 조회 및 검증
-   */
   private async validateAndGetUserForUpdate(
     entityManager: any, // EntityManager 타입을 any로 임시 처리 혹은 모듈에서 import 필요 (여기선 흐름상 any 허용 혹은 EntityManager import 추가 권장하지만 import 최소화 위해)
     userSeq: number,
@@ -325,9 +304,6 @@ export class UserService {
     return currentUser;
   }
 
-  /**
-   * 이메일 유효성 및 중복 검사
-   */
   private async validateAndCheckEmail(
     entityManager: any,
     userSeq: number,
@@ -339,7 +315,6 @@ export class UserService {
       return;
     }
 
-    // 추가 이메일 형식 검증
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(newEmail)) {
       throw new BadRequestException({
@@ -349,7 +324,6 @@ export class UserService {
       });
     }
 
-    // 이메일 고유성 확인 (결정적 암호화 값으로 조회)
     const encryptedNewEmail = encryptSymmetricDeterministic(newEmail);
 
     const existingUser = await entityManager.findOne(UserEntity, {
@@ -374,9 +348,6 @@ export class UserService {
     }
   }
 
-  /**
-   * 기본 사용자 필드 업데이트
-   */
   private updateUserFields(
     currentUser: UserEntity,
     sanitizedDto: UpdateUserDto,
@@ -457,9 +428,6 @@ export class UserService {
     return false;
   }
 
-  /**
-   * 프로필 이미지 업데이트 처리
-   */
   private async handleProfileImageUpdate(
     currentUser: UserEntity,
     profileImageFile: Express.Multer.File,
@@ -536,9 +504,6 @@ export class UserService {
     }
   }
 
-  /**
-   * 프로필 업데이트 데이터를 검증하고 새니타이즈합니다
-   */
   private validateAndSanitizeUpdateData(
     updateUserDto: UpdateUserDto,
   ): UpdateUserDto {
@@ -549,7 +514,6 @@ export class UserService {
     if (userName !== undefined) {
       sanitized.userName = this.inputSanitizer.sanitizeName(userName);
 
-      // 추가 이름 검증
       if (sanitized.userName && sanitized.userName.length > 200) {
         throw new BadRequestException({
           message: 'Name too long',
@@ -563,7 +527,6 @@ export class UserService {
     if (userEmail !== undefined) {
       sanitized.userEmail = this.inputSanitizer.sanitizeEmail(userEmail);
 
-      // 추가 이메일 검증
       if (sanitized.userEmail && sanitized.userEmail.length > 100) {
         throw new BadRequestException({
           message: 'Email too long',
@@ -578,7 +541,6 @@ export class UserService {
       sanitized.userDescription =
         this.inputSanitizer.sanitizeDescription(userDescription);
 
-      // 추가 설명 검증
       if (
         sanitized.userDescription &&
         sanitized.userDescription.length > 4000
@@ -599,9 +561,6 @@ export class UserService {
     return sanitized;
   }
 
-  /**
-   * 프로필 이미지 업로드를 위한 추가 보안 검증
-   */
   private validateProfileImageSecurity(
     profileImageFile: Express.Multer.File,
     userSeq: number,
@@ -634,7 +593,6 @@ export class UserService {
       }
     }
 
-    // 과도하게 큰 파일 검사 (multer 제한을 넘어선 추가 검사)
     const maxSize = 5 * 1024 * 1024; // 5MB
     if (size > maxSize) {
       this.logger.warn('Profile image file too large', {
@@ -676,14 +634,12 @@ export class UserService {
     }
   }
 
-  // 비밀번호 변경
   async changePassword(
     userSeq: number,
     changePasswordDto: ChangePasswordDto,
     ip: string,
   ): Promise<void> {
     return this.dataSource.transaction(async (transactionalEntityManager) => {
-      // 향상된 사용자 검증
       const currentUser = await transactionalEntityManager.findOne(UserEntity, {
         where: { userSeq },
       });
@@ -698,7 +654,6 @@ export class UserService {
 
       const { adminYn, userId, userPassword } = currentUser;
 
-      // 추가 보안 검사 - 사용자가 활성 상태인지 확인
       if (adminYn === 'SUSPENDED') {
         this.logger.warn('Password change attempted by suspended user', {
           userSeq,
@@ -713,7 +668,6 @@ export class UserService {
       const { currentPassword, newPassword, confirmPassword } =
         changePasswordDto;
 
-      // 현재 비밀번호 검증
       const isCurrentPasswordValid = await isHashValid(
         currentPassword,
         userPassword,
@@ -731,14 +685,12 @@ export class UserService {
         throw new UnauthorizedException('현재 비밀번호가 올바르지 않습니다.');
       }
 
-      // 새 비밀번호 확인 검증
       if (newPassword !== confirmPassword) {
         throw new BadRequestException(
           '새 비밀번호와 비밀번호 확인이 일치하지 않습니다.',
         );
       }
 
-      // 새 비밀번호가 현재 비밀번호와 다른지 확인
       const isSamePassword = await isHashValid(newPassword, userPassword);
 
       if (isSamePassword) {
@@ -747,23 +699,18 @@ export class UserService {
         );
       }
 
-      // 새 비밀번호 암호화
       const encryptedNewPassword = await encrypt(newPassword);
 
-      // 비밀번호 업데이트
       currentUser.userPassword = encryptedNewPassword;
 
-      // 업데이트를 위한 감사 컬럼 설정
       const updatedUser = setAuditColumn({
         entity: currentUser,
         id: userId,
         ip,
       });
 
-      // 업데이트된 사용자 저장
       await transactionalEntityManager.save(UserEntity, updatedUser);
 
-      // 성공적인 비밀번호 변경 로깅
       this.logger.log('Password change completed successfully', {
         userSeq,
         userId,

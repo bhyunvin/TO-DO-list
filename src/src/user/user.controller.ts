@@ -40,7 +40,6 @@ export class UserController {
     private readonly fileUploadErrorService: FileUploadErrorService,
   ) {}
 
-  //로그인
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(
@@ -65,13 +64,11 @@ export class UserController {
     });
   }
 
-  //아이디 중복체크
   @Get('duplicate/:userId')
   async checkIdDuplicated(@Param('userId') userId: string): Promise<boolean> {
     return await this.userService.checkIdDuplicated(userId);
   }
 
-  //회원가입
   @Post('signup')
   @UseInterceptors(
     FileInterceptor('profileImage', profileImageMulterOptions),
@@ -131,7 +128,6 @@ export class UserController {
     }
   }
 
-  //로그아웃
   @UseGuards(AuthenticatedGuard)
   @Post('logout')
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -141,7 +137,6 @@ export class UserController {
     });
   }
 
-  //프로필 업데이트
   @UseGuards(AuthenticatedGuard)
   @Patch('profile')
   @UseInterceptors(
@@ -178,7 +173,6 @@ export class UserController {
 
       const { userSeq, userId } = currentUser;
 
-      // 추가 세션 검증 - 세션이 여전히 유효한지 확인
       if (!userId) {
         this.logger.warn(
           'Profile update attempted with incomplete session data',
@@ -193,7 +187,6 @@ export class UserController {
         );
       }
 
-      // 감사 목적으로 프로필 업데이트 시도 로깅
       this.logger.log('Profile update attempt', {
         userSeq,
         userId,
@@ -203,7 +196,6 @@ export class UserController {
         sessionId,
       });
 
-      // 속도 제한 검사 - 너무 빈번한 업데이트 방지
       const { lastProfileUpdate: lastUpdateTime } = session;
       const now = Date.now();
       const minUpdateInterval = 60 * 1000; // 업데이트 간 최소 1분
@@ -230,7 +222,6 @@ export class UserController {
         ip,
       );
 
-      // 새 사용자 데이터와 타임스탬프로 세션 업데이트
       session.user = updatedUser;
       session.lastProfileUpdate = now;
 
@@ -279,7 +270,6 @@ export class UserController {
     }
   }
 
-  //비밀번호 변경
   @UseGuards(AuthenticatedGuard)
   @Patch('password')
   @HttpCode(HttpStatus.OK)
@@ -312,7 +302,6 @@ export class UserController {
 
       const { userSeq, userId } = currentUser;
 
-      // 추가 세션 검증
       if (!userId) {
         this.logger.warn(
           'Password change attempted with incomplete session data',
@@ -327,7 +316,6 @@ export class UserController {
         );
       }
 
-      // 감사 목적으로 비밀번호 변경 시도 로깅
       this.logger.log('Password change attempt', {
         userSeq,
         userId,
@@ -335,7 +323,6 @@ export class UserController {
         sessionId,
       });
 
-      // 속도 제한 검사 - 너무 빈번한 비밀번호 변경 방지
       const { lastPasswordChange } = session;
       const now = Date.now();
       const minChangeInterval = 300000; // 비밀번호 변경 간 최소 5분
@@ -354,7 +341,6 @@ export class UserController {
 
       await this.userService.changePassword(userSeq, changePasswordDto, ip);
 
-      // 비밀번호 변경 타임스탬프로 세션 업데이트
       session.lastPasswordChange = now;
 
       return new Promise((resolve, reject) => {
@@ -394,7 +380,6 @@ export class UserController {
     }
   }
 
-  //프로필 조회
   @UseGuards(AuthenticatedGuard)
   @Get('profile')
   getProfile(@Session() session: SessionInterface & SessionData) {
@@ -408,7 +393,6 @@ export class UserController {
     return this.userService.getPublicUserInfo(userForClient);
   }
 
-  // 프로필 상세 조회 (편집용 - 전체 정보 반환)
   @UseGuards(AuthenticatedGuard)
   @Get('profile/detail')
   getProfileDetail(@Session() session: SessionInterface & SessionData) {

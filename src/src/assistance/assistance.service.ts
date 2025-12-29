@@ -626,7 +626,6 @@ export class AssistanceService implements OnModuleInit {
     todoDate: string,
     todoNote?: string,
   ): Promise<any> {
-    // [로그 추가] createTodo 함수 시작
     this.logger.log(
       `[createTodo] 함수 시작. userSeq: ${userSeq}, userId: ${userId}, todoContent: "${todoContent}", todoDate: ${todoDate}, todoNote: ${todoNote}`,
     );
@@ -661,7 +660,6 @@ export class AssistanceService implements OnModuleInit {
         todoNote,
       };
 
-      this.logger.log(`[createTodo] todoService.create 호출 중...`);
       const createdTodo = await this.todoService.create(
         user,
         ip,
