@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Request } from 'express';
-import { extname } from 'path';
+import { extname } from 'node:path';
 import {
   FileValidationError,
   ValidationResult,
@@ -270,7 +270,7 @@ export class FileUploadErrorService {
     userId?: number,
   ): ErrorLogContext {
     return {
-      clientIp: request.ip || request.connection?.remoteAddress || 'unknown',
+      clientIp: request.ip || request.socket?.remoteAddress || 'unknown',
       userAgent: request.get('User-Agent') || 'unknown',
       userId,
       category,
@@ -289,7 +289,7 @@ export class FileUploadErrorService {
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return Number.parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   }
 
   /**
