@@ -24,7 +24,7 @@
 - **언어**: TypeScript
 - **데이터베이스**: PostgreSQL with TypeORM
 - **인증**: Express Session with bcrypt
-- **보안**: Keychain integration
+- **보안**: Keychain integration, AES-256-GCM encryption
 - **AI**: Google Gemini API via @nestjs/axios
 - **파일 업로드**: Multer
 - **마크다운**: marked, sanitize-html
@@ -294,7 +294,7 @@ A full-stack TO-DO List application built with modern web technologies. Provides
 - **Language**: TypeScript
 - **Database**: PostgreSQL with TypeORM
 - **Authentication**: Express Session with bcrypt
-- **Security**: Keychain integration
+- **Security**: Keychain integration, AES-256-GCM encryption
 - **AI**: Google Gemini API via @nestjs/axios
 - **File Upload**: Multer
 - **Markdown**: marked, sanitize-html

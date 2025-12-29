@@ -12,6 +12,7 @@ TO-DO List 애플리케이션의 프론트엔드 클라이언트입니다. React
 - 비밀번호 변경
 - 반응형 디자인 (Bootstrap 5)
 - 실시간 알림 (SweetAlert2)
+- 웹 접근성 준수 (WCAG 2.1 AA, 고대비 모드)
 
 ## 기술 스택
 
@@ -23,6 +24,7 @@ TO-DO List 애플리케이션의 프론트엔드 클라이언트입니다. React
 - **알림**: SweetAlert2 11.22.5
 - **날짜 처리**: date-fns 4.1.0, react-datepicker 8.7.0
 - **보안**: DOMPurify 3.3.0
+- **타입 검사**: PropTypes 15.x
 - **아이콘**: Bootstrap Icons 1.13.1
 - **테스트**: Jest, React Testing Library
 
@@ -304,6 +306,7 @@ Frontend client for the TO-DO List application. Built with React 19 and React Bo
 - Password change
 - Responsive design (Bootstrap 5)
 - Real-time notifications (SweetAlert2)
+- Web Accessibility compliant (WCAG 2.1 AA, High contrast mode)
 
 ## Technology Stack
 
@@ -315,6 +318,7 @@ Frontend client for the TO-DO List application. Built with React 19 and React Bo
 - **Notifications**: SweetAlert2 11.22.5
 - **Date Handling**: date-fns 4.1.0, react-datepicker 8.7.0
 - **Security**: DOMPurify 3.3.0
+- **Type Checking**: PropTypes 15.x
 - **Icons**: Bootstrap Icons 1.13.1
 - **Testing**: Jest, React Testing Library
 

@@ -5,7 +5,7 @@
 - **Language**: TypeScript
 - **Database**: PostgreSQL with TypeORM
 - **Authentication**: Express sessions with bcrypt password hashing
-- **Security**: Environment variables for secure credential storage
+- **Security**: Environment variables for secure credential storage, AES-256-GCM for data encryption
 - **AI Integration**: Google Gemini API via @nestjs/axios with function calling
 - **File Upload**: Multer for multipart form handling
 - **Markdown Processing**: marked for markdown parsing, sanitize-html for XSS protection
@@ -17,7 +17,8 @@
 - **HTTP Client**: Axios (configured via setupProxy.js)
 - **Notifications**: SweetAlert2
 - **Date Handling**: date-fns and react-datepicker
-- **Security**: DOMPurify for HTML sanitization
+- **Security**: DOMPurify for HTML sanitization, PropTypes for type checking
+- **Accessibility**: WCAG 2.1 AA compliant (High contrast mode support)
 - **Theming**: CSS Custom Properties for dynamic light/dark mode
 
 ## Development Tools

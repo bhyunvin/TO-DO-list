@@ -196,7 +196,7 @@ npm run format
 
 ## 보안
 
-- 강력한 암호화 알고리즘을 사용한 비밀번호 해싱
+- 강력한 암호화 알고리즘을 사용한 비밀번호 해싱 (bcrypt) 및 데이터 암호화 (AES-256-GCM)
 - 세션 기반 인증 시스템
 - 안전한 자격 증명 저장 메커니즘
 - XSS 및 CSRF 공격 방지
@@ -442,7 +442,7 @@ For detailed API specifications, please refer to the separate API documentation.
 
 ## Security
 
-- Strong encryption algorithm for password hashing
+- Strong encryption algorithm for password hashing (bcrypt) and data encryption (AES-256-GCM)
 - Session-based authentication system
 - Secure credential storage mechanism
 - XSS and CSRF attack prevention

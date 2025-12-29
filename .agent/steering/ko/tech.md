@@ -5,7 +5,7 @@
 - **언어**: TypeScript
 - **데이터베이스**: TypeORM을 사용하는 PostgreSQL
 - **인증**: bcrypt 비밀번호 해싱을 사용하는 Express 세션
-- **보안**: 안전한 자격 증명 저장을 위한 환경 변수
+- **보안**: 안전한 자격 증명 저장을 위한 환경 변수, 데이터 암호화를 위한 AES-256-GCM
 - **AI 통합**: 함수 호출 기능을 갖춘 @nestjs/axios를 통한 Google Gemini API
 - **파일 업로드**: multipart form 처리를 위한 Multer
 - **마크다운 처리**: 마크다운 파싱을 위한 marked, XSS 보호를 위한 sanitize-html
@@ -17,7 +17,8 @@
 - **HTTP 클라이언트**: Axios (setupProxy.js를 통해 구성)
 - **알림**: SweetAlert2
 - **날짜 처리**: date-fns 및 react-datepicker
-- **보안**: HTML 새니타이제이션을 위한 DOMPurify
+- **보안**: HTML 새니타이제이션을 위한 DOMPurify, 타입 검사를 위한 PropTypes
+- **접근성**: WCAG 2.1 AA 준수 (고대비 모드 지원)
 - **테마**: 동적 라이트/다크 모드를 위한 CSS Custom Properties
 
 ## 개발 도구
