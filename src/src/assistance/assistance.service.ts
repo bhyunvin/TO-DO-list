@@ -14,8 +14,8 @@ import { firstValueFrom } from 'rxjs';
 import { GeminiApiResponse } from './gemini.interface';
 import { marked } from 'marked';
 import * as sanitizeHtml from 'sanitize-html';
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import { TodoService } from '../todo/todo.service';
 import { CreateTodoDto } from '../todo/todo.dto';
 import { UserEntity } from '../user/user.entity';
@@ -216,7 +216,7 @@ export class AssistanceService implements OnModuleInit {
     // 사용자 정보 최신 조회 (API Key 확인용)
     const user = await this.userRepository.findOne({ where: { userSeq } });
 
-    if (!user || !user.aiApiKey) {
+    if (!user?.aiApiKey) {
       throw new BadRequestException(
         'AI API Key가 설정되지 않았습니다. 프로필 설정에서 등록해주세요.',
       );
@@ -231,25 +231,7 @@ export class AssistanceService implements OnModuleInit {
     }
 
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-    let systemPrompt = '';
-
-    try {
-      const promptPath =
-        process.env.SYSTEM_PROMPT_PATH ||
-        './src/assistance/assistance.systemPrompt.txt';
-      systemPrompt = fs.readFileSync(path.resolve(promptPath), 'utf-8').trim();
-
-      if (userName) {
-        systemPrompt = systemPrompt.replace(/\[사용자 이름\]/g, userName);
-      }
-
-      const currentDate = this.getCurrentKSTDate();
-      const dateContext = `\n\n[CURRENT_DATE]\n오늘 날짜: ${currentDate} (YYYY-MM-DD 형식)\n이 날짜를 기준으로 "오늘", "내일", "다음 주" 등의 상대적 날짜를 계산하세요.`;
-      systemPrompt = systemPrompt + dateContext;
-    } catch (error) {
-      this.logger.error('시스템 프롬프트를 불러오는 중 오류 발생:', error);
-      systemPrompt = `[ROLE] 당신은 친절한 한국어 비서입니다. 존댓말로 할 일 목록에 관해서만 답변하세요.`;
-    }
+    const systemPrompt = this.loadSystemPrompt(userName);
 
     const requestData: any = {
       system_instruction: {
@@ -310,80 +292,18 @@ export class AssistanceService implements OnModuleInit {
       );
 
       if (functionCall) {
-        const args = functionCall.args || {};
-        let functionResult: any;
-
-        this.logger.log(
-          `[Gemini Function Call] Gemini가 함수 호출 요청: ${functionCall.name}, Args: ${JSON.stringify(args)}`,
+        const functionResult = await this.executeFunctionCall(
+          functionCall,
+          userSeq,
+          userId,
+          ip,
         );
 
-        switch (functionCall.name) {
-          case 'getTodos':
-            if (userSeq) {
-              this.logger.log(
-                `[Function Execution] getTodos 실행 시작 (userSeq 존재: true)`,
-              );
-              functionResult = await this.getTodos(
-                userSeq,
-                args.status,
-                args.days,
-              );
-            } else {
-              this.logger.warn(
-                `[Function Execution] getTodos 실행 불가 - userSeq가 없음`,
-              );
-            }
-            break;
-
-          case 'createTodo':
-            if (userSeq && ip && userId) {
-              this.logger.log(
-                `[Function Execution] createTodo 실행 시작 (userSeq: ${userSeq}, userId: ${userId}, ip: ${ip})`,
-              );
-              functionResult = await this.createTodo(
-                userSeq,
-                userId,
-                ip,
-                args.todoContent,
-                args.todoDate,
-                args.todoNote,
-              );
-            } else {
-              this.logger.warn(
-                `[Function Execution] createTodo 실행 불가 - userSeq: ${userSeq}, userId: ${userId}, ip: ${ip}`,
-              );
-            }
-            break;
-
-          case 'updateTodo':
-            if (userSeq && ip && userId) {
-              this.logger.log(
-                `[Function Execution] updateTodo 실행 시작 (userSeq: ${userSeq}, userId: ${userId}, ip: ${ip}, todoSeq: ${args.todoSeq}, todoContentToFind: ${args.todoContentToFind})`,
-              );
-              functionResult = await this.updateTodo(
-                userSeq,
-                userId,
-                ip,
-                args.todoSeq,
-                args.todoContentToFind,
-                {
-                  todoContent: args.todoContent,
-                  isCompleted: args.isCompleted,
-                  todoNote: args.todoNote,
-                },
-              );
-            } else {
-              this.logger.warn(
-                `[Function Execution] updateTodo 실행 불가 - userSeq: ${userSeq}, userId: ${userId}, ip: ${ip}`,
-              );
-            }
-            break;
-
-          default:
-            this.logger.warn(`알 수 없는 함수 호출: ${functionCall.name}`);
-        }
-
-        if (functionResult !== undefined) {
+        if (functionResult === undefined) {
+          this.logger.warn(
+            `[Function Execution] functionResult가 undefined - 함수가 실행되지 않았거나 조건 불충족`,
+          );
+        } else {
           this.logger.log(
             `[Gemini Function Result] ${functionCall.name} 함수 실행 결과 (Gemini에게 전송): ${JSON.stringify(functionResult)}`,
           );
@@ -432,10 +352,6 @@ export class AssistanceService implements OnModuleInit {
           );
           this.logger.debug(
             `[Gemini Response] 2차 응답 전체 데이터: ${JSON.stringify(response.data, null, 2)}`,
-          );
-        } else {
-          this.logger.warn(
-            `[Function Execution] functionResult가 undefined - 함수가 실행되지 않았거나 조건 불충족`,
           );
         }
       }
@@ -488,6 +404,107 @@ export class AssistanceService implements OnModuleInit {
     }
   }
 
+  private loadSystemPrompt(userName?: string): string {
+    let systemPrompt = '';
+
+    try {
+      const promptPath =
+        process.env.SYSTEM_PROMPT_PATH ||
+        './src/assistance/assistance.systemPrompt.txt';
+      systemPrompt = fs.readFileSync(path.resolve(promptPath), 'utf-8').trim();
+
+      if (userName) {
+        systemPrompt = systemPrompt.replaceAll('[사용자 이름]', userName);
+      }
+
+      const currentDate = this.getCurrentKSTDate();
+      const dateContext = `\n\n[CURRENT_DATE]\n오늘 날짜: ${currentDate} (YYYY-MM-DD 형식)\n이 날짜를 기준으로 "오늘", "내일", "다음 주" 등의 상대적 날짜를 계산하세요.`;
+      systemPrompt = systemPrompt + dateContext;
+    } catch (error) {
+      this.logger.error('시스템 프롬프트를 불러오는 중 오류 발생:', error);
+      systemPrompt = `[ROLE] 당신은 친절한 한국어 비서입니다. 존댓말로 할 일 목록에 관해서만 답변하세요.`;
+    }
+    return systemPrompt;
+  }
+
+  private async executeFunctionCall(
+    functionCall: any,
+    userSeq: number,
+    userId?: string,
+    ip?: string,
+  ): Promise<any> {
+    const args = functionCall.args || {};
+    let functionResult: any;
+
+    this.logger.log(
+      `[Gemini Function Call] Gemini가 함수 호출 요청: ${functionCall.name}, Args: ${JSON.stringify(args)}`,
+    );
+
+    switch (functionCall.name) {
+      case 'getTodos':
+        if (userSeq) {
+          this.logger.log(
+            `[Function Execution] getTodos 실행 시작 (userSeq 존재: true)`,
+          );
+          functionResult = await this.getTodos(userSeq, args.status, args.days);
+        } else {
+          this.logger.warn(
+            `[Function Execution] getTodos 실행 불가 - userSeq가 없음`,
+          );
+        }
+        break;
+
+      case 'createTodo':
+        if (userSeq && ip && userId) {
+          this.logger.log(
+            `[Function Execution] createTodo 실행 시작 (userSeq: ${userSeq}, userId: ${userId}, ip: ${ip})`,
+          );
+          functionResult = await this.createTodo(
+            userSeq,
+            userId,
+            ip,
+            args.todoContent,
+            args.todoDate,
+            args.todoNote,
+          );
+        } else {
+          this.logger.warn(
+            `[Function Execution] createTodo 실행 불가 - userSeq: ${userSeq}, userId: ${userId}, ip: ${ip}`,
+          );
+        }
+        break;
+
+      case 'updateTodo':
+        if (userSeq && ip && userId) {
+          this.logger.log(
+            `[Function Execution] updateTodo 실행 시작 (userSeq: ${userSeq}, userId: ${userId}, ip: ${ip}, todoSeq: ${args.todoSeq}, todoContentToFind: ${args.todoContentToFind})`,
+          );
+          functionResult = await this.updateTodo(
+            userSeq,
+            userId,
+            ip,
+            args.todoSeq,
+            args.todoContentToFind,
+            {
+              todoContent: args.todoContent,
+              isCompleted: args.isCompleted,
+              todoNote: args.todoNote,
+            },
+          );
+        } else {
+          this.logger.warn(
+            `[Function Execution] updateTodo 실행 불가 - userSeq: ${userSeq}, userId: ${userId}, ip: ${ip}`,
+          );
+        }
+        break;
+
+      default:
+        this.logger.warn(`알 수 없는 함수 호출: ${functionCall.name}`);
+    }
+
+    return functionResult;
+  }
+
   private async getTodos(
     userSeq: number,
     status?: string,
@@ -501,12 +518,12 @@ export class AssistanceService implements OnModuleInit {
       let targetDate: string;
       const today = new Date();
 
-      if (days !== undefined) {
+      if (days === undefined) {
+        targetDate = null;
+      } else {
         const targetDateObj = new Date(today);
         targetDateObj.setDate(today.getDate() + days);
         targetDate = targetDateObj.toISOString().split('T')[0];
-      } else {
-        targetDate = null;
       }
 
       this.logger.log(
@@ -592,14 +609,14 @@ export class AssistanceService implements OnModuleInit {
   }
 
   /**
-   * 새로운 TODO 항목 생성
+   * 새로운 할 일 항목 생성
    * @param userSeq - 사용자 시퀀스 번호
    * @param userId - 사용자 ID
    * @param ip - 클라이언트 IP 주소
-   * @param todoContent - TODO 내용
+   * @param todoContent - 할 일 내용
    * @param todoDate - YYYY-MM-DD 형식의 목표 날짜
    * @param todoNote - 추가 메모
-   * @returns 성공 여부와 생성된 TODO 데이터
+   * @returns 성공 여부와 생성된 할 일 데이터
    */
   private async createTodo(
     userSeq: number,
@@ -684,14 +701,14 @@ export class AssistanceService implements OnModuleInit {
   }
 
   /**
-   * 기존 TODO 항목 업데이트
+   * 기존 할 일 항목 업데이트
    * @param userSeq - 사용자 시퀀스 번호
    * @param userId - 사용자 ID
    * @param ip - 클라이언트 IP 주소
-   * @param todoSeq - TODO 시퀀스 번호
+   * @param todoSeq - 할 일 시퀀스 번호
    * @param todoContentToFind - 내용 검색어
    * @param updateData - 업데이트할 필드
-   * @returns 성공 여부와 업데이트된 TODO 데이터
+   * @returns 성공 여부와 업데이트된 할 일 데이터
    */
   private async updateTodo(
     userSeq: number,

@@ -116,7 +116,7 @@ export class ChatController {
     // API가 Retry-After 헤더를 제공하는지 확인
     const retryAfter = error.response?.headers?.['retry-after'];
     if (retryAfter) {
-      const retryAfterMs = parseInt(retryAfter) * 1000; // 초를 밀리초로 변환
+      const retryAfterMs = Number.parseInt(retryAfter) * 1000; // 초를 밀리초로 변환
       return Math.min(retryAfterMs, 30000); // 최대 30초로 제한
     }
 
