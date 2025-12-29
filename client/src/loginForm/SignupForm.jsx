@@ -3,6 +3,7 @@ import Swal from 'sweetalert2';
 import authService from '../api/authService';
 import { useFileUploadValidator } from '../hooks/useFileUploadValidator';
 import { useFileUploadProgress } from '../hooks/useFileUploadProgress';
+import PropTypes from 'prop-types';
 import FileUploadProgress from '../components/FileUploadProgress';
 
 import './loginForm.css';
@@ -86,10 +87,10 @@ const SignupForm = ({ onSignupComplete }) => {
 
       setIsIdDuplicated(isDuplicated);
 
-      if (!isDuplicated) {
-        setIdDuplicatedResult('사용하실 수 있는 아이디입니다.');
-      } else {
+      if (isDuplicated) {
         setIdDuplicatedResult('중복된 아이디가 있습니다.');
+      } else {
+        setIdDuplicatedResult('사용하실 수 있는 아이디입니다.');
       }
     } catch (error) {
       console.error('SignupForm Error : ', error);
@@ -111,12 +112,12 @@ const SignupForm = ({ onSignupComplete }) => {
   const confirmUserPasswordChangeHandler = (e) => {
     const confirmPasswordValue = e.target.value;
 
-    if (userPassword !== confirmPasswordValue) {
-      setConfirmPasswordError('비밀번호를 다시 한번 확인해주세요.');
-      setConfirmUserPassword('');
-    } else {
+    if (userPassword === confirmPasswordValue) {
       setConfirmPasswordError('');
       setConfirmUserPassword(confirmPasswordValue);
+    } else {
+      setConfirmPasswordError('비밀번호를 다시 한번 확인해주세요.');
+      setConfirmUserPassword('');
     }
   };
 
@@ -294,6 +295,18 @@ const SignupForm = ({ onSignupComplete }) => {
     });
   };
 
+  const getFileInputClass = () => {
+    if (profileImageError) return 'form-control is-invalid';
+    if (profileImageValidation?.isValid) return 'form-control is-valid';
+    return 'form-control';
+  };
+
+  const getSignupButtonText = () => {
+    if (uploadStatus === 'uploading') return '이미지 업로드 중...';
+    if (uploadStatus === 'validating') return '파일 검증 중...';
+    return '가입 중...';
+  };
+
   return (
     <div className="signup-container">
       <h2>회원가입</h2>
@@ -421,7 +434,7 @@ const SignupForm = ({ onSignupComplete }) => {
           <div className="col-9">
             <input
               type="file"
-              className={`form-control ${profileImageError ? 'is-invalid' : profileImageValidation?.isValid ? 'is-valid' : ''}`}
+              className={getFileInputClass()}
               id="profileImage"
               accept="image/*"
               onChange={handleImageChange}
@@ -449,7 +462,7 @@ const SignupForm = ({ onSignupComplete }) => {
         {/* 이미지 미리보기 및 업로드 상태 */}
         {profileImage && profileImageValidation?.isValid && (
           <div className="form-group row mb-3">
-            <label className="col-3 col-form-label">미리보기</label>
+            <div className="col-3 col-form-label">미리보기</div>
             <div className="col-9">
               <div className="d-flex align-items-center">
                 <img
@@ -482,7 +495,7 @@ const SignupForm = ({ onSignupComplete }) => {
         {/* 프로필 이미지를 위한 향상된 업로드 진행 상황 */}
         {profileImageFile && (uploadStatus !== 'idle' || isSubmitting) && (
           <div className="form-group row mb-3">
-            <label className="col-3 col-form-label">업로드 상태</label>
+            <div className="col-3 col-form-label">업로드 상태</div>
             <div className="col-9">
               <FileUploadProgress
                 files={[profileImageFile]}
@@ -558,16 +571,11 @@ const SignupForm = ({ onSignupComplete }) => {
               uploadStatus === 'uploading' ||
               uploadStatus === 'validating' ? (
                 <>
-                  <span
+                  <output
                     className="spinner-border spinner-border-sm me-2"
-                    role="status"
                     aria-hidden="true"
-                  ></span>
-                  {uploadStatus === 'uploading'
-                    ? '이미지 업로드 중...'
-                    : uploadStatus === 'validating'
-                      ? '파일 검증 중...'
-                      : '가입 중...'}
+                  ></output>
+                  {getSignupButtonText()}
                 </>
               ) : (
                 '회원가입'
@@ -581,3 +589,7 @@ const SignupForm = ({ onSignupComplete }) => {
 };
 
 export default SignupForm;
+
+SignupForm.propTypes = {
+  onSignupComplete: PropTypes.func.isRequired,
+};

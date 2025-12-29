@@ -18,7 +18,7 @@ export const useThemeStore = create(
         const currentTheme = get().theme;
         const newTheme = currentTheme === 'light' ? 'dark' : 'light';
         set({ theme: newTheme });
-        document.documentElement.setAttribute('data-theme', newTheme);
+        document.documentElement.dataset.theme = newTheme;
       },
 
       /**
@@ -30,7 +30,7 @@ export const useThemeStore = create(
           theme = 'dark';
         }
         set({ theme });
-        document.documentElement.setAttribute('data-theme', theme);
+        document.documentElement.dataset.theme = theme;
       },
 
       /**
@@ -42,7 +42,7 @@ export const useThemeStore = create(
 
         // 저장된 테마가 있으면 그것을 사용
         if (theme) {
-          document.documentElement.setAttribute('data-theme', theme);
+          document.documentElement.dataset.theme = theme;
           return;
         }
 
@@ -51,10 +51,10 @@ export const useThemeStore = create(
 
         try {
           if (
-            window.matchMedia &&
-            window.matchMedia('(prefers-color-scheme: dark)').matches
+            globalThis.matchMedia &&
+            globalThis.matchMedia('(prefers-color-scheme: dark)').matches
           ) {
-            initialTheme = 'dark';
+            // 이미 'dark'로 초기화되어 있으므로 추가 작업 필요 없음
           }
         } catch (error) {
           console.warn('System theme detection failed:', error);
@@ -62,7 +62,7 @@ export const useThemeStore = create(
         }
 
         set({ theme: initialTheme });
-        document.documentElement.setAttribute('data-theme', initialTheme);
+        document.documentElement.dataset.theme = initialTheme;
       },
     }),
     {

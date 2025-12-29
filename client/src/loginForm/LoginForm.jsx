@@ -149,11 +149,10 @@ const LoginForm = () => {
           >
             {isLoading ? (
               <>
-                <span
+                <output
                   className="spinner-border spinner-border-sm me-2"
-                  role="status"
                   aria-hidden="true"
-                ></span>
+                ></output>{' '}
                 로그인 중...
               </>
             ) : (

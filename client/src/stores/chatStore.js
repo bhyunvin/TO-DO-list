@@ -186,9 +186,9 @@ export const useChatStore = create(
           isLoading: loading,
           requestInProgress: loading,
           lastRequestTime:
-            lastRequestTime !== undefined
-              ? lastRequestTime
-              : state.lastRequestTime,
+            lastRequestTime === undefined
+              ? state.lastRequestTime
+              : lastRequestTime,
         }));
       },
 
@@ -306,7 +306,7 @@ export const useChatStore = create(
         return messages.slice(-count);
       },
 
-      // Todo 목록 새로고침 트리거
+      // 할 일 목록 새로고침 트리거
       todoRefreshTrigger: 0,
       triggerTodoRefresh: () =>
         set((state) => ({

@@ -82,7 +82,7 @@ export const useFileUploadValidator = () => {
    */
   const getFileExtension = useCallback((fileName) => {
     const lastDot = fileName.lastIndexOf('.');
-    return lastDot !== -1 ? fileName.substring(lastDot).toLowerCase() : '';
+    return lastDot === -1 ? '' : fileName.substring(lastDot).toLowerCase();
   }, []);
 
   /**
@@ -97,7 +97,9 @@ export const useFileUploadValidator = () => {
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return (
+      Number.parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+    );
   }, []);
 
   /**
@@ -159,7 +161,7 @@ export const useFileUploadValidator = () => {
    * @returns {Object} 유효성 검사 결과
    */
   const validateFileCount = useCallback((files, maxCount) => {
-    const fileCount = files.length || files.length;
+    const fileCount = files.length;
     if (fileCount > maxCount) {
       return {
         isValid: false,

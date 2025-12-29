@@ -29,7 +29,7 @@ const TestUtils = {
 
   // data-theme 속성 가져오기
   getCurrentTheme: () => {
-    return document.documentElement.getAttribute('data-theme');
+    return document.documentElement.dataset.theme;
   },
 
   // localStorage 초기화
@@ -220,8 +220,8 @@ const test5_SystemPreferenceDetection = async () => {
   let systemPreference = 'light';
   try {
     if (
-      window.matchMedia &&
-      window.matchMedia('(prefers-color-scheme: dark)').matches
+      globalThis.matchMedia &&
+      globalThis.matchMedia('(prefers-color-scheme: dark)').matches
     ) {
       systemPreference = 'dark';
     }
@@ -299,7 +299,7 @@ const runAllAutomatedTests = async () => {
 };
 
 // 테스트 함수들을 전역으로 노출
-window.ThemePersistenceTests = {
+globalThis.ThemePersistenceTests = {
   test1_PageReloadPersistence,
   test2_LogoutLoginPersistence,
   test3_MultipleTabsPersistence,

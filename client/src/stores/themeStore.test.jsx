@@ -37,18 +37,18 @@ describe('themeStore', () => {
   // 각 테스트 전에 localStorage와 document.documentElement 초기화
   beforeEach(() => {
     // matchMedia 원본 저장
-    originalMatchMedia = window.matchMedia;
+    originalMatchMedia = globalThis.matchMedia;
 
     // localStorage 초기화
     localStorageMock.clear();
-    Object.defineProperty(window, 'localStorage', {
+    Object.defineProperty(globalThis, 'localStorage', {
       value: localStorageMock,
       writable: true,
       configurable: true,
     });
 
     // document.documentElement 초기화
-    document.documentElement.removeAttribute('data-theme');
+    delete document.documentElement.dataset.theme;
 
     // Zustand persist 스토어 초기화
     localStorage.removeItem('theme-storage');
@@ -62,7 +62,7 @@ describe('themeStore', () => {
   afterEach(() => {
     // matchMedia 복원
     if (originalMatchMedia) {
-      window.matchMedia = originalMatchMedia;
+      globalThis.matchMedia = originalMatchMedia;
     }
     jest.clearAllMocks();
   });
@@ -121,13 +121,13 @@ describe('themeStore', () => {
         useThemeStore.getState().toggleTheme();
       });
 
-      expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
+      expect(document.documentElement.dataset.theme).toBe('dark');
 
       act(() => {
         useThemeStore.getState().toggleTheme();
       });
 
-      expect(document.documentElement.getAttribute('data-theme')).toBe('light');
+      expect(document.documentElement.dataset.theme).toBe('light');
     });
 
     test('should toggle multiple times correctly', () => {
@@ -178,13 +178,13 @@ describe('themeStore', () => {
         useThemeStore.getState().setTheme('dark');
       });
 
-      expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
+      expect(document.documentElement.dataset.theme).toBe('dark');
 
       act(() => {
         useThemeStore.getState().setTheme('light');
       });
 
-      expect(document.documentElement.getAttribute('data-theme')).toBe('light');
+      expect(document.documentElement.dataset.theme).toBe('light');
     });
 
     test('should handle invalid theme value by defaulting to light', () => {
@@ -290,21 +290,21 @@ describe('themeStore', () => {
       });
 
       // document element 초기화
-      document.documentElement.removeAttribute('data-theme');
+      delete document.documentElement.dataset.theme;
 
       // initializeTheme 호출 시 document element에 테마 적용
       act(() => {
         useThemeStore.getState().initializeTheme();
       });
 
-      expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
+      expect(document.documentElement.dataset.theme).toBe('dark');
     });
   });
 
   describe('System preference detection', () => {
     test('should use system dark preference when no stored theme exists', () => {
       // 시스템 다크 모드 선호도 mock
-      window.matchMedia = createMatchMediaMock(true);
+      globalThis.matchMedia = createMatchMediaMock(true);
 
       // 스토어 테마를 light로 설정 (저장된 테마 없음 시뮬레이션)
       act(() => {
@@ -312,7 +312,7 @@ describe('themeStore', () => {
       });
 
       // document element 초기화
-      document.documentElement.removeAttribute('data-theme');
+      delete document.documentElement.dataset.theme;
 
       // initializeTheme 호출 - 저장된 테마가 있으므로 시스템 선호도 무시
       act(() => {
@@ -321,19 +321,19 @@ describe('themeStore', () => {
 
       // 저장된 테마(light)가 유지됨
       expect(useThemeStore.getState().theme).toBe('light');
-      expect(document.documentElement.getAttribute('data-theme')).toBe('light');
+      expect(document.documentElement.dataset.theme).toBe('light');
     });
 
     test('should use system light preference when no stored theme exists', () => {
       // 시스템 라이트 모드 선호도 mock
-      window.matchMedia = createMatchMediaMock(false);
+      globalThis.matchMedia = createMatchMediaMock(false);
 
       act(() => {
         useThemeStore.getState().initializeTheme();
       });
 
       expect(useThemeStore.getState().theme).toBe('light');
-      expect(document.documentElement.getAttribute('data-theme')).toBe('light');
+      expect(document.documentElement.dataset.theme).toBe('light');
     });
 
     test('should prefer stored theme over system preference', () => {
@@ -343,7 +343,7 @@ describe('themeStore', () => {
       });
 
       // 시스템은 다크 모드 선호
-      window.matchMedia = createMatchMediaMock(true);
+      globalThis.matchMedia = createMatchMediaMock(true);
 
       act(() => {
         useThemeStore.getState().initializeTheme();
@@ -351,24 +351,24 @@ describe('themeStore', () => {
 
       // 저장된 light 테마가 시스템 선호도보다 우선
       expect(useThemeStore.getState().theme).toBe('light');
-      expect(document.documentElement.getAttribute('data-theme')).toBe('light');
+      expect(document.documentElement.dataset.theme).toBe('light');
     });
 
     test('should fallback to light theme when matchMedia is not supported', () => {
       // matchMedia를 undefined로 설정
-      window.matchMedia = undefined;
+      globalThis.matchMedia = undefined;
 
       act(() => {
         useThemeStore.getState().initializeTheme();
       });
 
       expect(useThemeStore.getState().theme).toBe('light');
-      expect(document.documentElement.getAttribute('data-theme')).toBe('light');
+      expect(document.documentElement.dataset.theme).toBe('light');
     });
 
     test('should handle matchMedia errors gracefully', () => {
       // matchMedia가 에러를 던지도록 설정
-      window.matchMedia = jest.fn(() => {
+      globalThis.matchMedia = jest.fn(() => {
         throw new Error('matchMedia error');
       });
 
@@ -395,21 +395,21 @@ describe('themeStore', () => {
         useThemeStore.getState().toggleTheme();
       });
       expect(useThemeStore.getState().theme).toBe('dark');
-      expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
+      expect(document.documentElement.dataset.theme).toBe('dark');
 
       // light로 명시적 설정
       act(() => {
         useThemeStore.getState().setTheme('light');
       });
       expect(useThemeStore.getState().theme).toBe('light');
-      expect(document.documentElement.getAttribute('data-theme')).toBe('light');
+      expect(document.documentElement.dataset.theme).toBe('light');
 
       // 다시 dark로 토글
       act(() => {
         useThemeStore.getState().toggleTheme();
       });
       expect(useThemeStore.getState().theme).toBe('dark');
-      expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
+      expect(document.documentElement.dataset.theme).toBe('dark');
     });
 
     test('should handle rapid theme changes', () => {
@@ -422,7 +422,7 @@ describe('themeStore', () => {
 
       // 3번 토글하면 light -> dark -> light -> dark
       expect(useThemeStore.getState().theme).toBe('dark');
-      expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
+      expect(document.documentElement.dataset.theme).toBe('dark');
     });
   });
 });
