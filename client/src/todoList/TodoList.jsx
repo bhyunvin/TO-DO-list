@@ -19,6 +19,7 @@ import ThemeToggle from '../components/ThemeToggle';
 import './todoList.css';
 import DatePicker from 'react-datepicker';
 import { ko } from 'date-fns/locale';
+import { showNavigationConfirmAlert } from '../utils/alertUtils';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import 'react-datepicker/dist/react-datepicker.css';
 
@@ -713,6 +714,7 @@ const TodoContainer = () => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [optimisticUpdates, setOptimisticUpdates] = useState(new Map());
   const [isChatInputFocused, setIsChatInputFocused] = useState(false);
+  const [isFormDirty, setIsFormDirty] = useState(false);
 
   const userMenuRef = useRef(null);
 
@@ -1106,8 +1108,27 @@ const TodoContainer = () => {
     setIsUserMenuOpen((prev) => !prev);
   };
 
+  // 폼 변경 상태 업데이트 핸들러
+  const handleDirtyChange = (isDirty) => {
+    setIsFormDirty(isDirty);
+  };
+
   // 프로필 수정 시작
   const handleUpdateProfile = () => {
+    if (isFormDirty) {
+      showNavigationConfirmAlert().then((result) => {
+        if (result.isConfirmed) {
+          setIsUpdatingProfile(true);
+          setIsCreating(false);
+          setEditingTodo(null);
+          setIsChangingPassword(false);
+          setIsUserMenuOpen(false);
+          setIsFormDirty(false);
+        }
+      });
+      return;
+    }
+
     setIsUpdatingProfile(true);
     setIsCreating(false);
     setEditingTodo(null);
@@ -1118,10 +1139,25 @@ const TodoContainer = () => {
   // 프로필 수정 취소
   const handleCancelProfileUpdate = () => {
     setIsUpdatingProfile(false);
+    setIsFormDirty(false);
   };
 
   // 비밀번호 변경 시작
   const handleChangePassword = () => {
+    if (isFormDirty) {
+      showNavigationConfirmAlert().then((result) => {
+        if (result.isConfirmed) {
+          setIsChangingPassword(true);
+          setIsCreating(false);
+          setEditingTodo(null);
+          setIsUpdatingProfile(false);
+          setIsUserMenuOpen(false);
+          setIsFormDirty(false);
+        }
+      });
+      return;
+    }
+
     setIsChangingPassword(true);
     setIsCreating(false);
     setEditingTodo(null);
@@ -1132,6 +1168,7 @@ const TodoContainer = () => {
   // 비밀번호 변경 취소
   const handleCancelPasswordChange = () => {
     setIsChangingPassword(false);
+    setIsFormDirty(false);
   };
 
   // 프로필 수정 저장
@@ -1163,6 +1200,7 @@ const TodoContainer = () => {
         confirmButtonText: '확인',
       }).then(() => {
         setIsUpdatingProfile(false);
+        setIsFormDirty(false);
       });
     } catch (error) {
       console.error('Profile update error:', error);
@@ -1216,7 +1254,9 @@ const TodoContainer = () => {
         icon: 'success',
         confirmButtonText: '확인',
       }).then(() => {
+      }).then(() => {
         setIsChangingPassword(false);
+        setIsFormDirty(false);
         // 비밀번호 변경 후 로그아웃 처리
         handleLogout();
       });
@@ -1555,6 +1595,7 @@ const TodoContainer = () => {
           user={user}
           onSave={handleSaveProfile}
           onCancel={handleCancelProfileUpdate}
+          onDirtyChange={handleDirtyChange}
         />
       );
     }
@@ -1563,6 +1604,7 @@ const TodoContainer = () => {
         <PasswordChangeForm
           onSave={handleSavePassword}
           onCancel={handleCancelPasswordChange}
+          onDirtyChange={handleDirtyChange}
         />
       );
     }
@@ -1637,14 +1679,12 @@ const TodoContainer = () => {
               <button
                 className="dropdown-item"
                 onClick={handleUpdateProfile}
-                disabled={isUpdatingProfile || isChangingPassword}
               >
                 프로필 수정
               </button>
               <button
                 className="dropdown-item"
                 onClick={handleChangePassword}
-                disabled={isUpdatingProfile || isChangingPassword}
               >
                 비밀번호 변경
               </button>

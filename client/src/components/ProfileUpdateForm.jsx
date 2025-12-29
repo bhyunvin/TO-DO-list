@@ -5,6 +5,7 @@ import { useFileUploadValidator } from '../hooks/useFileUploadValidator';
 import { useFileUploadProgress } from '../hooks/useFileUploadProgress';
 import FileUploadProgress from './FileUploadProgress';
 import userService from '../api/userService';
+import { showConfirmAlert } from '../utils/alertUtils';
 
 const isValidEmail = (email) => {
   return /^[a-z0-9]+@[a-z]+\.[a-z]{2,3}$/i.test(email);
@@ -39,6 +40,7 @@ const ProfileUpdateForm = ({
   onSave,
   onCancel,
   isSubmitting = false,
+  onDirtyChange,
 }) => {
   const { validateFiles, formatFileSize, getUploadPolicy } =
     useFileUploadValidator();
@@ -119,6 +121,33 @@ const ProfileUpdateForm = ({
 
     fetchProfileDetail();
   }, [user]);
+
+  // 변경 감지 및 부모 컴포넌트에 알림
+  useEffect(() => {
+    if (onDirtyChange) {
+      const currentValues = {
+        userName,
+        userEmail,
+        userDescription,
+        aiApiKey,
+        profileImageFile,
+      };
+      // originalUser가 없으면(로딩 중) 변경 없음으로 처리
+      const hasChanges = originalUser
+        ? checkChanges(originalUser, user, currentValues)
+        : false;
+      onDirtyChange(hasChanges);
+    }
+  }, [
+    userName,
+    userEmail,
+    userDescription,
+    aiApiKey,
+    profileImageFile,
+    originalUser,
+    user,
+    onDirtyChange,
+  ]);
 
   /**
    * 프로필 이미지 파일 선택 및 유효성 검사 처리
@@ -317,19 +346,9 @@ const ProfileUpdateForm = ({
     const hasChanges = checkChanges(originalUser, user, currentValues);
 
     if (hasChanges) {
-      Swal.fire({
+      showConfirmAlert({
         title: '정말 취소하시겠습니까?',
         text: '변경사항이 저장되지 않습니다.',
-        icon: 'warning',
-        showCancelButton: true,
-        reverseButtons: true,
-        confirmButtonColor: 'transparent',
-        cancelButtonColor: 'transparent',
-        customClass: {
-          confirmButton: 'btn btn-outline-primary',
-          cancelButton: 'btn btn-outline-secondary me-2',
-        },
-        buttonsStyling: false,
         confirmButtonText: '확인',
         cancelButtonText: '계속 수정',
       }).then((result) => {
@@ -646,6 +665,7 @@ ProfileUpdateForm.propTypes = {
   onSave: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
   isSubmitting: PropTypes.bool,
+  onDirtyChange: PropTypes.func,
 };
 
 export default ProfileUpdateForm;

@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import Swal from 'sweetalert2';
+
 import { useAuthStore } from '../authStore/authStore';
+import { showConfirmAlert } from '../utils/alertUtils';
 
 /**
 /**
@@ -37,7 +38,12 @@ const getInputClass = (error, value) => {
  * PasswordChangeForm 컴포넌트
  * 사용자가 비밀번호를 변경할 수 있도록 합니다
  */
-const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
+const PasswordChangeForm = ({
+  onSave,
+  onCancel,
+  isSubmitting = false,
+  onDirtyChange,
+}) => {
   const { user } = useAuthStore();
   // 폼 상태
   const [currentPassword, setCurrentPassword] = useState('');
@@ -53,6 +59,15 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // 변경 감지 및 부모 컴포넌트에 알림
+  useEffect(() => {
+    if (onDirtyChange) {
+      const hasChanges =
+        currentPassword !== '' || newPassword !== '' || confirmPassword !== '';
+      onDirtyChange(hasChanges);
+    }
+  }, [currentPassword, newPassword, confirmPassword, onDirtyChange]);
 
   /**
    * 유효성 검사와 함께 현재 비밀번호 입력 변경 처리
@@ -214,19 +229,9 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
     const hasChanges = currentPassword || newPassword || confirmPassword;
 
     if (hasChanges) {
-      Swal.fire({
+      showConfirmAlert({
         title: '정말 취소하시겠습니까?',
         text: '입력한 내용이 저장되지 않습니다.',
-        icon: 'warning',
-        showCancelButton: true,
-        reverseButtons: true,
-        confirmButtonColor: 'transparent',
-        cancelButtonColor: 'transparent',
-        customClass: {
-          confirmButton: 'btn btn-outline-primary',
-          cancelButton: 'btn btn-outline-secondary me-2',
-        },
-        buttonsStyling: false,
         confirmButtonText: '확인',
         cancelButtonText: '계속 수정',
       }).then((result) => {
@@ -455,6 +460,7 @@ PasswordChangeForm.propTypes = {
   onSave: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
   isSubmitting: PropTypes.bool,
+  onDirtyChange: PropTypes.func,
 };
 
 export default PasswordChangeForm;
