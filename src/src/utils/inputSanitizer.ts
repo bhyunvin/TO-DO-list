@@ -32,15 +32,15 @@ export class InputSanitizerService {
 
     // 허용되지 않은 경우 HTML 태그 제거 (기본값: 허용 안 함)
     if (!options.allowHtml) {
-      sanitized = sanitized.replace(/<[^>]*>/g, '');
+      sanitized = sanitized.replaceAll(/<[^>]*>/g, '');
     }
 
     // SQL 인젝션 방지를 위해 잠재적으로 위험한 문자 제거
-    sanitized = sanitized.replace(/['"\\;]/g, '');
+    sanitized = sanitized.replaceAll(/['"\\;]/g, '');
 
     // XSS 방지를 위해 스크립트 관련 콘텐츠 제거
-    sanitized = sanitized.replace(/javascript:/gi, '');
-    sanitized = sanitized.replace(/on\w+\s*=/gi, '');
+    sanitized = sanitized.replaceAll(/javascript:/gi, '');
+    sanitized = sanitized.replaceAll(/on\w+\s*=/gi, '');
 
     // 지정된 경우 길이 제한
     if (options.maxLength && sanitized.length > options.maxLength) {
@@ -64,10 +64,10 @@ export class InputSanitizerService {
     let sanitized = email.trim().toLowerCase();
 
     // 이메일에서 절대 유효하지 않고 위험할 수 있는 문자 제거
-    sanitized = sanitized.replace(/['"\\;()<>]/g, '');
+    sanitized = sanitized.replaceAll(/['"\\;()<>]/g, '');
 
     // 스크립트 관련 콘텐츠 제거
-    sanitized = sanitized.replace(/javascript:/gi, '');
+    sanitized = sanitized.replaceAll(/javascript:/gi, '');
 
     return sanitized;
   }
@@ -85,10 +85,10 @@ export class InputSanitizerService {
     let sanitized = name.trim();
 
     // 이름에 문자, 숫자, 공백, 하이픈, 아포스트로피, 마침표 허용
-    sanitized = sanitized.replace(/[^a-zA-Z0-9\s\-'.]/g, '');
+    sanitized = sanitized.replaceAll(/[^a-zA-Z0-9\s\-'.]/g, '');
 
     // 연속된 여러 공백 제거
-    sanitized = sanitized.replace(/\s+/g, ' ');
+    sanitized = sanitized.replaceAll(/\s+/g, ' ');
 
     // 이름 길이 제한
     if (sanitized.length > 200) {
@@ -111,13 +111,13 @@ export class InputSanitizerService {
     let sanitized = description.trim();
 
     // 스크립트 태그와 위험한 HTML 제거
-    sanitized = sanitized.replace(/<script[^>]*>.*?<\/script>/gi, '');
-    sanitized = sanitized.replace(/<iframe[^>]*>.*?<\/iframe>/gi, '');
-    sanitized = sanitized.replace(/javascript:/gi, '');
-    sanitized = sanitized.replace(/on\w+\s*=/gi, '');
+    sanitized = sanitized.replaceAll(/<script[^>]*>.*?<\/script>/gi, '');
+    sanitized = sanitized.replaceAll(/<iframe[^>]*>.*?<\/iframe>/gi, '');
+    sanitized = sanitized.replaceAll(/javascript:/gi, '');
+    sanitized = sanitized.replaceAll(/on\w+\s*=/gi, '');
 
     // SQL 인젝션 시도 제거
-    sanitized = sanitized.replace(/['"\\;]/g, '');
+    sanitized = sanitized.replaceAll(/['"\\;]/g, '');
 
     // 설명 길이 제한
     if (sanitized.length > 4000) {
