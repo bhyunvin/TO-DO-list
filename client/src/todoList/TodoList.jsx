@@ -1253,13 +1253,14 @@ const TodoContainer = () => {
           `,
         icon: 'success',
         confirmButtonText: '확인',
-      }).then(() => {
-      }).then(() => {
-        setIsChangingPassword(false);
-        setIsFormDirty(false);
-        // 비밀번호 변경 후 로그아웃 처리
-        handleLogout();
-      });
+      })
+        .then(() => {})
+        .then(() => {
+          setIsChangingPassword(false);
+          setIsFormDirty(false);
+          // 비밀번호 변경 후 로그아웃 처리
+          handleLogout();
+        });
     } catch (error) {
       console.error('Password change error:', error);
 
@@ -1676,16 +1677,10 @@ const TodoContainer = () => {
           </button>
           {isUserMenuOpen && (
             <div className="user-dropdown-menu">
-              <button
-                className="dropdown-item"
-                onClick={handleUpdateProfile}
-              >
+              <button className="dropdown-item" onClick={handleUpdateProfile}>
                 프로필 수정
               </button>
-              <button
-                className="dropdown-item"
-                onClick={handleChangePassword}
-              >
+              <button className="dropdown-item" onClick={handleChangePassword}>
                 비밀번호 변경
               </button>
               <div className="dropdown-divider"></div>
