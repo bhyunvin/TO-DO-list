@@ -11,7 +11,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { FileInfoEntity } from './file.entity';
 import { AuthenticatedGuard } from '../../types/express/auth.guard';
-import { existsSync } from 'fs';
+import { existsSync } from 'node:fs';
 
 @Controller('file')
 export class FileController {

@@ -16,7 +16,7 @@ export const ALLOWED_IMAGE_EXTENSIONS = [
   '.webp',
 ];
 
-// TODO 첨부 파일에 허용되는 문서 확장자
+// 할 일 첨부 파일에 허용되는 문서 확장자
 export const ALLOWED_DOCUMENT_EXTENSIONS = [
   '.xlsx',
   '.pptx',

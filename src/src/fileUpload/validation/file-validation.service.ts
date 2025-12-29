@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { extname } from 'path';
+import { extname } from 'node:path';
 import {
   ValidationResult,
   ValidationConfig,
@@ -105,7 +105,7 @@ export class FileValidationService {
   }
 
   /**
-   * 카테고리(profile_image 또는 todo_attachment)에 따라 파일을 검증합니다
+   * 카테고리(profileImage 또는 todoAttachment)에 따라 파일을 검증합니다
    */
   validateFilesByCategory(
     files: File[] | Express.Multer.File[],
@@ -181,7 +181,7 @@ export class FileValidationService {
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return Number.parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   }
 
   /**

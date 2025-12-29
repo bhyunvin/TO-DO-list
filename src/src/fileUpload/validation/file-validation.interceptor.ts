@@ -109,7 +109,7 @@ export class ProfileImageValidationInterceptor extends FileValidationInterceptor
 }
 
 /**
- * TODO 첨부파일 검증 인터셉터
+ * 할 일 첨부파일 검증 인터셉터
  */
 @Injectable()
 export class TodoAttachmentValidationInterceptor extends FileValidationInterceptor {
