@@ -91,8 +91,6 @@ const ChatMessage = ({ message, isUser }) => {
   );
 };
 
-
-
 ChatMessage.propTypes = {
   message: PropTypes.shape({
     content: PropTypes.string.isRequired,

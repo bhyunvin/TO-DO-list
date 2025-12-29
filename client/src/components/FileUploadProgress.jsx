@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { ProgressBar, Alert, Badge, ListGroup } from 'react-bootstrap';
 import { useFileUploadValidator } from '../hooks/useFileUploadValidator';
 
@@ -94,15 +95,6 @@ const FileUploadProgress = ({
   /**
    * 파일 유효성 검사 상태 배지 렌더링
    */
-  // const renderValidationBadge = (file, index) => {
-  //   const status = getFileValidationStatus(file, index);
-
-  //   if (status.isValid) {
-  //     return <Badge bg="success" className="ms-2">✓ 유효</Badge>;
-  //   } else {
-  //     return <Badge bg="danger" className="ms-2">✗ 오류</Badge>;
-  //   }
-  // };
 
   /**
    * 향상된 시각적 피드백 및 실시간 상태와 함께 파일 진행률 표시줄 렌더링
@@ -126,7 +118,6 @@ const FileUploadProgress = ({
       statusIcon = 'bi-x-circle-fill';
       showLabel = true;
     } else if (uploadStatus === 'uploading') {
-      variant = 'primary';
       label = `${progress}%`;
       statusIcon = 'bi-cloud-upload';
       showLabel = progress > 0;
@@ -141,12 +132,17 @@ const FileUploadProgress = ({
       <div className="mt-2">
         <div className="d-flex justify-content-between align-items-center mb-1">
           <small className="text-muted">
-            <i className={`bi ${statusIcon} me-1`}></i>
-            업로드 상태
+            <i className={`bi ${statusIcon} me-1`}></i> 업로드 상태
           </small>
           {showLabel && (
             <small
-              className={`text-${variant === 'success' ? 'success' : variant === 'danger' ? 'danger' : variant === 'info' ? 'info' : 'primary'} fw-bold`}
+              className={`text-${
+                variant === 'success' ||
+                variant === 'danger' ||
+                variant === 'info'
+                  ? variant
+                  : 'primary'
+              } fw-bold`}
             >
               {label}
             </small>
@@ -184,8 +180,8 @@ const FileUploadProgress = ({
         {uploadStatus === 'validating' && (
           <div className="mt-1">
             <small className="text-info">
-              <i className="bi bi-shield-check me-1"></i>
-              파일 보안 검사 및 유효성 검증 중...
+              <i className="bi bi-shield-check me-1"></i> 파일 보안 검사 및
+              유효성 검증 중...
             </small>
           </div>
         )}
@@ -276,12 +272,12 @@ const FileUploadProgress = ({
           <div className="d-flex align-items-center flex-grow-1">
             {(uploadStatus === 'validating' ||
               uploadStatus === 'uploading') && (
-              <div
+              <output
                 className="spinner-border spinner-border-sm me-2"
-                role="status"
+                aria-label="Loading..."
               >
                 <span className="visually-hidden">Loading...</span>
-              </div>
+              </output>
             )}
             <div className="flex-grow-1">
               <div className="d-flex align-items-center">
@@ -299,8 +295,7 @@ const FileUploadProgress = ({
                 <div className="mt-2">
                   <div className="d-flex justify-content-between align-items-center mb-1">
                     <small className="text-muted">
-                      <i className="bi bi-cloud-upload me-1"></i>
-                      전체 진행률
+                      <i className="bi bi-cloud-upload me-1"></i> 전체 진행률
                     </small>
                     <small className="text-primary font-weight-bold">
                       {overallProgress}%
@@ -352,8 +347,11 @@ const FileUploadProgress = ({
                     <div className="mt-2">
                       <small className="text-muted">업로드된 파일:</small>
                       <ul className="list-unstyled mb-0 mt-1">
-                        {uploadedFiles.slice(0, 3).map((file, index) => (
-                          <li key={index} className="small text-success">
+                        {uploadedFiles.slice(0, 3).map((file) => (
+                          <li
+                            key={file.originalFileName || file.fileName}
+                            className="small text-success"
+                          >
                             <i className="bi bi-file-earmark-check me-1"></i>
                             {file.originalFileName || file.fileName}
                           </li>
@@ -387,9 +385,8 @@ const FileUploadProgress = ({
                     </div>
                   </div>
                   <div className="mt-1 small text-muted">
-                    <i className="bi bi-info-circle me-1"></i>
-                    성공한 파일은 저장되었습니다. 실패한 파일만 다시
-                    업로드하세요.
+                    <i className="bi bi-info-circle me-1"></i> 성공한 파일은
+                    저장되었습니다. 실패한 파일만 다시 업로드하세요.
                   </div>
                 </div>
               )}
@@ -455,10 +452,11 @@ const FileUploadProgress = ({
                   type="button"
                   className="btn btn-sm btn-warning ms-3"
                   onClick={() => {
+                    const failedFileNameList = new Set(
+                      uploadErrors.map((e) => e.fileName),
+                    );
                     const failedFiles = files.filter((file) =>
-                      uploadErrors.some(
-                        (error) => error.fileName === file.name,
-                      ),
+                      failedFileNameList.has(file.name),
                     );
                     onRetryUpload(failedFiles);
                   }}
@@ -491,8 +489,8 @@ const FileUploadProgress = ({
                 className="btn btn-sm btn-outline-danger"
                 onClick={() => onRetryUpload(files)}
               >
-                <i className="bi bi-arrow-clockwise me-1"></i>
-                모든 파일 다시 시도
+                <i className="bi bi-arrow-clockwise me-1"></i> 모든 파일 다시
+                시도
               </button>
             )}
           </div>
@@ -511,8 +509,8 @@ const FileUploadProgress = ({
       <Alert variant="danger" className="mb-3">
         <Alert.Heading>업로드 오류</Alert.Heading>
         <ul className="mb-0">
-          {uploadErrors.map((error, index) => (
-            <li key={index}>
+          {uploadErrors.map((error) => (
+            <li key={error.fileName}>
               <strong>{error.fileName}:</strong> {getUserFriendlyMessage(error)}
             </li>
           ))}
@@ -522,276 +520,261 @@ const FileUploadProgress = ({
   };
 
   /**
+   * 개별 파일 항목 렌더링
+   */
+  const renderFileItem = (file, index) => {
+    const validationStatus = getFileValidationStatus(file, index);
+    const uploadFileStatus = getFileUploadStatus(file);
+
+    const hasValidationError = !validationStatus.isValid;
+    const hasUploadError = uploadFileStatus.status === 'error';
+    const isSuccess = uploadFileStatus.status === 'success';
+    const isUploading = uploadFileStatus.status === 'uploading';
+
+    let borderClass = '';
+    if (hasValidationError || hasUploadError) {
+      borderClass = 'border-danger';
+    } else if (isSuccess) {
+      borderClass = 'border-success';
+    } else if (isUploading) {
+      borderClass = 'border-primary';
+    }
+
+    const getFileIconClass = () => {
+      if (file.type?.startsWith('image/')) return 'bi-file-earmark-image';
+      if (file.type?.includes('pdf')) return 'bi-file-earmark-pdf';
+      if (file.type?.includes('word') || file.name?.endsWith('.docx')) {
+        return 'bi-file-earmark-word';
+      }
+      if (file.type?.includes('excel') || file.name?.endsWith('.xlsx')) {
+        return 'bi-file-earmark-excel';
+      }
+      if (file.type?.includes('powerpoint') || file.name?.endsWith('.pptx')) {
+        return 'bi-file-earmark-ppt';
+      }
+      return 'bi-file-earmark-text';
+    };
+
+    const getBadgeVariant = (status) => {
+      switch (status) {
+        case 'success':
+          return 'success';
+        case 'error':
+          return 'danger';
+        case 'uploading':
+          return 'primary';
+        default:
+          return 'secondary';
+      }
+    };
+
+    return (
+      <ListGroup.Item
+        key={file.name || index}
+        className={`d-flex justify-content-between align-items-start ${borderClass}`}
+      >
+        <div className="flex-grow-1">
+          <div className="d-flex align-items-center flex-wrap">
+            {/* 유형에 따른 파일 아이콘 */}
+            <i className={`bi ${getFileIconClass()} me-2 text-muted`}></i>
+
+            <div className="flex-grow-1">
+              <div className="d-flex align-items-center">
+                <strong className={hasValidationError ? 'text-danger' : ''}>
+                  {file.name}
+                </strong>
+                <span className="text-muted ms-2">
+                  ({formatFileSize(file.size)})
+                </span>
+              </div>
+
+              {/* 파일 유형 및 마지막 수정 정보 */}
+              <div className="small text-muted mt-1">
+                <i className="bi bi-info-circle me-1"></i>
+                타입: {file.type || 'Unknown'}
+                {file.lastModified && (
+                  <>
+                    {' | '}
+                    <i className="bi bi-calendar3 me-1"></i>
+                    수정:{' '}
+                    {new Date(file.lastModified).toLocaleDateString('ko-KR')}
+                  </>
+                )}
+              </div>
+            </div>
+
+            <div className="d-flex align-items-center ms-2">
+              {/* 향상된 유효성 검사 상태 배지 */}
+              {showValidation && (
+                <div className="me-2">
+                  {validationStatus.isValid ? (
+                    <Badge bg="success" className="d-flex align-items-center">
+                      <i className="bi bi-shield-check me-1"></i> 검증 완료
+                    </Badge>
+                  ) : (
+                    <Badge bg="danger" className="d-flex align-items-center">
+                      <i className="bi bi-shield-x me-1"></i> 검증 실패
+                    </Badge>
+                  )}
+                </div>
+              )}
+
+              {/* 향상된 업로드 상태 배지 */}
+              {uploadStatus !== 'idle' && uploadStatus !== 'validating' && (
+                <div className="me-2">
+                  <Badge
+                    bg={getBadgeVariant(uploadFileStatus.status)}
+                    className="d-flex align-items-center"
+                  >
+                    {uploadFileStatus.status === 'success' && (
+                      <>
+                        <i className="bi bi-check-circle-fill me-1"></i> 업로드
+                        완료
+                      </>
+                    )}
+                    {uploadFileStatus.status === 'error' && (
+                      <>
+                        <i className="bi bi-x-circle-fill me-1"></i> 업로드 실패
+                      </>
+                    )}
+                    {uploadFileStatus.status === 'uploading' && (
+                      <>
+                        <output
+                          className="spinner-border spinner-border-sm me-1"
+                          aria-label="Loading..."
+                        >
+                          <span className="visually-hidden">Loading...</span>
+                        </output>
+                        업로드 중
+                      </>
+                    )}
+                    {uploadFileStatus.status === 'pending' && (
+                      <>
+                        <i className="bi bi-hourglass me-1"></i> 대기 중
+                      </>
+                    )}
+                  </Badge>
+                </div>
+              )}
+
+              {/* 제거 버튼 */}
+              {onRemoveFile && uploadStatus !== 'uploading' && (
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-danger"
+                  onClick={() => onRemoveFile(index)}
+                  title="파일 제거"
+                  disabled={uploadFileStatus.status === 'success'}
+                >
+                  <i className="bi bi-trash"></i>
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* 제안이 포함된 향상된 유효성 검사 오류 메시지 */}
+          {!validationStatus.isValid && (
+            <div className="alert alert-danger small mt-2 mb-0 py-2">
+              <i className="bi bi-exclamation-triangle-fill me-1"></i>
+              <strong>검증 오류:</strong> {validationStatus.message}
+              <div className="mt-1 text-muted">
+                파일을 다시 선택하거나 파일 형식과 크기를 확인해주세요.
+              </div>
+            </div>
+          )}
+
+          {/* 재시도 옵션이 포함된 향상된 업로드 오류 메시지 */}
+          {uploadFileStatus.status === 'error' && (
+            <div className="alert alert-danger small mt-2 mb-0 py-2">
+              <i className="bi bi-exclamation-triangle-fill me-1"></i>
+              <strong>업로드 오류:</strong>{' '}
+              {uploadErrors.find((error) => error.fileName === file.name)
+                ?.errorMessage || '업로드에 실패했습니다.'}
+              <div className="mt-1 text-muted">
+                네트워크 연결을 확인하거나 잠시 후 다시 시도해주세요.
+              </div>
+            </div>
+          )}
+
+          {/* 상세 정보가 포함된 향상된 성공 메시지 */}
+          {uploadFileStatus.status === 'success' && showDetailedStatus && (
+            <div className="alert alert-success small mt-2 mb-0 py-2">
+              <i className="bi bi-check-circle-fill me-1"></i>
+              <strong>업로드 성공!</strong>
+              <div className="row mt-1 text-muted">
+                <div className="col-6">
+                  <i className="bi bi-clock me-1"></i>
+                  완료: {new Date().toLocaleTimeString('ko-KR')}
+                </div>
+                <div className="col-6">
+                  <i className="bi bi-hdd me-1"></i>
+                  크기: {formatFileSize(file.size)}
+                </div>
+              </div>
+              {/* 사용 가능한 경우 서버 파일 정보 표시 */}
+              {uploadedFiles.find(
+                (uploaded) =>
+                  uploaded.originalFileName === file.name ||
+                  uploaded.fileName === file.name,
+              ) && (
+                <div className="mt-1 text-muted">
+                  <i className="bi bi-server me-1"></i> 서버에 안전하게
+                  저장되었습니다.
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* 활성 업로드를 위한 향상된 업로드 상태 */}
+          {uploadFileStatus.status === 'uploading' && (
+            <div className="alert alert-primary small mt-2 mb-0 py-2">
+              <div className="d-flex align-items-center">
+                <output
+                  className="spinner-border spinner-border-sm me-2"
+                  aria-label="Loading..."
+                >
+                  <span className="visually-hidden">Loading...</span>
+                </output>
+                <div className="flex-grow-1">
+                  <strong>업로드 진행 중...</strong>
+                  <div className="text-muted">
+                    파일 크기: {formatFileSize(file.size)} | 진행률:{' '}
+                    {getFileProgress(file.name)}%
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 대기 상태 */}
+          {uploadFileStatus.status === 'pending' &&
+            uploadStatus === 'uploading' && (
+              <div className="alert alert-info small mt-2 mb-0 py-2">
+                <i className="bi bi-hourglass me-1"></i>
+                <strong>업로드 대기 중...</strong>
+                <div className="text-muted">
+                  다른 파일 업로드가 완료되면 자동으로 시작됩니다.
+                </div>
+              </div>
+            )}
+
+          {/* 향상된 진행률 표시줄 */}
+          {showProgress &&
+            (uploadStatus === 'uploading' || uploadStatus === 'validating') &&
+            validationStatus.isValid &&
+            renderProgressBar(file)}
+        </div>
+      </ListGroup.Item>
+    );
+  };
+
+  /**
    * 향상된 상태 및 유효성 검사 피드백과 함께 파일 목록 렌더링
    */
   const renderFileList = () => {
     if (files.length === 0) return null;
 
-    return (
-      <ListGroup className="mb-3">
-        {files.map((file, index) => {
-          const validationStatus = getFileValidationStatus(file, index);
-          const uploadFileStatus = getFileUploadStatus(file);
-
-          // 스타일링을 위한 전체 파일 상태 결정
-          const hasValidationError = !validationStatus.isValid;
-          const hasUploadError = uploadFileStatus.status === 'error';
-          const isSuccess = uploadFileStatus.status === 'success';
-          const isUploading = uploadFileStatus.status === 'uploading';
-
-          return (
-            <ListGroup.Item
-              key={index}
-              className={`d-flex justify-content-between align-items-start ${
-                hasValidationError || hasUploadError
-                  ? 'border-danger'
-                  : isSuccess
-                    ? 'border-success'
-                    : isUploading
-                      ? 'border-primary'
-                      : ''
-              }`}
-            >
-              <div className="flex-grow-1">
-                <div className="d-flex align-items-center flex-wrap">
-                  {/* 유형에 따른 파일 아이콘 */}
-                  <i
-                    className={`bi ${
-                      file.type?.startsWith('image/')
-                        ? 'bi-file-earmark-image'
-                        : file.type?.includes('pdf')
-                          ? 'bi-file-earmark-pdf'
-                          : file.type?.includes('word') ||
-                              file.name?.endsWith('.docx')
-                            ? 'bi-file-earmark-word'
-                            : file.type?.includes('excel') ||
-                                file.name?.endsWith('.xlsx')
-                              ? 'bi-file-earmark-excel'
-                              : file.type?.includes('powerpoint') ||
-                                  file.name?.endsWith('.pptx')
-                                ? 'bi-file-earmark-ppt'
-                                : 'bi-file-earmark-text'
-                    } me-2 text-muted`}
-                  ></i>
-
-                  <div className="flex-grow-1">
-                    <div className="d-flex align-items-center">
-                      <strong
-                        className={hasValidationError ? 'text-danger' : ''}
-                      >
-                        {file.name}
-                      </strong>
-                      <span className="text-muted ms-2">
-                        ({formatFileSize(file.size)})
-                      </span>
-                    </div>
-
-                    {/* 파일 유형 및 마지막 수정 정보 */}
-                    <div className="small text-muted mt-1">
-                      <i className="bi bi-info-circle me-1"></i>
-                      타입: {file.type || 'Unknown'}
-                      {file.lastModified && (
-                        <>
-                          {' | '}
-                          <i className="bi bi-calendar3 me-1"></i>
-                          수정:{' '}
-                          {new Date(file.lastModified).toLocaleDateString(
-                            'ko-KR',
-                          )}
-                        </>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="d-flex align-items-center ms-2">
-                    {/* 향상된 유효성 검사 상태 배지 */}
-                    {showValidation && (
-                      <div className="me-2">
-                        {validationStatus.isValid ? (
-                          <Badge
-                            bg="success"
-                            className="d-flex align-items-center"
-                          >
-                            <i className="bi bi-shield-check me-1"></i>
-                            검증 완료
-                          </Badge>
-                        ) : (
-                          <Badge
-                            bg="danger"
-                            className="d-flex align-items-center"
-                          >
-                            <i className="bi bi-shield-x me-1"></i>
-                            검증 실패
-                          </Badge>
-                        )}
-                      </div>
-                    )}
-
-                    {/* 향상된 업로드 상태 배지 */}
-                    {uploadStatus !== 'idle' &&
-                      uploadStatus !== 'validating' && (
-                        <div className="me-2">
-                          <Badge
-                            bg={
-                              uploadFileStatus.status === 'success'
-                                ? 'success'
-                                : uploadFileStatus.status === 'error'
-                                  ? 'danger'
-                                  : uploadFileStatus.status === 'uploading'
-                                    ? 'primary'
-                                    : 'secondary'
-                            }
-                            className="d-flex align-items-center"
-                          >
-                            {uploadFileStatus.status === 'success' && (
-                              <>
-                                <i className="bi bi-check-circle-fill me-1"></i>
-                                업로드 완료
-                              </>
-                            )}
-                            {uploadFileStatus.status === 'error' && (
-                              <>
-                                <i className="bi bi-x-circle-fill me-1"></i>
-                                업로드 실패
-                              </>
-                            )}
-                            {uploadFileStatus.status === 'uploading' && (
-                              <>
-                                <div
-                                  className="spinner-border spinner-border-sm me-1"
-                                  role="status"
-                                >
-                                  <span className="visually-hidden">
-                                    Loading...
-                                  </span>
-                                </div>
-                                업로드 중
-                              </>
-                            )}
-                            {uploadFileStatus.status === 'pending' && (
-                              <>
-                                <i className="bi bi-hourglass me-1"></i>
-                                대기 중
-                              </>
-                            )}
-                          </Badge>
-                        </div>
-                      )}
-
-                    {/* 제거 버튼 */}
-                    {onRemoveFile && uploadStatus !== 'uploading' && (
-                      <button
-                        type="button"
-                        className="btn btn-sm btn-outline-danger"
-                        onClick={() => onRemoveFile(index)}
-                        title="파일 제거"
-                        disabled={uploadFileStatus.status === 'success'}
-                      >
-                        <i className="bi bi-trash"></i>
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* 제안이 포함된 향상된 유효성 검사 오류 메시지 */}
-                {!validationStatus.isValid && (
-                  <div className="alert alert-danger small mt-2 mb-0 py-2">
-                    <i className="bi bi-exclamation-triangle-fill me-1"></i>
-                    <strong>검증 오류:</strong> {validationStatus.message}
-                    <div className="mt-1 text-muted">
-                      파일을 다시 선택하거나 파일 형식과 크기를 확인해주세요.
-                    </div>
-                  </div>
-                )}
-
-                {/* 재시도 옵션이 포함된 향상된 업로드 오류 메시지 */}
-                {uploadFileStatus.status === 'error' && (
-                  <div className="alert alert-danger small mt-2 mb-0 py-2">
-                    <i className="bi bi-exclamation-triangle-fill me-1"></i>
-                    <strong>업로드 오류:</strong>{' '}
-                    {uploadErrors.find((error) => error.fileName === file.name)
-                      ?.errorMessage || '업로드에 실패했습니다.'}
-                    <div className="mt-1 text-muted">
-                      네트워크 연결을 확인하거나 잠시 후 다시 시도해주세요.
-                    </div>
-                  </div>
-                )}
-
-                {/* 상세 정보가 포함된 향상된 성공 메시지 */}
-                {uploadFileStatus.status === 'success' &&
-                  showDetailedStatus && (
-                    <div className="alert alert-success small mt-2 mb-0 py-2">
-                      <i className="bi bi-check-circle-fill me-1"></i>
-                      <strong>업로드 성공!</strong>
-                      <div className="row mt-1 text-muted">
-                        <div className="col-6">
-                          <i className="bi bi-clock me-1"></i>
-                          완료: {new Date().toLocaleTimeString('ko-KR')}
-                        </div>
-                        <div className="col-6">
-                          <i className="bi bi-hdd me-1"></i>
-                          크기: {formatFileSize(file.size)}
-                        </div>
-                      </div>
-                      {/* 사용 가능한 경우 서버 파일 정보 표시 */}
-                      {uploadedFiles.find(
-                        (uploaded) =>
-                          uploaded.originalFileName === file.name ||
-                          uploaded.fileName === file.name,
-                      ) && (
-                        <div className="mt-1 text-muted">
-                          <i className="bi bi-server me-1"></i>
-                          서버에 안전하게 저장되었습니다.
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                {/* 활성 업로드를 위한 향상된 업로드 상태 */}
-                {uploadFileStatus.status === 'uploading' && (
-                  <div className="alert alert-primary small mt-2 mb-0 py-2">
-                    <div className="d-flex align-items-center">
-                      <div
-                        className="spinner-border spinner-border-sm me-2"
-                        role="status"
-                      >
-                        <span className="visually-hidden">Loading...</span>
-                      </div>
-                      <div className="flex-grow-1">
-                        <strong>업로드 진행 중...</strong>
-                        <div className="text-muted">
-                          파일 크기: {formatFileSize(file.size)} | 진행률:{' '}
-                          {getFileProgress(file.name)}%
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* 대기 상태 */}
-                {uploadFileStatus.status === 'pending' &&
-                  uploadStatus === 'uploading' && (
-                    <div className="alert alert-info small mt-2 mb-0 py-2">
-                      <i className="bi bi-hourglass me-1"></i>
-                      <strong>업로드 대기 중...</strong>
-                      <div className="text-muted">
-                        다른 파일 업로드가 완료되면 자동으로 시작됩니다.
-                      </div>
-                    </div>
-                  )}
-
-                {/* 향상된 진행률 표시줄 */}
-                {showProgress &&
-                  (uploadStatus === 'uploading' ||
-                    uploadStatus === 'validating') &&
-                  validationStatus.isValid &&
-                  renderProgressBar(file)}
-              </div>
-            </ListGroup.Item>
-          );
-        })}
-      </ListGroup>
-    );
+    return <ListGroup className="mb-3">{files.map(renderFileItem)}</ListGroup>;
   };
 
   /**
@@ -836,14 +819,16 @@ const FileUploadProgress = ({
                 type="button"
                 className="btn btn-sm btn-outline-primary"
                 onClick={() => {
+                  const failedFileNameList = new Set(
+                    uploadErrors.map((e) => e.fileName),
+                  );
                   const failedFiles = files.filter((file) =>
-                    uploadErrors.some((error) => error.fileName === file.name),
+                    failedFileNameList.has(file.name),
                   );
                   onRetryUpload(failedFiles);
                 }}
               >
-                <i className="bi bi-arrow-clockwise me-1"></i>
-                다시 시도
+                <i className="bi bi-arrow-clockwise me-1"></i> 다시 시도
               </button>
             </div>
           )}
@@ -869,3 +854,25 @@ const FileUploadProgress = ({
 };
 
 export default FileUploadProgress;
+
+FileUploadProgress.propTypes = {
+  files: PropTypes.arrayOf(PropTypes.object),
+  validationResults: PropTypes.arrayOf(PropTypes.object),
+  uploadProgress: PropTypes.object,
+  uploadStatus: PropTypes.oneOf([
+    'idle',
+    'validating',
+    'uploading',
+    'success',
+    'error',
+    'partial_success',
+  ]),
+  uploadErrors: PropTypes.arrayOf(PropTypes.object),
+  uploadedFiles: PropTypes.arrayOf(PropTypes.object),
+  onRemoveFile: PropTypes.func,
+  onRetryUpload: PropTypes.func,
+  showValidation: PropTypes.bool,
+  showProgress: PropTypes.bool,
+  showDetailedStatus: PropTypes.bool,
+  compact: PropTypes.bool,
+};

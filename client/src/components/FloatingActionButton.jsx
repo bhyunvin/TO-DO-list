@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import './FloatingActionButton.css';
 
 const FloatingActionButton = ({ isOpen, onClick, isFocused }) => {
@@ -21,6 +22,12 @@ const FloatingActionButton = ({ isOpen, onClick, isFocused }) => {
       <i className={`bi ${isOpen ? 'bi-x-lg' : 'bi-chat-dots'}`}></i>
     </button>
   );
+};
+
+FloatingActionButton.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  onClick: PropTypes.func.isRequired,
+  isFocused: PropTypes.bool,
 };
 
 export default FloatingActionButton;

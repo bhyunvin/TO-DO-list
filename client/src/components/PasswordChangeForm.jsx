@@ -1,6 +1,37 @@
 import { useState } from 'react';
+import PropTypes from 'prop-types';
 import Swal from 'sweetalert2';
 import { useAuthStore } from '../authStore/authStore';
+
+/**
+/**
+ * 비밀번호 강도 표시기 가져오기
+ */
+const getPasswordStrength = (password) => {
+  if (!password) return { strength: 0, text: '', color: '' };
+
+  let strength = 0;
+  const checks = [
+    /[a-z]/.test(password), // 소문자
+    /[A-Z]/.test(password), // 대문자
+    /\d/.test(password), // 숫자
+    /[@$!%*?&]/.test(password), // 특수문자
+    password.length >= 8, // 길이
+    password.length >= 12, // 적절한 길이
+  ];
+
+  strength = checks.filter(Boolean).length;
+
+  if (strength <= 2) return { strength, text: '약함', color: 'danger' };
+  if (strength <= 4) return { strength, text: '보통', color: 'warning' };
+  return { strength, text: '강함', color: 'success' };
+};
+
+const getInputClass = (error, value) => {
+  if (error) return 'form-control is-invalid';
+  if (value && value.trim()) return 'form-control is-valid';
+  return 'form-control';
+};
 
 /**
  * PasswordChangeForm 컴포넌트
@@ -31,10 +62,10 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
     setCurrentPassword(passwordValue);
 
     // 실시간 유효성 검사
-    if (!passwordValue.trim()) {
-      setCurrentPasswordError('현재 비밀번호를 입력해주세요.');
-    } else {
+    if (passwordValue.trim()) {
       setCurrentPasswordError('');
+    } else {
+      setCurrentPasswordError('현재 비밀번호를 입력해주세요.');
     }
   };
 
@@ -46,30 +77,32 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
     setNewPassword(passwordValue);
 
     // 실시간 유효성 검사
-    if (!passwordValue.trim()) {
-      setNewPasswordError('새 비밀번호를 입력해주세요.');
-    } else if (passwordValue.length < 8) {
-      setNewPasswordError('새 비밀번호는 최소 8자 이상이어야 합니다.');
-    } else if (passwordValue.length > 100) {
-      setNewPasswordError('새 비밀번호는 최대 100자까지 입력 가능합니다.');
-    } else if (!/[@$!%*?&]/.test(passwordValue)) {
-      setNewPasswordError(
-        '새 비밀번호는 특수문자(@$!%*?&)를 하나 이상 포함해야 합니다.',
-      );
-    } else if (passwordValue === currentPassword) {
-      setNewPasswordError('새 비밀번호는 현재 비밀번호와 달라야 합니다.');
+    if (passwordValue.trim()) {
+      if (passwordValue.length < 8) {
+        setNewPasswordError('새 비밀번호는 최소 8자 이상이어야 합니다.');
+      } else if (passwordValue.length > 100) {
+        setNewPasswordError('새 비밀번호는 최대 100자까지 입력 가능합니다.');
+      } else if (!/[@$!%*?&]/.test(passwordValue)) {
+        setNewPasswordError(
+          '새 비밀번호는 특수문자(@$!%*?&)를 하나 이상 포함해야 합니다.',
+        );
+      } else if (passwordValue === currentPassword) {
+        setNewPasswordError('새 비밀번호는 현재 비밀번호와 달라야 합니다.');
+      } else {
+        setNewPasswordError('');
+      }
     } else {
-      setNewPasswordError('');
+      setNewPasswordError('새 비밀번호를 입력해주세요.');
     }
 
     // 이미 입력된 경우 비밀번호 확인 재검증
     if (confirmPassword) {
-      if (passwordValue !== confirmPassword) {
+      if (passwordValue === confirmPassword) {
+        setConfirmPasswordError('');
+      } else {
         setConfirmPasswordError(
           '새 비밀번호와 비밀번호 확인이 일치하지 않습니다.',
         );
-      } else {
-        setConfirmPasswordError('');
       }
     }
   };
@@ -82,14 +115,16 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
     setConfirmPassword(passwordValue);
 
     // 실시간 유효성 검사
-    if (!passwordValue.trim()) {
-      setConfirmPasswordError('새 비밀번호 확인을 입력해주세요.');
-    } else if (passwordValue !== newPassword) {
-      setConfirmPasswordError(
-        '새 비밀번호와 비밀번호 확인이 일치하지 않습니다.',
-      );
+    if (passwordValue.trim()) {
+      if (passwordValue === newPassword) {
+        setConfirmPasswordError('');
+      } else {
+        setConfirmPasswordError(
+          '새 비밀번호와 비밀번호 확인이 일치하지 않습니다.',
+        );
+      }
     } else {
-      setConfirmPasswordError('');
+      setConfirmPasswordError('새 비밀번호 확인을 입력해주세요.');
     }
   };
 
@@ -100,11 +135,11 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
     let isValid = true;
 
     // 현재 비밀번호 유효성 검사
-    if (!currentPassword.trim()) {
+    if (currentPassword.trim()) {
+      setCurrentPasswordError('');
+    } else {
       setCurrentPasswordError('현재 비밀번호를 입력해주세요.');
       isValid = false;
-    } else {
-      setCurrentPasswordError('');
     }
 
     // 새 비밀번호 유효성 검사
@@ -133,13 +168,13 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
     if (!confirmPassword.trim()) {
       setConfirmPasswordError('새 비밀번호 확인을 입력해주세요.');
       isValid = false;
-    } else if (confirmPassword !== newPassword) {
+    } else if (confirmPassword === newPassword) {
+      setConfirmPasswordError('');
+    } else {
       setConfirmPasswordError(
         '새 비밀번호와 비밀번호 확인이 일치하지 않습니다.',
       );
       isValid = false;
-    } else {
-      setConfirmPasswordError('');
     }
 
     return isValid;
@@ -204,29 +239,6 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
     }
   };
 
-  /**
-   * 비밀번호 강도 표시기 가져오기
-   */
-  const getPasswordStrength = (password) => {
-    if (!password) return { strength: 0, text: '', color: '' };
-
-    let strength = 0;
-    const checks = [
-      /[a-z]/.test(password), // 소문자
-      /[A-Z]/.test(password), // 대문자
-      /\d/.test(password), // 숫자
-      /[@$!%*?&]/.test(password), // 특수문자
-      password.length >= 8, // 길이
-      password.length >= 12, // 적절한 길이
-    ];
-
-    strength = checks.filter(Boolean).length;
-
-    if (strength <= 2) return { strength, text: '약함', color: 'danger' };
-    if (strength <= 4) return { strength, text: '보통', color: 'warning' };
-    return { strength, text: '강함', color: 'success' };
-  };
-
   const passwordStrength = getPasswordStrength(newPassword);
 
   return (
@@ -253,7 +265,7 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
             <div className="input-group">
               <input
                 type={showCurrentPassword ? 'text' : 'password'}
-                className={`form-control ${currentPasswordError ? 'is-invalid' : currentPassword.trim() ? 'is-valid' : ''}`}
+                className={getInputClass(currentPasswordError, currentPassword)}
                 id="currentPassword"
                 placeholder="현재 비밀번호를 입력해주세요."
                 value={currentPassword}
@@ -290,7 +302,7 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
             <div className="input-group">
               <input
                 type={showNewPassword ? 'text' : 'password'}
-                className={`form-control ${newPasswordError ? 'is-invalid' : newPassword.trim() && !newPasswordError ? 'is-valid' : ''}`}
+                className={getInputClass(newPasswordError, newPassword)}
                 id="newPassword"
                 placeholder="새 비밀번호를 입력해주세요."
                 value={newPassword}
@@ -344,7 +356,7 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
             <div className="input-group">
               <input
                 type={showConfirmPassword ? 'text' : 'password'}
-                className={`form-control ${confirmPasswordError ? 'is-invalid' : confirmPassword.trim() && !confirmPasswordError ? 'is-valid' : ''}`}
+                className={getInputClass(confirmPasswordError, confirmPassword)}
                 id="confirmPassword"
                 placeholder="새 비밀번호를 다시 입력해주세요."
                 value={confirmPassword}
@@ -420,11 +432,12 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
             >
               {isSubmitting ? (
                 <>
-                  <span
+                  <output
                     className="spinner-border spinner-border-sm me-2"
-                    role="status"
-                    aria-hidden="true"
-                  ></span>
+                    aria-label="Loading..."
+                  >
+                    <span className="visually-hidden">Loading...</span>
+                  </output>
                   비밀번호 변경 중...
                 </>
               ) : (
@@ -436,6 +449,12 @@ const PasswordChangeForm = ({ onSave, onCancel, isSubmitting = false }) => {
       </form>
     </div>
   );
+};
+
+PasswordChangeForm.propTypes = {
+  onSave: PropTypes.func.isRequired,
+  onCancel: PropTypes.func.isRequired,
+  isSubmitting: PropTypes.bool,
 };
 
 export default PasswordChangeForm;

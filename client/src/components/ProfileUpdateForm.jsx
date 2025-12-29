@@ -1,9 +1,34 @@
 import { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import Swal from 'sweetalert2';
 import { useFileUploadValidator } from '../hooks/useFileUploadValidator';
 import { useFileUploadProgress } from '../hooks/useFileUploadProgress';
 import FileUploadProgress from './FileUploadProgress';
 import userService from '../api/userService';
+
+const isValidEmail = (email) => {
+  return /^[a-z0-9]+@[a-z]+\.[a-z]{2,3}$/i.test(email);
+};
+
+const getInputClass = (error, value) => {
+  if (error) return 'form-control is-invalid';
+  if (value && value.trim()) return 'form-control is-valid';
+  return 'form-control';
+};
+
+const checkChanges = (originalUser, user, currentValues) => {
+  const comparisonUser = originalUser || user;
+  const { userName, userEmail, userDescription, aiApiKey, profileImageFile } =
+    currentValues;
+
+  return (
+    userName !== (comparisonUser?.userName || '') ||
+    userEmail !== (comparisonUser?.userEmail || '') ||
+    userDescription !== (comparisonUser?.userDescription || '') ||
+    (aiApiKey !== '' && aiApiKey.trim().length > 0) ||
+    profileImageFile !== null
+  );
+};
 
 /**
  * ProfileUpdateForm 컴포넌트
@@ -157,14 +182,16 @@ const ProfileUpdateForm = ({
     setUserEmail(emailValue);
 
     // 실시간 유효성 검사
-    if (!emailValue.trim()) {
-      setEmailError('이메일을 입력해주세요.');
-    } else if (emailValue.length > 100) {
-      setEmailError('이메일은 100자 이내로 입력해주세요.');
-    } else if (!/^[a-z0-9]+@[a-z]+\.[a-z]{2,3}$/i.test(emailValue)) {
-      setEmailError('올바른 이메일 형식을 입력해주세요.');
+    if (emailValue.trim()) {
+      if (emailValue.length > 100) {
+        setEmailError('이메일은 100자 이내로 입력해주세요.');
+      } else if (isValidEmail(emailValue)) {
+        setEmailError('');
+      } else {
+        setEmailError('올바른 이메일 형식을 입력해주세요.');
+      }
     } else {
-      setEmailError('');
+      setEmailError('이메일을 입력해주세요.');
     }
   };
 
@@ -183,28 +210,32 @@ const ProfileUpdateForm = ({
     let isValid = true;
 
     // 이름 유효성 검사
-    if (!userName.trim()) {
+    if (userName.trim()) {
+      if (userName.length > 200) {
+        setNameError('이름은 200자 이내로 입력해주세요.');
+        isValid = false;
+      } else {
+        setNameError('');
+      }
+    } else {
       setNameError('이름을 입력해주세요.');
       isValid = false;
-    } else if (userName.length > 200) {
-      setNameError('이름은 200자 이내로 입력해주세요.');
-      isValid = false;
-    } else {
-      setNameError('');
     }
 
     // 이메일 유효성 검사
-    if (!userEmail.trim()) {
+    if (userEmail.trim()) {
+      if (userEmail.length > 100) {
+        setEmailError('이메일은 100자 이내로 입력해주세요.');
+        isValid = false;
+      } else if (isValidEmail(userEmail)) {
+        setEmailError('');
+      } else {
+        setEmailError('올바른 이메일 형식을 입력해주세요.');
+        isValid = false;
+      }
+    } else {
       setEmailError('이메일을 입력해주세요.');
       isValid = false;
-    } else if (userEmail.length > 100) {
-      setEmailError('이메일은 100자 이내로 입력해주세요.');
-      isValid = false;
-    } else if (!/^[a-z0-9]+@[a-z]+\.[a-z]{2,3}$/i.test(userEmail)) {
-      setEmailError('올바른 이메일 형식을 입력해주세요.');
-      isValid = false;
-    } else {
-      setEmailError('');
     }
 
     // 프로필 이미지가 제공된 경우 유효성 검사
@@ -275,15 +306,15 @@ const ProfileUpdateForm = ({
    */
   const handleCancel = () => {
     // 폼이 수정되었는지 확인
-    // originalUser(상세 조회된 복호화 데이터)가 있으면 그것과 비교, 없으면 props user와 비교
-    const comparisonUser = originalUser || user;
+    const currentValues = {
+      userName,
+      userEmail,
+      userDescription,
+      aiApiKey,
+      profileImageFile,
+    };
 
-    const hasChanges =
-      userName !== (comparisonUser?.userName || '') ||
-      userEmail !== (comparisonUser?.userEmail || '') ||
-      userDescription !== (comparisonUser?.userDescription || '') ||
-      (aiApiKey !== '' && aiApiKey.trim().length > 0) ||
-      profileImageFile !== null;
+    const hasChanges = checkChanges(originalUser, user, currentValues);
 
     if (hasChanges) {
       Swal.fire({
@@ -313,14 +344,110 @@ const ProfileUpdateForm = ({
     }
   };
 
+  const renderImagePreview = () => {
+    if (!profileImage || (profileImageFile && !profileImageValidation?.isValid))
+      return null;
+
+    return (
+      <div className="form-group row mb-3">
+        <div className="col-3 col-form-label">미리보기</div>
+        <div className="col-9">
+          <div className="d-flex align-items-center">
+            <img
+              src={profileImage}
+              alt="프로필 미리보기"
+              style={{
+                width: '100px',
+                height: '100px',
+                objectFit: 'cover',
+                border: '2px solid #28a745',
+                borderRadius: '8px',
+              }}
+            />
+            <div className="ms-3">
+              <div className="text-success">
+                <small>
+                  {profileImageFile ? (
+                    <>
+                      <strong>{profileImageFile.name}</strong>
+                      <br />
+                      크기: {formatFileSize(profileImageFile.size)}
+                      <br />
+                      상태: 검증 완료 ✓
+                    </>
+                  ) : (
+                    <>
+                      <strong>현재 프로필 이미지</strong>
+                      <br />
+                      <span className="text-muted">
+                        서버에 저장된 이미지입니다.
+                      </span>
+                    </>
+                  )}
+                </small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderUploadStatus = () => {
+    if (!profileImageFile || (uploadStatus === 'idle' && !isSubmitting))
+      return null;
+
+    return (
+      <div className="form-group row mb-3">
+        <div className="col-3 col-form-label">업로드 상태</div>
+        <div className="col-9">
+          <FileUploadProgress
+            files={[profileImageFile]}
+            validationResults={[profileImageValidation]}
+            uploadProgress={uploadProgress}
+            uploadStatus={uploadStatus}
+            uploadErrors={uploadErrors}
+            showValidation={false}
+            showProgress={true}
+            showDetailedStatus={true}
+            onRetryUpload={async (failedFiles) => {
+              // 프로필 이미지의 경우 유효성 검사만 재설정
+              if (failedFiles.length > 0) {
+                const file = failedFiles[0];
+                const validationResults = validateFiles([file], 'profileImage');
+                setProfileImageValidation(validationResults[0]);
+              }
+            }}
+          />
+        </div>
+      </div>
+    );
+  };
+
+  const getSubmitButtonText = () => {
+    if (uploadStatus === 'uploading') return '이미지 업로드 중...';
+    if (uploadStatus === 'validating') return '파일 검증 중...';
+    if (isSubmitting) return '저장 중...';
+    return '저장';
+  };
+
+  const getFileInputClass = () => {
+    if (profileImageError) return 'form-control is-invalid';
+    if (profileImageValidation?.isValid) return 'form-control is-valid';
+    return 'form-control';
+  };
+
   return (
     <div className="profile-update-form">
       <h2>프로필 수정</h2>
       {isLoadingDetail ? (
         <div className="text-center py-5">
-          <div className="spinner-border text-primary" role="status">
+          <output
+            className="spinner-border text-primary"
+            aria-label="Loading..."
+          >
             <span className="visually-hidden">Loading...</span>
-          </div>
+          </output>
           <p className="mt-2">정보를 불러오는 중...</p>
         </div>
       ) : (
@@ -333,7 +460,7 @@ const ProfileUpdateForm = ({
             <div className="col-9">
               <input
                 type="text"
-                className={`form-control ${nameError ? 'is-invalid' : userName.trim() ? 'is-valid' : ''}`}
+                className={getInputClass(nameError, userName)}
                 id="userName"
                 placeholder="이름을 입력해주세요."
                 value={userName}
@@ -354,7 +481,7 @@ const ProfileUpdateForm = ({
             <div className="col-9">
               <input
                 type="email"
-                className={`form-control ${emailError ? 'is-invalid' : userEmail.trim() && !emailError ? 'is-valid' : ''}`}
+                className={getInputClass(emailError, userEmail)}
                 id="userEmail"
                 placeholder="이메일을 입력해주세요."
                 value={userEmail}
@@ -377,7 +504,7 @@ const ProfileUpdateForm = ({
             <div className="col-9">
               <input
                 type="file"
-                className={`form-control ${profileImageError ? 'is-invalid' : profileImageValidation?.isValid ? 'is-valid' : ''}`}
+                className={getFileInputClass()}
                 id="profileImage"
                 accept="image/*"
                 onChange={handleImageChange}
@@ -401,80 +528,10 @@ const ProfileUpdateForm = ({
           </div>
 
           {/* 이미지 미리보기 */}
-          {profileImage &&
-            (!profileImageFile || profileImageValidation?.isValid) && (
-              <div className="form-group row mb-3">
-                <label className="col-3 col-form-label">미리보기</label>
-                <div className="col-9">
-                  <div className="d-flex align-items-center">
-                    <img
-                      src={profileImage}
-                      alt="프로필 미리보기"
-                      style={{
-                        width: '100px',
-                        height: '100px',
-                        objectFit: 'cover',
-                        border: '2px solid #28a745',
-                        borderRadius: '8px',
-                      }}
-                    />
-                    <div className="ms-3">
-                      <div className="text-success">
-                        <small>
-                          {profileImageFile ? (
-                            <>
-                              <strong>{profileImageFile.name}</strong>
-                              <br />
-                              크기: {formatFileSize(profileImageFile.size)}
-                              <br />
-                              상태: 검증 완료 ✓
-                            </>
-                          ) : (
-                            <>
-                              <strong>현재 프로필 이미지</strong>
-                              <br />
-                              <span className="text-muted">
-                                서버에 저장된 이미지입니다.
-                              </span>
-                            </>
-                          )}
-                        </small>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
+          {renderImagePreview()}
 
           {/* 파일 업로드 진행 상황 */}
-          {profileImageFile && (uploadStatus !== 'idle' || isSubmitting) && (
-            <div className="form-group row mb-3">
-              <label className="col-3 col-form-label">업로드 상태</label>
-              <div className="col-9">
-                <FileUploadProgress
-                  files={[profileImageFile]}
-                  validationResults={[profileImageValidation]}
-                  uploadProgress={uploadProgress}
-                  uploadStatus={uploadStatus}
-                  uploadErrors={uploadErrors}
-                  showValidation={false}
-                  showProgress={true}
-                  showDetailedStatus={true}
-                  onRetryUpload={async (failedFiles) => {
-                    // 프로필 이미지의 경우 유효성 검사만 재설정
-                    if (failedFiles.length > 0) {
-                      const file = failedFiles[0];
-                      const validationResults = validateFiles(
-                        [file],
-                        'profileImage',
-                      );
-                      setProfileImageValidation(validationResults[0]);
-                    }
-                  }}
-                />
-              </div>
-            </div>
-          )}
+          {renderUploadStatus()}
 
           {/* AI API Key 필드 */}
           <div className="form-group row mb-3">
@@ -498,7 +555,7 @@ const ProfileUpdateForm = ({
                   rel="noopener noreferrer"
                 >
                   Google AI Studio
-                </a>
+                </a>{' '}
                 에서 발급받은 API Key를 입력해주세요. 입력하지 않으면 기존 키가
                 유지됩니다.
               </small>
@@ -563,14 +620,9 @@ const ProfileUpdateForm = ({
                   <>
                     <span
                       className="spinner-border spinner-border-sm me-2"
-                      role="status"
                       aria-hidden="true"
                     ></span>
-                    {uploadStatus === 'uploading'
-                      ? '이미지 업로드 중...'
-                      : uploadStatus === 'validating'
-                        ? '파일 검증 중...'
-                        : '저장 중...'}
+                    {getSubmitButtonText()}
                   </>
                 ) : (
                   '저장'
@@ -582,6 +634,18 @@ const ProfileUpdateForm = ({
       )}
     </div>
   );
+};
+
+ProfileUpdateForm.propTypes = {
+  user: PropTypes.shape({
+    userName: PropTypes.string,
+    userEmail: PropTypes.string,
+    userDescription: PropTypes.string,
+    profileImage: PropTypes.string,
+  }),
+  onSave: PropTypes.func.isRequired,
+  onCancel: PropTypes.func.isRequired,
+  isSubmitting: PropTypes.bool,
 };
 
 export default ProfileUpdateForm;

@@ -138,9 +138,9 @@ describe('ThemeToggle', () => {
       const mockParentClick = jest.fn();
 
       const { container } = render(
-        <div onClick={mockParentClick}>
+        <button onClick={mockParentClick} className="theme-toggle-wrapper-mock">
           <ThemeToggle />
-        </div>,
+        </button>,
       );
 
       const toggleWrapper = container.querySelector('.theme-toggle-wrapper');
@@ -156,9 +156,9 @@ describe('ThemeToggle', () => {
       const mockDropdownClick = jest.fn();
 
       const { container } = render(
-        <div className="dropdown-menu" onClick={mockDropdownClick}>
+        <button className="dropdown-menu" onClick={mockDropdownClick}>
           <ThemeToggle />
-        </div>,
+        </button>,
       );
 
       const toggleWrapper = container.querySelector('.theme-toggle-wrapper');

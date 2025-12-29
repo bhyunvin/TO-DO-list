@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useLayoutEffect } from 'react';
+import PropTypes from 'prop-types';
 import { Modal } from 'react-bootstrap';
 import ChatMessage from './ChatMessage';
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
@@ -54,16 +55,13 @@ const ChatModal = ({
           messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
         }
       }, 150);
-    } else {
-      // 모달이 닫힐 때 이전에 포커스된 요소로 포커스 복원
-      if (
-        previousFocusRef.current &&
-        typeof previousFocusRef.current.focus === 'function'
-      ) {
-        setTimeout(() => {
-          previousFocusRef.current.focus();
-        }, 100);
-      }
+    } else if (
+      previousFocusRef.current &&
+      typeof previousFocusRef.current.focus === 'function'
+    ) {
+      setTimeout(() => {
+        previousFocusRef.current.focus();
+      }, 100);
     }
   }, [isOpen]);
 
@@ -75,7 +73,7 @@ const ChatModal = ({
 
       // 전송 후 입력 필드로 포커스 복귀 (더 나은 UX를 위해)
       setTimeout(() => {
-        if (inputRef.current && !isLoading) {
+        if (inputRef.current) {
           inputRef.current.focus();
         }
       }, 100);
@@ -112,12 +110,9 @@ const ChatModal = ({
           e.preventDefault();
           lastElement.focus();
         }
-      } else {
-        // Tab 처리
-        if (document.activeElement === lastElement) {
-          e.preventDefault();
-          firstElement.focus();
-        }
+      } else if (document.activeElement === lastElement) {
+        e.preventDefault();
+        firstElement.focus();
       }
     }
   };
@@ -138,8 +133,8 @@ const ChatModal = ({
     >
       <Modal.Header closeButton className="chat-modal-header">
         <Modal.Title id="chat-modal-title">
-          <i className="bi bi-robot me-2"></i>
-          AI 어시스턴트
+          <i className="bi bi-robot me-2" aria-hidden="true"></i> Use AI
+          Assistant AI 어시스턴트
         </Modal.Title>
       </Modal.Header>
 
@@ -160,7 +155,7 @@ const ChatModal = ({
             />
           ))}
           {isLoading && (
-            <div className="typing-indicator" role="status" aria-live="polite">
+            <output className="typing-indicator" aria-live="polite">
               <div className="typing-dots" aria-hidden="true">
                 <span></span>
                 <span></span>
@@ -169,7 +164,7 @@ const ChatModal = ({
               <span className="typing-text">
                 AI가 응답을 준비하고 있습니다...
               </span>
-            </div>
+            </output>
           )}
           {error && (
             <div className="error-message" role="alert" aria-live="assertive">
@@ -187,8 +182,7 @@ const ChatModal = ({
                     onClick={onRetry}
                     disabled={isLoading}
                   >
-                    <i className="bi bi-arrow-clockwise me-1"></i>
-                    다시 시도
+                    <i className="bi bi-arrow-clockwise me-1"></i> 다시 시도
                   </button>
                   <button
                     className="btn btn-sm btn-outline-secondary"
@@ -231,7 +225,6 @@ const ChatModal = ({
               {isLoading ? (
                 <span
                   className="spinner-border spinner-border-sm"
-                  role="status"
                   aria-hidden="true"
                 ></span>
               ) : (
@@ -242,8 +235,8 @@ const ChatModal = ({
           <small id="chat-input-help" className="text-muted mt-1">
             {isLoading ? (
               <span className="text-primary">
-                <i className="bi bi-arrow-up-circle me-1"></i>
-                메시지를 전송하고 있습니다...
+                <i className="bi bi-arrow-up-circle me-1"></i> 메시지를 전송하고
+                있습니다...
               </span>
             ) : (
               'Enter로 전송, Shift+Enter로 줄바꿈'
@@ -253,6 +246,25 @@ const ChatModal = ({
       </Modal.Footer>
     </Modal>
   );
+};
+
+ChatModal.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  messages: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+      isUser: PropTypes.bool.isRequired,
+      content: PropTypes.string.isRequired,
+    }),
+  ).isRequired,
+  onSendMessage: PropTypes.func.isRequired,
+  isLoading: PropTypes.bool.isRequired,
+  error: PropTypes.string,
+  onRetry: PropTypes.func,
+  onClearError: PropTypes.func.isRequired,
+  onInputFocus: PropTypes.func,
+  onInputBlur: PropTypes.func,
 };
 
 export default ChatModal;
