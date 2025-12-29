@@ -53,6 +53,17 @@ jest.mock('sweetalert2', () => ({
   fire: jest.fn(() => Promise.resolve({ isConfirmed: true })),
 }));
 
+const createDelayedResponse = (data, delay = 100) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({
+        ok: true,
+        json: async () => data,
+      });
+    }, delay);
+  });
+};
+
 describe('TodoContainer Loading State', () => {
   beforeEach(() => {
     mockApi.mockClear();
@@ -64,17 +75,8 @@ describe('TodoContainer Loading State', () => {
 
   test('displays loading message while fetching todos', async () => {
     // 지연된 API 응답 모킹
-    mockApi.mockImplementation(
-      () =>
-        new Promise((resolve) => {
-          setTimeout(() => {
-            resolve({
-              ok: true,
-              json: async () => [],
-            });
-          }, 100);
-        }),
-    );
+    // 지연된 API 응답 모킹
+    mockApi.mockImplementation(() => createDelayedResponse([], 100));
 
     render(<TodoList />);
 
@@ -139,17 +141,8 @@ describe('TodoContainer Loading State', () => {
 
   test('loading indicator has spinner', async () => {
     // 지연된 API 응답 모킹
-    mockApi.mockImplementation(
-      () =>
-        new Promise((resolve) => {
-          setTimeout(() => {
-            resolve({
-              ok: true,
-              json: async () => [],
-            });
-          }, 100);
-        }),
-    );
+    // 지연된 API 응답 모킹
+    mockApi.mockImplementation(() => createDelayedResponse([], 100));
 
     render(<TodoList />);
 

@@ -287,15 +287,15 @@
 }
 
 [data-theme='dark'] .alert-warning {
-  background-color: rgba(255, 193, 7, 0.2);
+  background-color: #574b25; /* Opaque simulated rgba(255, 193, 7, 0.2) on #2d2d2d */
   border-color: #ffc107;
-  color: #ffc107;
+  color: #fff9c4;
 }
 
 [data-theme='dark'] .alert-info {
-  background-color: rgba(23, 162, 184, 0.2);
+  background-color: #294449; /* Opaque simulated rgba(23, 162, 184, 0.2) on #2d2d2d */
   border-color: #17a2b8;
-  color: #5dccde;
+  color: #b2ebf2;
 }
 
 [data-theme='dark'] .alert-info .alert-heading {

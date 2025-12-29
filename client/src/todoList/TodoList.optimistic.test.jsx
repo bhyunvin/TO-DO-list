@@ -2,6 +2,7 @@
 /* eslint-disable testing-library/no-node-access */
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import PropTypes from 'prop-types';
 import TodoContainer from './TodoList';
 
 // SweetAlert2 모킹
@@ -60,6 +61,11 @@ jest.mock('../components/ProfileUpdateForm', () => {
       <button onClick={onCancel}>Cancel</button>
     </div>
   );
+
+  MockProfileUpdateForm.propTypes = {
+    onCancel: PropTypes.func.isRequired,
+  };
+
   return MockProfileUpdateForm;
 });
 
@@ -69,6 +75,11 @@ jest.mock('../components/PasswordChangeForm', () => {
       <button onClick={onCancel}>Cancel</button>
     </div>
   );
+
+  MockPasswordChangeForm.propTypes = {
+    onCancel: PropTypes.func.isRequired,
+  };
+
   return MockPasswordChangeForm;
 });
 
@@ -80,8 +91,27 @@ jest.mock('react-datepicker', () => {
       onChange={(e) => onChange(new Date(e.target.value))}
     />
   );
+
+  MockDatePicker.propTypes = {
+    selected: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.instanceOf(Date),
+    ]).isRequired,
+    onChange: PropTypes.func.isRequired,
+  };
+
   return MockDatePicker;
 });
+
+const createDelayedRejection = (delay) => {
+  return new Promise((_, reject) => {
+    setTimeout(() => {
+      const abortError = new Error('The operation was aborted');
+      abortError.name = 'AbortError';
+      reject(abortError);
+    }, delay);
+  });
+};
 
 describe('TodoContainer Optimistic UI Pattern', () => {
   beforeEach(() => {
@@ -413,14 +443,7 @@ describe('TodoContainer Optimistic UI Pattern', () => {
           ]),
       })
       .mockImplementationOnce(() => {
-        return new Promise((resolve, reject) => {
-          // 타임아웃 후 중단 시뮬레이션
-          setTimeout(() => {
-            const abortError = new Error('The operation was aborted');
-            abortError.name = 'AbortError';
-            reject(abortError);
-          }, 100);
-        });
+        return createDelayedRejection(100);
       });
 
     render(<TodoContainer />);
@@ -479,12 +502,12 @@ describe('TodoContainer Optimistic UI Pattern', () => {
             },
           ]),
       })
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({}) }) // Todo 1 성공
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({}) }) // Item 1 성공
       .mockResolvedValueOnce({
         ok: false,
         status: 500,
         json: () => Promise.resolve({}),
-      }); // Todo 2 실패
+      }); // Item 2 실패
 
     render(<TodoContainer />);
 
@@ -504,9 +527,9 @@ describe('TodoContainer Optimistic UI Pattern', () => {
 
     // API 호출 완료 대기
     await waitFor(() => {
-      // Todo 1은 체크된 상태로 유지되어야 함 (성공)
+      // Item 1은 체크된 상태로 유지되어야 함 (성공)
       expect(checkboxes[0]).toBeChecked();
-      // Todo 2는 체크 해제되어야 함 (롤백)
+      // Item 2는 체크 해제되어야 함 (롤백)
       expect(checkboxes[1]).not.toBeChecked();
     });
   });

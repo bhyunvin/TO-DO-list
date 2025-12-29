@@ -2,6 +2,7 @@
 /* eslint-disable testing-library/no-node-access */
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import PropTypes from 'prop-types';
 import TodoContainer from './TodoList';
 
 // Mock SweetAlert2
@@ -91,6 +92,15 @@ jest.mock('../components/ProfileUpdateForm', () => {
       <button onClick={onCancel}>Cancel Profile</button>
     </div>
   );
+
+  MockProfileUpdateForm.propTypes = {
+    user: PropTypes.shape({
+      userName: PropTypes.string,
+    }).isRequired,
+    onSave: PropTypes.func.isRequired,
+    onCancel: PropTypes.func.isRequired,
+  };
+
   return MockProfileUpdateForm;
 });
 
@@ -112,6 +122,12 @@ jest.mock('../components/PasswordChangeForm', () => {
       <button onClick={onCancel}>Cancel Password</button>
     </div>
   );
+
+  MockPasswordChangeForm.propTypes = {
+    onSave: PropTypes.func.isRequired,
+    onCancel: PropTypes.func.isRequired,
+  };
+
   return MockPasswordChangeForm;
 });
 
@@ -124,6 +140,15 @@ jest.mock('react-datepicker', () => {
       onChange={(e) => onChange(new Date(e.target.value))}
     />
   );
+
+  MockDatePicker.propTypes = {
+    selected: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.instanceOf(Date),
+    ]).isRequired,
+    onChange: PropTypes.func.isRequired,
+  };
+
   return MockDatePicker;
 });
 
@@ -186,7 +211,7 @@ describe('TodoContainer Profile Update Integration', () => {
     const user = userEvent.setup();
     render(<TodoContainer />);
 
-    // Initially, todo list elements should be visible
+    // Initially, task list elements should be visible
     expect(screen.getByRole('button', { name: /신규/ })).toBeInTheDocument();
     expect(screen.getByTestId('date-picker')).toBeInTheDocument();
 
@@ -199,7 +224,7 @@ describe('TodoContainer Profile Update Integration', () => {
     });
     await user.click(updateProfileButton);
 
-    // Todo list elements should be hidden
+    // Task list elements should be hidden
     expect(
       screen.queryByRole('button', { name: /신규/ }),
     ).not.toBeInTheDocument();
@@ -248,7 +273,7 @@ describe('TodoContainer Profile Update Integration', () => {
     const cancelButton = screen.getByRole('button', { name: /Cancel Profile/ });
     await user.click(cancelButton);
 
-    // Should return to todo list view
+    // Should return to task list view
     expect(screen.queryByTestId('profile-update-form')).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: /신규/ })).toBeInTheDocument();
     expect(screen.getByTestId('date-picker')).toBeInTheDocument();
@@ -436,7 +461,7 @@ describe('TodoContainer Profile Update Integration', () => {
     const cancelButton = screen.getByRole('button', { name: /Cancel Profile/ });
     await user.click(cancelButton);
 
-    // Should be able to start todo creation
+    // Should be able to start task creation
     const newTodoButton = screen.getByRole('button', { name: /신규/ });
     await user.click(newTodoButton);
 
@@ -480,7 +505,7 @@ describe('TodoContainer Profile Update Integration', () => {
     const cancelButton = screen.getByRole('button', { name: /Cancel Profile/ });
     await user.click(cancelButton);
 
-    // Should be able to edit todo
+    // Should be able to edit task
     const moreActionsButton = screen.getByRole('button', { name: '' }); // Three dots button
     await user.click(moreActionsButton);
 
@@ -829,8 +854,8 @@ describe('TodoContainer File Download Handler', () => {
     originalCreateElement = document.createElement.bind(document);
     originalAppendChild = document.body.appendChild.bind(document.body);
     originalRemoveChild = document.body.removeChild.bind(document.body);
-    originalCreateObjectURL = window.URL.createObjectURL;
-    originalRevokeObjectURL = window.URL.revokeObjectURL;
+    originalCreateObjectURL = globalThis.URL.createObjectURL;
+    originalRevokeObjectURL = globalThis.URL.revokeObjectURL;
   });
 
   beforeEach(() => {
@@ -843,8 +868,8 @@ describe('TodoContainer File Download Handler', () => {
     });
 
     // Mock URL methods for file download
-    window.URL.createObjectURL = jest.fn(() => 'blob:mock-url');
-    window.URL.revokeObjectURL = jest.fn();
+    globalThis.URL.createObjectURL = jest.fn(() => 'blob:mock-url');
+    globalThis.URL.revokeObjectURL = jest.fn();
 
     // Mock SweetAlert to return cancelled by default
     const Swal = require('sweetalert2');
@@ -864,8 +889,8 @@ describe('TodoContainer File Download Handler', () => {
     if (document.body.removeChild !== originalRemoveChild) {
       document.body.removeChild = originalRemoveChild;
     }
-    window.URL.createObjectURL = originalCreateObjectURL;
-    window.URL.revokeObjectURL = originalRevokeObjectURL;
+    globalThis.URL.createObjectURL = originalCreateObjectURL;
+    globalThis.URL.revokeObjectURL = originalRevokeObjectURL;
   });
 
   test('successful download flow with correct API call', async () => {
@@ -912,7 +937,7 @@ describe('TodoContainer File Download Handler', () => {
 
     // Verify blob was created and download was triggered
     await waitFor(() => {
-      expect(window.URL.createObjectURL).toHaveBeenCalledWith(mockBlob);
+      expect(globalThis.URL.createObjectURL).toHaveBeenCalledWith(mockBlob);
     });
   });
 
@@ -1170,7 +1195,7 @@ describe('TodoContainer File Download Handler', () => {
     // Wait for download to complete
     await waitFor(
       () => {
-        expect(window.URL.createObjectURL).toHaveBeenCalledWith(mockBlob);
+        expect(globalThis.URL.createObjectURL).toHaveBeenCalledWith(mockBlob);
       },
       { timeout: 3000 },
     );
@@ -1178,7 +1203,7 @@ describe('TodoContainer File Download Handler', () => {
     // Verify cleanup was called
     await waitFor(
       () => {
-        expect(window.URL.revokeObjectURL).toHaveBeenCalledWith(
+        expect(globalThis.URL.revokeObjectURL).toHaveBeenCalledWith(
           'blob:mock-url',
         );
       },
@@ -1221,7 +1246,7 @@ describe('TodoContainer Password Change Integration', () => {
     const user = userEvent.setup();
     render(<TodoContainer />);
 
-    // Initially, todo list elements should be visible
+    // Initially, task list elements should be visible
     expect(screen.getByRole('button', { name: /신규/ })).toBeInTheDocument();
     expect(screen.getByTestId('date-picker')).toBeInTheDocument();
 
@@ -1234,7 +1259,7 @@ describe('TodoContainer Password Change Integration', () => {
     });
     await user.click(changePasswordButton);
 
-    // Todo list elements should be hidden
+    // Task list elements should be hidden
     expect(
       screen.queryByRole('button', { name: /신규/ }),
     ).not.toBeInTheDocument();
@@ -1295,7 +1320,7 @@ describe('TodoContainer Password Change Integration', () => {
     });
     await user.click(cancelButton);
 
-    // Should return to todo list view
+    // Should return to task list view
     expect(
       screen.queryByTestId('password-change-form'),
     ).not.toBeInTheDocument();

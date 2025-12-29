@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import TodoList from './TodoList';
 
@@ -113,24 +113,26 @@ describe('TodoContainer Sorting Behavior', () => {
       json: async () => ({}),
     });
 
-    // Todo 3 (첫 번째 항목)을 완료로 토글 - 체크박스가 아닌 셀 클릭
-    const checkboxCells = screen
+    // Item 3 (첫 번째 항목)을 완료로 토글 - 체크박스가 아닌 셀 클릭
+    const todo3Row = screen.getByRole('row', { name: /Todo 3/ });
+    // Find the cell with checkbox-cell class within the row
+    const checkboxCell = within(todo3Row)
       .getAllByRole('cell')
-      .filter((cell) => cell.classList.contains('checkbox-cell'));
-    await user.click(checkboxCells[0]);
+      .find((cell) => cell.classList.contains('checkbox-cell'));
+    await user.click(checkboxCell);
 
     // 낙관적 업데이트 및 정렬 대기
     await waitFor(() => {
       const updatedRows = screen.getAllByRole('row');
-      // Todo 3은 이제 하단에 있어야 함 (완료된 항목은 마지막으로)
+      // Item 3은 이제 하단에 있어야 함 (완료된 항목은 마지막으로)
       expect(updatedRows[1]).toHaveTextContent('Todo 2'); // 이제 첫 번째
       expect(updatedRows[2]).toHaveTextContent('Todo 1'); // 이제 두 번째
       expect(updatedRows[3]).toHaveTextContent('Todo 3'); // 이제 마지막 (완료됨)
     });
 
-    // Todo 3 체크박스가 체크되었는지 확인
+    // Item 3 체크박스가 체크되었는지 확인
     const updatedCheckboxes = screen.getAllByRole('checkbox');
-    expect(updatedCheckboxes[2]).toBeChecked(); // Todo 3은 이제 인덱스 2에 있음
+    expect(updatedCheckboxes[2]).toBeChecked(); // Item 3은 이제 인덱스 2에 있음
   });
 
   test('uncompleted todo moves to top after toggle', async () => {
@@ -186,22 +188,23 @@ describe('TodoContainer Sorting Behavior', () => {
       json: async () => ({}),
     });
 
-    // Todo 1 (마지막 항목)을 미완료로 토글 - 셀 클릭
-    const checkboxCells = screen
+    // Item 1 (마지막 항목)을 미완료로 토글 - 셀 클릭
+    const todo1Row = screen.getByRole('row', { name: /Todo 1/ });
+    const checkboxCell = within(todo1Row)
       .getAllByRole('cell')
-      .filter((cell) => cell.classList.contains('checkbox-cell'));
-    await user.click(checkboxCells[2]); // Todo 1 체크박스 셀
+      .find((cell) => cell.classList.contains('checkbox-cell'));
+    await user.click(checkboxCell);
 
     // 낙관적 업데이트 및 정렬 대기
     await waitFor(() => {
       const updatedRows = screen.getAllByRole('row');
-      // Todo 1은 이제 상단에 있어야 함 (미완료 항목이 먼저, seq DESC로 정렬)
+      // Item 1은 이제 상단에 있어야 함 (미완료 항목이 먼저, seq DESC로 정렬)
       expect(updatedRows[1]).toHaveTextContent('Todo 3'); // 여전히 첫 번째 (seq 3)
       expect(updatedRows[2]).toHaveTextContent('Todo 2'); // 여전히 두 번째 (seq 2)
       expect(updatedRows[3]).toHaveTextContent('Todo 1'); // 여전히 마지막 (seq 1, 하지만 이제 미완료)
     });
 
-    // Todo 1 체크박스가 체크 해제되었는지 확인
+    // Item 1 체크박스가 체크 해제되었는지 확인
     const updatedCheckboxes = screen.getAllByRole('checkbox');
     expect(updatedCheckboxes[2]).not.toBeChecked();
   });
@@ -251,11 +254,11 @@ describe('TodoContainer Sorting Behavior', () => {
       json: async () => ({ message: 'Server error' }),
     });
 
-    // Todo 2 토글 시도 - 셀 클릭
-    const checkboxCells = screen
+    // Item 2 토글 시도 - 셀 클릭
+    const checkboxCell = screen
       .getAllByRole('cell')
-      .filter((cell) => cell.classList.contains('checkbox-cell'));
-    await user.click(checkboxCells[0]);
+      .find((cell) => cell.classList.contains('checkbox-cell'));
+    await user.click(checkboxCell);
 
     // 롤백 대기
     await waitFor(() => {
@@ -265,7 +268,7 @@ describe('TodoContainer Sorting Behavior', () => {
       expect(updatedRows[2]).toHaveTextContent('Todo 1');
     });
 
-    // Todo 2 체크박스가 체크 해제되었는지 확인 (롤백됨)
+    // Item 2 체크박스가 체크 해제되었는지 확인 (롤백됨)
     const updatedCheckboxes = screen.getAllByRole('checkbox');
     expect(updatedCheckboxes[0]).not.toBeChecked();
   });

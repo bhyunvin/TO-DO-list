@@ -1,6 +1,7 @@
 /* eslint-disable testing-library/no-node-access */
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import PropTypes from 'prop-types';
 import TodoContainer from './TodoList';
 
 // Mock SweetAlert2
@@ -59,6 +60,11 @@ jest.mock('../components/ProfileUpdateForm', () => {
       <button onClick={onCancel}>Cancel</button>
     </div>
   );
+
+  MockProfileUpdateForm.propTypes = {
+    onCancel: PropTypes.func.isRequired,
+  };
+
   return MockProfileUpdateForm;
 });
 
@@ -68,6 +74,11 @@ jest.mock('../components/PasswordChangeForm', () => {
       <button onClick={onCancel}>Cancel</button>
     </div>
   );
+
+  MockPasswordChangeForm.propTypes = {
+    onCancel: PropTypes.func.isRequired,
+  };
+
   return MockPasswordChangeForm;
 });
 
@@ -79,6 +90,15 @@ jest.mock('react-datepicker', () => {
       onChange={(e) => onChange(new Date(e.target.value))}
     />
   );
+
+  MockDatePicker.propTypes = {
+    selected: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.instanceOf(Date),
+    ]).isRequired,
+    onChange: PropTypes.func.isRequired,
+  };
+
   return MockDatePicker;
 });
 

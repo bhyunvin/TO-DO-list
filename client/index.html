@@ -27,7 +27,7 @@
           if (savedTheme) {
             const { state } = JSON.parse(savedTheme);
             if (state && state.theme) {
-              document.documentElement.setAttribute('data-theme', state.theme);
+              document.documentElement.dataset.theme = state.theme;
             }
           }
         } catch (e) {
