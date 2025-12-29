@@ -41,7 +41,7 @@ export class TodoController {
     private readonly fileUploadErrorService: FileUploadErrorService,
   ) {}
 
-  // 새로운 ToDo 항목을 생성합니다.
+  // 새로운 할 일 항목을 생성합니다.
   @Post()
   create(
     @Session() session: SessionData,
@@ -52,14 +52,14 @@ export class TodoController {
     return this.todoService.create(user, ip, createTodoDto);
   }
 
-  // 특정 날짜의 모든 ToDo 항목을 조회합니다.
+  // 특정 날짜의 모든 할 일 항목을 조회합니다.
   @Get()
   findAll(@Session() session: SessionData, @Query('date') date: string) {
     const { user } = session;
     return this.todoService.findAll(user.userSeq, date);
   }
 
-  // ToDo 항목을 Excel 파일로 내보냅니다.
+  // 할 일 항목을 Excel 파일로 내보냅니다.
   @Get('excel')
   async exportToExcel(
     @Session() session: SessionData,
@@ -103,7 +103,7 @@ export class TodoController {
     }
   }
 
-  // 특정 ToDo 항목을 수정합니다.
+  // 특정 할 일 항목을 수정합니다.
   @Patch(':id')
   update(
     @Param('id') id: string,
@@ -115,7 +115,7 @@ export class TodoController {
     return this.todoService.update(Number(id), user, ip, updateTodoDto);
   }
 
-  // 특정 ToDo 항목을 삭제합니다.
+  // 특정 할 일 항목을 삭제합니다.
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT) // 성공적으로 삭제되었을 때 204 No Content를 반환합니다.
   remove(
@@ -127,7 +127,7 @@ export class TodoController {
     return this.todoService.delete(user, ip, Number(id));
   }
 
-  // TODO 파일 첨부 업로드 엔드포인트
+  // 할 일 파일 첨부 업로드 엔드포인트
   @Post('upload-attachments')
   @UseInterceptors(
     FilesInterceptor('files', 10, todoAttachmentMulterOptions),
@@ -179,7 +179,7 @@ export class TodoController {
     }
   }
 
-  // 파일과 함께 새로운 TODO 항목을 생성합니다.
+  // 파일과 함께 새로운 할 일 항목을 생성합니다.
   @Post('with-files')
   @UseInterceptors(
     FilesInterceptor('files', 10, todoAttachmentMulterOptions),
@@ -235,7 +235,7 @@ export class TodoController {
     }
   }
 
-  // 기존 TODO 항목에 파일을 추가합니다.
+  // 기존 할 일 항목에 파일을 추가합니다.
   @Post(':id/attachments')
   @UseInterceptors(
     FilesInterceptor('files', 10, todoAttachmentMulterOptions),
@@ -294,7 +294,7 @@ export class TodoController {
     }
   }
 
-  // TODO 항목의 첨부 파일 목록을 조회합니다.
+  // 할 일 항목의 첨부 파일 목록을 조회합니다.
   @Get(':id/attachments')
   getAttachments(@Param('id') id: string, @Session() session: SessionData) {
     const { user } = session;

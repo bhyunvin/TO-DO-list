@@ -21,10 +21,10 @@ import { format, addDays } from 'date-fns';
 export class TodoService {
   constructor(
     @InjectRepository(TodoEntity)
-    private todoRepository: Repository<TodoEntity>,
+    private readonly todoRepository: Repository<TodoEntity>,
     @InjectRepository(FileInfoEntity)
-    private fileInfoRepository: Repository<FileInfoEntity>,
-    private fileUploadUtil: FileUploadUtil,
+    private readonly fileInfoRepository: Repository<FileInfoEntity>,
+    private readonly fileUploadUtil: FileUploadUtil,
   ) {}
 
   async findAll(
@@ -300,31 +300,7 @@ export class TodoService {
     try {
       let fileGroupNo = todo.todoFileGroupNo;
 
-      if (!fileGroupNo) {
-        const { savedFiles, fileGroupNo: newFileGroupNo } =
-          await this.fileUploadUtil.saveFileInfo(files, auditSettings);
-
-        fileGroupNo = newFileGroupNo;
-        todo.todoFileGroupNo = fileGroupNo;
-        await this.todoRepository.save(todo);
-
-        const attachmentResponses: FileAttachmentResponseDto[] = savedFiles.map(
-          (file) => ({
-            fileNo: file.fileNo,
-            originalFileName: file.saveFileName,
-            fileSize: file.fileSize,
-            fileExt: file.fileExt,
-            uploadDate: file.auditColumns.regDtm.toISOString(),
-          }),
-        );
-
-        return {
-          success: true,
-          uploadedFiles: attachmentResponses,
-          fileGroupNo,
-          message: `Successfully added ${savedFiles.length} file(s) to TODO`,
-        };
-      } else {
+      if (fileGroupNo) {
         // 기존 파일 그룹에 파일 추가
         const savedFiles: FileInfoEntity[] = [];
 
@@ -359,6 +335,30 @@ export class TodoService {
           fileGroupNo,
           message: `Successfully added ${savedFiles.length} file(s) to existing TODO`,
         };
+      } else {
+        const { savedFiles, fileGroupNo: newFileGroupNo } =
+          await this.fileUploadUtil.saveFileInfo(files, auditSettings);
+
+        fileGroupNo = newFileGroupNo;
+        todo.todoFileGroupNo = fileGroupNo;
+        await this.todoRepository.save(todo);
+
+        const attachmentResponses: FileAttachmentResponseDto[] = savedFiles.map(
+          (file) => ({
+            fileNo: file.fileNo,
+            originalFileName: file.saveFileName,
+            fileSize: file.fileSize,
+            fileExt: file.fileExt,
+            uploadDate: file.auditColumns.regDtm.toISOString(),
+          }),
+        );
+
+        return {
+          success: true,
+          uploadedFiles: attachmentResponses,
+          fileGroupNo,
+          message: `Successfully added ${savedFiles.length} file(s) to TODO`,
+        };
       }
     } catch (error) {
       return {
@@ -369,17 +369,17 @@ export class TodoService {
     }
   }
 
-  // TODO 항목의 첨부 파일 목록을 조회합니다.
+  // 할 일 항목의 첨부 파일 목록을 조회합니다.
   async getAttachments(
     todoId: number,
     userSeq: number,
   ): Promise<FileAttachmentResponseDto[]> {
-    // TODO 항목이 존재하고 사용자 소유인지 확인합니다.
+    // 할 일 항목이 존재하고 사용자 소유인지 확인합니다.
     const todo = await this.todoRepository.findOne({
       where: { todoSeq: todoId, userSeq, delYn: 'N' },
     });
 
-    if (!todo || !todo.todoFileGroupNo) {
+    if (!todo?.todoFileGroupNo) {
       return [];
     }
 
@@ -401,7 +401,7 @@ export class TodoService {
     }));
   }
 
-  // TODO 항목을 Excel 파일로 내보냅니다.
+  // 할 일 항목을 Excel 파일로 내보냅니다.
   async exportToExcel(
     userSeq: number,
     startDate: string,
@@ -418,7 +418,7 @@ export class TodoService {
       throw new Error('Invalid date format. Use YYYY-MM-DD');
     }
 
-    // 날짜 범위 내의 삭제되지 않은 TODO 항목을 조회합니다.
+    // 날짜 범위 내의 삭제되지 않은 할 일 항목을 조회합니다.
     const todos = await this.todoRepository.find({
       where: {
         userSeq,

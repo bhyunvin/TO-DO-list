@@ -3,9 +3,9 @@ import {
   ExecutionContext,
   Injectable,
   NestInterceptor,
+  Logger,
 } from '@nestjs/common';
 import { Observable, tap } from 'rxjs';
-import { Logger } from '@nestjs/common';
 import { LoggerService } from '../logging/logging.service';
 import { LogEntity } from 'src/logging/logging.entity';
 
@@ -28,13 +28,13 @@ export class LoggingInterceptor implements NestInterceptor {
     const ip = connection.remoteAddress || headers['x-forwarded-for'] || '';
 
     this.logger.log(
-      `Incoming request: ${method} ${url}. userSeq : ${isNaN(userSeq) ? 'anonymous user' : userSeq}`,
+      `Incoming request: ${method} ${url}. userSeq : ${Number.isNaN(userSeq) ? 'anonymous user' : userSeq}`,
     );
 
     return next.handle().pipe(
       tap(() => {
         const logEntity = new LogEntity();
-        logEntity.userSeq = isNaN(userSeq) ? null : userSeq;
+        logEntity.userSeq = Number.isNaN(userSeq) ? null : userSeq;
         logEntity.connectUrl = url;
         logEntity.method = method;
 

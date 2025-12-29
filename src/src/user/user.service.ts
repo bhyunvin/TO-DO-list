@@ -28,10 +28,10 @@ export class UserService {
 
   constructor(
     @InjectRepository(UserEntity)
-    private userRepository: Repository<UserEntity>,
-    private fileUploadUtil: FileUploadUtil,
-    private fileValidationService: FileValidationService,
-    private inputSanitizer: InputSanitizerService,
+    private readonly userRepository: Repository<UserEntity>,
+    private readonly fileUploadUtil: FileUploadUtil,
+    private readonly fileValidationService: FileValidationService,
+    private readonly inputSanitizer: InputSanitizerService,
     @InjectDataSource()
     private readonly dataSource: DataSource,
   ) {}
@@ -60,9 +60,8 @@ export class UserService {
     // 복호화를 수행하지 않고 그대로 반환합니다.
     // DB에 저장된 암호문(Ciphertext) 상태로 클라이언트에 전달되어
     // 브라우저 세션 스토리지 등 평문 저장을 방지합니다.
-    // 필요한 경우 /user/profile/detail 엔드포인트를 통해 복호화된 정보를 조회합니다.
-
-    return user;
+    // 객체 복사를 통해 동일 참조 반환 경고를 회피하고 사이드 이펙트를 방지합니다.
+    return { ...user };
   }
 
   // 로그인 로직 (컨트롤러에서 세션 처리)
@@ -219,215 +218,37 @@ export class UserService {
     ip: string,
   ): Promise<Omit<UserEntity, 'userPassword' | 'setProfileImage'>> {
     return this.dataSource.transaction(async (transactionalEntityManager) => {
-      // 향상된 사용자 검증
-      const currentUser = await transactionalEntityManager.findOne(UserEntity, {
-        where: { userSeq },
-      });
-
-      if (!currentUser) {
-        this.logger.error('Profile update attempted for non-existent user', {
-          userSeq,
-          ip,
-        });
-        throw new BadRequestException('사용자를 찾을 수 없습니다.');
-      }
-
-      const { adminYn, userId: currentUserId } = currentUser;
-
-      // 추가 보안 검사 - 사용자가 활성 상태인지 확인 (해당 필드가 있는 경우)
-      // 향후 사용자 상태 검사를 위한 플레이스홀더
-      if (adminYn === 'SUSPENDED') {
-        this.logger.warn('Profile update attempted by suspended user', {
-          userSeq,
-          userId: currentUserId,
-          ip,
-        });
-        throw new ForbiddenException(
-          '계정이 일시 정지되어 프로필을 수정할 수 없습니다.',
-        );
-      }
+      // 향상된 사용자 검증 및 활성 상태 확인
+      const currentUser = await this.validateAndGetUserForUpdate(
+        transactionalEntityManager,
+        userSeq,
+        ip,
+      );
+      const { userId: currentUserId } = currentUser;
 
       // 입력 데이터 검증 및 새니타이즈
       const sanitizedDto = this.validateAndSanitizeUpdateData(updateUserDto);
 
-      // 추가 검증을 포함한 향상된 이메일 고유성 검사
-      const { userEmail: newEmail } = sanitizedDto;
-      const { userEmail: currentEmail } = currentUser;
+      // 이메일 고유성 검사
+      await this.validateAndCheckEmail(
+        transactionalEntityManager,
+        userSeq,
+        sanitizedDto.userEmail,
+        currentUser.userEmail,
+        ip,
+      );
 
-      if (newEmail && newEmail !== currentEmail) {
-        // 추가 이메일 형식 검증
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(newEmail)) {
-          throw new BadRequestException({
-            message: 'Invalid email format',
-            error: '올바른 이메일 형식이 아닙니다.',
-            errorCode: 'INVALID_EMAIL_FORMAT',
-          });
-        }
-
-        // 이메일 고유성 확인 (결정적 암호화 값으로 조회)
-        const encryptedNewEmail = encryptSymmetricDeterministic(newEmail);
-
-        const existingUser = await transactionalEntityManager.findOne(
-          UserEntity,
-          {
-            where: {
-              userEmail: encryptedNewEmail,
-              userSeq: Not(userSeq), // 현재 사용자 제외
-            },
-          },
-        );
-
-        if (existingUser) {
-          const { userSeq: existingUserSeq } = existingUser;
-          this.logger.warn('Profile update attempted with duplicate email', {
-            userSeq,
-            attemptedEmail: newEmail,
-            existingUserSeq,
-            ip,
-          });
-          throw new BadRequestException({
-            message: 'Email already in use',
-            error: '이미 사용 중인 이메일 주소입니다.',
-            errorCode: 'DUPLICATE_EMAIL',
-          });
-        }
-      }
-
-      // 감사 목적으로 업데이트되는 필드 추적
-      const updatedFields: string[] = [];
-
-      // 추가 검증과 함께 사용자 필드 업데이트
-      const {
-        userName: newName,
-        userEmail: newUserEmail,
-        userDescription: newDescription,
-        aiApiKey: newApiKey,
-      } = sanitizedDto;
-      const {
-        userName: currentName,
-        userEmail: currentUserEmail,
-        userDescription: currentDescription,
-        aiApiKey: currentApiKey,
-      } = currentUser;
-
-      if (newName !== undefined && newName !== currentName) {
-        // userName이 undefined가 아니고 실제로 값이 있을 때만 업데이트
-        if (newName && newName.trim().length > 0) {
-          currentUser.userName = newName;
-          updatedFields.push('userName');
-        }
-      }
-
-      if (newUserEmail !== undefined && newUserEmail !== currentUserEmail) {
-        // userEmail이 undefined가 아니고 실제로 값이 있을 때만 업데이트
-        if (newUserEmail && newUserEmail.trim().length > 0) {
-          // 이미 위에서 중복 검사를 위해 암호화했으므로 다시 암호화
-          // (위의 encryptedNewEmail 변수를 스코프 문제로 다시 생성하거나 재사용)
-          currentUser.userEmail = encryptSymmetricDeterministic(newUserEmail);
-          updatedFields.push('userEmail');
-        }
-      }
-
-      if (
-        newDescription !== undefined &&
-        newDescription !== currentDescription
-      ) {
-        currentUser.userDescription = newDescription;
-        updatedFields.push('userDescription');
-      }
-
-      if (newApiKey !== undefined) {
-        // 빈 문자열인 경우 키 삭제로 간주, 값이 있는 경우 암호화하여 저장
-        if (newApiKey === '') {
-          if (currentApiKey !== null) {
-            currentUser.aiApiKey = null;
-            updatedFields.push('aiApiKey');
-          }
-        } else {
-          // 새 키가 입력된 경우 (기존 키와 다른지 비교는 암호화 되어있어 어려우므로 무조건 업데이트하거나, 복호화해서 비교할 수 있음.
-          // 여기서는 보안상 입력되면 무조건 업데이트)
-          const encryptedKey = encryptSymmetric(newApiKey);
-          if (currentUser.aiApiKey !== encryptedKey) {
-            currentUser.aiApiKey = encryptedKey;
-            updatedFields.push('aiApiKey');
-          }
-        }
-      }
+      // 감사 목적으로 업데이트되는 필드 추적 및 사용자 필드 업데이트
+      const updatedFields = this.updateUserFields(currentUser, sanitizedDto);
 
       // 추가 보안 검사를 포함한 향상된 프로필 이미지 처리
       if (profileImageFile) {
-        try {
-          // 추가 파일 보안 검사
-          this.validateProfileImageSecurity(profileImageFile, userSeq, ip);
-
-          // 프로필 이미지 파일 검증
-          const validationResults =
-            this.fileValidationService.validateFilesByCategory(
-              [profileImageFile],
-              'profile_image',
-            );
-
-          const [validationResult] = validationResults;
-          const { isValid, errorCode, errorMessage } = validationResult;
-          const { originalname, size } = profileImageFile;
-
-          if (!isValid) {
-            this.logger.error('Profile image validation failed during update', {
-              userSeq,
-              fileName: originalname,
-              fileSize: size,
-              errorCode,
-              errorMessage,
-              ip,
-            });
-
-            throw new BadRequestException({
-              message: 'Profile image validation failed',
-              error: errorMessage,
-              errorCode,
-            });
-          }
-
-          // 검증된 프로필 이미지 저장
-          const fileUploadResult = await this.fileUploadUtil.saveFileInfo(
-            [profileImageFile],
-            { entity: null, id: currentUserId, ip },
-          );
-
-          const { fileGroupNo } = fileUploadResult;
-          currentUser.userProfileImageFileGroupNo = fileGroupNo;
-          updatedFields.push('profileImage');
-
-          this.logger.log('Profile image updated successfully', {
-            userSeq,
-            fileName: originalname,
-            fileSize: size,
-            fileGroupNo,
-            ip,
-          });
-        } catch (error) {
-          const { message } = error;
-          this.logger.error('Profile image upload failed during update', {
-            userSeq,
-            fileName: profileImageFile?.originalname,
-            fileSize: profileImageFile?.size,
-            error: message,
-            ip,
-          });
-
-          // 이미 BadRequestException인 경우, 재발생
-          if (error instanceof BadRequestException) {
-            throw error;
-          }
-
-          // 다른 오류의 경우, BadRequestException으로 래핑
-          throw new BadRequestException({
-            message: 'Profile image upload failed',
-            error: message,
-            errorCode: 'PROFILE_IMAGE_UPLOAD_FAILED',
-          });
-        }
+        await this.handleProfileImageUpdate(
+          currentUser,
+          profileImageFile,
+          updatedFields,
+          ip,
+        );
       }
 
       // 감사 목적으로 업데이트 시도 로깅
@@ -439,18 +260,18 @@ export class UserService {
         ip,
       });
 
-      // 업데이트를 위한 감사 컬럼 설정
+      // 업데이트를 위한 감사 컬럼 설정 및 저장
       const updatedUser = setAuditColumn({
         entity: currentUser,
         id: currentUserId,
         ip,
       });
 
-      // 업데이트된 사용자 저장
       const savedUser = await transactionalEntityManager.save(
         UserEntity,
         updatedUser,
       );
+      savedUser.setProfileImage();
 
       const { userId: savedUserId } = savedUser;
 
@@ -463,17 +284,256 @@ export class UserService {
       });
 
       // 비밀번호 없이 사용자 반환
+
       const { userPassword: _, ...userToReturn } = savedUser;
-
-      // 프로필 이미지 URL 설정 (@AfterLoad는 save 후 호출되지 않을 수 있으므로 수동 호출이나 로직 중복)
-      // savedUser는 Entity 인스턴스이므로 메서드가 있음
-      savedUser.setProfileImage();
-
-      // userToReturn은 plain object이므로 수동 할당 필요하거나, savedUser에서 가져와야 함.
-      (userToReturn as any).profileImage = savedUser.profileImage;
 
       return userToReturn;
     });
+  }
+
+  /**
+   * 업데이트를 위한 사용자 조회 및 검증
+   */
+  private async validateAndGetUserForUpdate(
+    entityManager: any, // EntityManager 타입을 any로 임시 처리 혹은 모듈에서 import 필요 (여기선 흐름상 any 허용 혹은 EntityManager import 추가 권장하지만 import 최소화 위해)
+    userSeq: number,
+    ip: string,
+  ): Promise<UserEntity> {
+    const currentUser = await entityManager.findOne(UserEntity, {
+      where: { userSeq },
+    });
+
+    if (!currentUser) {
+      this.logger.error('Profile update attempted for non-existent user', {
+        userSeq,
+        ip,
+      });
+      throw new BadRequestException('사용자를 찾을 수 없습니다.');
+    }
+
+    if (currentUser.adminYn === 'SUSPENDED') {
+      this.logger.warn('Profile update attempted by suspended user', {
+        userSeq,
+        userId: currentUser.userId,
+        ip,
+      });
+      throw new ForbiddenException(
+        '계정이 일시 정지되어 프로필을 수정할 수 없습니다.',
+      );
+    }
+
+    return currentUser;
+  }
+
+  /**
+   * 이메일 유효성 및 중복 검사
+   */
+  private async validateAndCheckEmail(
+    entityManager: any,
+    userSeq: number,
+    newEmail: string | undefined,
+    currentEmail: string,
+    ip: string,
+  ): Promise<void> {
+    if (!newEmail || newEmail === currentEmail) {
+      return;
+    }
+
+    // 추가 이메일 형식 검증
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(newEmail)) {
+      throw new BadRequestException({
+        message: 'Invalid email format',
+        error: '올바른 이메일 형식이 아닙니다.',
+        errorCode: 'INVALID_EMAIL_FORMAT',
+      });
+    }
+
+    // 이메일 고유성 확인 (결정적 암호화 값으로 조회)
+    const encryptedNewEmail = encryptSymmetricDeterministic(newEmail);
+
+    const existingUser = await entityManager.findOne(UserEntity, {
+      where: {
+        userEmail: encryptedNewEmail,
+        userSeq: Not(userSeq), // 현재 사용자 제외
+      },
+    });
+
+    if (existingUser) {
+      this.logger.warn('Profile update attempted with duplicate email', {
+        userSeq,
+        attemptedEmail: newEmail,
+        existingUserSeq: existingUser.userSeq,
+        ip,
+      });
+      throw new BadRequestException({
+        message: 'Email already in use',
+        error: '이미 사용 중인 이메일 주소입니다.',
+        errorCode: 'DUPLICATE_EMAIL',
+      });
+    }
+  }
+
+  /**
+   * 기본 사용자 필드 업데이트
+   */
+  private updateUserFields(
+    currentUser: UserEntity,
+    sanitizedDto: UpdateUserDto,
+  ): string[] {
+    const updatedFields: string[] = [];
+    const {
+      userName: newName,
+      userEmail: newUserEmail,
+      userDescription: newDescription,
+      aiApiKey: newApiKey,
+    } = sanitizedDto;
+
+    const {
+      userName: currentName,
+      userEmail: currentUserEmail,
+      userDescription: currentDescription,
+      aiApiKey: currentApiKey,
+    } = currentUser;
+
+    if (this.shouldUpdate(newName, currentName)) {
+      currentUser.userName = newName;
+      updatedFields.push('userName');
+    }
+
+    if (this.shouldUpdate(newUserEmail, currentUserEmail)) {
+      currentUser.userEmail = encryptSymmetricDeterministic(newUserEmail);
+      updatedFields.push('userEmail');
+    }
+
+    if (newDescription !== undefined && newDescription !== currentDescription) {
+      currentUser.userDescription = newDescription;
+      updatedFields.push('userDescription');
+    }
+
+    if (newApiKey !== undefined) {
+      const apiKeyUpdated = this.updateApiKey(
+        currentUser,
+        newApiKey,
+        currentApiKey,
+      );
+      if (apiKeyUpdated) {
+        updatedFields.push('aiApiKey');
+      }
+    }
+
+    return updatedFields;
+  }
+
+  private shouldUpdate(
+    newValue: string | undefined,
+    currentValue: string,
+  ): boolean {
+    return (
+      newValue !== undefined &&
+      newValue !== currentValue &&
+      newValue.trim().length > 0
+    );
+  }
+
+  private updateApiKey(
+    currentUser: UserEntity,
+    newApiKey: string,
+    currentApiKey: string | null,
+  ): boolean {
+    if (newApiKey === '') {
+      if (currentApiKey !== null) {
+        currentUser.aiApiKey = null;
+        return true;
+      }
+      return false;
+    }
+
+    const encryptedKey = encryptSymmetric(newApiKey);
+    if (currentUser.aiApiKey !== encryptedKey) {
+      currentUser.aiApiKey = encryptedKey;
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * 프로필 이미지 업데이트 처리
+   */
+  private async handleProfileImageUpdate(
+    currentUser: UserEntity,
+    profileImageFile: Express.Multer.File,
+    updatedFields: string[],
+    ip: string,
+  ): Promise<void> {
+    const { userSeq, userId: currentUserId } = currentUser;
+
+    try {
+      this.validateProfileImageSecurity(profileImageFile, userSeq, ip);
+
+      const validationResults =
+        this.fileValidationService.validateFilesByCategory(
+          [profileImageFile],
+          'profile_image',
+        );
+
+      const [validationResult] = validationResults;
+      const { isValid, errorCode, errorMessage } = validationResult;
+      const { originalname, size } = profileImageFile;
+
+      if (!isValid) {
+        this.logger.error('Profile image validation failed during update', {
+          userSeq,
+          fileName: originalname,
+          fileSize: size,
+          errorCode,
+          errorMessage,
+          ip,
+        });
+
+        throw new BadRequestException({
+          message: 'Profile image validation failed',
+          error: errorMessage,
+          errorCode,
+        });
+      }
+
+      const fileUploadResult = await this.fileUploadUtil.saveFileInfo(
+        [profileImageFile],
+        { entity: null, id: currentUserId, ip },
+      );
+
+      const { fileGroupNo } = fileUploadResult;
+      currentUser.userProfileImageFileGroupNo = fileGroupNo;
+      updatedFields.push('profileImage');
+
+      this.logger.log('Profile image updated successfully', {
+        userSeq,
+        fileName: originalname,
+        fileSize: size,
+        fileGroupNo,
+        ip,
+      });
+    } catch (error) {
+      const { message } = error;
+      this.logger.error('Profile image upload failed during update', {
+        userSeq,
+        fileName: profileImageFile?.originalname,
+        fileSize: profileImageFile?.size,
+        error: message,
+        ip,
+      });
+
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+
+      throw new BadRequestException({
+        message: 'Profile image upload failed',
+        error: message,
+        errorCode: 'PROFILE_IMAGE_UPLOAD_FAILED',
+      });
+    }
   }
 
   /**
