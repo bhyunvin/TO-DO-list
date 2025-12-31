@@ -287,7 +287,7 @@ const SignupForm = ({ onSignupComplete }) => {
       },
       buttonsStyling: false,
       confirmButtonText: '확인',
-      cancelButtonText: '계속작성',
+      cancelButtonText: '계속 작성',
     }).then((result) => {
       if (result.isConfirmed) {
         onSignupComplete();

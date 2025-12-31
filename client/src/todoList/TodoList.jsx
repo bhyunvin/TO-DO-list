@@ -756,19 +756,28 @@ const TodoContainer = () => {
     try {
       const formattedDate = formatDate(selectedDate);
 
-      const formData = new FormData();
-      formData.append('todoContent', todoContent);
-      formData.append('todoDate', formattedDate);
-      formData.append('todoNote', todoNote || '');
+      let responseData;
 
-      // 파일이 있으면 추가
+      // 파일이 있는 경우 FormData 사용 (multipart/form-data)
       if (todoFiles && todoFiles.length > 0) {
+        const formData = new FormData();
+        formData.append('todoContent', todoContent);
+        formData.append('todoDate', formattedDate);
+        formData.append('todoNote', todoNote || '');
+
         todoFiles.forEach((file) => {
           formData.append('files', file);
         });
-      }
 
-      const responseData = await todoService.createTodo(formData);
+        responseData = await todoService.createTodo(formData);
+      } else {
+        // 파일이 없는 경우 일반 JSON 객체 전송
+        responseData = await todoService.createTodo({
+          todoContent,
+          todoDate: formattedDate,
+          todoNote: todoNote || '',
+        });
+      }
 
       Swal.fire({
         title: '성공',
@@ -999,23 +1008,26 @@ const TodoContainer = () => {
     try {
       const { todoContent, todoNote, todoFiles } = updatedData;
 
-      const formData = new FormData();
-      formData.append('todoContent', todoContent);
-      formData.append('todoNote', todoNote || '');
+      let responseData;
 
-      // 파일이 있으면 추가
+      // 파일이 있는 경우 FormData 사용
       if (todoFiles && todoFiles.length > 0) {
+        const formData = new FormData();
+        formData.append('todoContent', todoContent);
+        formData.append('todoNote', todoNote || '');
+
         todoFiles.forEach((file) => {
           formData.append('files', file);
         });
+
+        responseData = await todoService.updateTodo(todoSeq, formData);
+      } else {
+        // 파일이 없는 경우 일반 JSON 객체 전송
+        responseData = await todoService.updateTodo(todoSeq, {
+          todoContent,
+          todoNote: todoNote || '',
+        });
       }
-
-      // updateTodo 내부에서 FormData 처리를 이미 구현했음 (기존 todoService.js 참고)
-      // 하지만 여기서 formData를 직접 만들어서 넘김.
-      // todoService.updateTodo(todoSeq, data) -> data가 FormData면 그걸 쓰고, 객체면 json으로 보냄.
-      // 여기서는 FormData를 보내므로 OK.
-
-      const responseData = await todoService.updateTodo(todoSeq, formData);
 
       Swal.fire({
         title: '성공',

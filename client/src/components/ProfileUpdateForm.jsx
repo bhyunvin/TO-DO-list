@@ -8,7 +8,8 @@ import userService from '../api/userService';
 import { showConfirmAlert } from '../utils/alertUtils';
 
 const isValidEmail = (email) => {
-  return /^[a-z0-9]+@[a-z]+\.[a-z]{2,3}$/i.test(email);
+  // 영문 대소문자, 숫자, 특수문자(._%+-), 서브도메인, 2자리 이상의 최상위 도메인 허용
+  return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
 };
 
 const getInputClass = (error, value) => {

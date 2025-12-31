@@ -22,7 +22,10 @@ const todoService = {
       ? { headers: { 'Content-Type': 'multipart/form-data' } }
       : {};
 
-    const response = await apiClient.post('/todo', data, config);
+    // FormData(파일 포함)인 경우와 일반 JSON 요청인 경우 엔드포인트 분기 처리
+    const url = isFormData ? '/todo/with-files' : '/todo';
+
+    const response = await apiClient.post(url, data, config);
     return response.data;
   },
 
