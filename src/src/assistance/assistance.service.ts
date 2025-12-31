@@ -209,54 +209,14 @@ export class AssistanceService implements OnModuleInit {
     userName?: string,
     userId?: string,
   ): Promise<RequestAssistanceDto> {
-    if (!userSeq) {
-      throw new UnauthorizedException('로그인이 필요합니다.');
-    }
-
-    // 사용자 정보 최신 조회 (API Key 확인용)
-    const user = await this.userRepository.findOne({ where: { userSeq } });
-
-    if (!user?.aiApiKey) {
-      throw new BadRequestException(
-        'AI API Key가 설정되지 않았습니다. 프로필 설정에서 등록해주세요.',
-      );
-    }
-
-    const apiKey = decryptSymmetric(user.aiApiKey);
-    if (!apiKey) {
-      this.logger.error(`API Key decryption failed for user ${userSeq}`);
-      throw new InternalServerErrorException(
-        'API Key 처리 중 오류가 발생했습니다.',
-      );
-    }
-
+    const apiKey = await this.validateAndGetApiKey(userSeq);
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
     const systemPrompt = this.loadSystemPrompt(userName);
 
-    const requestData: any = {
-      system_instruction: {
-        parts: [{ text: systemPrompt }],
-      },
-      contents: [
-        ...(requestAssistanceDto.history || []),
-        {
-          parts: [
-            {
-              text: requestAssistanceDto.prompt,
-            },
-          ],
-        },
-      ],
-      tools: [
-        {
-          function_declarations: [
-            ...this.getTodosTool.functionDeclarations,
-            ...this.createTodoTool.functionDeclarations,
-            ...this.updateTodoTool.functionDeclarations,
-          ],
-        },
-      ],
-    };
+    const requestData = this.buildGeminiRequest(
+      systemPrompt,
+      requestAssistanceDto,
+    );
 
     try {
       this.logger.log(
@@ -292,116 +252,207 @@ export class AssistanceService implements OnModuleInit {
       );
 
       if (functionCall) {
-        const functionResult = await this.executeFunctionCall(
+        const functionResponse = await this.handleFunctionCall(
           functionCall,
+          requestData,
+          apiUrl,
+          firstPart,
           userSeq,
           userId,
           ip,
         );
-
-        if (functionResult === undefined) {
-          this.logger.warn(
-            `[Function Execution] functionResult가 undefined - 함수가 실행되지 않았거나 조건 불충족`,
-          );
-        } else {
-          this.logger.log(
-            `[Gemini Function Result] ${functionCall.name} 함수 실행 결과 (Gemini에게 전송): ${JSON.stringify(functionResult)}`,
-          );
-
-          // 모델의 이전 응답(함수 호출)을 대화 기록에 추가 (role: model)
-          requestData.contents.push({
-            role: 'model',
-            parts: [firstPart],
-          });
-
-          // 함수의 실행 결과를 대화 기록에 추가 (role: function)
-          const functionResponsePart = {
-            role: 'function',
-            parts: [
-              {
-                function_response: {
-                  name: functionCall.name,
-                  response: {
-                    content: functionResult,
-                  },
-                },
-              } as any,
-            ],
-          };
-          requestData.contents.push(functionResponsePart);
-
-          this.logger.log(
-            `[Gemini Request] 2차 요청 contents 개수: ${requestData.contents.length}`,
-          );
-          this.logger.debug(
-            `[Gemini Request] 2차 요청 전체 requestData: ${JSON.stringify(requestData, null, 2)}`,
-          );
-
-          this.logger.log(
-            `[Gemini Request] 함수 실행 결과를 포함하여 2차 API 요청...`,
-          );
-
-          response = await firstValueFrom(
-            this.httpService.post<GeminiApiResponse>(apiUrl, requestData, {
-              headers: { 'Content-Type': 'application/json' },
-            }),
-          );
-
-          this.logger.log(
-            `[Gemini Response] 2차 응답 받음. candidates 개수: ${response.data.candidates?.length}`,
-          );
-          this.logger.debug(
-            `[Gemini Response] 2차 응답 전체 데이터: ${JSON.stringify(response.data, null, 2)}`,
-          );
+        if (functionResponse) {
+          response = functionResponse;
         }
       }
 
-      const finalCandidate = response.data.candidates[0];
-      const finalPart = finalCandidate.content.parts[0];
-
-      this.logger.log(
-        `[Gemini Final Response] 최종 part 타입 - text 존재: ${!!(finalPart as any).text}, functionCall 존재: ${!!(finalPart as any).functionCall}`,
-      );
-
-      const responseText = (finalPart as any).text;
-
-      if (!responseText) {
-        this.logger.error(
-          `[Gemini Final Response] 최종 응답에 text가 없음! finalPart: ${JSON.stringify(finalPart)}`,
-        );
-        throw new InternalServerErrorException(
-          'AI Assistant returned invalid response format',
-        );
-      }
-
-      this.logger.log(
-        `[Gemini Final Response] 최종 텍스트 응답 (첫 100자): ${responseText.substring(0, 100)}...`,
-      );
-
-      const unsafeHtml = await marked.parse(responseText);
-      const safeHtml = sanitizeHtml.default(unsafeHtml);
+      const safeHtml = await this.processFinalResponse(response.data);
       requestAssistanceDto.response = safeHtml;
       return requestAssistanceDto;
     } catch (error) {
-      this.logger.error(
-        'Gemini API로부터 응답을 받는데 실패했습니다',
-        error.response?.data || error.message,
-      );
+      this.handleGeminiError(error);
+    }
+  }
 
-      if (error instanceof AxiosError && error.response) {
-        const status = error.response.status;
+  private async validateAndGetApiKey(userSeq?: number): Promise<string> {
+    if (!userSeq) {
+      throw new UnauthorizedException('로그인이 필요합니다.');
+    }
 
-        if (status === 503 || status === 429) {
-          throw new ServiceUnavailableException(
-            'AI 어시스턴트가 일시적으로 과부하 상태입니다. 잠시 후 다시 시도해주세요.',
-          );
-        }
-      }
+    // 사용자 정보 최신 조회 (API Key 확인용)
+    const user = await this.userRepository.findOne({ where: { userSeq } });
 
-      throw new InternalServerErrorException(
-        'AI 어시스턴트 API 요청이 실패했습니다',
+    if (!user?.aiApiKey) {
+      throw new BadRequestException(
+        'AI API Key가 설정되지 않았습니다. 프로필 설정에서 등록해주세요.',
       );
     }
+
+    const apiKey = decryptSymmetric(user.aiApiKey);
+    if (!apiKey) {
+      this.logger.error(`API Key decryption failed for user ${userSeq}`);
+      throw new InternalServerErrorException(
+        'API Key 처리 중 오류가 발생했습니다.',
+      );
+    }
+    return apiKey;
+  }
+
+  private buildGeminiRequest(
+    systemPrompt: string,
+    dto: RequestAssistanceDto,
+  ): any {
+    return {
+      system_instruction: {
+        parts: [{ text: systemPrompt }],
+      },
+      contents: [
+        ...(dto.history || []),
+        {
+          parts: [
+            {
+              text: dto.prompt,
+            },
+          ],
+        },
+      ],
+      tools: [
+        {
+          function_declarations: [
+            ...this.getTodosTool.functionDeclarations,
+            ...this.createTodoTool.functionDeclarations,
+            ...this.updateTodoTool.functionDeclarations,
+          ],
+        },
+      ],
+    };
+  }
+
+  private async handleFunctionCall(
+    functionCall: any,
+    requestData: any,
+    apiUrl: string,
+    firstPart: any,
+    userSeq: number,
+    userId?: string,
+    ip?: string,
+  ): Promise<any> {
+    const functionResult = await this.executeFunctionCall(
+      functionCall,
+      userSeq,
+      userId,
+      ip,
+    );
+
+    if (functionResult === undefined) {
+      this.logger.warn(
+        `[Function Execution] functionResult가 undefined - 함수가 실행되지 않았거나 조건 불충족`,
+      );
+      return null;
+    }
+
+    this.logger.log(
+      `[Gemini Function Result] ${functionCall.name} 함수 실행 결과 (Gemini에게 전송): ${JSON.stringify(functionResult)}`,
+    );
+
+    // 모델의 이전 응답(함수 호출)을 대화 기록에 추가 (role: model)
+    requestData.contents.push({
+      role: 'model',
+      parts: [firstPart],
+    });
+
+    // 함수의 실행 결과를 대화 기록에 추가 (role: function)
+    const functionResponsePart = {
+      role: 'function',
+      parts: [
+        {
+          function_response: {
+            name: functionCall.name,
+            response: {
+              content: functionResult,
+            },
+          },
+        } as any,
+      ],
+    };
+    requestData.contents.push(functionResponsePart);
+
+    this.logger.log(
+      `[Gemini Request] 2차 요청 contents 개수: ${requestData.contents.length}`,
+    );
+    this.logger.debug(
+      `[Gemini Request] 2차 요청 전체 requestData: ${JSON.stringify(requestData, null, 2)}`,
+    );
+
+    this.logger.log(
+      `[Gemini Request] 함수 실행 결과를 포함하여 2차 API 요청...`,
+    );
+
+    const response = await firstValueFrom(
+      this.httpService.post<GeminiApiResponse>(apiUrl, requestData, {
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    );
+
+    this.logger.log(
+      `[Gemini Response] 2차 응답 받음. candidates 개수: ${response.data.candidates?.length}`,
+    );
+    this.logger.debug(
+      `[Gemini Response] 2차 응답 전체 데이터: ${JSON.stringify(response.data, null, 2)}`,
+    );
+
+    return response;
+  }
+
+  private async processFinalResponse(data: GeminiApiResponse): Promise<string> {
+    const finalCandidate = data.candidates[0];
+    const finalPart = finalCandidate.content.parts[0];
+
+    this.logger.log(
+      `[Gemini Final Response] 최종 part 타입 - text 존재: ${!!(finalPart as any).text}, functionCall 존재: ${!!(finalPart as any).functionCall}`,
+    );
+
+    const responseText = (finalPart as any).text;
+
+    // text가 없어도 functionCall이 있으면 유효한 응답으로 처리
+    if (!responseText && !(finalPart as any).functionCall) {
+      this.logger.error(
+        `[Gemini Final Response] 최종 응답에 text와 functionCall이 모두 없음! finalPart: ${JSON.stringify(finalPart)}`,
+      );
+      throw new InternalServerErrorException(
+        'AI Assistant returned invalid response format',
+      );
+    }
+
+    const safeResponseText = responseText || '';
+
+    this.logger.log(
+      `[Gemini Final Response] 최종 텍스트 응답 (첫 100자): ${safeResponseText.substring(0, 100)}...`,
+    );
+
+    const unsafeHtml = await marked.parse(safeResponseText);
+    return sanitizeHtml.default(unsafeHtml);
+  }
+
+  private handleGeminiError(error: any) {
+    this.logger.error(
+      'Gemini API로부터 응답을 받는데 실패했습니다',
+      error.response?.data || error.message,
+    );
+
+    if (error instanceof AxiosError && error.response) {
+      const status = error.response.status;
+
+      if (status === 503 || status === 429) {
+        throw new ServiceUnavailableException(
+          'AI 어시스턴트가 일시적으로 과부하 상태입니다. 잠시 후 다시 시도해주세요.',
+        );
+      }
+    }
+
+    throw new InternalServerErrorException(
+      'AI 어시스턴트 API 요청이 실패했습니다',
+    );
   }
 
   private loadSystemPrompt(userName?: string): string {
