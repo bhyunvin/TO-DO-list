@@ -27,6 +27,8 @@ import { format, addDays } from 'date-fns';
 
 @Injectable()
 export class TodoService {
+  private readonly logger = new Logger(TodoService.name);
+
   constructor(
     @InjectRepository(TodoEntity)
     private readonly todoRepository: Repository<TodoEntity>,
@@ -36,7 +38,6 @@ export class TodoService {
 
     private readonly cloudinaryService: CloudinaryService,
     private readonly dataSource: DataSource,
-    private readonly logger: Logger,
   ) {}
 
   async deleteAttachment(
