@@ -19,6 +19,7 @@ import { CustomNamingStrategy } from './utils/customNamingStrategy';
 import { APP_INTERCEPTOR, APP_FILTER } from '@nestjs/core';
 import { LoggingInterceptor } from './interceptor/logging.interceptor';
 import { HttpExceptionFilter } from './filter/http-exception.filter';
+import { WelcomeController } from './welcome.controller';
 
 const envSchema = z.object({
   NODE_ENV: z
@@ -110,7 +111,7 @@ const validate = (config: Record<string, unknown>) => {
     AssistanceModule,
     FileUploadModule,
   ],
-  controllers: [],
+  controllers: [WelcomeController],
   providers: [
     {
       provide: APP_INTERCEPTOR,

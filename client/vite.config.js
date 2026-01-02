@@ -25,7 +25,18 @@ export default defineConfig({
       output: {
         manualChunks: (id) => {
           if (id.includes('node_modules')) {
-            return 'vendor';
+            // React, Router, 상태관리 등 핵심 로직
+            if (
+              id.includes('react') ||
+              id.includes('zustand') ||
+              id.includes('@vitejs') ||
+              id.includes('scheduler')
+            ) {
+              return 'vendor-core';
+            }
+
+            // 나머지 Bootstrap, SweetAlert2 등 용량이 큰 UI 라이브러리
+            return 'vendor-ui';
           }
         },
       },
