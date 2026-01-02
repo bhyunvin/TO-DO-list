@@ -3,7 +3,7 @@ import { extname } from 'node:path';
 
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, EntityManager } from 'typeorm';
 import { FileInfoEntity } from './file.entity';
 import { FileValidationService } from './validation/file-validation.service';
 import { FileCategory } from './validation/file-validation.interfaces';
@@ -25,7 +25,11 @@ export class FileUploadUtil {
   async saveFileInfo(
     files: Express.Multer.File[],
     setting: AuditSettings,
+    manager?: EntityManager,
   ): Promise<{ savedFiles: FileInfoEntity[]; fileGroupNo: number }> {
+    const repository = manager
+      ? manager.getRepository(FileInfoEntity)
+      : this.fileInfoRepository;
     const savedFiles: FileInfoEntity[] = [];
     let fileGroupNo: number | null = null;
 
@@ -41,7 +45,7 @@ export class FileUploadUtil {
 
         const uploadedFileExt =
           uploadResult.format || extname(file.originalname).substring(1);
-        const newFile = this.fileInfoRepository.create({
+        const newFile = repository.create({
           fileGroupNo: groupNo,
           filePath: uploadResult.secure_url, // 로컬 경로 대신 Cloudinary URL 저장
           saveFileName: `${uploadResult.public_id}.${uploadedFileExt}`,
@@ -57,15 +61,12 @@ export class FileUploadUtil {
       const firstFile = files[0];
       // 임시 groupNo 0으로 생성
       const newFirstFile = await processFile(firstFile, 0);
-      const savedFirstFile = await this.fileInfoRepository.save(newFirstFile);
+      const savedFirstFile = await repository.save(newFirstFile);
 
       fileGroupNo = savedFirstFile.fileNo;
 
       // fileGroupNo 업데이트
-      await this.fileInfoRepository.update(
-        { fileNo: fileGroupNo },
-        { fileGroupNo },
-      );
+      await repository.update({ fileNo: fileGroupNo }, { fileGroupNo });
       savedFirstFile.fileGroupNo = fileGroupNo; // 메모리 객체 업데이트
       savedFiles.push(savedFirstFile);
 
@@ -73,7 +74,7 @@ export class FileUploadUtil {
       if (files.length > 1) {
         for (let i = 1; i < files.length; i++) {
           const newFile = await processFile(files[i], fileGroupNo);
-          const savedFile = await this.fileInfoRepository.save(newFile);
+          const savedFile = await repository.save(newFile);
           savedFiles.push(savedFile);
         }
       }

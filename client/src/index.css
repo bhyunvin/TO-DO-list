@@ -140,3 +140,9 @@ html[data-theme='dark'] #root {
 [data-theme='dark'] div {
   color: inherit;
 }
+
+[data-theme='dark'] .list-group-item {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border-color: var(--border-medium);
+}

@@ -1,6 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Brackets, Repository, Between } from 'typeorm';
+import {
+  Brackets,
+  Repository,
+  Between,
+  DataSource,
+  EntityManager,
+} from 'typeorm';
 import { TodoEntity } from './todo.entity';
 import {
   CreateTodoDto,
@@ -26,7 +32,9 @@ export class TodoService {
     @InjectRepository(FileInfoEntity)
     private readonly fileInfoRepository: Repository<FileInfoEntity>,
     private readonly fileUploadUtil: FileUploadUtil,
+
     private readonly cloudinaryService: CloudinaryService,
+    private readonly dataSource: DataSource,
   ) {}
 
   async deleteAttachment(
@@ -144,9 +152,13 @@ export class TodoService {
     user: Omit<UserEntity, 'userPassword' | 'setProfileImage'>,
     ip: string,
     createTodoDto: CreateTodoDto,
+    manager?: EntityManager,
   ): Promise<TodoEntity> {
     const { userSeq, userId } = user;
-    const newTodo = this.todoRepository.create({
+    const repository = manager
+      ? manager.getRepository(TodoEntity)
+      : this.todoRepository;
+    const newTodo = repository.create({
       ...createTodoDto,
       userSeq,
     });
@@ -157,7 +169,7 @@ export class TodoService {
     };
     setAuditColumn(auditSettings);
 
-    return this.todoRepository.save(newTodo);
+    return repository.save(newTodo);
   }
 
   async update(
@@ -264,52 +276,61 @@ export class TodoService {
     user: Omit<UserEntity, 'userPassword' | 'setProfileImage'>,
     ip: string,
     createTodoDto: CreateTodoWithFilesDto,
+
     files: Express.Multer.File[],
   ): Promise<TodoWithFilesResponseDto> {
-    const newTodo = await this.create(user, ip, createTodoDto);
+    return this.dataSource.transaction(async (manager) => {
+      const newTodo = await this.create(user, ip, createTodoDto, manager);
 
-    let attachments: FileAttachmentResponseDto[] = [];
-    let fileGroupNo: number | null = null;
+      let attachments: FileAttachmentResponseDto[] = [];
+      let fileGroupNo: number | null = null;
 
-    if (files && files.length > 0) {
-      const { userId } = user;
-      const auditSettings: AuditSettings = {
-        ip,
-        entity: null,
-        id: userId,
-      };
+      if (files && files.length > 0) {
+        const { userId } = user;
+        const auditSettings: AuditSettings = {
+          ip,
+          entity: null,
+          id: userId,
+        };
 
-      try {
-        const { savedFiles, fileGroupNo: uploadedFileGroupNo } =
-          await this.fileUploadUtil.saveFileInfo(files, auditSettings);
+        try {
+          // 트랜잭션 매니저를 fileUploadUtil로 전달
+          const { savedFiles, fileGroupNo: uploadedFileGroupNo } =
+            await this.fileUploadUtil.saveFileInfo(
+              files,
+              auditSettings,
+              manager,
+            );
 
-        fileGroupNo = uploadedFileGroupNo;
+          fileGroupNo = uploadedFileGroupNo;
 
-        newTodo.todoFileGroupNo = fileGroupNo;
-        await this.todoRepository.save(newTodo);
+          newTodo.todoFileGroupNo = fileGroupNo;
+          await manager.save(newTodo);
 
-        attachments = savedFiles.map((file) => ({
-          fileNo: file.fileNo,
-          originalFileName: file.saveFileName,
-          fileSize: file.fileSize,
-          fileExt: file.fileExt,
-          uploadDate: file.auditColumns.regDtm.toISOString(),
-        }));
-      } catch (error) {
-        console.error('File upload failed during TODO creation:', error);
+          attachments = savedFiles.map((file) => ({
+            fileNo: file.fileNo,
+            originalFileName: file.saveFileName,
+            fileSize: file.fileSize,
+            fileExt: file.fileExt,
+            uploadDate: file.auditColumns.regDtm.toISOString(),
+          }));
+        } catch (error) {
+          console.error('File upload failed during TODO creation:', error);
+          throw error; // 트랜잭션 롤백을 위해 에러 다시 던짐
+        }
       }
-    }
 
-    const { todoSeq, todoContent, todoDate, todoNote, completeDtm } = newTodo;
-    return {
-      todoSeq,
-      todoContent,
-      todoDate,
-      todoNote,
-      completeDtm,
-      attachments,
-      createdAt: newTodo.auditColumns.regDtm.toISOString(),
-    };
+      const { todoSeq, todoContent, todoDate, todoNote, completeDtm } = newTodo;
+      return {
+        todoSeq,
+        todoContent,
+        todoDate,
+        todoNote,
+        completeDtm,
+        attachments,
+        createdAt: newTodo.auditColumns.regDtm.toISOString(),
+      };
+    });
   }
 
   async addAttachments(

@@ -587,20 +587,6 @@ const FileUploadProgress = ({
                   ({formatFileSize(file.size)})
                 </span>
               </div>
-
-              {/* 파일 유형 및 마지막 수정 정보 */}
-              <div className="small text-muted mt-1">
-                <i className="bi bi-info-circle me-1"></i>
-                타입: {file.type || 'Unknown'}
-                {file.lastModified && (
-                  <>
-                    {' | '}
-                    <i className="bi bi-calendar3 me-1"></i>
-                    수정:{' '}
-                    {new Date(file.lastModified).toLocaleDateString('ko-KR')}
-                  </>
-                )}
-              </div>
             </div>
 
             <div className="d-flex align-items-center ms-2">

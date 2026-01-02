@@ -798,37 +798,13 @@ const TodoContainer = () => {
       });
       setIsCreating(false);
       fetchTodos();
-      return { success: true, data: responseData };
+
+      // 성공 결과 반환
+      return { success: true, ...responseData };
     } catch (error) {
       console.error('Add Todo Error:', error);
-
-      const { response } = error;
-      if (response && response.data) {
-        const errorData = response.data;
-        // 파일 업로드 오류를 구체적으로 처리
-        if (errorData.errors && Array.isArray(errorData.errors)) {
-          const errorMessages = errorData.errors
-            .map(({ fileName, errorMessage }) => `${fileName}: ${errorMessage}`)
-            .join('<br>');
-
-          Swal.fire({
-            title: '파일 업로드 오류',
-            html: errorMessages,
-            icon: 'error',
-          });
-          return { success: false, errors: errorData.errors || [] };
-        } else {
-          Swal.fire(
-            '오류',
-            errorData.message || '할 일 추가에 실패했습니다.',
-            'error',
-          );
-          return { success: false, error: errorData.message };
-        }
-      }
-
-      Swal.fire('오류', '서버와의 통신 중 문제가 발생했습니다.', 'error');
-      return { success: false, error: error.message };
+      Swal.fire('오류', '할 일 추가 중 문제가 발생했습니다.', 'error');
+      return { success: false, error };
     }
   };
 
