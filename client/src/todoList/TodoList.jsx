@@ -1666,31 +1666,33 @@ const TodoContainer = () => {
         !isUpdatingProfile &&
         !isChangingPassword && (
           <div className="date-navigator">
-            <button
-              onClick={handlePrevDay}
-              className="date-nav-btn"
-              aria-label="이전 날짜"
-            >
-              <i className="bi bi-chevron-left"></i>
-            </button>
-            <DatePicker
-              locale={ko}
-              selected={selectedDate}
-              onChange={(date) => setSelectedDate(date)}
-              dateFormat="yyyy-MM-dd"
-              className="date-display"
-              showMonthDropdown
-              showYearDropdown
-              dropdownMode="select"
-              withPortal
-            />
-            <button
-              onClick={handleNextDay}
-              className="date-nav-btn"
-              aria-label="다음 날짜"
-            >
-              <i className="bi bi-chevron-right"></i>
-            </button>
+            <div className="date-controls">
+              <button
+                onClick={handlePrevDay}
+                className="date-nav-btn"
+                aria-label="이전 날짜"
+              >
+                <i className="bi bi-chevron-left"></i>
+              </button>
+              <DatePicker
+                locale={ko}
+                selected={selectedDate}
+                onChange={(date) => setSelectedDate(date)}
+                dateFormat="yyyy-MM-dd"
+                className="date-display"
+                showMonthDropdown
+                showYearDropdown
+                dropdownMode="select"
+                withPortal
+              />
+              <button
+                onClick={handleNextDay}
+                className="date-nav-btn"
+                aria-label="다음 날짜"
+              >
+                <i className="bi bi-chevron-right"></i>
+              </button>
+            </div>
             <button onClick={handleToday} className="date-today-btn">
               오늘
             </button>
