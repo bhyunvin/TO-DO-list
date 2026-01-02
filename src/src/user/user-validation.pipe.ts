@@ -124,7 +124,7 @@ export class UserProfileValidationPipe implements PipeTransform<any> {
       checkValue(userDescription, 'userDescription');
     }
 
-    const specialCharPattern = new RegExp('[<>{}[\\]\\\\/$^]', 'g');
+    const specialCharPattern = /[<>{}[\\]\\\\\/$^]/g;
 
     Object.entries(value).forEach(([key, val]) => {
       if (typeof val === 'string') {
