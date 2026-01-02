@@ -5,6 +5,7 @@ import { useFileUploadValidator } from '../hooks/useFileUploadValidator';
 import { useFileUploadProgress } from '../hooks/useFileUploadProgress';
 import PropTypes from 'prop-types';
 import FileUploadProgress from '../components/FileUploadProgress';
+import { getPasswordStrength, PASSWORD_CRITERIA } from '../utils/passwordUtils';
 
 import './loginForm.css';
 
@@ -107,6 +108,32 @@ const SignupForm = ({ onSignupComplete }) => {
   const userPasswordChangeHandler = (e) => {
     const passwordValue = e.target.value;
     setUserPassword(passwordValue);
+
+    // 실시간 유효성 검사
+    if (passwordValue.trim()) {
+      if (passwordValue.length < PASSWORD_CRITERIA.MIN_LENGTH) {
+        setPasswordError(
+          `비밀번호는 최소 ${PASSWORD_CRITERIA.MIN_LENGTH}자 이상이어야 합니다.`,
+        );
+      } else if (PASSWORD_CRITERIA.SPECIAL_CHAR_REGEX.test(passwordValue)) {
+        setPasswordError('');
+      } else {
+        setPasswordError(
+          '비밀번호는 특수문자(@$!%*?&)를 하나 이상 포함해야 합니다.',
+        );
+      }
+    } else {
+      setPasswordError('비밀번호를 입력해주세요.');
+    }
+
+    // 비밀번호 확인 재검증
+    if (confirmUserPassword) {
+      if (passwordValue === confirmUserPassword) {
+        setConfirmPasswordError('');
+      } else {
+        setConfirmPasswordError('비밀번호가 일치하지 않습니다.');
+      }
+    }
   };
 
   const confirmUserPasswordChangeHandler = (e) => {
@@ -172,10 +199,16 @@ const SignupForm = ({ onSignupComplete }) => {
     if (!userPassword) {
       setPasswordError('비밀번호를 확인해주세요.');
       return false;
-    } else if (userPassword.length < 8) {
-      setPasswordError('비밀번호는 최소 8자 이상이어야 합니다.');
+    }
+
+    if (userPassword.length < PASSWORD_CRITERIA.MIN_LENGTH) {
+      setPasswordError(
+        `비밀번호는 최소 ${PASSWORD_CRITERIA.MIN_LENGTH}자 이상이어야 합니다.`,
+      );
       return false;
-    } else if (!/[@$!%*?&]/.test(userPassword)) {
+    }
+
+    if (!PASSWORD_CRITERIA.SPECIAL_CHAR_REGEX.test(userPassword)) {
       setPasswordError(
         '비밀번호는 특수문자(@$!%*?&)를 하나 이상 포함해야 합니다.',
       );
@@ -307,6 +340,8 @@ const SignupForm = ({ onSignupComplete }) => {
     return '가입 중...';
   };
 
+  const passwordStrength = getPasswordStrength(userPassword);
+
   return (
     <div className="signup-container">
       <h2>회원가입</h2>
@@ -352,14 +387,34 @@ const SignupForm = ({ onSignupComplete }) => {
           <div className="col-9">
             <input
               type="password"
-              className="form-control"
+              className={`form-control ${passwordError ? 'is-invalid' : ''}`}
               id="userPassword"
               placeholder="비밀번호를 입력해주세요."
               autoComplete="off"
               onChange={userPasswordChangeHandler}
               required
             />
-            <small className="text-danger">{passwordError}</small>
+            {passwordError && (
+              <small className="invalid-feedback">{passwordError}</small>
+            )}
+            {userPassword && !passwordError && (
+              <div className={`text-${passwordStrength.color} mt-1`}>
+                <small>
+                  비밀번호 강도: <strong>{passwordStrength.text}</strong>
+                  <div className="progress mt-1" style={{ height: '4px' }}>
+                    <div
+                      className={`progress-bar bg-${passwordStrength.color}`}
+                      style={{
+                        width: `${(passwordStrength.strength / 6) * 100}%`,
+                      }}
+                    ></div>
+                  </div>
+                </small>
+              </div>
+            )}
+            <small className="form-text text-muted">
+              8자 이상, 특수문자(@$!%*?&) 하나 이상 포함
+            </small>
           </div>
         </div>
 
@@ -371,14 +426,23 @@ const SignupForm = ({ onSignupComplete }) => {
           <div className="col-9">
             <input
               type="password"
-              className="form-control"
+              className={`form-control ${confirmPasswordError ? 'is-invalid' : ''}`}
               id="confirmUserPassword"
               placeholder="비밀번호를 다시 입력해주세요."
               autoComplete="off"
               onChange={confirmUserPasswordChangeHandler}
               required
             />
-            <small className="text-danger">{confirmPasswordError}</small>
+            {confirmPasswordError && (
+              <small className="invalid-feedback">{confirmPasswordError}</small>
+            )}
+            {confirmUserPassword &&
+              !confirmPasswordError &&
+              userPassword === confirmUserPassword && (
+                <div className="valid-feedback d-block">
+                  ✓ 비밀번호가 일치합니다.
+                </div>
+              )}
           </div>
         </div>
 
