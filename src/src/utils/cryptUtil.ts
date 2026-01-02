@@ -1,7 +1,6 @@
 import bcrypt from 'bcrypt';
 import * as crypto from 'node:crypto';
 
-
 const ALGORITHM = 'aes-256-gcm';
 
 /**
@@ -15,8 +14,6 @@ const getBufferFromEnv = (
   expectedByteLength: number,
   fallbackVal?: string,
 ): Buffer => {
-  let buffer: Buffer;
-
   // 값이 없으면 fallback 사용
   if (!val && fallbackVal) {
     val = fallbackVal;
@@ -38,8 +35,7 @@ const getBufferFromEnv = (
   }
 
   // 일반 문자열로 간주
-  buffer = Buffer.from(val);
-  return buffer;
+  return Buffer.from(val);
 };
 
 // ENCRYPTION_KEY 로딩
@@ -95,11 +91,7 @@ export const decryptSymmetric = (text: string): string => {
     const iv = Buffer.from(textParts.shift(), 'hex');
     const authTag = Buffer.from(textParts.shift(), 'hex');
     const encryptedText = Buffer.from(textParts.join(':'), 'hex');
-    const decipher = crypto.createDecipheriv(
-      ALGORITHM,
-      ENCRYPTION_KEY_BUF,
-      iv,
-    );
+    const decipher = crypto.createDecipheriv(ALGORITHM, ENCRYPTION_KEY_BUF, iv);
     decipher.setAuthTag(authTag);
     let decrypted = decipher.update(encryptedText);
     decrypted = Buffer.concat([decrypted, decipher.final()]);
@@ -120,10 +112,10 @@ const getFixedIv = () => {
     16,
     'a1b2c3d4e5f6g7h8', // 16글자 fallback
   );
-  
+
   // 길이가 안맞으면 fallback으로 강제 (안전장치)
   if (ivBuffer.length !== 16) {
-      return Buffer.from('a1b2c3d4e5f6g7h8');
+    return Buffer.from('a1b2c3d4e5f6g7h8');
   }
   return ivBuffer;
 };
@@ -133,11 +125,7 @@ const FIXED_IV = getFixedIv();
 export const encryptSymmetricDeterministic = (text: string): string => {
   if (!text) return text;
 
-  const cipher = crypto.createCipheriv(
-    ALGORITHM,
-    ENCRYPTION_KEY_BUF,
-    FIXED_IV,
-  );
+  const cipher = crypto.createCipheriv(ALGORITHM, ENCRYPTION_KEY_BUF, FIXED_IV);
   let encrypted = cipher.update(text);
   encrypted = Buffer.concat([encrypted, cipher.final()]);
   const authTag = cipher.getAuthTag();
