@@ -19,6 +19,18 @@ export default defineConfig({
     },
     host: true,
   },
+  build: {
+    // 라이브러리 코드를 'vendor'라는 별도 파일로 분리 (Code Splitting)
+    rollupOptions: {
+      output: {
+        manualChunks: (id) => {
+          if (id.includes('node_modules')) {
+            return 'vendor';
+          }
+        },
+      },
+    },
+  },
   test: {
     globals: true, // describe, it, expect 등을 전역으로 사용 (Jest와 동일)
     environment: 'jsdom', // 'jsdom' 환경에서 테스트 실행
