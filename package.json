@@ -34,9 +34,5 @@
     "svgo": "^4.0.0",
     "css-select": "^6.0.0",
     "glob": ">=11.0.4"
-  },
-  "dependencies": {
-    "buffer-to-stream": "^1.0.0",
-    "cloudinary": "^2.8.0"
   }
 }
