@@ -11,6 +11,7 @@ import { useFileUploadValidator } from '../hooks/useFileUploadValidator';
 import { useTodoFileHandler } from '../hooks/useTodoFileHandler';
 import { useFileUploadProgress } from '../hooks/useFileUploadProgress';
 import FileUploadProgress from '../components/FileUploadProgress';
+import ExistingAttachments from './ExistingAttachments';
 import ProfileUpdateForm from '../components/ProfileUpdateForm';
 import PasswordChangeForm from '../components/PasswordChangeForm';
 import FloatingActionButton from '../components/FloatingActionButton';
@@ -598,6 +599,12 @@ const EditTodoForm = ({ todo, onSave, onCancel }) => {
             />
           </div>
         )}
+
+        {/* 기존 첨부 파일 목록 */}
+        <ExistingAttachments
+          todoSeq={todo.todoSeq}
+          uploadStatus={uploadStatus} // 업로드 중에는 갱신 방지 등을 위해 전달 가능
+        />
 
         <div className="form-actions">
           <button

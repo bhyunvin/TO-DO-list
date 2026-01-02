@@ -292,4 +292,15 @@ export class TodoController {
     const { user } = session;
     return this.todoService.getAttachments(Number(id), user.userSeq);
   }
+
+  @Delete(':id/attachments/:fileNo')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteAttachment(
+    @Param('id') id: string,
+    @Param('fileNo') fileNo: string,
+    @Session() session: SessionData,
+  ) {
+    const { user } = session;
+    await this.todoService.deleteAttachment(user, Number(id), Number(fileNo));
+  }
 }

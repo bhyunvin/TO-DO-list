@@ -12,6 +12,26 @@ const todoService = {
   },
 
   /**
+   * 첨부파일 목록 조회
+   * @param {number|string} todoSeq
+   * @returns {Promise<Array>}
+   */
+  async getAttachments(todoSeq) {
+    const response = await apiClient.get(`/todo/${todoSeq}/attachments`);
+    return response.data;
+  },
+
+  /**
+   * 첨부파일 삭제
+   * @param {number|string} todoSeq
+   * @param {number|string} fileNo
+   * @returns {Promise<void>}
+   */
+  async deleteAttachment(todoSeq, fileNo) {
+    await apiClient.delete(`/todo/${todoSeq}/attachments/${fileNo}`);
+  },
+
+  /**
    * 할 일 생성
    * @param {object|FormData} data - 일반 객체 또는 파일 포함 시 FormData
    * @returns {Promise<object>}
