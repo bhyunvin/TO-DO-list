@@ -147,8 +147,9 @@ export class AppModule implements NestModule {
           resave: false,
           saveUninitialized: false,
           cookie: {
-            secure: false, // (참고: 프로덕션에서는 true 권장)
+            secure: process.env.NODE_ENV === 'production', // 프로덕션에서는 true (HTTPS)
             httpOnly: true,
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 크로스 사이트 쿠키 허용
           },
         }),
       )
