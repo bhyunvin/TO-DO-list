@@ -12,6 +12,7 @@ import {
   CreateTodoDto,
   UpdateTodoDto,
   CreateTodoWithFilesDto,
+  UpdateTodoWithFilesDto,
   TodoWithFilesResponseDto,
   FileAttachmentResponseDto,
   FileUploadResponseDto,
@@ -177,9 +178,14 @@ export class TodoService {
     user: Omit<UserEntity, 'userPassword' | 'setProfileImage'>,
     ip: string,
     updateTodoDto: UpdateTodoDto,
+    manager?: EntityManager,
   ): Promise<TodoEntity> {
     const { userSeq, userId } = user;
-    const todo = await this.todoRepository.findOne({
+    const repository = manager
+      ? manager.getRepository(TodoEntity)
+      : this.todoRepository;
+
+    const todo = await repository.findOne({
       where: { todoSeq: id, userSeq },
     });
     if (!todo) {
@@ -195,7 +201,7 @@ export class TodoService {
     };
     setAuditColumn(auditSettings);
 
-    return this.todoRepository.save(todo);
+    return repository.save(todo);
   }
 
   async delete(
@@ -330,6 +336,71 @@ export class TodoService {
         attachments,
         createdAt: newTodo.auditColumns.regDtm.toISOString(),
       };
+    });
+  }
+
+  async updateWithFiles(
+    id: number,
+    user: Omit<UserEntity, 'userPassword' | 'setProfileImage'>,
+    ip: string,
+    updateTodoDto: UpdateTodoWithFilesDto,
+    files: Express.Multer.File[],
+  ): Promise<TodoEntity> {
+    return this.dataSource.transaction(async (manager) => {
+      // 1. 기본 정보 수정
+      const updatedTodo = await this.update(
+        id,
+        user,
+        ip,
+        updateTodoDto,
+        manager,
+      );
+
+      if (!updatedTodo) {
+        throw new Error('TODO item not found or update failed');
+      }
+
+      // 2. 파일 처리
+      if (files && files.length > 0) {
+        const { userId } = user;
+        const auditSettings: AuditSettings = {
+          ip,
+          entity: null,
+          id: userId,
+        };
+
+        try {
+          // 파일 그룹 번호 확인 또는 생성
+          let fileGroupNo = updatedTodo.todoFileGroupNo;
+
+          // 파일 업로드 (트랜잭션 매니저 사용)
+          const { savedFiles, fileGroupNo: newFileGroupNo } =
+            await this.fileUploadUtil.saveFileInfo(
+              files,
+              auditSettings,
+              manager,
+            );
+
+          if (!fileGroupNo) {
+            // 기존 파일 그룹이 없으면 새로 생성된 그룹 번호 사용
+            fileGroupNo = newFileGroupNo;
+            updatedTodo.todoFileGroupNo = fileGroupNo;
+            await manager.save(updatedTodo);
+          } else {
+            // 기존 파일 그룹이 있으면, 새로 업로드된 파일들의 그룹 번호를 기존 번호로 업데이트
+            const fileInfoRepo = manager.getRepository(FileInfoEntity);
+            for (const file of savedFiles) {
+              file.fileGroupNo = fileGroupNo;
+              await fileInfoRepo.save(file);
+            }
+          }
+        } catch (error) {
+          console.error('File upload failed during TODO update:', error);
+          throw error; // 트랜잭션 롤백
+        }
+      }
+
+      return updatedTodo;
     });
   }
 

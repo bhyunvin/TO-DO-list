@@ -61,7 +61,9 @@ const todoService = {
       ? { headers: { 'Content-Type': 'multipart/form-data' } }
       : {};
 
-    const response = await apiClient.patch(`/todo/${todoSeq}`, data, config);
+    const url = isFormData ? `/todo/with-files/${todoSeq}` : `/todo/${todoSeq}`;
+
+    const response = await apiClient.patch(url, data, config);
     return response.data;
   },
 

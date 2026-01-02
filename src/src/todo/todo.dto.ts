@@ -14,6 +14,10 @@ export class UpdateTodoDto {
   todoNote?: string; // 비고 (선택 사항)
 }
 
+export class UpdateTodoWithFilesDto extends UpdateTodoDto {
+  // 파일은 multipart/form-data로 별도 처리되므로 DTO에는 포함하지 않음
+}
+
 export class DeleteTodoDto {
   todoIds: number[];
 }

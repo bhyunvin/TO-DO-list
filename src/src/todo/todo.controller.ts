@@ -25,6 +25,7 @@ import {
   CreateTodoDto,
   UpdateTodoDto,
   CreateTodoWithFilesDto,
+  UpdateTodoWithFilesDto,
 } from './todo.dto';
 import { AuthenticatedGuard } from '../../types/express/auth.guard';
 import { TodoAttachmentValidationInterceptor } from '../fileUpload/validation/file-validation.interceptor';
@@ -222,6 +223,63 @@ export class TodoController {
       const { user } = session;
       this.logger.error('TODO creation with files failed', {
         userId: user.userSeq,
+        error: error.message,
+        fileCount: files?.length || 0,
+      });
+      throw error;
+    }
+  }
+  @Patch('with-files/:id')
+  @UseInterceptors(
+    FilesInterceptor('files', 10, todoAttachmentMulterOptions),
+    TodoAttachmentValidationInterceptor,
+  )
+  async updateWithFiles(
+    @Param('id') id: string,
+    @Session() session: SessionData,
+    @Body() updateTodoDto: UpdateTodoWithFilesDto,
+    @UploadedFiles() files: Express.Multer.File[],
+    @Ip() ip: string,
+  ) {
+    try {
+      const { user } = session;
+      const result = await this.todoService.updateWithFiles(
+        Number(id),
+        user,
+        ip,
+        updateTodoDto,
+        files,
+      );
+
+      // 파일과 함께 성공적인 수정 로그 기록
+      if (files && files.length > 0) {
+        const errorContext = this.fileUploadErrorService.extractErrorContext(
+          {
+            ip,
+            get: () => '',
+            headers: {},
+            method: 'PATCH',
+            path: `/todo/with-files/${id}`,
+          } as any,
+          'todo_attachment',
+          user.userSeq,
+        );
+
+        this.fileUploadErrorService.logSuccessfulUpload(
+          files.map((f) => ({
+            originalFileName: f.originalname,
+            fileSize: f.size,
+          })),
+          errorContext,
+        );
+      }
+
+      return result;
+    } catch (error) {
+      const { user } = session;
+      this.logger.error('TODO update with files failed', {
+        userId: user.userSeq,
+        todoId: id,
         error: error.message,
         fileCount: files?.length || 0,
       });
