@@ -1692,10 +1692,10 @@ const TodoContainer = () => {
               >
                 <i className="bi bi-chevron-right"></i>
               </button>
+              <button onClick={handleToday} className="date-today-btn ms-2">
+                오늘
+              </button>
             </div>
-            <button onClick={handleToday} className="date-today-btn">
-              오늘
-            </button>
           </div>
         )}
 

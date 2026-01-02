@@ -293,16 +293,20 @@
 
 /* 날짜 컨트롤 그룹 (이전, 날짜, 다음) */
 .date-controls {
+  position: relative; /* 자식 absolute 배치를 위한 기준점 */
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 15px;
 }
 
-/* Today 버튼 - 우측 절대 배치 */
+/* Today 버튼 - PC에서는 날짜 그룹 우측에 절대 배치 */
 .date-today-btn {
   position: absolute;
-  right: 0;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-left: 15px;
   background: none;
   border: 1px solid var(--color-border-light);
   border-radius: var(--border-radius-small);
@@ -311,9 +315,10 @@
   font-size: 0.9rem;
   color: var(--color-text-secondary);
   transition: background-color var(--transition-default);
+  white-space: nowrap; /* 줄바꿈 방지 */
 }
 
-/* 모바일 화면에서는 Today 버튼을 상대 위치로 변경하여 겹침 방지 */
+/* 모바일 화면 대응 */
 @media (max-width: 576px) {
   .date-navigator {
     flex-direction: column;
@@ -322,6 +327,8 @@
 
   .date-today-btn {
     position: static;
+    transform: none;
+    margin-left: 0;
     margin-top: 5px;
   }
 }
