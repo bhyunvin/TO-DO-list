@@ -5,8 +5,13 @@ import { ExpressAdapter } from '@nestjs/platform-express';
 const bootstrap = async () => {
   const app = await NestFactory.create(AppModule, new ExpressAdapter());
 
+  const origins = ['http://localhost:5173'];
+  if (process.env.FRONTEND_URL) {
+    origins.push(process.env.FRONTEND_URL);
+  }
+
   app.enableCors({
-    origin: ['http://localhost:5173'],
+    origin: origins,
     methods: 'GET,POST,PATCH,DELETE,OPTIONS',
     credentials: true,
   });
