@@ -1,9 +1,8 @@
-// src/src/app.module.ts
-import { Module, NestModule, MiddlewareConsumer, Logger } from '@nestjs/common'; // NestModule, MiddlewareConsumer, Logger 추가
+import { Module, NestModule, MiddlewareConsumer, Logger } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { z } from 'zod';
-import session from 'express-session'; // express-session import 추가
+import session from 'express-session';
 
 import { TodoModule } from './todo/todo.module';
 import { UserModule } from './user/user.module';
@@ -66,11 +65,12 @@ const validate = (config: Record<string, unknown>) => {
     return validatedConfig;
   } catch (error) {
     if (error instanceof z.ZodError) {
-      console.error('=== ❌ 환경 변수 유효성 검사 실패 ===');
+      const logger = new Logger('ConfigValidation');
+      logger.error('=== ❌ 환경 변수 유효성 검사 실패 ===');
       error.issues.forEach((err) => {
-        console.error(`- [${err.path.join('.') || 'config'}]: ${err.message}`);
+        logger.error(`- [${err.path.join('.') || 'config'}]: ${err.message}`);
       });
-      console.error('======================================');
+      logger.error('======================================');
     }
     throw new Error(
       '환경 변수 설정이 올바르지 않습니다. .env 또는 .env.example 파일을 확인하세요.',
