@@ -49,6 +49,7 @@ export class FileUploadUtil {
           fileGroupNo: groupNo,
           filePath: uploadResult.secure_url, // 로컬 경로 대신 Cloudinary URL 저장
           saveFileName: `${uploadResult.public_id}.${uploadedFileExt}`,
+          originalFileName: file.originalname,
           fileExt: uploadedFileExt,
           fileSize: uploadResult.bytes,
         });

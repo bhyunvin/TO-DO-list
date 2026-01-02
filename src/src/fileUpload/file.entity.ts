@@ -19,6 +19,9 @@ export class FileInfoEntity {
   @Column({ name: 'save_file_nm', type: 'text' })
   saveFileName: string;
 
+  @Column({ name: 'original_file_nm', type: 'text' })
+  originalFileName: string;
+
   @Column({ name: 'file_ext', type: 'varchar', length: 10 })
   fileExt: string;
 

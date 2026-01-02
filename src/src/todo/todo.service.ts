@@ -256,7 +256,7 @@ export class TodoService {
       const attachmentResponses: FileAttachmentResponseDto[] = savedFiles.map(
         (file) => ({
           fileNo: file.fileNo,
-          originalFileName: file.saveFileName,
+          originalFileName: file.originalFileName,
           fileSize: file.fileSize,
           fileExt: file.fileExt,
           uploadDate: file.auditColumns.regDtm.toISOString(),
@@ -315,7 +315,7 @@ export class TodoService {
 
           attachments = savedFiles.map((file) => ({
             fileNo: file.fileNo,
-            originalFileName: file.saveFileName,
+            originalFileName: file.originalFileName,
             fileSize: file.fileSize,
             fileExt: file.fileExt,
             uploadDate: file.auditColumns.regDtm.toISOString(),
@@ -381,18 +381,18 @@ export class TodoService {
               manager,
             );
 
-          if (!fileGroupNo) {
-            // 기존 파일 그룹이 없으면 새로 생성된 그룹 번호 사용
-            fileGroupNo = newFileGroupNo;
-            updatedTodo.todoFileGroupNo = fileGroupNo;
-            await manager.save(updatedTodo);
-          } else {
+          if (fileGroupNo) {
             // 기존 파일 그룹이 있으면, 새로 업로드된 파일들의 그룹 번호를 기존 번호로 업데이트
             const fileInfoRepo = manager.getRepository(FileInfoEntity);
             for (const file of savedFiles) {
               file.fileGroupNo = fileGroupNo;
               await fileInfoRepo.save(file);
             }
+          } else {
+            // 기존 파일 그룹이 없으면 새로 생성된 그룹 번호 사용
+            fileGroupNo = newFileGroupNo;
+            updatedTodo.todoFileGroupNo = fileGroupNo;
+            await manager.save(updatedTodo);
           }
         } catch (error) {
           console.error('File upload failed during TODO update:', error);
@@ -445,11 +445,24 @@ export class TodoService {
         const savedFiles: FileInfoEntity[] = [];
 
         for (const file of files) {
-          const { path, filename } = file;
+          const { originalname } = file;
+          // Cloudinary 업로드 추가
+          const uploadResult = (await this.cloudinaryService.uploadFile(
+            file,
+          )) as any;
+          const uploadedFileExt =
+            uploadResult.format ||
+            (originalname.includes('.')
+              ? originalname.split('.').pop()
+              : 'dat');
+
           let newFile = this.fileInfoRepository.create({
             fileGroupNo,
-            filePath: path,
-            saveFileName: filename,
+            filePath: uploadResult.secure_url,
+            saveFileName: `${uploadResult.public_id}.${uploadedFileExt}`,
+            originalFileName: file.originalname,
+            fileExt: uploadedFileExt,
+            fileSize: uploadResult.bytes,
           });
 
           auditSettings.entity = newFile;
@@ -462,7 +475,7 @@ export class TodoService {
         const attachmentResponses: FileAttachmentResponseDto[] = savedFiles.map(
           (file) => ({
             fileNo: file.fileNo,
-            originalFileName: file.saveFileName,
+            originalFileName: file.originalFileName,
             fileSize: file.fileSize,
             fileExt: file.fileExt,
             uploadDate: file.auditColumns.regDtm.toISOString(),
@@ -486,7 +499,7 @@ export class TodoService {
         const attachmentResponses: FileAttachmentResponseDto[] = savedFiles.map(
           (file) => ({
             fileNo: file.fileNo,
-            originalFileName: file.saveFileName,
+            originalFileName: file.originalFileName,
             fileSize: file.fileSize,
             fileExt: file.fileExt,
             uploadDate: file.auditColumns.regDtm.toISOString(),
@@ -534,7 +547,7 @@ export class TodoService {
 
     return files.map((file) => ({
       fileNo: file.fileNo,
-      originalFileName: file.saveFileName,
+      originalFileName: file.originalFileName,
       fileSize: file.fileSize,
       fileExt: file.fileExt,
       uploadDate: file.auditColumns.regDtm.toISOString(),
