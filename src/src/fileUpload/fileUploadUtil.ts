@@ -1,6 +1,5 @@
-import { diskStorage } from 'multer';
-import { extname, resolve } from 'node:path';
-import * as fs from 'node:fs';
+import { memoryStorage } from 'multer';
+import { extname } from 'node:path';
 
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -9,6 +8,8 @@ import { FileInfoEntity } from './file.entity';
 import { FileValidationService } from './validation/file-validation.service';
 import { FileCategory } from './validation/file-validation.interfaces';
 import { FILE_UPLOAD_POLICY } from './validation/file-validation.constants';
+import { CloudinaryService } from './cloudinary.service';
+import { UploadApiResponse } from 'cloudinary';
 
 import { AuditSettings, setAuditColumn } from '../utils/auditColumns';
 
@@ -17,9 +18,10 @@ export class FileUploadUtil {
   constructor(
     @InjectRepository(FileInfoEntity)
     private readonly fileInfoRepository: Repository<FileInfoEntity>,
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
-  // 파일 정보를 DB에 저장하는 함수
+  // 파일 정보를 Cloudinary에 업로드하고 DB에 저장하는 함수
   async saveFileInfo(
     files: Express.Multer.File[],
     setting: AuditSettings,
@@ -28,49 +30,53 @@ export class FileUploadUtil {
     let fileGroupNo: number | null = null;
 
     if (files.length > 0) {
-      // 첫 번째 파일을 DB에 저장하여 fileGroupNo를 설정합니다.
-      const [firstFile] = files;
-      let newFirstFile = this.fileInfoRepository.create({
-        fileGroupNo: 0, // 임시값: 저장 후 fileNo로 업데이트됨
-        filePath: firstFile.path,
-        saveFileName: firstFile.filename,
-        fileExt: extname(firstFile.originalname).substring(1),
-        fileSize: firstFile.size,
-      });
+      // 0. Cloudinary 업로드 및 Entity 생성 헬퍼
+      const processFile = async (
+        file: Express.Multer.File,
+        groupNo: number,
+      ) => {
+        const uploadResult = (await this.cloudinaryService.uploadFile(
+          file,
+        )) as UploadApiResponse;
 
-      setting.entity = newFirstFile;
-      newFirstFile = setAuditColumn(setting);
+        const newFile = this.fileInfoRepository.create({
+          fileGroupNo: groupNo,
+          filePath: uploadResult.secure_url, // 로컬 경로 대신 Cloudinary URL 저장
+          saveFileName: uploadResult.original_filename,
+          fileExt:
+            uploadResult.format || extname(file.originalname).substring(1),
+          fileSize: uploadResult.bytes,
+          publicId: uploadResult.public_id,
+          resourceType: uploadResult.resource_type,
+        });
 
+        setting.entity = newFile;
+        return setAuditColumn(setting);
+      };
+
+      // 1. 첫 번째 파일 처리
+      const firstFile = files[0];
+      // 임시 groupNo 0으로 생성
+      const newFirstFile = await processFile(firstFile, 0);
       const savedFirstFile = await this.fileInfoRepository.save(newFirstFile);
-      fileGroupNo = savedFirstFile.fileNo; // 첫 번째 파일의 fileNo를 fileGroupNo로 설정
 
-      // 첫 번째 파일의 fileGroupNo를 기준으로 업데이트합니다.
+      fileGroupNo = savedFirstFile.fileNo;
+
+      // fileGroupNo 업데이트
       await this.fileInfoRepository.update(
         { fileNo: fileGroupNo },
         { fileGroupNo },
       );
-
-      // 첫 번째 파일을 savedFiles에 추가합니다.
+      savedFirstFile.fileGroupNo = fileGroupNo; // 메모리 객체 업데이트
       savedFiles.push(savedFirstFile);
-    }
 
-    if (files.length > 1) {
-      // 나머지 파일들을 DB에 저장합니다.
-      for (let i = 1; i < files.length; i++) {
-        const file = files[i];
-        let newFile = this.fileInfoRepository.create({
-          fileGroupNo, // 모든 파일에 같은 fileGroupNo 설정
-          filePath: file.path,
-          saveFileName: file.filename,
-          fileExt: extname(file.originalname).substring(1),
-          fileSize: file.size,
-        });
-
-        setting.entity = newFile;
-        newFile = setAuditColumn(setting);
-
-        const savedFile = await this.fileInfoRepository.save(newFile);
-        savedFiles.push(savedFile);
+      // 2. 나머지 파일 처리
+      if (files.length > 1) {
+        for (let i = 1; i < files.length; i++) {
+          const newFile = await processFile(files[i], fileGroupNo);
+          const savedFile = await this.fileInfoRepository.save(newFile);
+          savedFiles.push(savedFile);
+        }
       }
     }
 
@@ -104,23 +110,7 @@ export const createFileFilter =
 
 // 프로필 이미지를 위한 향상된 multer 설정
 export const profileImageMulterOptions = {
-  storage: diskStorage({
-    destination: (req, file, callback) => {
-      const uploadPath =
-        process.env.UPLOAD_FILE_DIRECTORY ||
-        resolve(process.cwd(), '../upload');
-      if (!fs.existsSync(uploadPath)) {
-        fs.mkdirSync(uploadPath, { recursive: true });
-      }
-      callback(null, uploadPath);
-    },
-    filename: (req, file, callback) => {
-      const uniqueSuffix = `${Date.now()}_${Math.round(Math.random() * 1e9)}`;
-      const ext = extname(file.originalname);
-      const filename = `profile_${uniqueSuffix}${ext}`;
-      callback(null, filename);
-    },
-  }),
+  storage: memoryStorage(),
   fileFilter: createFileFilter('profile_image'),
   limits: {
     fileSize: FILE_UPLOAD_POLICY.profileImage.maxSize,
@@ -130,23 +120,7 @@ export const profileImageMulterOptions = {
 
 // 첨부 파일을 위한 향상된 multer 설정
 export const todoAttachmentMulterOptions = {
-  storage: diskStorage({
-    destination: (req, file, callback) => {
-      const uploadPath =
-        process.env.UPLOAD_FILE_DIRECTORY ||
-        resolve(process.cwd(), '../upload');
-      if (!fs.existsSync(uploadPath)) {
-        fs.mkdirSync(uploadPath, { recursive: true });
-      }
-      callback(null, uploadPath);
-    },
-    filename: (req, file, callback) => {
-      const uniqueSuffix = `${Date.now()}_${Math.round(Math.random() * 1e9)}`;
-      const ext = extname(file.originalname);
-      const filename = `todo_${uniqueSuffix}${ext}`;
-      callback(null, filename);
-    },
-  }),
+  storage: memoryStorage(),
   fileFilter: createFileFilter('todo_attachment'),
   limits: {
     fileSize: FILE_UPLOAD_POLICY.todoAttachment.maxSize,

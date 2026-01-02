@@ -42,8 +42,14 @@ const envSchema = z.object({
     .string()
     .default('./src/assistance/assistance.systemPrompt.txt'),
 
-  // --- 파일 업로드 ---
-  UPLOAD_FILE_DIRECTORY: z.string().default('./upload'),
+  // --- Cloudinary 설정 ---
+  CLOUDINARY_CLOUD_NAME: z
+    .string()
+    .min(1, 'CLOUDINARY_CLOUD_NAME은 필수입니다.'),
+  CLOUDINARY_API_KEY: z.string().min(1, 'CLOUDINARY_API_KEY는 필수입니다.'),
+  CLOUDINARY_API_SECRET: z
+    .string()
+    .min(1, 'CLOUDINARY_API_SECRET는 필수입니다.'),
 
   // --- 암호화 (Encryption) ---
   ENCRYPTION_KEY: z

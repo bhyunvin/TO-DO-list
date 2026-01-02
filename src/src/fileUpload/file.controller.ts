@@ -33,11 +33,16 @@ export class FileController {
 
     const filePath = fileInfo.filePath;
 
+    // Cloudinary URL인 경우 리다이렉트
+    if (filePath.startsWith('http')) {
+      return res.redirect(filePath);
+    }
+
     if (!existsSync(filePath)) {
       throw new NotFoundException('파일이 서버에 존재하지 않습니다.');
     }
 
-    // 파일 전송
+    // 로컬 파일 전송 (기존 데이터 호환성용)
     res.sendFile(filePath);
   }
 }

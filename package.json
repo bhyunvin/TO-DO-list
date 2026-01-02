@@ -24,6 +24,7 @@
     "node": ">=24.0.0"
   },
   "devDependencies": {
+    "@types/multer": "^2.0.0",
     "concurrently": "^9.2.0",
     "prettier": "^3.6.2"
   },
@@ -34,5 +35,8 @@
     "css-select": "^6.0.0",
     "glob": ">=11.0.4"
   },
-  "dependencies": {}
+  "dependencies": {
+    "buffer-to-stream": "^1.0.0",
+    "cloudinary": "^2.8.0"
+  }
 }

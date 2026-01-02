@@ -11,6 +11,8 @@ import {
   TodoAttachmentValidationInterceptor,
 } from './validation';
 import { FileController } from './file.controller';
+import { CloudinaryProvider } from './cloudinary.provider';
+import { CloudinaryService } from './cloudinary.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([FileInfoEntity])],
@@ -20,6 +22,8 @@ import { FileController } from './file.controller';
     FileUploadErrorService,
     ProfileImageValidationInterceptor,
     TodoAttachmentValidationInterceptor,
+    CloudinaryProvider,
+    CloudinaryService,
   ],
   controllers: [FileController],
   exports: [
@@ -28,6 +32,8 @@ import { FileController } from './file.controller';
     FileUploadErrorService,
     ProfileImageValidationInterceptor,
     TodoAttachmentValidationInterceptor,
+    CloudinaryProvider,
+    CloudinaryService,
   ],
 })
 export class FileUploadModule {}
