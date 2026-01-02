@@ -46,8 +46,6 @@ export class FileUploadUtil {
           fileExt:
             uploadResult.format || extname(file.originalname).substring(1),
           fileSize: uploadResult.bytes,
-          publicId: uploadResult.public_id,
-          resourceType: uploadResult.resource_type,
         });
 
         setting.entity = newFile;

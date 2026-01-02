@@ -25,17 +25,6 @@ export class FileInfoEntity {
   @Column({ name: 'file_size', type: 'int' })
   fileSize: number;
 
-  @Column({ name: 'public_id', type: 'varchar', length: 255, nullable: true })
-  publicId: string;
-
-  @Column({
-    name: 'resource_type',
-    type: 'varchar',
-    length: 50,
-    nullable: true,
-  })
-  resourceType: string;
-
   @Column(() => AuditColumns) // 복합 엔티티를 포함
   auditColumns: AuditColumns;
 }

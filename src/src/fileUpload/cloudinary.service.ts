@@ -8,6 +8,11 @@ import * as toStream from 'buffer-to-stream';
 
 @Injectable()
 export class CloudinaryService {
+  /**
+   * 파일을 Cloudinary에 업로드
+   * @param file 업로드할 파일
+   * @returns 업로드 결과
+   */
   async uploadFile(
     file: Express.Multer.File,
   ): Promise<UploadApiResponse | UploadApiErrorResponse> {
@@ -23,6 +28,12 @@ export class CloudinaryService {
     });
   }
 
+  /**
+   * Cloudinary에서 파일 삭제
+   * @param publicId 삭제할 파일의 public_id
+   * @param resourceType 삭제할 파일의 resource_type
+   * @returns 삭제 결과
+   */
   async deleteFile(
     publicId: string,
     resourceType: string = 'image',
@@ -30,5 +41,24 @@ export class CloudinaryService {
     return cloudinary.uploader.destroy(publicId, {
       resource_type: resourceType,
     });
+  }
+
+  /**
+   * URL에서 public_id 추출
+   * @param url Cloudinary URL
+   * @returns public_id
+   */
+  extractPublicIdFromUrl(url: string): string {
+    try {
+      const { pathname } = new URL(url);
+      // '/upload/' 이후의 경로 캡처 (버전 'v1234/'는 무시)
+      // 예: /.../upload/v12345/folder/filename.jpg -> folder/filename
+      const regex = /\/upload\/(?:v\d+\/)?(.+)\.[^.]+$/;
+      const match = regex.exec(pathname);
+      return match ? match[1] : '';
+    } catch (error) {
+      console.error('Failed to extract public_id:', error);
+      return '';
+    }
   }
 }

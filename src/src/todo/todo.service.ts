@@ -55,16 +55,20 @@ export class TodoService {
     }
 
     // Cloudinary에서 파일 삭제
-    if (fileInfo.publicId) {
-      await this.cloudinaryService.deleteFile(
-        fileInfo.publicId,
-        fileInfo.resourceType || 'auto',
+    if (fileInfo.filePath?.includes('cloudinary')) {
+      const publicId = this.cloudinaryService.extractPublicIdFromUrl(
+        fileInfo.filePath,
       );
-    }
-    // 로컬 파일 삭제 (하위 호환성)
-    else if (fileInfo.filePath && !fileInfo.filePath.startsWith('http')) {
-      // fs모듈 import가 필요할 수 있으나, 일단 Cloudinary 위주로 구현. 로컬 삭제 로직은 생략하거나 필요시 추가.
-      // 기존 코드에서 fs 사용을 줄였으므로 여기서는 Cloudinary만 처리.
+      // 리소스 타입 추론
+      let resourceType = 'image';
+      const ext = fileInfo.fileExt.toLowerCase();
+      if (['pdf', 'txt', 'csv'].includes(ext)) {
+        resourceType = 'raw';
+      } else if (['mp4', 'avi', 'mov'].includes(ext)) {
+        resourceType = 'video';
+      }
+
+      await this.cloudinaryService.deleteFile(publicId, resourceType);
     }
 
     // DB에서 파일 정보 삭제
