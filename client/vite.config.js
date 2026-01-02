@@ -20,23 +20,14 @@ export default defineConfig({
     host: true,
   },
   build: {
-    // 라이브러리 코드를 'vendor'라는 별도 파일로 분리 (Code Splitting)
+    // 경고 기준을 1024kb로 설정
+    chunkSizeWarningLimit: 1024,
+    // 모든 라이브러리(node_modules)를 'vendor'라는 하나의 파일로 뭉침
     rollupOptions: {
       output: {
         manualChunks: (id) => {
           if (id.includes('node_modules')) {
-            // React, Router, 상태관리 등 핵심 로직
-            if (
-              id.includes('react') ||
-              id.includes('zustand') ||
-              id.includes('@vitejs') ||
-              id.includes('scheduler')
-            ) {
-              return 'vendor-core';
-            }
-
-            // 나머지 Bootstrap, SweetAlert2 등 용량이 큰 UI 라이브러리
-            return 'vendor-ui';
+            return 'vendor';
           }
         },
       },
