@@ -1,5 +1,5 @@
 // 환경 변수에서 API URL 가져오기 (기본값 설정)
-const API_URL = import.meta.env.VITE_API_URL || '/api';
+export const API_URL = import.meta.env.VITE_API_URL || '/api';
 import { useAuthStore } from '../authStore/authStore';
 import Swal from 'sweetalert2';
 

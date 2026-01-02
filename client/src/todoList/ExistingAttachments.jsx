@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import Swal from 'sweetalert2';
 import todoService from '../api/todoService';
+import { API_URL } from '../api/apiClient';
 import { useFileUploadValidator } from '../hooks/useFileUploadValidator';
 
 const ExistingAttachments = ({ todoSeq }) => {
@@ -72,7 +73,7 @@ const ExistingAttachments = ({ todoSeq }) => {
             <div className="d-flex align-items-center overflow-hidden">
               <i className="bi bi-paperclip me-2 text-secondary"></i>
               <a
-                href={`/api/file/${file.fileNo}`}
+                href={`${API_URL}/file/${file.fileNo}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-decoration-none text-truncate d-block"

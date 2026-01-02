@@ -23,6 +23,7 @@ import { ko } from 'date-fns/locale';
 import { showNavigationConfirmAlert } from '../utils/alertUtils';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import 'react-datepicker/dist/react-datepicker.css';
+import { API_URL } from '../api/apiClient';
 
 const CreateTodoForm = ({ onAddTodo, onCancel }) => {
   const { formatFileSize, getUploadPolicy, validateFiles } =
@@ -1604,7 +1605,11 @@ const TodoContainer = () => {
           >
             {user?.profileImage && !imgError ? (
               <img
-                src={user.profileImage}
+                src={
+                  user.profileImage?.startsWith('http')
+                    ? user.profileImage
+                    : `${API_URL}${user.profileImage?.replace(/^\/api/, '')}`
+                }
                 alt="프로필"
                 onError={() => setImgError(true)}
                 loading="lazy"

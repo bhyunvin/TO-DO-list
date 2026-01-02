@@ -7,7 +7,7 @@ const bootstrap = async () => {
 
   const origins = ['http://localhost:5173'];
   if (process.env.FRONTEND_URL) {
-    origins.push(process.env.FRONTEND_URL);
+    origins.push(process.env.FRONTEND_URL.replace(/\/$/, ''));
   }
 
   app.enableCors({
