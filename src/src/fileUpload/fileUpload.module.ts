@@ -14,8 +14,11 @@ import { FileController } from './file.controller';
 import { CloudinaryProvider } from './cloudinary.provider';
 import { CloudinaryService } from './cloudinary.service';
 
+import { TodoEntity } from '../todo/todo.entity';
+import { UserEntity } from '../user/user.entity';
+
 @Module({
-  imports: [TypeOrmModule.forFeature([FileInfoEntity])],
+  imports: [TypeOrmModule.forFeature([FileInfoEntity, TodoEntity, UserEntity])],
   providers: [
     FileUploadUtil,
     FileValidationService,

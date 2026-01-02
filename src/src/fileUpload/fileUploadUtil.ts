@@ -39,12 +39,13 @@ export class FileUploadUtil {
           file,
         )) as UploadApiResponse;
 
+        const uploadedFileExt =
+          uploadResult.format || extname(file.originalname).substring(1);
         const newFile = this.fileInfoRepository.create({
           fileGroupNo: groupNo,
           filePath: uploadResult.secure_url, // 로컬 경로 대신 Cloudinary URL 저장
-          saveFileName: uploadResult.original_filename,
-          fileExt:
-            uploadResult.format || extname(file.originalname).substring(1),
+          saveFileName: `${uploadResult.public_id}.${uploadedFileExt}`,
+          fileExt: uploadedFileExt,
           fileSize: uploadResult.bytes,
         });
 
