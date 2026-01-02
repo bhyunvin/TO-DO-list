@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import {
   UploadApiErrorResponse,
   UploadApiResponse,
@@ -8,6 +8,8 @@ import toStream from 'buffer-to-stream';
 
 @Injectable()
 export class CloudinaryService {
+  private readonly logger = new Logger(CloudinaryService.name);
+
   /**
    * 파일을 Cloudinary에 업로드
    * @param file 업로드할 파일
@@ -57,7 +59,7 @@ export class CloudinaryService {
       const match = regex.exec(pathname);
       return match ? match[1] : '';
     } catch (error) {
-      console.error('Failed to extract public_id:', error);
+      this.logger.error('Failed to extract public_id:', error);
       return '';
     }
   }

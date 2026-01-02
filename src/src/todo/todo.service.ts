@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   Brackets,
@@ -36,6 +36,7 @@ export class TodoService {
 
     private readonly cloudinaryService: CloudinaryService,
     private readonly dataSource: DataSource,
+    private readonly logger: Logger,
   ) {}
 
   async deleteAttachment(
@@ -321,7 +322,7 @@ export class TodoService {
             uploadDate: file.auditColumns.regDtm.toISOString(),
           }));
         } catch (error) {
-          console.error('File upload failed during TODO creation:', error);
+          this.logger.error('File upload failed during TODO creation:', error);
           throw error; // 트랜잭션 롤백을 위해 에러 다시 던짐
         }
       }
@@ -395,7 +396,7 @@ export class TodoService {
             await manager.save(updatedTodo);
           }
         } catch (error) {
-          console.error('File upload failed during TODO update:', error);
+          this.logger.error('File upload failed during TODO update:', error);
           throw error; // 트랜잭션 롤백
         }
       }
