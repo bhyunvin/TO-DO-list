@@ -22,7 +22,12 @@ import { ProfileImageValidationInterceptor } from '../fileUpload/validation/file
 import { FileUploadErrorService } from '../fileUpload/validation/file-upload-error.service';
 
 import { UserService } from './user.service';
-import { UserDto, UpdateUserDto, ChangePasswordDto } from './user.dto';
+import {
+  UserDto,
+  UpdateUserDto,
+  ChangePasswordDto,
+  LoginDto,
+} from './user.dto';
 import { UserEntity } from './user.entity';
 import { UserProfileValidationPipe } from './user-validation.pipe';
 
@@ -41,11 +46,11 @@ export class UserController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  async login(@Body() userDto: UserDto): Promise<{
+  async login(@Body() loginDto: LoginDto): Promise<{
     access_token: string;
     user: Omit<UserEntity, 'userPassword' | 'setProfileImage'>;
   }> {
-    const user = await this.userService.login(userDto);
+    const user = await this.userService.login(loginDto);
     const { access_token } = await this.authService.login(user);
 
     // 간단히 클라이언트 반환용으로 복사본 생성 후 복호화 및 마스킹

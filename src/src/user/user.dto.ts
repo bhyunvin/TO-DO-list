@@ -9,26 +9,53 @@ import {
 } from 'class-validator';
 import { Transform } from 'class-transformer';
 
+export class LoginDto {
+  @IsNotEmpty({ message: '사용자 ID를 입력해주세요.' })
+  @IsString({ message: '사용자 ID는 문자열이어야 합니다.' })
+  userId: string;
+
+  @IsNotEmpty({ message: '비밀번호를 입력해주세요.' })
+  @IsString({ message: '비밀번호는 문자열이어야 합니다.' })
+  userPassword: string;
+}
+
 export class UserDto {
-  userSeq: number; // 사용자번호
+  @IsOptional()
+  userSeq: number; // 사용자번호 (회원가입 전달 시 불필요하므로 Optional 처리)
 
-  userId: string; //사용자ID
+  @IsNotEmpty({ message: '사용자 ID를 입력해주세요.' })
+  @IsString({ message: '사용자 ID는 문자열이어야 합니다.' })
+  userId: string; // 사용자ID
 
-  userName: string; //사용자명
+  @IsNotEmpty({ message: '사용자명을 입력해주세요.' })
+  @IsString({ message: '사용자명은 문자열이어야 합니다.' })
+  userName: string; // 사용자명
 
-  userPassword: string; //사용자비밀번호
+  @IsNotEmpty({ message: '비밀번호를 입력해주세요.' })
+  @IsString({ message: '비밀번호는 문자열이어야 합니다.' })
+  userPassword: string; // 사용자비밀번호
 
-  userEmail: string; //사용자이메일
-
-  userDescription: string; //사용자설명
-
-  userProfileImageFileGroupNo: number; //사용자프로필이미지파일그룹번호
-
-  aiApiKey?: string; // AI API Key
-
-  adminYn: string; //관리자여부
+  @IsNotEmpty({ message: '이메일을 입력해주세요.' })
+  @IsEmail({}, { message: '올바른 이메일 형식이 아닙니다.' })
+  userEmail: string; // 사용자이메일
 
   @IsOptional()
+  @IsString()
+  userDescription: string; // 사용자설명
+
+  @IsOptional()
+  userProfileImageFileGroupNo: number; // 사용자프로필이미지파일그룹번호
+
+  @IsOptional()
+  @IsString()
+  aiApiKey?: string; // AI API Key
+
+  @IsOptional()
+  @IsString()
+  adminYn: string; // 관리자여부
+
+  @IsOptional()
+  @IsString()
   profileImage?: string; // 프로필 이미지 URL (응답용)
 }
 

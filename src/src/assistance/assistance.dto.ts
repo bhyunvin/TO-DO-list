@@ -1,21 +1,39 @@
-import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsNumber,
+  IsArray,
+} from 'class-validator';
 
 export class RequestAssistanceDto {
-  userSeq: number; // 사용자 번호
+  @IsOptional()
+  @IsNumber()
+  userSeq: number; // 사용자 번호 (보통 토큰에서 추출하므로 optional 혹은 제외 가능하지만 일단 유지)
+
+  @IsNotEmpty({ message: '요청 내용을 입력해주세요.' })
+  @IsString({ message: '요청 내용은 문자열이어야 합니다.' })
   prompt: string; // 요청
+
+  @IsOptional()
+  @IsArray()
   history?: {
     role: 'user' | 'model';
     parts: { text: string }[];
   }[]; // 대화 기록
-  response: string; // 응답
+
+  @IsOptional()
+  @IsString()
+  response: string; // 응답 (보통 응답용이지만 DTO 재사용 시 유의)
 }
 
 export class ChatRequestDto {
-  @IsString()
-  @IsNotEmpty()
+  @IsString({ message: '메시지는 문자열이어야 합니다.' })
+  @IsNotEmpty({ message: '메시지를 입력해주세요.' })
   prompt: string; // 사용자 메시지
 
   @IsOptional()
+  @IsArray()
   history?: {
     role: 'user' | 'model';
     parts: { text: string }[];

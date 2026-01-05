@@ -9,7 +9,12 @@ import { InjectRepository, InjectDataSource } from '@nestjs/typeorm';
 import { Repository, DataSource, Not } from 'typeorm';
 import { UserEntity } from './user.entity';
 import { FileInfoEntity } from '../fileUpload/file.entity'; // FileInfoEntity 임포트
-import { UserDto, UpdateUserDto, ChangePasswordDto } from './user.dto';
+import {
+  UserDto,
+  UpdateUserDto,
+  ChangePasswordDto,
+  LoginDto,
+} from './user.dto';
 import {
   encrypt,
   isHashValid,
@@ -66,9 +71,9 @@ export class UserService {
   }
 
   async login(
-    userDto: UserDto,
+    loginDto: LoginDto,
   ): Promise<Omit<UserEntity, 'userPassword' | 'setProfileImage'>> {
-    const { userId } = userDto;
+    const { userId } = loginDto;
     const selectedUser = await this.userRepository.findOne({
       where: { userId },
     });
@@ -78,7 +83,7 @@ export class UserService {
     }
 
     const isPasswordMatch = await isHashValid(
-      userDto.userPassword,
+      loginDto.userPassword,
       selectedUser.userPassword,
     );
 

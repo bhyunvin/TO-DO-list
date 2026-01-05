@@ -1,6 +1,23 @@
+import {
+  IsString,
+  IsOptional,
+  IsNotEmpty,
+  IsDateString,
+  IsArray,
+  IsNumber,
+} from 'class-validator';
+
 export class CreateTodoDto {
+  @IsNotEmpty({ message: '할 일 내용을 입력해주세요.' })
+  @IsString({ message: '할 일 내용은 문자열이어야 합니다.' })
   todoContent: string; // 할 일 내용
+
+  @IsNotEmpty({ message: '날짜를 입력해주세요.' })
+  @IsDateString({}, { message: '올바른 날짜 형식이 아닙니다.' })
   todoDate: string; // 할 일 날짜
+
+  @IsOptional()
+  @IsString({ message: '비고는 문자열이어야 합니다.' })
   todoNote?: string; // 비고 (선택 사항)
 }
 
@@ -9,8 +26,16 @@ export class CreateTodoWithFilesDto extends CreateTodoDto {
 }
 
 export class UpdateTodoDto {
+  @IsOptional()
+  @IsString({ message: '할 일 내용은 문자열이어야 합니다.' })
   todoContent?: string; // 할 일 내용 (선택 사항)
+
+  @IsOptional()
+  @IsDateString({}, { message: '올바른 날짜 형식이 아닙니다.' })
   completeDtm?: string; // 완료 일시 (선택 사항)
+
+  @IsOptional()
+  @IsString({ message: '비고는 문자열이어야 합니다.' })
   todoNote?: string; // 비고 (선택 사항)
 }
 
@@ -19,6 +44,8 @@ export class UpdateTodoWithFilesDto extends UpdateTodoDto {
 }
 
 export class DeleteTodoDto {
+  @IsArray({ message: '삭제할 할 일 ID 목록은 배열이어야 합니다.' })
+  @IsNumber({}, { each: true, message: '할 일 ID는 숫자이어야 합니다.' })
   todoIds: number[];
 }
 
