@@ -1,6 +1,5 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import { visualizer } from 'rollup-plugin-visualizer';
 import purgecss from '@fullhuman/postcss-purgecss';
 
 // https://vitejs.dev/config/
@@ -8,12 +7,6 @@ export default defineConfig({
   plugins: [
     react({
       jsxRuntime: 'automatic',
-    }),
-    visualizer({
-      filename: 'stats.html',
-      open: false,
-      gzipSize: true,
-      brotliSize: true,
     }),
   ],
   css: {
@@ -56,8 +49,6 @@ export default defineConfig({
     host: true,
   },
   build: {
-    // 경고 기준을 1024kb로 설정
-    chunkSizeWarningLimit: 1024,
     minify: 'terser', // terser 사용 설정
     terserOptions: {
       compress: {
@@ -72,7 +63,7 @@ export default defineConfig({
       output: {
         manualChunks: (id) => {
           if (id.includes('node_modules')) {
-            // UI 관련 라이브러리 먼저 체크 (더 구체적인 조건 우선)
+            // UI 관련 라이브러리 먼저 체크
             if (
               id.includes('bootstrap') ||
               id.includes('react-bootstrap') ||
@@ -83,7 +74,7 @@ export default defineConfig({
               return 'ui-vendor';
             }
 
-            // React 핵심 라이브러리 (정밀 매칭)
+            // React 핵심 라이브러리
             if (
               id.includes('/react/') ||
               id.includes('/react-dom/') ||
@@ -102,6 +93,19 @@ export default defineConfig({
             }
 
             return 'vendor'; // 나머지
+          }
+
+          // src 파일 청크 분리
+          if (id.includes('/src/')) {
+            // 파일 업로드 관련 모듈 분리
+            if (id.includes('FileUpload') || id.includes('useFileUpload')) {
+              return 'file-upload';
+            }
+
+            // API 관련 모듈 분리
+            if (id.includes('/api/')) {
+              return 'api';
+            }
           }
         },
       },

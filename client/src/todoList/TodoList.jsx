@@ -28,12 +28,8 @@ import ThemeToggle from '../components/ThemeToggle';
 import './todoList.css';
 import { ko } from 'date-fns/locale';
 import { showNavigationConfirmAlert } from '../utils/alertUtils';
-const DatePicker = lazy(() =>
-  import('react-datepicker').then((module) => {
-    import('react-datepicker/dist/react-datepicker.css');
-    return module;
-  }),
-);
+import 'react-datepicker/dist/react-datepicker.css';
+const DatePicker = lazy(() => import('react-datepicker'));
 import { API_URL } from '../api/apiClient';
 import { BsThreeDotsVertical } from '@react-icons/all-files/bs/BsThreeDotsVertical';
 import { BsPencilSquare } from '@react-icons/all-files/bs/BsPencilSquare';
