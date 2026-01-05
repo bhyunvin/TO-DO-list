@@ -1,5 +1,31 @@
 import PropTypes from 'prop-types';
 import { ProgressBar, Alert, Badge, ListGroup } from 'react-bootstrap';
+import {
+  BsCheckCircleFill,
+  BsXCircleFill,
+  BsCloudUpload,
+  BsHourglassSplit,
+  BsSpeedometer2,
+  BsShieldCheck,
+  BsExclamationTriangleFill,
+  BsHourglass,
+  BsFileEarmarkImage,
+  BsFileEarmarkPdf,
+  BsFileEarmarkWord,
+  BsFileEarmarkExcel,
+  BsFileEarmarkPpt,
+  BsFileEarmarkText,
+  BsTrash,
+  BsShieldX,
+  BsClock,
+  BsHdd,
+  BsServer,
+  BsFileEarmarkCheck,
+  BsInfoCircle,
+  BsExclamationTriangle,
+  BsArrowClockwise,
+  BsFiles,
+} from 'react-icons/bs';
 import { useFileUploadValidator } from '../hooks/useFileUploadValidator';
 
 /**
@@ -105,34 +131,34 @@ const FileUploadProgress = ({
     let variant = 'primary';
     let label = '';
     let showLabel = false;
-    let statusIcon = '';
+    let StatusIcon = null;
 
     if (progress === 100 || fileStatus.status === 'success') {
       variant = 'success';
       label = '완료';
-      statusIcon = 'bi-check-circle-fill';
+      StatusIcon = BsCheckCircleFill;
       showLabel = true;
     } else if (fileStatus.status === 'error' || uploadStatus === 'error') {
       variant = 'danger';
       label = '실패';
-      statusIcon = 'bi-x-circle-fill';
+      StatusIcon = BsXCircleFill;
       showLabel = true;
     } else if (uploadStatus === 'uploading') {
       label = `${progress}%`;
-      statusIcon = 'bi-cloud-upload';
+      StatusIcon = BsCloudUpload;
       showLabel = progress > 0;
     } else if (uploadStatus === 'validating') {
       variant = 'info';
       label = '검증 중';
-      statusIcon = 'bi-hourglass-split';
+      StatusIcon = BsHourglassSplit;
       showLabel = true;
     }
 
     return (
       <div className="mt-2">
         <div className="d-flex justify-content-between align-items-center mb-1">
-          <small className="text-muted">
-            <i className={`bi ${statusIcon} me-1`}></i> 업로드 상태
+          <small className="text-muted d-flex align-items-center">
+            {StatusIcon && <StatusIcon className="me-1" />} 업로드 상태
           </small>
           {showLabel && (
             <small
@@ -161,14 +187,14 @@ const FileUploadProgress = ({
         {/* 상세 정보가 포함된 향상된 업로드 피드백 */}
         {uploadStatus === 'uploading' && progress > 0 && progress < 100 && (
           <div className="mt-1 d-flex justify-content-between align-items-center">
-            <small className="text-primary">
-              <i className="bi bi-cloud-upload me-1"></i>
+            <small className="text-primary d-flex align-items-center">
+              <BsCloudUpload className="me-1" />
               업로드 중... {formatFileSize(file.size)}
             </small>
-            <small className="text-muted">
+            <small className="text-muted d-flex align-items-center">
               {progress > 0 && (
                 <>
-                  <i className="bi bi-speedometer2 me-1"></i>
+                  <BsSpeedometer2 className="me-1" />
                   {Math.round((file.size * progress) / 100 / 1024)} KB 전송됨
                 </>
               )}
@@ -179,9 +205,9 @@ const FileUploadProgress = ({
         {/* 유효성 검사 피드백 */}
         {uploadStatus === 'validating' && (
           <div className="mt-1">
-            <small className="text-info">
-              <i className="bi bi-shield-check me-1"></i> 파일 보안 검사 및
-              유효성 검증 중...
+            <small className="text-info d-flex align-items-center">
+              <BsShieldCheck className="me-1" /> 파일 보안 검사 및 유효성 검증
+              중...
             </small>
           </div>
         )}
@@ -189,8 +215,8 @@ const FileUploadProgress = ({
         {/* 타임스탬프가 포함된 성공 피드백 */}
         {fileStatus.status === 'success' && (
           <div className="mt-1">
-            <small className="text-success">
-              <i className="bi bi-check-circle-fill me-1"></i>
+            <small className="text-success d-flex align-items-center">
+              <BsCheckCircleFill className="me-1" />
               <strong>업로드 완료!</strong> -{' '}
               {new Date().toLocaleTimeString('ko-KR')}
             </small>
@@ -200,8 +226,8 @@ const FileUploadProgress = ({
         {/* 재시도 제안이 포함된 오류 피드백 */}
         {fileStatus.status === 'error' && (
           <div className="mt-1">
-            <small className="text-danger">
-              <i className="bi bi-exclamation-triangle-fill me-1"></i>
+            <small className="text-danger d-flex align-items-center">
+              <BsExclamationTriangleFill className="me-1" />
               <strong>업로드 실패</strong> - 파일을 다시 선택하거나
               재시도해주세요.
             </small>
@@ -211,8 +237,8 @@ const FileUploadProgress = ({
         {/* 대기 상태 */}
         {uploadStatus === 'uploading' && progress === 0 && (
           <div className="mt-1">
-            <small className="text-muted">
-              <i className="bi bi-hourglass me-1"></i>
+            <small className="text-muted d-flex align-items-center">
+              <BsHourglass className="me-1" />
               업로드 대기 중... ({formatFileSize(file.size)})
             </small>
           </div>
@@ -294,8 +320,8 @@ const FileUploadProgress = ({
               {uploadStatus === 'uploading' && (
                 <div className="mt-2">
                   <div className="d-flex justify-content-between align-items-center mb-1">
-                    <small className="text-muted">
-                      <i className="bi bi-cloud-upload me-1"></i> 전체 진행률
+                    <small className="text-muted d-flex align-items-center">
+                      <BsCloudUpload className="me-1" /> 전체 진행률
                     </small>
                     <small className="text-primary font-weight-bold">
                       {overallProgress}%
@@ -309,13 +335,13 @@ const FileUploadProgress = ({
                   />
                   {/* 업로드 통계 */}
                   <div className="mt-1 d-flex justify-content-between">
-                    <small className="text-muted">
-                      <i className="bi bi-files me-1"></i>
+                    <small className="text-muted d-flex align-items-center">
+                      <BsFiles className="me-1" />
                       {successfulUploads}/{totalFiles} 파일 완료
                     </small>
                     {remainingSize > 0 && (
-                      <small className="text-muted">
-                        <i className="bi bi-hourglass-split me-1"></i>
+                      <small className="text-muted d-flex align-items-center">
+                        <BsHourglassSplit className="me-1" />
                         남은 용량: {formatFileSize(remainingSize)}
                       </small>
                     )}
@@ -326,19 +352,19 @@ const FileUploadProgress = ({
               {/* 파일 요약이 포함된 향상된 성공 세부 정보 */}
               {uploadStatus === 'success' && showDetailedStatus && (
                 <div className="mt-2 p-2 bg-light rounded">
-                  <div className="text-success mb-2">
-                    <i className="bi bi-check-circle-fill me-1"></i>
+                  <div className="text-success mb-2 d-flex align-items-center">
+                    <BsCheckCircleFill className="me-1" />
                     <strong>
                       {successfulUploads}개 파일이 성공적으로 업로드되었습니다!
                     </strong>
                   </div>
                   <div className="row text-muted small">
-                    <div className="col-6">
-                      <i className="bi bi-clock me-1"></i>
+                    <div className="col-6 d-flex align-items-center">
+                      <BsClock className="me-1" />
                       완료 시간: {new Date().toLocaleTimeString('ko-KR')}
                     </div>
-                    <div className="col-6">
-                      <i className="bi bi-hdd me-1"></i>총 용량:{' '}
+                    <div className="col-6 d-flex align-items-center">
+                      <BsHdd className="me-1" />총 용량:{' '}
                       {formatFileSize(totalSize)}
                     </div>
                   </div>
@@ -350,9 +376,9 @@ const FileUploadProgress = ({
                         {uploadedFiles.slice(0, 3).map((file) => (
                           <li
                             key={file.originalFileName || file.fileName}
-                            className="small text-success"
+                            className="small text-success d-flex align-items-center"
                           >
-                            <i className="bi bi-file-earmark-check me-1"></i>
+                            <BsFileEarmarkCheck className="me-1" />
                             {file.originalFileName || file.fileName}
                           </li>
                         ))}
@@ -372,20 +398,20 @@ const FileUploadProgress = ({
                 <div className="mt-2 p-2 bg-light rounded">
                   <div className="row">
                     <div className="col-6">
-                      <div className="text-success small">
-                        <i className="bi bi-check-circle-fill me-1"></i>
+                      <div className="text-success small d-flex align-items-center">
+                        <BsCheckCircleFill className="me-1" />
                         성공: {successfulUploads}개
                       </div>
                     </div>
                     <div className="col-6">
-                      <div className="text-danger small">
-                        <i className="bi bi-x-circle-fill me-1"></i>
+                      <div className="text-danger small d-flex align-items-center">
+                        <BsXCircleFill className="me-1" />
                         실패: {failedUploads}개
                       </div>
                     </div>
                   </div>
-                  <div className="mt-1 small text-muted">
-                    <i className="bi bi-info-circle me-1"></i> 성공한 파일은
+                  <div className="mt-1 small text-muted d-flex align-items-center">
+                    <BsInfoCircle className="me-1" /> 성공한 파일은
                     저장되었습니다. 실패한 파일만 다시 업로드하세요.
                   </div>
                 </div>
@@ -400,26 +426,32 @@ const FileUploadProgress = ({
               <div className="text-end ms-3">
                 <div className="d-flex flex-column align-items-end">
                   {uploadStatus === 'success' && (
-                    <Badge bg="success" className="mb-1">
-                      <i className="bi bi-check-circle-fill me-1"></i>
+                    <Badge
+                      bg="success"
+                      className="mb-1 d-flex align-items-center"
+                    >
+                      <BsCheckCircleFill className="me-1" />
                       {successfulUploads}/{totalFiles} 완료
                     </Badge>
                   )}
                   {uploadStatus === 'partial_success' && (
                     <>
-                      <Badge bg="success" className="mb-1">
-                        <i className="bi bi-check-circle-fill me-1"></i>
+                      <Badge
+                        bg="success"
+                        className="mb-1 d-flex align-items-center"
+                      >
+                        <BsCheckCircleFill className="me-1" />
                         성공: {successfulUploads}
                       </Badge>
-                      <Badge bg="warning">
-                        <i className="bi bi-exclamation-triangle-fill me-1"></i>
+                      <Badge bg="warning" className="d-flex align-items-center">
+                        <BsExclamationTriangleFill className="me-1" />
                         실패: {failedUploads}
                       </Badge>
                     </>
                   )}
                   {uploadStatus === 'error' && (
-                    <Badge bg="danger">
-                      <i className="bi bi-x-circle-fill me-1"></i>
+                    <Badge bg="danger" className="d-flex align-items-center">
+                      <BsXCircleFill className="me-1" />
                       {failedUploads}/{totalFiles} 실패
                     </Badge>
                   )}
@@ -435,8 +467,8 @@ const FileUploadProgress = ({
             <div className="mt-3 pt-2 border-top">
               <div className="d-flex justify-content-between align-items-center">
                 <div className="flex-grow-1">
-                  <small className="text-warning">
-                    <i className="bi bi-exclamation-triangle me-1"></i>
+                  <small className="text-warning d-flex align-items-center">
+                    <BsExclamationTriangle className="me-1" />
                     <strong>
                       {failedUploads}개 파일 업로드에 실패했습니다.
                     </strong>
@@ -450,7 +482,7 @@ const FileUploadProgress = ({
                 </div>
                 <button
                   type="button"
-                  className="btn btn-sm btn-warning ms-3"
+                  className="btn btn-sm btn-warning ms-3 d-flex align-items-center"
                   onClick={() => {
                     const failedFileNameList = new Set(
                       uploadErrors.map((e) => e.fileName),
@@ -461,7 +493,7 @@ const FileUploadProgress = ({
                     onRetryUpload(failedFiles);
                   }}
                 >
-                  <i className="bi bi-arrow-clockwise me-1"></i>
+                  <BsArrowClockwise className="me-1" />
                   실패한 파일 재시도 ({failedUploads}개)
                 </button>
               </div>
@@ -471,8 +503,8 @@ const FileUploadProgress = ({
         {/* 문제 해결 팁이 포함된 향상된 오류 섹션 */}
         {uploadStatus === 'error' && failedUploads > 0 && (
           <div className="mt-3 pt-2 border-top">
-            <div className="text-danger mb-2">
-              <i className="bi bi-exclamation-triangle-fill me-1"></i>
+            <div className="text-danger mb-2 d-flex align-items-center">
+              <BsExclamationTriangleFill className="me-1" />
               <strong>모든 파일 업로드에 실패했습니다.</strong>
             </div>
             <div className="small text-muted">
@@ -486,11 +518,10 @@ const FileUploadProgress = ({
             {onRetryUpload && (
               <button
                 type="button"
-                className="btn btn-sm btn-outline-danger"
+                className="btn btn-sm btn-outline-danger d-flex align-items-center"
                 onClick={() => onRetryUpload(files)}
               >
-                <i className="bi bi-arrow-clockwise me-1"></i> 모든 파일 다시
-                시도
+                <BsArrowClockwise className="me-1" /> 모든 파일 다시 시도
               </button>
             )}
           </div>
@@ -540,20 +571,22 @@ const FileUploadProgress = ({
       borderClass = 'border-primary';
     }
 
-    const getFileIconClass = () => {
-      if (file.type?.startsWith('image/')) return 'bi-file-earmark-image';
-      if (file.type?.includes('pdf')) return 'bi-file-earmark-pdf';
+    const getFileIcon = () => {
+      if (file.type?.startsWith('image/')) return BsFileEarmarkImage;
+      if (file.type?.includes('pdf')) return BsFileEarmarkPdf;
       if (file.type?.includes('word') || file.name?.endsWith('.docx')) {
-        return 'bi-file-earmark-word';
+        return BsFileEarmarkWord;
       }
       if (file.type?.includes('excel') || file.name?.endsWith('.xlsx')) {
-        return 'bi-file-earmark-excel';
+        return BsFileEarmarkExcel;
       }
       if (file.type?.includes('powerpoint') || file.name?.endsWith('.pptx')) {
-        return 'bi-file-earmark-ppt';
+        return BsFileEarmarkPpt;
       }
-      return 'bi-file-earmark-text';
+      return BsFileEarmarkText;
     };
+
+    const FileIcon = getFileIcon();
 
     const getBadgeVariant = (status) => {
       switch (status) {
@@ -576,7 +609,7 @@ const FileUploadProgress = ({
         <div className="flex-grow-1">
           <div className="d-flex align-items-center flex-wrap">
             {/* 유형에 따른 파일 아이콘 */}
-            <i className={`bi ${getFileIconClass()} me-2 text-muted`}></i>
+            <FileIcon className="me-2 text-muted" />
 
             <div className="flex-grow-1">
               <div className="d-flex align-items-center">
@@ -595,11 +628,11 @@ const FileUploadProgress = ({
                 <div className="me-2">
                   {validationStatus.isValid ? (
                     <Badge bg="success" className="d-flex align-items-center">
-                      <i className="bi bi-shield-check me-1"></i> 검증 완료
+                      <BsShieldCheck className="me-1" /> 검증 완료
                     </Badge>
                   ) : (
                     <Badge bg="danger" className="d-flex align-items-center">
-                      <i className="bi bi-shield-x me-1"></i> 검증 실패
+                      <BsShieldX className="me-1" /> 검증 실패
                     </Badge>
                   )}
                 </div>
@@ -614,13 +647,12 @@ const FileUploadProgress = ({
                   >
                     {uploadFileStatus.status === 'success' && (
                       <>
-                        <i className="bi bi-check-circle-fill me-1"></i> 업로드
-                        완료
+                        <BsCheckCircleFill className="me-1" /> 업로드 완료
                       </>
                     )}
                     {uploadFileStatus.status === 'error' && (
                       <>
-                        <i className="bi bi-x-circle-fill me-1"></i> 업로드 실패
+                        <BsXCircleFill className="me-1" /> 업로드 실패
                       </>
                     )}
                     {uploadFileStatus.status === 'uploading' && (
@@ -636,7 +668,7 @@ const FileUploadProgress = ({
                     )}
                     {uploadFileStatus.status === 'pending' && (
                       <>
-                        <i className="bi bi-hourglass me-1"></i> 대기 중
+                        <BsHourglass className="me-1" /> 대기 중
                       </>
                     )}
                   </Badge>
@@ -652,7 +684,7 @@ const FileUploadProgress = ({
                   title="파일 제거"
                   disabled={uploadFileStatus.status === 'success'}
                 >
-                  <i className="bi bi-trash"></i>
+                  <BsTrash />
                 </button>
               )}
             </div>
@@ -660,24 +692,28 @@ const FileUploadProgress = ({
 
           {/* 제안이 포함된 향상된 유효성 검사 오류 메시지 */}
           {!validationStatus.isValid && (
-            <div className="alert alert-danger small mt-2 mb-0 py-2">
-              <i className="bi bi-exclamation-triangle-fill me-1"></i>
-              <strong>검증 오류:</strong> {validationStatus.message}
-              <div className="mt-1 text-muted">
-                파일을 다시 선택하거나 파일 형식과 크기를 확인해주세요.
+            <div className="alert alert-danger small mt-2 mb-0 py-2 d-flex align-items-center">
+              <BsExclamationTriangleFill className="me-1" />
+              <div>
+                <strong>검증 오류:</strong> {validationStatus.message}
+                <div className="mt-1 text-muted">
+                  파일을 다시 선택하거나 파일 형식과 크기를 확인해주세요.
+                </div>
               </div>
             </div>
           )}
 
           {/* 재시도 옵션이 포함된 향상된 업로드 오류 메시지 */}
           {uploadFileStatus.status === 'error' && (
-            <div className="alert alert-danger small mt-2 mb-0 py-2">
-              <i className="bi bi-exclamation-triangle-fill me-1"></i>
-              <strong>업로드 오류:</strong>{' '}
-              {uploadErrors.find((error) => error.fileName === file.name)
-                ?.errorMessage || '업로드에 실패했습니다.'}
-              <div className="mt-1 text-muted">
-                네트워크 연결을 확인하거나 잠시 후 다시 시도해주세요.
+            <div className="alert alert-danger small mt-2 mb-0 py-2 d-flex align-items-center">
+              <BsExclamationTriangleFill className="me-1" />
+              <div>
+                <strong>업로드 오류:</strong>{' '}
+                {uploadErrors.find((error) => error.fileName === file.name)
+                  ?.errorMessage || '업로드에 실패했습니다.'}
+                <div className="mt-1 text-muted">
+                  네트워크 연결을 확인하거나 잠시 후 다시 시도해주세요.
+                </div>
               </div>
             </div>
           )}
@@ -685,15 +721,17 @@ const FileUploadProgress = ({
           {/* 상세 정보가 포함된 향상된 성공 메시지 */}
           {uploadFileStatus.status === 'success' && showDetailedStatus && (
             <div className="alert alert-success small mt-2 mb-0 py-2">
-              <i className="bi bi-check-circle-fill me-1"></i>
-              <strong>업로드 성공!</strong>
+              <div className="d-flex align-items-center">
+                <BsCheckCircleFill className="me-1" />
+                <strong>업로드 성공!</strong>
+              </div>
               <div className="row mt-1 text-muted">
-                <div className="col-6">
-                  <i className="bi bi-clock me-1"></i>
+                <div className="col-6 d-flex align-items-center">
+                  <BsClock className="me-1" />
                   완료: {new Date().toLocaleTimeString('ko-KR')}
                 </div>
-                <div className="col-6">
-                  <i className="bi bi-hdd me-1"></i>
+                <div className="col-6 d-flex align-items-center">
+                  <BsHdd className="me-1" />
                   크기: {formatFileSize(file.size)}
                 </div>
               </div>
@@ -703,9 +741,8 @@ const FileUploadProgress = ({
                   uploaded.originalFileName === file.name ||
                   uploaded.fileName === file.name,
               ) && (
-                <div className="mt-1 text-muted">
-                  <i className="bi bi-server me-1"></i> 서버에 안전하게
-                  저장되었습니다.
+                <div className="mt-1 text-muted d-flex align-items-center">
+                  <BsServer className="me-1" /> 서버에 안전하게 저장되었습니다.
                 </div>
               )}
             </div>
@@ -735,11 +772,13 @@ const FileUploadProgress = ({
           {/* 대기 상태 */}
           {uploadFileStatus.status === 'pending' &&
             uploadStatus === 'uploading' && (
-              <div className="alert alert-info small mt-2 mb-0 py-2">
-                <i className="bi bi-hourglass me-1"></i>
-                <strong>업로드 대기 중...</strong>
-                <div className="text-muted">
-                  다른 파일 업로드가 완료되면 자동으로 시작됩니다.
+              <div className="alert alert-info small mt-2 mb-0 py-2 d-flex align-items-center">
+                <BsHourglass className="me-1" />
+                <div>
+                  <strong>업로드 대기 중...</strong>
+                  <div className="text-muted">
+                    다른 파일 업로드가 완료되면 자동으로 시작됩니다.
+                  </div>
                 </div>
               </div>
             )}
@@ -814,7 +853,7 @@ const FileUploadProgress = ({
                   onRetryUpload(failedFiles);
                 }}
               >
-                <i className="bi bi-arrow-clockwise me-1"></i> 다시 시도
+                <BsArrowClockwise className="me-1" /> 다시 시도
               </button>
             </div>
           )}

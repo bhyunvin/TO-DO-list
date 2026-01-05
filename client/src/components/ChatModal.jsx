@@ -1,6 +1,13 @@
 import { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Modal } from 'react-bootstrap';
+import {
+  BsRobot,
+  BsExclamationTriangleFill,
+  BsArrowClockwise,
+  BsSend,
+  BsArrowUpCircle,
+} from 'react-icons/bs';
 import ChatMessage from './ChatMessage';
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
 import './ChatModal.css';
@@ -133,8 +140,8 @@ const ChatModal = ({
     >
       <Modal.Header closeButton className="chat-modal-header">
         <Modal.Title id="chat-modal-title">
-          <i className="bi bi-robot me-2" aria-hidden="true"></i> Use AI
-          Assistant AI 어시스턴트
+          <BsRobot className="me-2" aria-hidden="true" /> Use AI Assistant AI
+          어시스턴트
         </Modal.Title>
       </Modal.Header>
 
@@ -169,10 +176,10 @@ const ChatModal = ({
           {error && (
             <div className="error-message" role="alert" aria-live="assertive">
               <div className="error-content">
-                <i
-                  className="bi bi-exclamation-triangle-fill me-2"
+                <BsExclamationTriangleFill
+                  className="me-2"
                   aria-hidden="true"
-                ></i>
+                />
                 <span className="error-text">{error}</span>
               </div>
               {onRetry && (
@@ -182,7 +189,7 @@ const ChatModal = ({
                     onClick={onRetry}
                     disabled={isLoading}
                   >
-                    <i className="bi bi-arrow-clockwise me-1"></i> 다시 시도
+                    <BsArrowClockwise className="me-1" /> 다시 시도
                   </button>
                   <button
                     className="btn btn-sm btn-outline-secondary"
@@ -228,14 +235,14 @@ const ChatModal = ({
                   aria-hidden="true"
                 ></span>
               ) : (
-                <i className="bi bi-send"></i>
+                <BsSend />
               )}
             </button>
           </div>
           <small id="chat-input-help" className="text-muted mt-1">
             {isLoading ? (
               <span className="text-primary">
-                <i className="bi bi-arrow-up-circle me-1"></i> 메시지를 전송하고
+                <BsArrowUpCircle className="me-1" /> 메시지를 전송하고
                 있습니다...
               </span>
             ) : (

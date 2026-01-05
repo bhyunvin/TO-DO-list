@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import DOMPurify from 'dompurify';
+import { BsRobot, BsPersonFill } from 'react-icons/bs';
 import './ChatMessage.css';
 
 const ChatMessage = ({ message, isUser }) => {
@@ -69,7 +70,7 @@ const ChatMessage = ({ message, isUser }) => {
       <div className="message-container">
         {!isUser && (
           <div className="message-avatar" aria-hidden="true">
-            <i className="bi bi-robot"></i>
+            <BsRobot />
           </div>
         )}
         <div className="message-bubble">
@@ -83,7 +84,7 @@ const ChatMessage = ({ message, isUser }) => {
         </div>
         {isUser && (
           <div className="message-avatar user-avatar" aria-hidden="true">
-            <i className="bi bi-person-fill"></i>
+            <BsPersonFill />
           </div>
         )}
       </div>

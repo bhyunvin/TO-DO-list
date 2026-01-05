@@ -21,9 +21,9 @@ import './todoList.css';
 import DatePicker from 'react-datepicker';
 import { ko } from 'date-fns/locale';
 import { showNavigationConfirmAlert } from '../utils/alertUtils';
-import 'bootstrap-icons/font/bootstrap-icons.css';
 import 'react-datepicker/dist/react-datepicker.css';
 import { API_URL } from '../api/apiClient';
+import { BsThreeDotsVertical, BsPencilFill, BsTrashFill } from 'react-icons/bs';
 
 const CreateTodoForm = ({ onAddTodo, onCancel }) => {
   const { formatFileSize, getUploadPolicy, validateFiles } =
@@ -357,7 +357,7 @@ const TodoList = ({
                 setOpenActionMenu(openActionMenu === todoSeq ? null : todoSeq)
               }
             >
-              <i className="bi bi-three-dots-vertical"></i>
+              <BsThreeDotsVertical />
             </button>
             {openActionMenu === todoSeq && (
               <div className="action-menu" ref={menuRef}>
@@ -369,14 +369,14 @@ const TodoList = ({
                   }}
                   title="수정"
                 >
-                  <i className="bi bi-pencil-fill"></i>
+                  <BsPencilFill />
                 </button>
                 <button
                   className="btn btn-sm btn-outline-danger"
                   onClick={() => onDeleteTodo(todoSeq)}
                   title="삭제"
                 >
-                  <i className="bi bi-trash-fill"></i>
+                  <BsTrashFill />
                 </button>
               </div>
             )}

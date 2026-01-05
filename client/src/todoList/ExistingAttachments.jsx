@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import Swal from 'sweetalert2';
+import { BsPaperclip, BsXLg } from 'react-icons/bs';
 import todoService from '../api/todoService';
 import { API_URL } from '../api/apiClient';
 import { useFileUploadValidator } from '../hooks/useFileUploadValidator';
@@ -71,7 +72,7 @@ const ExistingAttachments = ({ todoSeq }) => {
             className="list-group-item d-flex justify-content-between align-items-center p-2"
           >
             <div className="d-flex align-items-center overflow-hidden">
-              <i className="bi bi-paperclip me-2 text-secondary"></i>
+              <BsPaperclip className="me-2 text-secondary" />
               <a
                 href={`${API_URL}/file/${file.fileNo}`}
                 target="_blank"
@@ -92,7 +93,7 @@ const ExistingAttachments = ({ todoSeq }) => {
               onClick={() => handleDelete(file.fileNo)}
               title="삭제"
             >
-              <i className="bi bi-x-lg"></i>
+              <BsXLg />
             </button>
           </div>
         ))}

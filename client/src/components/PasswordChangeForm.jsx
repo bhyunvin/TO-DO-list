@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { BsEye, BsEyeSlash } from 'react-icons/bs';
 
 import { useAuthStore } from '../authStore/authStore';
 import { showConfirmAlert } from '../utils/alertUtils';
@@ -255,11 +256,7 @@ const PasswordChangeForm = ({
                 className="btn btn-outline-secondary"
                 onClick={() => setShowCurrentPassword(!showCurrentPassword)}
               >
-                {showCurrentPassword ? (
-                  <i className="bi bi-eye-slash"></i>
-                ) : (
-                  <i className="bi bi-eye"></i>
-                )}
+                {showCurrentPassword ? <BsEyeSlash /> : <BsEye />}
               </button>
             </div>
             {currentPasswordError && (
@@ -292,11 +289,7 @@ const PasswordChangeForm = ({
                 className="btn btn-outline-secondary"
                 onClick={() => setShowNewPassword(!showNewPassword)}
               >
-                {showNewPassword ? (
-                  <i className="bi bi-eye-slash"></i>
-                ) : (
-                  <i className="bi bi-eye"></i>
-                )}
+                {showNewPassword ? <BsEyeSlash /> : <BsEye />}
               </button>
             </div>
             {newPasswordError && (
@@ -345,11 +338,7 @@ const PasswordChangeForm = ({
                 className="btn btn-outline-secondary"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               >
-                {showConfirmPassword ? (
-                  <i className="bi bi-eye-slash"></i>
-                ) : (
-                  <i className="bi bi-eye"></i>
-                )}
+                {showConfirmPassword ? <BsEyeSlash /> : <BsEye />}
               </button>
             </div>
             {confirmPasswordError && (
