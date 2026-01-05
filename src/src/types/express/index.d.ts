@@ -1,5 +1,5 @@
 import 'express-session';
-import { UserEntity } from '../../src/user/user.entity';
+import { UserEntity } from '../../user/user.entity';
 
 declare module 'express-session' {
   interface SessionData {

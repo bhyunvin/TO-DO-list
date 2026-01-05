@@ -29,7 +29,7 @@ import { UserDto, UpdateUserDto, ChangePasswordDto } from './user.dto';
 import { UserEntity } from './user.entity';
 import { UserProfileValidationPipe } from './user-validation.pipe';
 
-import { AuthenticatedGuard } from '../../types/express/auth.guard';
+import { AuthenticatedGuard } from '../types/express/auth.guard';
 
 @Controller('user')
 export class UserController {

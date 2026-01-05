@@ -4,7 +4,7 @@ import { TodoController } from './todo.controller';
 import { TodoService } from './todo.service';
 import { FileUploadErrorService } from '../fileUpload/validation/file-upload-error.service';
 import { FileValidationService } from '../fileUpload/validation/file-validation.service';
-import { AuthenticatedGuard } from '../../types/express/auth.guard';
+import { AuthenticatedGuard } from '../types/express/auth.guard';
 
 describe('TodoController - Excel Export', () => {
   let controller: TodoController;

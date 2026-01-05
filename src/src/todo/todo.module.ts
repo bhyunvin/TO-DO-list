@@ -4,7 +4,7 @@ import { TodoService } from './todo.service';
 import { TodoController } from './todo.controller';
 import { TodoEntity } from './todo.entity';
 import { UserModule } from '../user/user.module';
-import { AuthModule } from '../../types/express/auth.module';
+import { AuthModule } from '../types/express/auth.module';
 import { FileUploadModule } from '../fileUpload/fileUpload.module';
 import { FileInfoEntity } from '../fileUpload/file.entity';
 

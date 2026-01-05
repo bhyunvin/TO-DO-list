@@ -12,7 +12,7 @@ import { Response } from 'express';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { FileInfoEntity } from './file.entity';
-import { AuthenticatedGuard } from '../../types/express/auth.guard';
+import { AuthenticatedGuard } from '../types/express/auth.guard';
 import { existsSync } from 'node:fs';
 import { SessionData } from 'express-session';
 import { TodoEntity } from '../todo/todo.entity';

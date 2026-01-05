@@ -11,7 +11,7 @@ import {
 import { SessionData } from 'express-session';
 import { ChatRequestDto, ChatResponseDto } from './assistance.dto';
 import { AssistanceService } from './assistance.service';
-import { AuthenticatedGuard } from '../../types/express/auth.guard';
+import { AuthenticatedGuard } from '../types/express/auth.guard';
 
 @UseGuards(AuthenticatedGuard)
 @Controller('assistance')

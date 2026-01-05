@@ -27,7 +27,7 @@ import {
   CreateTodoWithFilesDto,
   UpdateTodoWithFilesDto,
 } from './todo.dto';
-import { AuthenticatedGuard } from '../../types/express/auth.guard';
+import { AuthenticatedGuard } from '../types/express/auth.guard';
 import { TodoAttachmentValidationInterceptor } from '../fileUpload/validation/file-validation.interceptor';
 import { FileUploadErrorService } from '../fileUpload/validation/file-upload-error.service';
 import { todoAttachmentMulterOptions } from '../fileUpload/fileUploadUtil';
