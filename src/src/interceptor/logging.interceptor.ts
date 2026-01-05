@@ -25,7 +25,13 @@ export class LoggingInterceptor implements NestInterceptor {
     const { user } = session;
     const userSeq = user ? Number(user.userSeq) : undefined;
     const userId = user ? user.userId : undefined;
-    const ip = connection.remoteAddress || headers['x-forwarded-for'] || '';
+    const xForwardedFor = headers['x-forwarded-for'];
+    let ip = connection.remoteAddress || '';
+    if (Array.isArray(xForwardedFor)) {
+      ip = xForwardedFor[0];
+    } else if (xForwardedFor) {
+      ip = xForwardedFor.split(',')[0].trim();
+    }
 
     this.logger.log(
       `Incoming request: ${method} ${url}. userSeq : ${Number.isNaN(userSeq) ? 'anonymous user' : userSeq}`,
