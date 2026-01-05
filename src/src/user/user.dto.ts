@@ -123,3 +123,8 @@ export class ChangePasswordDto {
   @IsString({ message: '새 비밀번호 확인은 문자열이어야 합니다.' })
   confirmPassword: string; //새 비밀번호 확인
 }
+export class RefreshTokenDto {
+  @IsNotEmpty({ message: 'Refresh Token을 입력해주세요.' })
+  @IsString({ message: 'Refresh Token은 문자열이어야 합니다.' })
+  refreshToken: string;
+}

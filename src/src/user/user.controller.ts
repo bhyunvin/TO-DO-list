@@ -27,12 +27,18 @@ import {
   UpdateUserDto,
   ChangePasswordDto,
   LoginDto,
+  RefreshTokenDto,
 } from './user.dto';
 import { UserEntity } from './user.entity';
 import { UserProfileValidationPipe } from './user-validation.pipe';
 
 import { AuthenticatedGuard } from '../types/express/auth.guard';
 import { AuthService } from '../types/express/auth.service';
+
+type AuthenticatedUser = {
+  userSeq: number;
+  userId: string;
+};
 
 @Controller('user')
 export class UserController {
@@ -46,12 +52,19 @@ export class UserController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  async login(@Body() loginDto: LoginDto): Promise<{
+  async login(
+    @Body() loginDto: LoginDto,
+    @Ip() ip: string,
+  ): Promise<{
     access_token: string;
+    refreshToken: string;
     user: Omit<UserEntity, 'userPassword' | 'setProfileImage'>;
   }> {
     const user = await this.userService.login(loginDto);
-    const { access_token } = await this.authService.login(user);
+    const { access_token, refreshToken } = await this.authService.login(
+      user,
+      ip,
+    );
 
     // 간단히 클라이언트 반환용으로 복사본 생성 후 복호화 및 마스킹
     const userForClient = { ...user };
@@ -59,6 +72,7 @@ export class UserController {
 
     return {
       access_token,
+      refreshToken,
       user: publicUser,
     };
   }
@@ -127,12 +141,42 @@ export class UserController {
     }
   }
 
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  async refresh(
+    @Body() refreshTokenDto: RefreshTokenDto,
+    @Req() req: Request,
+    @Ip() ip: string,
+  ): Promise<{ access_token: string; refreshToken: string }> {
+    // Access Token에서 userSeq 추출 (만료된 토큰이라도 디코딩 가능)
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      throw new UnauthorizedException('Access Token이 필요합니다.');
+    }
+    const accessToken = authHeader.split(' ')[1];
+    const decoded = this.authService.decodeAccessToken(accessToken);
+
+    if (!decoded?.userSeq) {
+      throw new UnauthorizedException('유효하지 않은 Access Token입니다.');
+    }
+
+    return this.authService.rotateRefreshToken(
+      refreshTokenDto.refreshToken,
+      decoded.userSeq,
+      ip,
+    );
+  }
+
   @UseGuards(AuthenticatedGuard)
   @Post('logout')
   @HttpCode(HttpStatus.NO_CONTENT)
-  logout(): void {
-    // JWT는 상태가 없으므로 서버측 로그아웃 로직은 필요 없습니다.
-    // 클라이언트에서 토큰을 폐기해야 합니다.
+  async logout(
+    @Req() req: Request,
+    @Body() refreshTokenDto: RefreshTokenDto,
+  ): Promise<void> {
+    const user = req.user as AuthenticatedUser;
+    // 로그아웃 시 클라이언트가 보낸 Refresh Token을 무효화합니다.
+    await this.authService.logout(user.userSeq, refreshTokenDto.refreshToken);
   }
 
   @UseGuards(AuthenticatedGuard)
@@ -148,7 +192,7 @@ export class UserController {
     @Ip() ip: string,
   ): Promise<Omit<UserEntity, 'userPassword' | 'setProfileImage'>> {
     try {
-      const user = req.user as any;
+      const user = req.user as AuthenticatedUser;
       if (!user?.userSeq) {
         throw new UnauthorizedException('로그인이 필요합니다.');
       }
@@ -182,7 +226,7 @@ export class UserController {
       return this.userService.getPublicUserInfo(userForClient);
     } catch (error) {
       const { message } = error;
-      const user = req.user as any;
+      const user = req.user as AuthenticatedUser;
       this.logger.error('Profile update failed', {
         userSeq: user?.userSeq,
         userId: user?.userId,
@@ -205,7 +249,7 @@ export class UserController {
     @Ip() ip: string,
   ): Promise<{ message: string }> {
     try {
-      const user = req.user as any;
+      const user = req.user as AuthenticatedUser;
       if (!user?.userSeq) {
         throw new UnauthorizedException('로그인이 필요합니다.');
       }
@@ -228,7 +272,7 @@ export class UserController {
       return { message: '비밀번호가 성공적으로 변경되었습니다.' };
     } catch (error) {
       const { message } = error;
-      const user = req.user as any;
+      const user = req.user as AuthenticatedUser;
       this.logger.error('Password change failed', {
         userSeq: user?.userSeq,
         userId: user?.userId,
@@ -243,7 +287,7 @@ export class UserController {
   @UseGuards(AuthenticatedGuard)
   @Get('profile')
   async getProfile(@Req() req: Request) {
-    const user = req.user as any;
+    const user = req.user as AuthenticatedUser;
     if (!user) {
       throw new UnauthorizedException('로그인이 필요합니다.');
     }
@@ -255,7 +299,7 @@ export class UserController {
   @UseGuards(AuthenticatedGuard)
   @Get('profile/detail')
   async getProfileDetail(@Req() req: Request) {
-    const user = req.user as any;
+    const user = req.user as AuthenticatedUser;
     if (!user) {
       throw new UnauthorizedException('로그인이 필요합니다.');
     }

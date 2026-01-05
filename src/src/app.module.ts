@@ -1,6 +1,7 @@
 import { Module, NestModule, MiddlewareConsumer, Logger } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ScheduleModule } from '@nestjs/schedule'; // Import ScheduleModule
 import { z } from 'zod';
 
 import { TodoModule } from './todo/todo.module';
@@ -13,6 +14,7 @@ import { TodoEntity } from './todo/todo.entity';
 import { UserEntity } from './user/user.entity';
 import { LogEntity } from './logging/logging.entity';
 import { FileInfoEntity } from './fileUpload/file.entity';
+import { RefreshTokenEntity } from './user/refresh-token.entity'; // Added RefreshTokenEntity
 
 import { CustomNamingStrategy } from './utils/customNamingStrategy';
 import { APP_INTERCEPTOR, APP_FILTER } from '@nestjs/core';
@@ -93,12 +95,20 @@ const validate = (config: Record<string, unknown>) => {
         password: configService.get<string>('DB_DEV_PASSWORD'),
         database: configService.get<string>('DB_DEV_DATABASE'),
         ssl: { rejectUnauthorized: false },
-        entities: [TodoEntity, UserEntity, LogEntity, FileInfoEntity],
+        entities: [
+          TodoEntity,
+          UserEntity,
+          LogEntity,
+          FileInfoEntity,
+          RefreshTokenEntity,
+        ],
         namingStrategy: new CustomNamingStrategy(),
         synchronize: false,
         logging: true,
       }),
     }),
+
+    ScheduleModule.forRoot(), // Add ScheduleModule
 
     TodoModule,
     UserModule,

@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { RefreshTokenEntity } from '../../user/refresh-token.entity';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthenticatedGuard } from './auth.guard';
 import { AuthService } from './auth.service';
@@ -10,6 +12,7 @@ import { JwtStrategy } from './jwt.strategy';
   imports: [
     PassportModule,
     ConfigModule,
+    TypeOrmModule.forFeature([RefreshTokenEntity]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

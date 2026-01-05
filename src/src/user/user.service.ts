@@ -62,11 +62,6 @@ export class UserService {
 
   getPublicUserInfo<T extends Partial<UserEntity>>(user: T): T {
     if (!user) return user;
-
-    // 복호화를 수행하지 않고 그대로 반환합니다.
-    // DB에 저장된 암호문(Ciphertext) 상태로 클라이언트에 전달되어
-    // 브라우저 세션 스토리지 등 평문 저장을 방지합니다.
-    // 객체 복사를 통해 동일 참조 반환 경고를 회피하고 사이드 이펙트를 방지합니다.
     return { ...user };
   }
 
