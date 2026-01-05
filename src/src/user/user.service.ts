@@ -289,6 +289,7 @@ export class UserService {
         entity: currentUser,
         id: currentUserId,
         ip,
+        isUpdate: true,
       });
 
       const savedUser = await transactionalEntityManager.save(
@@ -760,6 +761,7 @@ export class UserService {
         entity: currentUser,
         id: userId,
         ip,
+        isUpdate: true,
       });
 
       await transactionalEntityManager.save(UserEntity, updatedUser);

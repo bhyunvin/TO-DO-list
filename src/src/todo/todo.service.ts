@@ -496,6 +496,14 @@ export class TodoService {
 
         fileGroupNo = newFileGroupNo;
         todo.todoFileGroupNo = fileGroupNo;
+
+        setAuditColumn({
+          ip,
+          entity: todo,
+          id: userId,
+          isUpdate: true,
+        });
+
         await this.todoRepository.save(todo);
 
         const attachmentResponses: FileAttachmentResponseDto[] = savedFiles.map(
