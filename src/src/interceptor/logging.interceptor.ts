@@ -33,12 +33,17 @@ export class LoggingInterceptor implements NestInterceptor {
       ip = xForwardedFor.split(',')[0].trim();
     }
 
-    this.logger.log(
+    this.logger.debug(
       `Incoming request: ${method} ${url}. userSeq : ${Number.isNaN(userSeq) ? 'anonymous user' : userSeq}`,
     );
 
     return next.handle().pipe(
       tap(() => {
+        // 루트 경로('/')에 대한 헬스 체크 요청은 DB 로깅에서 제외합니다.
+        if (url === '/') {
+          return;
+        }
+
         const logEntity = new LogEntity();
         logEntity.userSeq = Number.isNaN(userSeq) ? null : userSeq;
         logEntity.connectUrl = url;
