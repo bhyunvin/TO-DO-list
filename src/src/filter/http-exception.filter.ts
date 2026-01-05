@@ -21,11 +21,14 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
     const request = ctx.getRequest();
-    const { url, method, session, body, headers, connection } = request;
+    const { url, method, body, headers, connection } = request;
     const status = exception.getStatus();
     const message = exception.message || 'Internal server error';
-    const userSeq = Number(session.userSeq);
-    const userId = session.userId;
+
+    // JWT 인증을 사용하는 경우 request.user에 사용자 정보가 있음
+    const user = request.user;
+    const userSeq = user ? Number(user.userSeq) : null;
+    const userId = user ? user.userId : null;
     const xForwardedFor = headers['x-forwarded-for'];
     let ip = connection.remoteAddress || '';
     if (Array.isArray(xForwardedFor)) {

@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { Response } from 'express';
+import { Response, Request } from 'express';
 import { TodoController } from './todo.controller';
 import { TodoService } from './todo.service';
 import { FileUploadErrorService } from '../fileUpload/validation/file-upload-error.service';
@@ -32,14 +32,17 @@ describe('TodoController - Excel Export', () => {
     validateFilesByCategory: jest.fn(),
   };
 
-  const mockSession = {
-    user: {
-      userSeq: 1,
-      userId: 'testuser',
-      userName: 'Test User',
-      userEmail: 'test@example.com',
-    },
+  const mockUser = {
+    userSeq: 1,
+    userId: 'testuser',
+    userName: 'Test User',
+    userEmail: 'test@example.com',
   };
+
+  // session 대신 request.user를 모킹
+  const mockRequest = {
+    user: mockUser,
+  } as unknown as Request;
 
   const mockResponse = (): Response => {
     const res: Partial<Response> = {
@@ -89,12 +92,7 @@ describe('TodoController - Excel Export', () => {
 
       const res = mockResponse();
 
-      await controller.exportToExcel(
-        mockSession as any,
-        startDate,
-        endDate,
-        res,
-      );
+      await controller.exportToExcel(mockRequest, startDate, endDate, res);
 
       expect(todoService.exportToExcel).toHaveBeenCalledWith(
         1,
@@ -128,7 +126,7 @@ describe('TodoController - Excel Export', () => {
       const res = mockResponse();
 
       await expect(
-        controller.exportToExcel(mockSession as any, '', endDate, res),
+        controller.exportToExcel(mockRequest, '', endDate, res),
       ).rejects.toThrow('startDate and endDate are required');
 
       expect(todoService.exportToExcel).toHaveBeenCalledWith(1, '', endDate);
@@ -142,7 +140,7 @@ describe('TodoController - Excel Export', () => {
       const res = mockResponse();
 
       await expect(
-        controller.exportToExcel(mockSession as any, startDate, '', res),
+        controller.exportToExcel(mockRequest, startDate, '', res),
       ).rejects.toThrow('startDate and endDate are required');
 
       expect(todoService.exportToExcel).toHaveBeenCalledWith(1, startDate, '');
@@ -156,12 +154,7 @@ describe('TodoController - Excel Export', () => {
       const res = mockResponse();
 
       await expect(
-        controller.exportToExcel(
-          mockSession as any,
-          '2024/01/01',
-          endDate,
-          res,
-        ),
+        controller.exportToExcel(mockRequest, '2024/01/01', endDate, res),
       ).rejects.toThrow('Invalid date format. Use YYYY-MM-DD');
 
       expect(todoService.exportToExcel).toHaveBeenCalledWith(
@@ -178,7 +171,7 @@ describe('TodoController - Excel Export', () => {
       const res = mockResponse();
 
       await expect(
-        controller.exportToExcel(mockSession as any, startDate, endDate, res),
+        controller.exportToExcel(mockRequest, startDate, endDate, res),
       ).rejects.toThrow(errorMessage);
 
       expect(todoService.exportToExcel).toHaveBeenCalledWith(
@@ -188,27 +181,22 @@ describe('TodoController - Excel Export', () => {
       );
     });
 
-    it('should extract userSeq from session', async () => {
+    it('should extract userSeq from request.user', async () => {
       const mockBuffer = Buffer.from('test excel data');
       mockTodoService.exportToExcel.mockResolvedValue(mockBuffer);
 
-      const customSession = {
+      const customRequest = {
         user: {
           userSeq: 999,
           userId: 'anotheruser',
           userName: 'Another User',
           userEmail: 'another@example.com',
         },
-      };
+      } as unknown as Request;
 
       const res = mockResponse();
 
-      await controller.exportToExcel(
-        customSession as any,
-        startDate,
-        endDate,
-        res,
-      );
+      await controller.exportToExcel(customRequest, startDate, endDate, res);
 
       expect(todoService.exportToExcel).toHaveBeenCalledWith(
         999,
@@ -227,7 +215,7 @@ describe('TodoController - Excel Export', () => {
       const res = mockResponse();
 
       await controller.exportToExcel(
-        mockSession as any,
+        mockRequest,
         customStartDate,
         customEndDate,
         res,
@@ -245,12 +233,7 @@ describe('TodoController - Excel Export', () => {
 
       const res = mockResponse();
 
-      await controller.exportToExcel(
-        mockSession as any,
-        startDate,
-        endDate,
-        res,
-      );
+      await controller.exportToExcel(mockRequest, startDate, endDate, res);
 
       expect(res.send).toHaveBeenCalledWith(mockBuffer);
       expect(res.send).toHaveBeenCalledTimes(1);

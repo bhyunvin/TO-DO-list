@@ -27,29 +27,8 @@ const authService = {
    * @returns {Promise<void>}
    */
   async logout() {
-    // API 호출 (선택 사항)
-    try {
-      await apiClient.post('/user/logout');
-    } catch (error) {
-      // 서버 로그아웃 실패해도 클라이언트 로그아웃은 진행
-      console.warn(
-        'Server logout failed (stateless logic safe to ignore)',
-        error,
-      );
-    }
     // 클라이언트 상태 초기화
     useAuthStore.getState().logout();
-  },
-
-  /**
-   * 세션 상태 확인 / 사용자 정보 조회
-   * (기존에 로딩 시 사용자 정보를 가져오는 API가 있다면 여기에 구현)
-   * @returns {Promise<object>}
-   */
-  async checkSession() {
-    // 세션 확인을 위해 프로필 정보를 조회
-    const response = await apiClient.get('/user/profile');
-    return response.data;
   },
 
   /**
