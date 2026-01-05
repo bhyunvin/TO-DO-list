@@ -8,11 +8,13 @@ import { UserController } from './user.controller';
 import { UserService } from './user.service';
 import { FileUploadModule } from '../fileUpload/fileUpload.module';
 import { InputSanitizerService } from '../utils/inputSanitizer';
+import { AuthModule } from '../types/express/auth.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([UserEntity, FileInfoEntity]),
     FileUploadModule,
+    AuthModule,
   ],
   controllers: [UserController],
   providers: [UserService, InputSanitizerService],
