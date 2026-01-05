@@ -8,6 +8,7 @@ import {
 import { InjectRepository, InjectDataSource } from '@nestjs/typeorm';
 import { Repository, DataSource, Not } from 'typeorm';
 import { UserEntity } from './user.entity';
+import { FileInfoEntity } from '../fileUpload/file.entity'; // FileInfoEntity 임포트
 import { UserDto, UpdateUserDto, ChangePasswordDto } from './user.dto';
 import {
   encrypt,
@@ -29,6 +30,8 @@ export class UserService {
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
+    @InjectRepository(FileInfoEntity) // FileInfo 리포지토리 주입
+    private readonly fileInfoRepository: Repository<FileInfoEntity>,
     private readonly fileUploadUtil: FileUploadUtil,
     private readonly fileValidationService: FileValidationService,
     private readonly inputSanitizer: InputSanitizerService,
@@ -83,6 +86,16 @@ export class UserService {
       throw new UnauthorizedException('아이디나 비밀번호가 다릅니다.');
     }
 
+    // 프로필 이미지 URL 최적화 (Cloudinary 등 외부 URL 직접 반환)
+    if (selectedUser.userProfileImageFileGroupNo) {
+      const fileInfo = await this.fileInfoRepository.findOne({
+        where: { fileGroupNo: selectedUser.userProfileImageFileGroupNo },
+      });
+      if (fileInfo?.filePath.startsWith('http')) {
+        selectedUser.profileImage = fileInfo.filePath;
+      }
+    }
+
     const { userPassword: _, ...userToStore } = selectedUser;
 
     // @AfterLoad에 의해 profileImage가 이미 설정되어 있음
@@ -95,6 +108,27 @@ export class UserService {
       where: { userId },
     });
     return !!selectedUser;
+  }
+
+  async getUser(userSeq: number): Promise<UserEntity> {
+    const user = await this.userRepository.findOne({
+      where: { userSeq },
+    });
+    if (!user) {
+      throw new UnauthorizedException('사용자를 찾을 수 없습니다.');
+    }
+
+    // 프로필 이미지 URL 최적화
+    if (user.userProfileImageFileGroupNo) {
+      const fileInfo = await this.fileInfoRepository.findOne({
+        where: { fileGroupNo: user.userProfileImageFileGroupNo },
+      });
+      if (fileInfo?.filePath.startsWith('http')) {
+        user.profileImage = fileInfo.filePath;
+      }
+    }
+
+    return user;
   }
 
   async signup(
@@ -196,7 +230,7 @@ export class UserService {
         }
       }
 
-      // 프로필 이미지 URL 설정 (Entity 메서드 호출)
+      // 프로필 이미지 URL 설정
       savedUser.setProfileImage();
 
       return savedUser;
@@ -257,6 +291,20 @@ export class UserService {
         updatedUser,
       );
       savedUser.setProfileImage();
+
+      // 프로필 이미지 URL 최적화 (Cloudinary 직접 URL)
+      if (savedUser.userProfileImageFileGroupNo) {
+        // 트랜잭션 안이라도 fileInfo는 이미 커밋되었거나 다른 테이블이므로 조회 가능
+        const fileInfo = await transactionalEntityManager.findOne(
+          FileInfoEntity,
+          {
+            where: { fileGroupNo: savedUser.userProfileImageFileGroupNo },
+          },
+        );
+        if (fileInfo?.filePath.startsWith('http')) {
+          savedUser.profileImage = fileInfo.filePath;
+        }
+      }
 
       const { userId: savedUserId } = savedUser;
 

@@ -4,7 +4,7 @@
 
 ## 주요 기능
 
-- 세션 기반 사용자 인증 및 회원가입
+- JWT 기반 사용자 인증 및 회원가입
 - 날짜별 todo 생성, 조회, 수정, 삭제
 - 파일 업로드 및 첨부 기능 (진행률 표시)
 - Google Gemini API를 활용한 AI 채팅 어시스턴트
@@ -15,7 +15,7 @@
 - 비밀번호 변경 기능
 - 마크다운 렌더링 (XSS 보호)
 - 포괄적인 감사 로깅
-- macOS Keychain을 통한 안전한 자격 증명 저장
+- 환경 변수를 통한 안전한 자격 증명 저장
 
 ## 기술 스택
 
@@ -23,8 +23,8 @@
 - **프레임워크**: NestJS with Express
 - **언어**: TypeScript
 - **데이터베이스**: PostgreSQL with TypeORM
-- **인증**: Express Session with bcrypt
-- **보안**: Keychain integration, AES-256-GCM encryption
+- **인증**: JWT (stateless) with bcrypt
+- **보안**: AES-256-GCM encryption
 - **AI**: Google Gemini API via @nestjs/axios
 - **파일 업로드**: Multer
 - **마크다운**: marked, sanitize-html
@@ -121,8 +121,8 @@ DB_DATABASE=...
 # 서버 포트
 PORT=...
 
-# 세션 설정 (강력한 랜덤 문자열 사용)
-SESSION_SECRET=...
+# JWT 설정 (강력한 랜덤 문자열 사용)
+JWT_SECRET=...
 
 # Google Gemini API
 GEMINI_API_KEY=...
@@ -254,7 +254,7 @@ npm test
 ## 보안
 
 - 강력한 암호화 알고리즘을 사용한 비밀번호 해싱
-- 세션 기반 인증 시스템
+- JWT 기반 인증 시스템
 - 안전한 자격 증명 저장 메커니즘
 - XSS 및 CSRF 공격 방지
 - 입력 유효성 검사 및 새니타이제이션
@@ -274,7 +274,7 @@ A full-stack TO-DO List application built with modern web technologies. Provides
 
 ## Key Features
 
-- Session-based user authentication and registration
+- JWT-based user authentication and registration
 - Create, read, update, and delete todos by date
 - File upload and attachment functionality (with progress tracking)
 - AI chat assistant powered by Google Gemini API
@@ -285,7 +285,7 @@ A full-stack TO-DO List application built with modern web technologies. Provides
 - Password change functionality
 - Markdown rendering (with XSS protection)
 - Comprehensive audit logging
-- Secure credential storage via macOS Keychain
+- Secure credential storage via environment variables
 
 ## Technology Stack
 
@@ -293,8 +293,8 @@ A full-stack TO-DO List application built with modern web technologies. Provides
 - **Framework**: NestJS with Express
 - **Language**: TypeScript
 - **Database**: PostgreSQL with TypeORM
-- **Authentication**: Express Session with bcrypt
-- **Security**: Keychain integration, AES-256-GCM encryption
+- **Authentication**: JWT (stateless) with bcrypt
+- **Security**: AES-256-GCM encryption
 - **AI**: Google Gemini API via @nestjs/axios
 - **File Upload**: Multer
 - **Markdown**: marked, sanitize-html
@@ -391,8 +391,8 @@ DB_DATABASE=...
 # Server port
 PORT=...
 
-# Session configuration (use strong random string)
-SESSION_SECRET=...
+# JWT configuration (use strong random string)
+JWT_SECRET=...
 
 # Google Gemini API
 GEMINI_API_KEY=...
@@ -524,7 +524,7 @@ npm test
 ## Security
 
 - Strong encryption algorithm for password hashing
-- Session-based authentication system
+- JWT-based authentication system
 - Secure credential storage mechanism
 - XSS and CSRF attack prevention
 - Input validation and sanitization

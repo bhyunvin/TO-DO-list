@@ -13,7 +13,6 @@ import { createTestTypeOrmConfig } from './test-helpers';
 import { APP_INTERCEPTOR, APP_FILTER } from '@nestjs/core';
 import { LoggingInterceptor } from '../src/interceptor/logging.interceptor';
 import { HttpExceptionFilter } from '../src/filter/http-exception.filter';
-import session from 'express-session';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication;
@@ -49,23 +48,7 @@ describe('AppController (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
 
-    // 세션 미들웨어 설정
-    const sessionSecret =
-      process.env.TEST_SESSION_SECRET ||
-      process.env.SESSION_SECRET ||
-      'test_session_secret_key_for_e2e_testing';
-    app.use(
-      session({
-        name: 'todo-session-id',
-        secret: sessionSecret,
-        resave: false,
-        saveUninitialized: false,
-        cookie: {
-          secure: false,
-          httpOnly: true,
-        },
-      }),
-    );
+    // 세션 미들웨어 제거됨 (JWT 사용)
 
     await app.init();
   });

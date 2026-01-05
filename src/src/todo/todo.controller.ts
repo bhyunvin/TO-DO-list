@@ -6,21 +6,20 @@ import {
   Patch,
   Param,
   Delete,
-  Session,
+  UseInterceptors,
+  UploadedFiles,
+  Res,
+  Req,
   Query,
   HttpCode,
   HttpStatus,
   Logger,
   UseGuards,
   Ip,
-  UseInterceptors,
-  UploadedFiles,
-  Res,
 } from '@nestjs/common';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { TodoService } from './todo.service';
-import { SessionData } from 'express-session';
 import {
   CreateTodoDto,
   UpdateTodoDto,
@@ -44,30 +43,31 @@ export class TodoController {
 
   @Post()
   create(
-    @Session() session: SessionData,
+    @Req() req: Request,
     @Body() createTodoDto: CreateTodoDto,
     @Ip() ip: string,
   ) {
-    const { user } = session;
+    const user = req.user as any;
     return this.todoService.create(user, ip, createTodoDto);
   }
 
   @Get()
-  findAll(@Session() session: SessionData, @Query('date') date: string) {
-    const { user } = session;
+  @Get()
+  findAll(@Req() req: Request, @Query('date') date: string) {
+    const user = req.user as any;
     return this.todoService.findAll(user.userSeq, date);
   }
 
   @Get('excel')
   async exportToExcel(
-    @Session() session: SessionData,
+    @Req() req: Request,
     @Query('startDate') startDate: string,
     @Query('endDate') endDate: string,
     @Res() res: Response,
   ) {
     try {
-      // 세션에서 userSeq 추출
-      const { user } = session;
+      // JWT에서 userSeq 추출
+      const user = req.user as any;
       const { userSeq } = user;
 
       // Excel 파일 생성 (검증은 서비스 레이어에서 수행)
@@ -90,9 +90,9 @@ export class TodoController {
       // Excel 버퍼를 응답으로 전송
       res.send(buffer);
     } catch (error) {
-      const { user } = session;
+      const user = req.user as any;
       this.logger.error('Excel export failed', {
-        userId: user.userSeq,
+        userId: user?.userSeq,
         startDate,
         endDate,
         error: error.message,
@@ -104,22 +104,18 @@ export class TodoController {
   @Patch(':id')
   update(
     @Param('id') id: string,
-    @Session() session: SessionData,
+    @Req() req: Request,
     @Ip() ip: string,
     @Body() updateTodoDto: UpdateTodoDto,
   ) {
-    const { user } = session;
+    const user = req.user as any;
     return this.todoService.update(Number(id), user, ip, updateTodoDto);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  remove(
-    @Param('id') id: string,
-    @Session() session: SessionData,
-    @Ip() ip: string,
-  ) {
-    const { user } = session;
+  remove(@Param('id') id: string, @Req() req: Request, @Ip() ip: string) {
+    const user = req.user as any;
     return this.todoService.delete(user, ip, Number(id));
   }
 
@@ -130,12 +126,12 @@ export class TodoController {
     TodoAttachmentValidationInterceptor,
   )
   async uploadAttachments(
-    @Session() session: SessionData,
+    @Req() req: Request,
     @UploadedFiles() files: Express.Multer.File[],
     @Ip() ip: string,
   ) {
     try {
-      const { user } = session;
+      const user = req.user as any;
       const result = await this.todoService.uploadAttachments(user, ip, files);
 
       // 성공적인 업로드 로그 기록
@@ -165,9 +161,9 @@ export class TodoController {
         errorContext.requestId,
       );
     } catch (error) {
-      const { user } = session;
+      const user = req.user as any;
       this.logger.error('TODO attachment upload failed', {
-        userId: user.userSeq,
+        userId: user?.userSeq,
         error: error.message,
         fileCount: files?.length || 0,
       });
@@ -181,13 +177,13 @@ export class TodoController {
     TodoAttachmentValidationInterceptor,
   )
   async createWithFiles(
-    @Session() session: SessionData,
+    @Req() req: Request,
     @Body() createTodoDto: CreateTodoWithFilesDto,
     @UploadedFiles() files: Express.Multer.File[],
     @Ip() ip: string,
   ) {
     try {
-      const { user } = session;
+      const user = req.user as any;
       const result = await this.todoService.createWithFiles(
         user,
         ip,
@@ -220,7 +216,7 @@ export class TodoController {
 
       return result;
     } catch (error) {
-      const { user } = session;
+      const user = req.user as any;
       this.logger.error('TODO creation with files failed', {
         userId: user.userSeq,
         error: error.message,
@@ -236,13 +232,13 @@ export class TodoController {
   )
   async updateWithFiles(
     @Param('id') id: string,
-    @Session() session: SessionData,
+    @Req() req: Request,
     @Body() updateTodoDto: UpdateTodoWithFilesDto,
     @UploadedFiles() files: Express.Multer.File[],
     @Ip() ip: string,
   ) {
     try {
-      const { user } = session;
+      const user = req.user as any;
       const result = await this.todoService.updateWithFiles(
         Number(id),
         user,
@@ -276,7 +272,7 @@ export class TodoController {
 
       return result;
     } catch (error) {
-      const { user } = session;
+      const user = req.user as any;
       this.logger.error('TODO update with files failed', {
         userId: user.userSeq,
         todoId: id,
@@ -294,12 +290,12 @@ export class TodoController {
   )
   async addAttachments(
     @Param('id') id: string,
-    @Session() session: SessionData,
+    @Req() req: Request,
     @UploadedFiles() files: Express.Multer.File[],
     @Ip() ip: string,
   ) {
     try {
-      const { user } = session;
+      const user = req.user as any;
       const result = await this.todoService.addAttachments(
         Number(id),
         user,
@@ -334,7 +330,7 @@ export class TodoController {
         errorContext.requestId,
       );
     } catch (error) {
-      const { user } = session;
+      const user = req.user as any;
       this.logger.error('TODO attachment addition failed', {
         todoId: id,
         userId: user.userSeq,
@@ -346,8 +342,8 @@ export class TodoController {
   }
 
   @Get(':id/attachments')
-  getAttachments(@Param('id') id: string, @Session() session: SessionData) {
-    const { user } = session;
+  getAttachments(@Param('id') id: string, @Req() req: Request) {
+    const user = req.user as any;
     return this.todoService.getAttachments(Number(id), user.userSeq);
   }
 
@@ -356,9 +352,9 @@ export class TodoController {
   async deleteAttachment(
     @Param('id') id: string,
     @Param('fileNo') fileNo: string,
-    @Session() session: SessionData,
+    @Req() req: Request,
   ) {
-    const { user } = session;
+    const user = req.user as any;
     await this.todoService.deleteAttachment(user, Number(id), Number(fileNo));
   }
 }

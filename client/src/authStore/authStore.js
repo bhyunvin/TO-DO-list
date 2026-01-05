@@ -5,9 +5,10 @@ export const useAuthStore = create(
   persist(
     (set) => ({
       user: null,
+      accessToken: null, // JWT 토큰 저장
 
-      login: (userData) => set({ user: userData }),
-      logout: () => set({ user: null }),
+      login: (userData, token) => set({ user: userData, accessToken: token }),
+      logout: () => set({ user: null, accessToken: null }),
     }),
     {
       name: 'auth-storage',

@@ -7,18 +7,15 @@ import {
   UploadedFile,
   UseInterceptors,
   Ip,
-  Session,
+  UnauthorizedException,
+  Req,
   HttpCode,
   HttpStatus,
   Logger,
   UseGuards,
   Patch,
-  UsePipes,
-  ValidationPipe,
-  ForbiddenException,
-  UnauthorizedException,
 } from '@nestjs/common';
-import { Session as SessionInterface, SessionData } from 'express-session';
+import { Request } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { profileImageMulterOptions } from '../fileUpload/fileUploadUtil';
 import { ProfileImageValidationInterceptor } from '../fileUpload/validation/file-validation.interceptor';
@@ -30,6 +27,7 @@ import { UserEntity } from './user.entity';
 import { UserProfileValidationPipe } from './user-validation.pipe';
 
 import { AuthenticatedGuard } from '../types/express/auth.guard';
+import { AuthService } from '../types/express/auth.service';
 
 @Controller('user')
 export class UserController {
@@ -38,30 +36,26 @@ export class UserController {
   constructor(
     private readonly userService: UserService,
     private readonly fileUploadErrorService: FileUploadErrorService,
+    private readonly authService: AuthService,
   ) {}
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  async login(
-    @Session() session: SessionInterface & SessionData, // SessionInterface로 타입 보강
-    @Body() userDto: UserDto,
-  ): Promise<Omit<UserEntity, 'userPassword' | 'setProfileImage'>> {
-    // Promise<void> 대신 사용자 정보 반환 유지
+  async login(@Body() userDto: UserDto): Promise<{
+    access_token: string;
+    user: Omit<UserEntity, 'userPassword' | 'setProfileImage'>;
+  }> {
     const user = await this.userService.login(userDto);
-    session.user = user; // 서비스에서 반환된 사용자 정보를 세션에 저장
+    const { access_token } = await this.authService.login(user);
 
-    return new Promise((resolve, reject) => {
-      session.save((err) => {
-        if (err) {
-          this.logger.error('Session save error', err);
-          return reject(new Error('세션 저장에 실패했습니다.'));
-        }
+    // 간단히 클라이언트 반환용으로 복사본 생성 후 복호화 및 마스킹
+    const userForClient = { ...user };
+    const publicUser = this.userService.getPublicUserInfo(userForClient);
 
-        // 간단히 클라이언트 반환용으로 복사본 생성 후 복호화 및 마스킹
-        const userForClient = { ...user };
-        resolve(this.userService.getPublicUserInfo(userForClient));
-      });
-    });
+    return {
+      access_token,
+      user: publicUser,
+    };
   }
 
   @Get('duplicate/:userId')
@@ -131,10 +125,9 @@ export class UserController {
   @UseGuards(AuthenticatedGuard)
   @Post('logout')
   @HttpCode(HttpStatus.NO_CONTENT)
-  logout(@Session() session: SessionInterface): void {
-    session.destroy(() => {
-      // 로그아웃 처리 중 에러 발생 시 처리 로직을 추가할 수 있습니다.
-    });
+  logout(): void {
+    // JWT는 상태가 없으므로 서버측 로그아웃 로직은 필요 없습니다.
+    // 클라이언트에서 토큰을 폐기해야 합니다.
   }
 
   @UseGuards(AuthenticatedGuard)
@@ -143,49 +136,18 @@ export class UserController {
     FileInterceptor('profileImage', profileImageMulterOptions),
     ProfileImageValidationInterceptor,
   )
-  @UsePipes(
-    new ValidationPipe({
-      transform: true,
-      whitelist: true,
-      forbidNonWhitelisted: true,
-    }),
-  )
   async updateProfile(
-    @Session() session: SessionInterface & SessionData,
+    @Req() req: Request,
     @Body(UserProfileValidationPipe) updateUserDto: UpdateUserDto,
     @UploadedFile() profileImageFile: Express.Multer.File,
     @Ip() ip: string,
   ): Promise<Omit<UserEntity, 'userPassword' | 'setProfileImage'>> {
     try {
-      // 향상된 인증 및 권한 검사
-      const currentUser = session.user;
-      const { id: sessionId } = session;
-
-      if (!currentUser || !currentUser.userSeq) {
-        this.logger.warn('Profile update attempted without valid session', {
-          sessionId,
-          ip,
-        });
-        throw new UnauthorizedException(
-          '유효한 세션이 없습니다. 다시 로그인해주세요.',
-        );
+      const user = req.user as any;
+      if (!user?.userSeq) {
+        throw new UnauthorizedException('로그인이 필요합니다.');
       }
-
-      const { userSeq, userId } = currentUser;
-
-      if (!userId) {
-        this.logger.warn(
-          'Profile update attempted with incomplete session data',
-          {
-            userSeq,
-            sessionId,
-            ip,
-          },
-        );
-        throw new UnauthorizedException(
-          '세션 데이터가 불완전합니다. 다시 로그인해주세요.',
-        );
-      }
+      const { userSeq, userId } = user;
 
       this.logger.log('Profile update attempt', {
         userSeq,
@@ -193,27 +155,7 @@ export class UserController {
         updateFields: Object.keys(updateUserDto),
         hasProfileImage: !!profileImageFile,
         ip,
-        sessionId,
       });
-
-      const { lastProfileUpdate: lastUpdateTime } = session;
-      const now = Date.now();
-      const minUpdateInterval = 60 * 1000; // 업데이트 간 최소 1분
-
-      if (lastUpdateTime && now - lastUpdateTime < minUpdateInterval) {
-        const remainingSeconds = Math.ceil(
-          (minUpdateInterval - (now - lastUpdateTime)) / 1000,
-        );
-        this.logger.warn('Profile update rate limit exceeded', {
-          userSeq,
-          lastUpdate: new Date(lastUpdateTime),
-          timeSinceLastUpdate: now - lastUpdateTime,
-          ip,
-        });
-        throw new ForbiddenException(
-          `프로필 업데이트가 너무 빈번합니다. ${remainingSeconds}초 후에 다시 시도해주세요.`,
-        );
-      }
 
       const updatedUser = await this.userService.updateProfile(
         userSeq,
@@ -222,50 +164,29 @@ export class UserController {
         ip,
       );
 
-      session.user = updatedUser;
-      session.lastProfileUpdate = now;
-
-      return new Promise((resolve, reject) => {
-        session.save((err) => {
-          if (err) {
-            const { message } = err;
-            this.logger.error('Session save error during profile update', {
-              userSeq,
-              error: message,
-              ip,
-            });
-            return reject(new Error('세션 저장에 실패했습니다.'));
-          }
-
-          const { userId: updatedUserId } = updatedUser;
-          this.logger.log('Profile update completed successfully', {
-            userSeq,
-            userId: updatedUserId,
-            updatedFields: Object.keys(updateUserDto),
-            hasNewProfileImage: !!profileImageFile,
-            ip,
-          });
-
-          // 클라이언트 반환용 복사본 생성 후 복호화 및 마스킹
-          const userForClient = { ...updatedUser };
-          // UserEntity 타입 캐스팅 필요 없음 (UserService에서 Generics 지원)
-          resolve(this.userService.getPublicUserInfo(userForClient));
-        });
+      const { userId: updatedUserId } = updatedUser;
+      this.logger.log('Profile update completed successfully', {
+        userSeq,
+        userId: updatedUserId,
+        updatedFields: Object.keys(updateUserDto),
+        hasNewProfileImage: !!profileImageFile,
+        ip,
       });
+
+      const userForClient = { ...updatedUser };
+      return this.userService.getPublicUserInfo(userForClient);
     } catch (error) {
       const { message } = error;
-      const { id: sessionId } = session;
+      const user = req.user as any;
       this.logger.error('Profile update failed', {
-        userSeq: session.user?.userSeq,
-        userId: session.user?.userId,
+        userSeq: user?.userSeq,
+        userId: user?.userId,
         error: message,
         fileName: profileImageFile?.originalname,
         fileSize: profileImageFile?.size,
         ip,
-        sessionId,
       });
 
-      // 전역 예외 필터에서 처리하도록 오류 재발생
       throw error;
     }
   }
@@ -273,135 +194,68 @@ export class UserController {
   @UseGuards(AuthenticatedGuard)
   @Patch('password')
   @HttpCode(HttpStatus.OK)
-  @UsePipes(
-    new ValidationPipe({
-      transform: true,
-      whitelist: true,
-      forbidNonWhitelisted: true,
-    }),
-  )
   async changePassword(
-    @Session() session: SessionInterface & SessionData,
+    @Req() req: Request,
     @Body() changePasswordDto: ChangePasswordDto,
     @Ip() ip: string,
   ): Promise<{ message: string }> {
     try {
-      // 향상된 인증 검사
-      const currentUser = session.user;
-      const { id: sessionId } = session;
-
-      if (!currentUser || !currentUser.userSeq) {
-        this.logger.warn('Password change attempted without valid session', {
-          sessionId,
-          ip,
-        });
-        throw new UnauthorizedException(
-          '유효한 세션이 없습니다. 다시 로그인해주세요.',
-        );
+      const user = req.user as any;
+      if (!user?.userSeq) {
+        throw new UnauthorizedException('로그인이 필요합니다.');
       }
-
-      const { userSeq, userId } = currentUser;
-
-      if (!userId) {
-        this.logger.warn(
-          'Password change attempted with incomplete session data',
-          {
-            userSeq,
-            sessionId,
-            ip,
-          },
-        );
-        throw new UnauthorizedException(
-          '세션 데이터가 불완전합니다. 다시 로그인해주세요.',
-        );
-      }
+      const { userSeq, userId } = user;
 
       this.logger.log('Password change attempt', {
         userSeq,
         userId,
         ip,
-        sessionId,
       });
-
-      const { lastPasswordChange } = session;
-      const now = Date.now();
-      const minChangeInterval = 300000; // 비밀번호 변경 간 최소 5분
-
-      if (lastPasswordChange && now - lastPasswordChange < minChangeInterval) {
-        this.logger.warn('Password change rate limit exceeded', {
-          userSeq,
-          lastChange: new Date(lastPasswordChange),
-          timeSinceLastChange: now - lastPasswordChange,
-          ip,
-        });
-        throw new ForbiddenException(
-          '비밀번호 변경이 너무 빈번합니다. 5분 후 다시 시도해주세요.',
-        );
-      }
 
       await this.userService.changePassword(userSeq, changePasswordDto, ip);
 
-      session.lastPasswordChange = now;
-
-      return new Promise((resolve, reject) => {
-        session.save((err) => {
-          if (err) {
-            const { message } = err;
-            this.logger.error('Session save error during password change', {
-              userSeq,
-              error: message,
-              ip,
-            });
-            return reject(new Error('세션 저장에 실패했습니다.'));
-          }
-
-          this.logger.log('Password change completed successfully', {
-            userSeq,
-            userId,
-            ip,
-          });
-
-          resolve({ message: '비밀번호가 성공적으로 변경되었습니다.' });
-        });
+      this.logger.log('Password change completed successfully', {
+        userSeq,
+        userId,
+        ip,
       });
+
+      return { message: '비밀번호가 성공적으로 변경되었습니다.' };
     } catch (error) {
       const { message } = error;
-      const { id: sessionId } = session;
+      const user = req.user as any;
       this.logger.error('Password change failed', {
-        userSeq: session.user?.userSeq,
-        userId: session.user?.userId,
+        userSeq: user?.userSeq,
+        userId: user?.userId,
         error: message,
         ip,
-        sessionId,
       });
 
-      // 전역 예외 필터에서 처리하도록 오류 재발생
       throw error;
     }
   }
 
   @UseGuards(AuthenticatedGuard)
   @Get('profile')
-  getProfile(@Session() session: SessionInterface & SessionData) {
-    const { user } = session;
+  async getProfile(@Req() req: Request) {
+    const user = req.user as any;
     if (!user) {
       throw new UnauthorizedException('로그인이 필요합니다.');
     }
-    // 세션의 사용자 정보(암호화 상태)를 복호화하여 반환
-    // 세션 객체 자체를 수정하지 않도록 복사본 사용
-    const userForClient = { ...user };
+    const fullUser = await this.userService.getUser(user.userSeq);
+    const userForClient = { ...fullUser };
     return this.userService.getPublicUserInfo(userForClient);
   }
 
   @UseGuards(AuthenticatedGuard)
   @Get('profile/detail')
-  getProfileDetail(@Session() session: SessionInterface & SessionData) {
-    const { user } = session;
+  async getProfileDetail(@Req() req: Request) {
+    const user = req.user as any;
     if (!user) {
       throw new UnauthorizedException('로그인이 필요합니다.');
     }
-    // 세션 객체 자체를 수정하지 않도록 복사본 사용
-    const userForClient = { ...user };
+    const fullUser = await this.userService.getUser(user.userSeq);
+    const userForClient = { ...fullUser };
     return this.userService.decryptUserInfo(userForClient);
   }
 }

@@ -7,6 +7,7 @@ import { useFileUploadProgress } from '../hooks/useFileUploadProgress';
 import FileUploadProgress from './FileUploadProgress';
 import userService from '../api/userService';
 import { showConfirmAlert } from '../utils/alertUtils';
+import useSecureImage from '../hooks/useSecureImage';
 
 const isValidEmail = (email) => {
   // 영문 대소문자, 숫자, 특수문자(._%+-), 서브도메인, 2자리 이상의 최상위 도메인 허용
@@ -363,9 +364,16 @@ const ProfileUpdateForm = ({
     }
   };
 
+  // useSecureImage 훅은 컴포넌트 최상위 레벨에서 호출되어야 함
+  // profileImage가 /api로 시작하는 경우에만 작동하고, data:나 http는 그대로 반환됨
+  const secureProfileImage = useSecureImage(profileImage);
+
   const renderImagePreview = () => {
     if (!profileImage || (profileImageFile && !profileImageValidation?.isValid))
       return null;
+
+    // secureProfileImage가 로딩 중이거나 변환된 URL일 수 있음
+    const displayImage = secureProfileImage || profileImage;
 
     return (
       <div className="form-group row mb-3">
@@ -374,10 +382,11 @@ const ProfileUpdateForm = ({
           <div className="d-flex align-items-center">
             <img
               src={
-                profileImage?.startsWith('data:') ||
-                profileImage?.startsWith('http')
-                  ? profileImage
-                  : `${API_URL}${profileImage?.replace(/^\/api/, '')}`
+                displayImage?.startsWith('data:') ||
+                displayImage?.startsWith('http') ||
+                displayImage?.startsWith('blob:')
+                  ? displayImage
+                  : `${API_URL}${displayImage?.replace(/^\/api/, '')}`
               }
               alt="프로필 미리보기"
               style={{

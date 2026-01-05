@@ -2,7 +2,6 @@ import { Module, NestModule, MiddlewareConsumer, Logger } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { z } from 'zod';
-import session from 'express-session';
 
 import { TodoModule } from './todo/todo.module';
 import { UserModule } from './user/user.module';
@@ -32,10 +31,6 @@ const envSchema = z.object({
   DB_DEV_USERNAME: z.string().min(1, 'DB_DEV_USERNAME은 필수입니다.'),
   DB_DEV_PASSWORD: z.string().min(1, 'DB_DEV_PASSWORD는 필수입니다.'),
   DB_DEV_DATABASE: z.string().min(1, 'DB_DEV_DATABASE는 필수입니다.'),
-
-  SESSION_SECRET: z
-    .string()
-    .min(32, 'SESSION_SECRET는 최소 32자 이상이어야 합니다.'),
 
   GEMINI_API_KEY: z.string().min(1, 'GEMINI_API_KEY는 필수입니다.'),
   SYSTEM_PROMPT_PATH: z
@@ -128,31 +123,7 @@ export class AppModule implements NestModule {
 
   constructor(private readonly configService: ConfigService) {}
 
-  configure(consumer: MiddlewareConsumer) {
-    const sessionSecret = this.configService.get<string>('SESSION_SECRET');
-
-    if (!sessionSecret) {
-      this.logger.error(
-        '세션 비밀 키를 찾을 수 없습니다! (Zod 검증은 통과했으나 ConfigService에서 값을 못 가져옴)',
-      );
-      throw new Error('Session secret key not found.');
-    }
-
-    this.logger.log('세션 미들웨어 설정 완료.');
-    consumer
-      .apply(
-        session({
-          name: 'todo-session-id', // 이전 버전과 동일하게 설정
-          secret: sessionSecret,
-          resave: false,
-          saveUninitialized: false,
-          cookie: {
-            secure: process.env.NODE_ENV === 'production', // 프로덕션에서는 true (HTTPS)
-            httpOnly: true,
-            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 크로스 사이트 쿠키 허용
-          },
-        }),
-      )
-      .forRoutes('*');
+  configure(_consumer: MiddlewareConsumer) {
+    // Session middleware removed
   }
 }

@@ -5,16 +5,15 @@ import {
   Res,
   NotFoundException,
   UseGuards,
-  Session,
+  Req,
   ForbiddenException,
 } from '@nestjs/common';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { FileInfoEntity } from './file.entity';
 import { AuthenticatedGuard } from '../types/express/auth.guard';
 import { existsSync } from 'node:fs';
-import { SessionData } from 'express-session';
 import { TodoEntity } from '../todo/todo.entity';
 import { UserEntity } from '../user/user.entity';
 
@@ -33,10 +32,10 @@ export class FileController {
   @UseGuards(AuthenticatedGuard)
   async getFile(
     @Param('fileNo') fileNo: number,
-    @Session() session: SessionData,
+    @Req() req: Request,
     @Res() res: Response,
   ) {
-    const { user } = session;
+    const user = req.user as any;
     const fileInfo = await this.fileInfoRepository.findOne({
       where: { fileNo },
     });
