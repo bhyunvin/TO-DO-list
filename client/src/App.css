@@ -450,3 +450,37 @@
 [data-theme='dark'] .bi {
   color: inherit;
 }
+
+/* 테마 적응형 아웃라인 버튼 - 높은 우선순위 적용 */
+.btn.btn-outline-adaptive {
+  color: #212529 !important; /* Light mode text (Dark) */
+  border: 1px solid #212529 !important; /* Light mode border (Dark) */
+  background-color: transparent !important;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn.btn-outline-adaptive:hover,
+.btn.btn-outline-adaptive:focus {
+  color: #ffffff !important;
+  background-color: #212529 !important;
+  border-color: #212529 !important;
+}
+
+/* Dark Mode Overrides */
+[data-theme='dark'] .btn.btn-outline-adaptive {
+  color: #f8f9fa !important; /* Dark mode text (Light) */
+  border-color: #f8f9fa !important; /* Dark mode border (Light) */
+}
+
+[data-theme='dark'] .btn.btn-outline-adaptive:hover,
+[data-theme='dark'] .btn.btn-outline-adaptive:focus {
+  color: #212529 !important; /* Text color on hover (Dark) */
+  background-color: #f8f9fa !important; /* Background on hover (Light) */
+  border-color: #f8f9fa !important;
+}
+
+.btn.btn-outline-adaptive:disabled {
+  color: var(--text-muted) !important;
+  border-color: var(--border-medium) !important;
+  background-color: transparent !important;
+}

@@ -1657,7 +1657,7 @@ const TodoContainer = () => {
                 <i className="bi bi-file-earmark-spreadsheet"></i>
               </button>
               <button
-                className="btn btn-outline-light"
+                className="btn btn-outline-adaptive"
                 onClick={handleToggleCreate}
               >
                 신규
