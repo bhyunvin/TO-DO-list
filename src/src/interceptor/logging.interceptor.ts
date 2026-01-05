@@ -21,8 +21,8 @@ export class LoggingInterceptor implements NestInterceptor {
   ): Observable<any> {
     const ctx = context.switchToHttp();
     const request = ctx.getRequest();
-    const { method, url, session, body, connection, headers } = request;
-    const { user } = session;
+    const { method, url, body, connection, headers } = request;
+    const user = request.user as any;
     const userSeq = user ? Number(user.userSeq) : undefined;
     const userId = user ? user.userId : undefined;
     const xForwardedFor = headers['x-forwarded-for'];

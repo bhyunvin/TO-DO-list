@@ -97,6 +97,16 @@ export class UserService {
     return !!selectedUser;
   }
 
+  async getUser(userSeq: number): Promise<UserEntity> {
+    const user = await this.userRepository.findOne({
+      where: { userSeq },
+    });
+    if (!user) {
+      throw new UnauthorizedException('사용자를 찾을 수 없습니다.');
+    }
+    return user;
+  }
+
   async signup(
     userDto: UserDto,
     profileImageFile: Express.Multer.File,

@@ -4,7 +4,7 @@ TO-DO List 애플리케이션의 백엔드 서버입니다. NestJS 프레임워�
 
 ## 주요 기능
 
-- 사용자 인증 및 세션 관리
+- 사용자 인증 및 JWT 관리
 - Todo CRUD 작업 및 날짜 기반 쿼리
 - Google Gemini API를 활용한 AI 지원
 - 파일 업로드 및 관리
@@ -16,7 +16,7 @@ TO-DO List 애플리케이션의 백엔드 서버입니다. NestJS 프레임워�
 - **프레임워크**: NestJS 11.x with Express
 - **언어**: TypeScript 5.x
 - **데이터베이스**: PostgreSQL with TypeORM 0.3.x
-- **인증**: Express Session with bcrypt
+- **인증**: JWT (stateless) with bcrypt
 - **AI**: Google Gemini API via @nestjs/axios
 - **파일 업로드**: Multer
 - **마크다운**: marked, sanitize-html
@@ -32,32 +32,39 @@ src/
 │   ├── user.controller.ts
 │   ├── user.service.ts
 │   ├── user.entity.ts
-│   └── dto/
+│   ├── user.dto.ts
+│   └── user-validation.pipe.ts
 ├── todo/                        # Todo 모듈
 │   ├── todo.controller.ts
 │   ├── todo.service.ts
 │   ├── todo.entity.ts
-│   └── dto/
+│   └── todo.dto.ts
 ├── assistance/                  # AI 지원 모듈
 │   ├── assistance.controller.ts
 │   ├── assistance.service.ts
-│   └── dto/
+│   ├── assistance.dto.ts
+│   └── gemini.interface.ts
 ├── fileUpload/                  # 파일 업로드 모듈
-│   ├── fileUpload.controller.ts
-│   └── fileUpload.service.ts
+│   ├── file.controller.ts
+│   ├── cloudinary.service.ts
+│   └── validation/
 ├── logging/                     # 로깅 모듈
 │   ├── logging.service.ts
 │   └── logging.entity.ts
 ├── utils/                       # 유틸리티
-│   ├── crypto.util.ts
-│   ├── audit-columns.ts
-│   └── naming-strategy.ts
+│   ├── cryptUtil.ts
+│   ├── auditColumns.ts
+│   ├── customNamingStrategy.ts
+│   └── inputSanitizer.ts
 ├── filter/                      # 전역 필터
 │   └── http-exception.filter.ts
 ├── interceptor/                 # 전역 인터셉터
 │   └── logging.interceptor.ts
 ├── types/                       # 타입 정의
-│   └── express/
+│   ├── express/
+│   │   ├── auth.guard.ts
+│   │   ├── auth.service.ts
+│   │   └── jwt.strategy.ts
 └── test/                        # E2E 테스트
 ```
 
@@ -93,8 +100,8 @@ DB_DATABASE=...
 # 서버 포트
 PORT=...
 
-# 세션 설정 (강력한 랜덤 문자열 사용)
-SESSION_SECRET=...
+# JWT 설정 (강력한 랜덤 문자열 사용)
+JWT_SECRET=...
 
 # Google Gemini API
 GEMINI_API_KEY=...
@@ -170,7 +177,7 @@ npm run format
 
 애플리케이션은 RESTful API를 제공하며, 다음과 같은 주요 기능을 포함합니다:
 
-- 사용자 인증 및 세션 관리
+- 사용자 인증 및 JWT 관리
 - 사용자 프로필 관리
 - Todo 항목 CRUD 작업
 - AI 채팅 지원
@@ -197,7 +204,7 @@ npm run format
 ## 보안
 
 - 강력한 암호화 알고리즘을 사용한 비밀번호 해싱 (bcrypt) 및 데이터 암호화 (AES-256-GCM)
-- 세션 기반 인증 시스템
+- JWT 기반 인증 시스템
 - 안전한 자격 증명 저장 메커니즘
 - XSS 및 CSRF 공격 방지
 - 입력 유효성 검사 및 새니타이제이션
@@ -228,15 +235,15 @@ npm run format
 - `.env` 파일의 데이터베이스 자격 증명 확인
 - `DB_DEV_PASSWORD` 환경 변수가 올바르게 설정되어 있는지 확인
 
-### 세션 오류
+### JWT 오류
 
-- `SESSION_SECRET`이 설정되어 있는지 확인
-- 세션 스토어가 올바르게 구성되어 있는지 확인
+- `JWT_SECRET`이 설정되어 있는지 확인
+- Authorization 헤더가 올바른지 확인
 
 ### 환경 변수 오류
 
 - `.env` 파일에 모든 필수 환경 변수가 설정되어 있는지 확인
-- `DB_DEV_PASSWORD`, `SESSION_SECRET`, `GEMINI_API_KEY` 등이 올바르게 설정되어 있는지 확인
+- `DB_DEV_PASSWORD`, `JWT_SECRET`, `GEMINI_API_KEY` 등이 올바르게 설정되어 있는지 확인
 
 ## 라이선스
 
@@ -250,7 +257,7 @@ Backend server for the TO-DO List application. Built with NestJS framework and i
 
 ## Key Features
 
-- User authentication and session management
+- User authentication and JWT management
 - Todo CRUD operations and date-based queries
 - AI assistance powered by Google Gemini API
 - File upload and management
@@ -262,7 +269,7 @@ Backend server for the TO-DO List application. Built with NestJS framework and i
 - **Framework**: NestJS 11.x with Express
 - **Language**: TypeScript 5.x
 - **Database**: PostgreSQL with TypeORM 0.3.x
-- **Authentication**: Express Session with bcrypt
+- **Authentication**: JWT (stateless) with bcrypt
 - **AI**: Google Gemini API via @nestjs/axios
 - **File Upload**: Multer
 - **Markdown**: marked, sanitize-html
@@ -278,32 +285,39 @@ src/
 │   ├── user.controller.ts
 │   ├── user.service.ts
 │   ├── user.entity.ts
-│   └── dto/
+│   ├── user.dto.ts
+│   └── user-validation.pipe.ts
 ├── todo/                        # Todo module
 │   ├── todo.controller.ts
 │   ├── todo.service.ts
 │   ├── todo.entity.ts
-│   └── dto/
+│   └── todo.dto.ts
 ├── assistance/                  # AI assistance module
 │   ├── assistance.controller.ts
 │   ├── assistance.service.ts
-│   └── dto/
+│   ├── assistance.dto.ts
+│   └── gemini.interface.ts
 ├── fileUpload/                  # File upload module
-│   ├── fileUpload.controller.ts
-│   └── fileUpload.service.ts
+│   ├── file.controller.ts
+│   ├── cloudinary.service.ts
+│   └── validation/
 ├── logging/                     # Logging module
 │   ├── logging.service.ts
 │   └── logging.entity.ts
 ├── utils/                       # Utilities
-│   ├── crypto.util.ts
-│   ├── audit-columns.ts
-│   └── naming-strategy.ts
+│   ├── cryptUtil.ts
+│   ├── auditColumns.ts
+│   ├── customNamingStrategy.ts
+│   └── inputSanitizer.ts
 ├── filter/                      # Global filters
 │   └── http-exception.filter.ts
 ├── interceptor/                 # Global interceptors
 │   └── logging.interceptor.ts
 ├── types/                       # Type definitions
-│   └── express/
+│   ├── express/
+│   │   ├── auth.guard.ts
+│   │   ├── auth.service.ts
+│   │   └── jwt.strategy.ts
 └── test/                        # E2E tests
 ```
 
@@ -339,8 +353,8 @@ DB_DATABASE=...
 # Server port
 PORT=...
 
-# Session configuration (use strong random string)
-SESSION_SECRET=...
+# JWT configuration (use strong random string)
+JWT_SECRET=...
 
 # Google Gemini API
 GEMINI_API_KEY=...
@@ -416,7 +430,7 @@ npm run format
 
 The application provides RESTful APIs with the following main features:
 
-- User authentication and session management
+- User authentication and JWT management
 - User profile management
 - Todo item CRUD operations
 - AI chat assistance
@@ -443,7 +457,7 @@ For detailed API specifications, please refer to the separate API documentation.
 ## Security
 
 - Strong encryption algorithm for password hashing (bcrypt) and data encryption (AES-256-GCM)
-- Session-based authentication system
+- JWT-based authentication system
 - Secure credential storage mechanism
 - XSS and CSRF attack prevention
 - Input validation and sanitization
@@ -474,15 +488,15 @@ For detailed API specifications, please refer to the separate API documentation.
 - Check database credentials in `.env` file
 - Verify `DB_DEV_PASSWORD` environment variable is properly set
 
-### Session Error
+### JWT Error
 
-- Verify `SESSION_SECRET` is configured
-- Check session store is properly configured
+- Verify `JWT_SECRET` is configured
+- Check Authorization header is correct
 
 ### Environment Variable Error
 
 - Verify all required environment variables are set in `.env` file
-- Check that `DB_DEV_PASSWORD`, `SESSION_SECRET`, `GEMINI_API_KEY` are properly configured
+- Check that `DB_DEV_PASSWORD`, `JWT_SECRET`, `GEMINI_API_KEY` are properly configured
 
 ## License
 

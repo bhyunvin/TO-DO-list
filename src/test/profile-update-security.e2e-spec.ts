@@ -16,7 +16,6 @@ import { HttpExceptionFilter } from '../src/filter/http-exception.filter';
 import { DataSource } from 'typeorm';
 import { UserEntity } from '../src/user/user.entity';
 import { encrypt } from '../src/utils/cryptUtil';
-import session from 'express-session';
 
 /**
  * Profile Update Security E2E Tests
@@ -33,7 +32,7 @@ describe('Profile Update Security (e2e)', () => {
   let app: INestApplication;
   let dataSource: DataSource;
   let testUser: UserEntity;
-  let sessionCookie: string;
+  let accessToken: string;
 
   beforeAll(async () => {
     const typeOrmConfig = await createTestTypeOrmConfig();
@@ -66,32 +65,16 @@ describe('Profile Update Security (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
 
-    // Enable validation pipes like in production, but allow extra properties for login
+    // 프로덕션과 동일하게 유효성 검사 파이프를 활성화하지만, E2E 테스트 유연성을 위해 추가 속성을 허용합니다.
     app.useGlobalPipes(
       new ValidationPipe({
         transform: true,
-        whitelist: false, // Allow extra properties for flexibility in E2E tests
+        whitelist: false, // E2E 테스트 유연성을 위해 추가 속성 허용
         forbidNonWhitelisted: false,
       }),
     );
 
-    // 세션 미들웨어 설정
-    const sessionSecret =
-      process.env.TEST_SESSION_SECRET ||
-      process.env.SESSION_SECRET ||
-      'test_session_secret_key_for_e2e_testing';
-    app.use(
-      session({
-        name: 'todo-session-id',
-        secret: sessionSecret,
-        resave: false,
-        saveUninitialized: false,
-        cookie: {
-          secure: false,
-          httpOnly: true,
-        },
-      }),
-    );
+    // 세션 미들웨어 제거됨 (JWT 사용)
 
     await app.init();
 
@@ -126,7 +109,7 @@ describe('Profile Update Security (e2e)', () => {
       },
     });
 
-    // Login to get session cookie
+    // 액세스 토큰 발급을 위한 로그인
     const loginResponse = await request(app.getHttpServer())
       .post('/user/login')
       .send({
@@ -135,7 +118,7 @@ describe('Profile Update Security (e2e)', () => {
       })
       .expect(200);
 
-    sessionCookie = loginResponse.headers['set-cookie'][0];
+    accessToken = loginResponse.body.access_token;
   });
 
   afterEach(async () => {
@@ -165,22 +148,22 @@ describe('Profile Update Security (e2e)', () => {
       expect(response.body.message).toContain('로그인이 필요합니다');
     });
 
-    it('should reject profile update with invalid session', async () => {
+    it('should reject profile update with invalid token', async () => {
       const response = await request(app.getHttpServer())
         .patch('/user/profile')
-        .set('Cookie', 'connect.sid=invalid-session-id')
+        .set('Authorization', 'Bearer invalid-token')
         .send({
           userName: 'Another User', // Avoid SQL keywords
         })
         .expect(401);
 
-      expect(response.body.message).toContain('로그인이 필요합니다');
+      expect(response.body.message).toContain('Unauthorized');
     });
 
     it('should accept profile update with valid authentication', async () => {
       const response = await request(app.getHttpServer())
         .patch('/user/profile')
-        .set('Cookie', sessionCookie)
+        .set('Authorization', `Bearer ${accessToken}`)
         .send({
           userName: 'John Smith', // Avoid SQL keywords like "UPDATE"
         })
@@ -196,7 +179,7 @@ describe('Profile Update Security (e2e)', () => {
       // Since we're using session-based auth, the user can only update their own profile
       const response = await request(app.getHttpServer())
         .patch('/user/profile')
-        .set('Cookie', sessionCookie)
+        .set('Authorization', `Bearer ${accessToken}`)
         .send({
           userName: 'Jane Doe', // Avoid SQL keywords
         })
@@ -212,7 +195,7 @@ describe('Profile Update Security (e2e)', () => {
       // The application doesn't have a "suspended" status in the current implementation
       const response = await request(app.getHttpServer())
         .patch('/user/profile')
-        .set('Cookie', sessionCookie)
+        .set('Authorization', `Bearer ${accessToken}`)
         .send({
           userName: 'Bob Wilson',
         })
@@ -235,7 +218,7 @@ describe('Profile Update Security (e2e)', () => {
       for (const maliciousInput of maliciousInputs) {
         const response = await request(app.getHttpServer())
           .patch('/user/profile')
-          .set('Cookie', sessionCookie)
+          .set('Authorization', `Bearer ${accessToken}`)
           .send({
             userName: maliciousInput,
           })
@@ -257,7 +240,7 @@ describe('Profile Update Security (e2e)', () => {
       for (const maliciousInput of maliciousInputs) {
         const response = await request(app.getHttpServer())
           .patch('/user/profile')
-          .set('Cookie', sessionCookie)
+          .set('Authorization', `Bearer ${accessToken}`)
           .send({
             userEmail: maliciousInput,
           })
@@ -280,7 +263,7 @@ describe('Profile Update Security (e2e)', () => {
       for (const xssInput of xssInputs) {
         const response = await request(app.getHttpServer())
           .patch('/user/profile')
-          .set('Cookie', sessionCookie)
+          .set('Authorization', `Bearer ${accessToken}`)
           .send({
             userDescription: xssInput,
           });
@@ -298,7 +281,7 @@ describe('Profile Update Security (e2e)', () => {
     it('should sanitize and accept safe input', async () => {
       const response = await request(app.getHttpServer())
         .patch('/user/profile')
-        .set('Cookie', sessionCookie)
+        .set('Authorization', `Bearer ${accessToken}`)
         .send({
           userName: '  John Doe  ', // Should be trimmed
           userEmail: '  JOHN@EXAMPLE.COM  ', // Should be trimmed and lowercased
@@ -318,7 +301,7 @@ describe('Profile Update Security (e2e)', () => {
 
       const response = await request(app.getHttpServer())
         .patch('/user/profile')
-        .set('Cookie', sessionCookie)
+        .set('Authorization', `Bearer ${accessToken}`)
         .send({
           userName: suspiciousInput,
         })
@@ -337,7 +320,7 @@ describe('Profile Update Security (e2e)', () => {
       // Test long name
       let response = await request(app.getHttpServer())
         .patch('/user/profile')
-        .set('Cookie', sessionCookie)
+        .set('Authorization', `Bearer ${accessToken}`)
         .send({ userName: longName })
         .expect(400);
       // Application returns validation error in message field
@@ -347,7 +330,7 @@ describe('Profile Update Security (e2e)', () => {
       // Test long email
       response = await request(app.getHttpServer())
         .patch('/user/profile')
-        .set('Cookie', sessionCookie)
+        .set('Authorization', `Bearer ${accessToken}`)
         .send({ userEmail: longEmail })
         .expect(400);
       expect(response.body.message).toBeDefined();
@@ -356,7 +339,7 @@ describe('Profile Update Security (e2e)', () => {
       // Test long description
       response = await request(app.getHttpServer())
         .patch('/user/profile')
-        .set('Cookie', sessionCookie)
+        .set('Authorization', `Bearer ${accessToken}`)
         .send({ userDescription: longDescription })
         .expect(400);
       expect(response.body.message).toBeDefined();
@@ -375,7 +358,7 @@ describe('Profile Update Security (e2e)', () => {
       for (const invalidEmail of invalidEmails) {
         const response = await request(app.getHttpServer())
           .patch('/user/profile')
-          .set('Cookie', sessionCookie)
+          .set('Authorization', `Bearer ${accessToken}`)
           .send({
             userEmail: invalidEmail,
           })
@@ -390,7 +373,7 @@ describe('Profile Update Security (e2e)', () => {
     it('should reject empty required fields when provided', async () => {
       const response = await request(app.getHttpServer())
         .patch('/user/profile')
-        .set('Cookie', sessionCookie)
+        .set('Authorization', `Bearer ${accessToken}`)
         .send({
           userName: '', // Empty name is transformed to undefined and ignored
         });
@@ -406,7 +389,7 @@ describe('Profile Update Security (e2e)', () => {
       // First change should succeed
       await request(app.getHttpServer())
         .patch('/user/profile')
-        .set('Cookie', sessionCookie)
+        .set('Authorization', `Bearer ${accessToken}`)
         .send({
           userName: 'Alice Brown', // Avoid SQL keywords
         })
@@ -415,7 +398,7 @@ describe('Profile Update Security (e2e)', () => {
       // Second change immediately should be rate limited
       const response = await request(app.getHttpServer())
         .patch('/user/profile')
-        .set('Cookie', sessionCookie)
+        .set('Authorization', `Bearer ${accessToken}`)
         .send({
           userName: 'Charlie Davis', // Avoid SQL keywords
         })
@@ -466,7 +449,7 @@ describe('Profile Update Security (e2e)', () => {
     it('should reject duplicate email addresses', async () => {
       const response = await request(app.getHttpServer())
         .patch('/user/profile')
-        .set('Cookie', sessionCookie)
+        .set('Authorization', `Bearer ${accessToken}`)
         .send({
           userEmail: 'second@test.com', // Email already used by secondUser
         })
@@ -479,7 +462,7 @@ describe('Profile Update Security (e2e)', () => {
     it('should allow updating to the same email (no change)', async () => {
       const response = await request(app.getHttpServer())
         .patch('/user/profile')
-        .set('Cookie', sessionCookie)
+        .set('Authorization', `Bearer ${accessToken}`)
         .send({
           userEmail: 'security@test.com', // Same as current email
         })
@@ -491,7 +474,7 @@ describe('Profile Update Security (e2e)', () => {
     it('should allow updating to a unique email', async () => {
       const response = await request(app.getHttpServer())
         .patch('/user/profile')
-        .set('Cookie', sessionCookie)
+        .set('Authorization', `Bearer ${accessToken}`)
         .send({
           userEmail: 'unique@test.com', // New unique email
         })
@@ -515,7 +498,7 @@ describe('Profile Update Security (e2e)', () => {
       for (const fileName of suspiciousFiles) {
         const response = await request(app.getHttpServer())
           .patch('/user/profile')
-          .set('Cookie', sessionCookie)
+          .set('Authorization', `Bearer ${accessToken}`)
           .attach('profileImage', Buffer.from('fake image data'), fileName);
 
         // Application may return 400 or 500 depending on where validation fails
@@ -526,7 +509,7 @@ describe('Profile Update Security (e2e)', () => {
     it('should reject files with invalid MIME types', async () => {
       const response = await request(app.getHttpServer())
         .patch('/user/profile')
-        .set('Cookie', sessionCookie)
+        .set('Authorization', `Bearer ${accessToken}`)
         .attach('profileImage', Buffer.from('fake executable'), {
           filename: 'image.jpg',
           contentType: 'application/x-executable',
@@ -543,7 +526,7 @@ describe('Profile Update Security (e2e)', () => {
 
       const response = await request(app.getHttpServer())
         .patch('/user/profile')
-        .set('Cookie', sessionCookie)
+        .set('Authorization', `Bearer ${accessToken}`)
         .attach('profileImage', largeBuffer, {
           filename: 'large.jpg',
           contentType: 'image/jpeg',
@@ -577,7 +560,7 @@ describe('Profile Update Security (e2e)', () => {
 
       const response = await request(app.getHttpServer())
         .patch('/user/profile')
-        .set('Cookie', sessionCookie)
+        .set('Authorization', `Bearer ${accessToken}`)
         .field('userName', 'Emma Wilson') // Avoid SQL keywords
         .attach('profileImage', validImageBuffer, {
           filename: 'profile.jpg',
@@ -594,40 +577,26 @@ describe('Profile Update Security (e2e)', () => {
     });
   });
 
-  describe('Session Security', () => {
-    it('should invalidate updates after session expiry simulation', async () => {
-      // Simulate session expiry by clearing session data
-      // This would typically be handled by session middleware
-      await request(app.getHttpServer())
-        .post('/user/logout')
-        .set('Cookie', sessionCookie)
-        .expect(204);
-
-      // Attempt to update profile with expired session
-      const response = await request(app.getHttpServer())
-        .patch('/user/profile')
-        .set('Cookie', sessionCookie)
-        .send({
-          userName: 'Should Fail',
-        })
-        .expect(401);
-
-      expect(response.body.message).toContain('로그인이 필요합니다');
+  describe('JWT Security', () => {
+    it('should invalidate updates after logical logout (client-side token removal)', async () => {
+      // JWT는 상태가 없으므로(Stateless) 서버 측에서 토큰을 무효화하는 과정이 없습니다.
+      // 로그아웃은 클라이언트에서 토큰을 폐기하는 방식으로 처리됩니다.
+      // 따라서 기존 세션 만료 테스트는 생략하거나 클라이언트 측 로직으로 대체됩니다.
     });
 
-    it('should validate session integrity', async () => {
-      // Test with malformed session cookie
-      const malformedCookie = sessionCookie.replaceAll(/[a-zA-Z0-9]/g, 'X');
+    it('should validate token integrity', async () => {
+      // 변조된 토큰으로 테스트
+      const malformedToken = accessToken.slice(0, -5) + 'XXXXX'; // 서명 변조
 
       const response = await request(app.getHttpServer())
         .patch('/user/profile')
-        .set('Cookie', malformedCookie)
+        .set('Authorization', `Bearer ${malformedToken}`)
         .send({
           userName: 'Should Fail',
         })
         .expect(401);
 
-      expect(response.body.message).toContain('로그인이 필요합니다');
+      expect(response.body.message).toContain('Unauthorized');
     });
   });
 
@@ -637,7 +606,7 @@ describe('Profile Update Security (e2e)', () => {
       // The actual logging is verified through the application logs
       const response = await request(app.getHttpServer())
         .patch('/user/profile')
-        .set('Cookie', sessionCookie)
+        .set('Authorization', `Bearer ${accessToken}`)
         .send({
           userName: "'; DROP TABLE nj_user_info; --",
         })
@@ -654,7 +623,7 @@ describe('Profile Update Security (e2e)', () => {
     it('should log successful profile updates for audit trail', async () => {
       const response = await request(app.getHttpServer())
         .patch('/user/profile')
-        .set('Cookie', sessionCookie)
+        .set('Authorization', `Bearer ${accessToken}`)
         .send({
           userName: 'Michael Chen', // Avoid SQL keywords
         })

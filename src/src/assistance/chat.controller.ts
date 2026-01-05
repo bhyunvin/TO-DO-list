@@ -2,13 +2,13 @@ import {
   Controller,
   Post,
   Body,
-  Session,
+  Req,
   UseGuards,
   Logger,
   HttpStatus,
   Ip,
 } from '@nestjs/common';
-import { SessionData } from 'express-session';
+import { Request } from 'express';
 import { ChatRequestDto, ChatResponseDto } from './assistance.dto';
 import { AssistanceService } from './assistance.service';
 import { AuthenticatedGuard } from '../types/express/auth.guard';
@@ -22,22 +22,23 @@ export class ChatController {
 
   @Post('chat')
   async chat(
-    @Session() session: SessionData,
+    @Req() req: Request,
     @Body() chatRequestDto: ChatRequestDto,
     @Ip() ip: string,
   ): Promise<ChatResponseDto> {
+    const user = req.user as any;
     const maxRetries = 3;
     const baseDelay = 1000; // 1초 기본 지연 시간
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         this.logger.log(
-          `Chat request from user ${session.user.userSeq} (attempt ${attempt}): ${chatRequestDto.prompt.substring(0, 50)}...`,
+          `Chat request from user ${user.userSeq} (attempt ${attempt}): ${chatRequestDto.prompt.substring(0, 50)}...`,
         );
 
         // 기존 서비스를 위한 요청 DTO 생성
         const requestDto = {
-          userSeq: session.user.userSeq,
+          userSeq: user.userSeq,
           prompt: chatRequestDto.prompt,
           history: chatRequestDto.history,
           response: '', // 서비스에서 채워질 예정
@@ -46,10 +47,10 @@ export class ChatController {
         // 사용자 컨텍스트와 함께 향상된 AssistanceService 호출
         const result = await this.assistanceService.getGeminiResponse(
           requestDto,
-          session.user.userSeq,
+          user.userSeq,
           ip,
-          session.user.userName,
-          session.user.userId,
+          user.userName,
+          user.userId,
         );
 
         // 구조화된 응답 반환
@@ -60,7 +61,7 @@ export class ChatController {
         };
 
         this.logger.log(
-          `Chat response sent to user ${session.user.userSeq} on attempt ${attempt}`,
+          `Chat response sent to user ${user.userSeq} on attempt ${attempt}`,
         );
         return response;
       } catch (error) {
@@ -68,7 +69,7 @@ export class ChatController {
         const isLastAttempt = attempt === maxRetries;
 
         this.logger.error(
-          `Chat request failed for user ${session.user.userSeq} on attempt ${attempt}:`,
+          `Chat request failed for user ${user.userSeq} on attempt ${attempt}:`,
           {
             error: error.message,
             status: error.response?.status || error.status,

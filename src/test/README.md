@@ -18,16 +18,15 @@
 
 다음을 수행하는 중앙 집중식 테스트 구성 모듈을 생성했습니다:
 
-- 실제 keychain 서비스를 대체하는 `MockKeychainUtil` 제공
 - 모든 엔티티가 명시적으로 등록된 `createTestTypeOrmConfig()` 내보내기
-- 민감한 데이터에 keychain 대신 환경 변수 사용
+- 민감한 데이터에 환경 변수 사용
 
 ### 2. 업데이트된 테스트 파일
 
 `app.e2e-spec.ts`와 `profile-update-security.e2e-spec.ts` 모두 이제:
 
 - 전체 `AppModule` 대신 개별 모듈 가져오기
-- keychain 의존성을 우회하기 위해 `MockKeychainUtil` 사용
+- keychain 의존성을 우회하기 위해 환경 변수 사용
 - 모든 엔티티로 TypeORM을 명시적으로 구성
 - 테스트 실행 전에 세션 미들웨어를 올바르게 초기화
 
@@ -75,7 +74,7 @@ npm test -- --config=test/jest-e2e.json --verbose
 - `DB_DEV_USERNAME`: 데이터베이스 사용자명
 - `DB_DEV_DATABASE`: 데이터베이스 이름
 - `TEST_DB_PASSWORD`: 테스트용 데이터베이스 비밀번호
-- `TEST_SESSION_SECRET`: 테스트용 세션 시크릿
+- `TEST_JWT_SECRET`: 테스트용 JWT 시크릿
 
 ### 선택 사항
 
@@ -97,7 +96,7 @@ npm test -- --config=test/jest-e2e.json --verbose
 - 입력 유효성 검사 및 새니타이제이션
 - 인젝션 공격 방지
 - XSS 공격 방지
-- 세션 보안
+- JWT 보안
 - 감사 로깅
 
 ## 문제 해결
@@ -118,12 +117,12 @@ npm test -- --config=test/jest-e2e.json --verbose
 2. `.env.test`의 데이터베이스 자격 증명 확인
 3. 필요한 경우 `jest-e2e.json`의 `testTimeout` 증가
 
-### 세션 문제
+### JWT 인증 문제
 
-세션 관련 테스트가 실패하는 경우:
+JWT 관련 테스트가 실패하는 경우:
 
-1. `TEST_SESSION_SECRET`이 설정되어 있는지 확인
-2. 테스트 설정에서 세션 미들웨어가 올바르게 초기화되었는지 확인
+1. `TEST_JWT_SECRET`이 설정되어 있는지 확인
+2. 요청 헤더에 `Authorization: Bearer <token>`이 올바르게 포함되었는지 확인
 
 ## CI/CD 통합
 
@@ -170,18 +169,7 @@ CI/CD 파이프라인의 경우:
      .compile();
    ```
 
-3. 필요한 경우 세션 미들웨어 초기화:
-
-   ```typescript
-   const sessionSecret = await mockKeychainUtil.getPassword(
-     'encrypt-session-key',
-   );
-   app.use(
-     session({
-       /* config */
-     }),
-   );
-   ```
+3. (선택 사항) JWT 테스트가 필요한 경우 토큰 생성 로직 등을 추가
 
 4. `afterAll`에서 정리:
    ```typescript
@@ -232,8 +220,6 @@ The original E2E tests were failing with `EntityMetadataNotFoundError` because:
 
 Created a centralized test configuration module that:
 
-- Provides `MockKeychainUtil` to replace the real keychain service
-- Exports `createTestTypeOrmConfig()` with all entities explicitly registered
 - Uses environment variables instead of keychain for sensitive data
 
 ### 2. Updated Test Files
@@ -241,7 +227,7 @@ Created a centralized test configuration module that:
 Both `app.e2e-spec.ts` and `profile-update-security.e2e-spec.ts` now:
 
 - Import individual modules instead of the entire `AppModule`
-- Use `MockKeychainUtil` to bypass keychain dependency
+- Use environment variables to bypass keychain dependency
 - Explicitly configure TypeORM with all entities
 - Properly initialize session middleware before tests run
 
@@ -289,7 +275,7 @@ npm test -- --config=test/jest-e2e.json --verbose
 - `DB_DEV_USERNAME`: Database username
 - `DB_DEV_DATABASE`: Database name
 - `TEST_DB_PASSWORD`: Database password for tests
-- `TEST_SESSION_SECRET`: Session secret for tests
+- `TEST_JWT_SECRET`: Session secret for tests
 
 ### Optional
 
@@ -311,7 +297,7 @@ Comprehensive security tests for key features, including:
 - Input validation and sanitization
 - Injection attack prevention
 - XSS attack prevention
-- Session security
+- JWT security
 - Audit logging
 
 ## Troubleshooting
@@ -332,12 +318,12 @@ If tests timeout:
 2. Check database credentials in `.env.test`
 3. Increase `testTimeout` in `jest-e2e.json` if needed
 
-### Session Issues
+### JWT Issues
 
-If session-related tests fail:
+If JWT-related tests fail:
 
-1. Verify `TEST_SESSION_SECRET` is set
-2. Check that session middleware is properly initialized in test setup
+1. Verify `TEST_JWT_SECRET` is set
+2. Check that `Authorization` header is present
 
 ## CI/CD Integration
 
@@ -384,18 +370,7 @@ When creating new E2E test files:
      .compile();
    ```
 
-3. Initialize session middleware if needed:
-
-   ```typescript
-   const sessionSecret = await mockKeychainUtil.getPassword(
-     'encrypt-session-key',
-   );
-   app.use(
-     session({
-       /* config */
-     }),
-   );
-   ```
+3. (Optional) Setup JWT generation logic if needed
 
 4. Clean up in `afterAll`:
    ```typescript
