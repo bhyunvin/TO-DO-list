@@ -8,7 +8,7 @@ import { TodoModule } from '../src/todo/todo.module';
 import { LoggingModule } from '../src/logging/logging.module';
 import { FileUploadModule } from '../src/fileUpload/fileUpload.module';
 import { AssistanceModule } from '../src/assistance/assistance.module';
-import { AuthModule } from '../types/express/auth.module';
+import { AuthModule } from '../src/types/express/auth.module';
 import { createTestTypeOrmConfig } from './test-helpers';
 import { APP_INTERCEPTOR, APP_FILTER } from '@nestjs/core';
 import { LoggingInterceptor } from '../src/interceptor/logging.interceptor';
@@ -314,7 +314,7 @@ describe('Profile Update Security (e2e)', () => {
     });
 
     it('should reject input with excessive special characters', async () => {
-      const suspiciousInput = '<>{}[]\\/$^<>{}[]\\/$^<>{}[]\\/$^<>{}[]\\/$^';
+      const suspiciousInput = String.raw`<>{}[]\/$^<>{}[]\/$^<>{}[]\/$^<>{}[]\/$^`;
 
       const response = await request(app.getHttpServer())
         .patch('/user/profile')
@@ -617,7 +617,7 @@ describe('Profile Update Security (e2e)', () => {
 
     it('should validate session integrity', async () => {
       // Test with malformed session cookie
-      const malformedCookie = sessionCookie.replace(/[a-zA-Z0-9]/g, 'X');
+      const malformedCookie = sessionCookie.replaceAll(/[a-zA-Z0-9]/g, 'X');
 
       const response = await request(app.getHttpServer())
         .patch('/user/profile')

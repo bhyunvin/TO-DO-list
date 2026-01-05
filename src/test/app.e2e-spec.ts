@@ -8,7 +8,7 @@ import { TodoModule } from '../src/todo/todo.module';
 import { LoggingModule } from '../src/logging/logging.module';
 import { FileUploadModule } from '../src/fileUpload/fileUpload.module';
 import { AssistanceModule } from '../src/assistance/assistance.module';
-import { AuthModule } from '../types/express/auth.module';
+import { AuthModule } from '../src/types/express/auth.module';
 import { createTestTypeOrmConfig } from './test-helpers';
 import { APP_INTERCEPTOR, APP_FILTER } from '@nestjs/core';
 import { LoggingInterceptor } from '../src/interceptor/logging.interceptor';
