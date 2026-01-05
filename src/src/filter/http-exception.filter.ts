@@ -26,7 +26,13 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const message = exception.message || 'Internal server error';
     const userSeq = Number(session.userSeq);
     const userId = session.userId;
-    const ip = headers['x-forwarded-for'] || connection.remoteAddress || '';
+    const xForwardedFor = headers['x-forwarded-for'];
+    let ip = connection.remoteAddress || '';
+    if (Array.isArray(xForwardedFor)) {
+      ip = xForwardedFor[0];
+    } else if (xForwardedFor) {
+      ip = xForwardedFor.split(',')[0].trim();
+    }
 
     this.logger.error(`HTTP Exception: ${message}`, exception.stack);
 
