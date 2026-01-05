@@ -1,7 +1,7 @@
 import { Module, NestModule, MiddlewareConsumer, Logger } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ScheduleModule } from '@nestjs/schedule'; // Import ScheduleModule
+import { ScheduleModule } from '@nestjs/schedule';
 import { z } from 'zod';
 
 import { TodoModule } from './todo/todo.module';
@@ -14,7 +14,7 @@ import { TodoEntity } from './todo/todo.entity';
 import { UserEntity } from './user/user.entity';
 import { LogEntity } from './logging/logging.entity';
 import { FileInfoEntity } from './fileUpload/file.entity';
-import { RefreshTokenEntity } from './user/refresh-token.entity'; // Added RefreshTokenEntity
+import { RefreshTokenEntity } from './user/refresh-token.entity';
 
 import { CustomNamingStrategy } from './utils/customNamingStrategy';
 import { APP_INTERCEPTOR, APP_FILTER } from '@nestjs/core';

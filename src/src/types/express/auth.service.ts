@@ -75,16 +75,11 @@ export class AuthService {
       newEntity.refreshToken = hashedRefreshToken;
       newEntity.expDtm = expiryDate;
 
-      // 감사 컬럼 설정 (기존 IP와 ID 등 정보 유지)
-      // 로테이션은 시스템에 의한 갱신 혹은 사용자에 의한 갱신으로 볼 수 있음.
-      // 여기서는 기존 등록 정보를 기반으로 새로 생성하되, 로테이션 요청을 보낸 현재 IP(ip)를 사용합니다.
-
       newEntity = setAuditColumn({
+        ip,
         entity: newEntity,
         id: matchedTokenEntity.auditColumns.regId || 'system',
-        ip: ip, // 현재 요청 IP 사용
       });
-      // regDtm 등은 setAuditColumn 내부에서 처리됨 (새 엔티티이므로)
 
       await manager.save(RefreshTokenEntity, newEntity);
 
@@ -97,7 +92,7 @@ export class AuthService {
 
   async logout(userSeq: number, refreshToken?: string) {
     if (refreshToken) {
-      // 특정 토큰만 삭제 (찾아서 삭제)
+      // 특정 토큰만 삭제
       const tokens = await this.refreshTokenRepository.find({
         where: { userSeq },
       });
@@ -133,7 +128,6 @@ export class AuthService {
     entity.refreshToken = hashedRefreshToken;
     entity.expDtm = expiryDate;
 
-    // 감사 컬럼 설정
     entity = setAuditColumn({
       entity,
       ip,

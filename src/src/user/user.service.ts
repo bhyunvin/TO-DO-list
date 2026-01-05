@@ -701,18 +701,7 @@ export class UserService {
         throw new BadRequestException('사용자를 찾을 수 없습니다.');
       }
 
-      const { adminYn, userId, userPassword } = currentUser;
-
-      if (adminYn === 'SUSPENDED') {
-        this.logger.warn('Password change attempted by suspended user', {
-          userSeq,
-          userId,
-          ip,
-        });
-        throw new ForbiddenException(
-          '계정이 일시 정지되어 비밀번호를 변경할 수 없습니다.',
-        );
-      }
+      const { userId, userPassword } = currentUser;
 
       const { currentPassword, newPassword, confirmPassword } =
         changePasswordDto;
