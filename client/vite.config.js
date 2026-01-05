@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-
+import { visualizer } from 'rollup-plugin-visualizer';
 import purgecss from '@fullhuman/postcss-purgecss';
 
 // https://vitejs.dev/config/
@@ -8,6 +8,12 @@ export default defineConfig({
   plugins: [
     react({
       jsxRuntime: 'automatic',
+    }),
+    visualizer({
+      filename: 'stats.html',
+      open: false,
+      gzipSize: true,
+      brotliSize: true,
     }),
   ],
   css: {
@@ -52,12 +58,50 @@ export default defineConfig({
   build: {
     // 경고 기준을 1024kb로 설정
     chunkSizeWarningLimit: 1024,
-    // 모든 라이브러리(node_modules)를 'vendor'라는 하나의 파일로 뭉침
+    minify: 'terser', // terser 사용 설정
+    terserOptions: {
+      compress: {
+        drop_console: true, // 콘솔 로그 제거
+        drop_debugger: true, // 디버거 제거
+      },
+      format: {
+        comments: false, // 주석 제거
+      },
+    },
     rollupOptions: {
       output: {
         manualChunks: (id) => {
           if (id.includes('node_modules')) {
-            return 'vendor';
+            // UI 관련 라이브러리 먼저 체크 (더 구체적인 조건 우선)
+            if (
+              id.includes('bootstrap') ||
+              id.includes('react-bootstrap') ||
+              id.includes('@react-icons') ||
+              id.includes('sweetalert2') ||
+              id.includes('react-datepicker')
+            ) {
+              return 'ui-vendor';
+            }
+
+            // React 핵심 라이브러리 (정밀 매칭)
+            if (
+              id.includes('/react/') ||
+              id.includes('/react-dom/') ||
+              id.includes('/zustand/') ||
+              id.includes('/scheduler/') ||
+              id === 'react' ||
+              id === 'react-dom' ||
+              id === 'zustand'
+            ) {
+              return 'react-vendor';
+            }
+
+            // 유틸리티
+            if (id.includes('date-fns') || id.includes('dompurify')) {
+              return 'utils-vendor';
+            }
+
+            return 'vendor'; // 나머지
           }
         },
       },

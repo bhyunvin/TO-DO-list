@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import App from './App';
 
-test('renders TO-DO application', () => {
+test('renders TO-DO application', async () => {
   render(<App />);
-  const titleElement = screen.getByText(/TO-DO/i);
+  const titleElement = await screen.findByText(/TO-DO/i);
   expect(titleElement).toBeInTheDocument();
 });

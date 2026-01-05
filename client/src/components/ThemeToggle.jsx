@@ -1,5 +1,6 @@
 import { useThemeStore } from '../stores/themeStore';
-import { BsMoonFill, BsSunFill } from 'react-icons/bs';
+import { FaMoon } from '@react-icons/all-files/fa/FaMoon';
+import { FaSun } from '@react-icons/all-files/fa/FaSun';
 import './ThemeToggle.css';
 
 /**
@@ -34,7 +35,7 @@ const ThemeToggle = () => {
           className={`theme-toggle-slider ${theme === 'dark' ? 'dark' : 'light'}`}
         >
           <div className="theme-toggle-icon">
-            {theme === 'dark' ? <BsMoonFill /> : <BsSunFill />}
+            {theme === 'dark' ? <FaMoon /> : <FaSun />}
           </div>
         </div>
       </div>

@@ -1,6 +1,14 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  Suspense,
+  lazy,
+} from 'react';
 import PropTypes from 'prop-types';
-import Swal from 'sweetalert2';
+import Swal from 'sweetalert2/dist/sweetalert2.min.js';
+import 'sweetalert2/dist/sweetalert2.min.css';
 import { useAuthStore } from '../authStore/authStore';
 import { useChatStore } from '../stores/chatStore';
 import todoService from '../api/todoService';
@@ -18,12 +26,22 @@ import FloatingActionButton from '../components/FloatingActionButton';
 import ChatModal from '../components/ChatModal';
 import ThemeToggle from '../components/ThemeToggle';
 import './todoList.css';
-import DatePicker from 'react-datepicker';
 import { ko } from 'date-fns/locale';
 import { showNavigationConfirmAlert } from '../utils/alertUtils';
-import 'react-datepicker/dist/react-datepicker.css';
+const DatePicker = lazy(() =>
+  import('react-datepicker').then((module) => {
+    import('react-datepicker/dist/react-datepicker.css');
+    return module;
+  }),
+);
 import { API_URL } from '../api/apiClient';
-import { BsThreeDotsVertical, BsPencilFill, BsTrashFill } from 'react-icons/bs';
+import { BsThreeDotsVertical } from '@react-icons/all-files/bs/BsThreeDotsVertical';
+import { BsPencilSquare } from '@react-icons/all-files/bs/BsPencilSquare';
+import { BsFillTrashFill } from '@react-icons/all-files/bs/BsFillTrashFill';
+import { BsFileEarmarkSpreadsheet } from '@react-icons/all-files/bs/BsFileEarmarkSpreadsheet';
+import { BsPeopleCircle } from '@react-icons/all-files/bs/BsPeopleCircle';
+import { BsChevronLeft } from '@react-icons/all-files/bs/BsChevronLeft';
+import { BsChevronRight } from '@react-icons/all-files/bs/BsChevronRight';
 
 const CreateTodoForm = ({ onAddTodo, onCancel }) => {
   const { formatFileSize, getUploadPolicy, validateFiles } =
@@ -369,14 +387,14 @@ const TodoList = ({
                   }}
                   title="수정"
                 >
-                  <BsPencilFill />
+                  <BsPencilSquare />
                 </button>
                 <button
                   className="btn btn-sm btn-outline-danger"
                   onClick={() => onDeleteTodo(todoSeq)}
                   title="삭제"
                 >
-                  <BsTrashFill />
+                  <BsFillTrashFill />
                 </button>
               </div>
             )}
@@ -710,6 +728,7 @@ const TodoContainer = () => {
   const [optimisticUpdates, setOptimisticUpdates] = useState(new Map());
   const [isChatInputFocused, setIsChatInputFocused] = useState(false);
   const [isFormDirty, setIsFormDirty] = useState(false);
+  const [isDatePickerLoaded, setIsDatePickerLoaded] = useState(false);
 
   const userMenuRef = useRef(null);
 
@@ -1621,7 +1640,7 @@ const TodoContainer = () => {
                 }}
               />
             ) : (
-              <i className="bi bi-person-circle"></i>
+              <BsPeopleCircle />
             )}
           </button>
           {isUserMenuOpen && (
@@ -1654,7 +1673,7 @@ const TodoContainer = () => {
                 onClick={handleExcelExport}
                 aria-label="Excel 내보내기"
               >
-                <i className="bi bi-file-earmark-spreadsheet"></i>
+                <BsFileEarmarkSpreadsheet />
               </button>
               <button
                 className="btn btn-outline-adaptive"
@@ -1677,25 +1696,43 @@ const TodoContainer = () => {
                 className="date-nav-btn"
                 aria-label="이전 날짜"
               >
-                <i className="bi bi-chevron-left"></i>
+                <BsChevronLeft />
               </button>
-              <DatePicker
-                locale={ko}
-                selected={selectedDate}
-                onChange={(date) => setSelectedDate(date)}
-                dateFormat="yyyy-MM-dd"
-                className="date-display"
-                showMonthDropdown
-                showYearDropdown
-                dropdownMode="select"
-                withPortal
-              />
+              {isDatePickerLoaded ? (
+                <Suspense
+                  fallback={
+                    <button className="date-display">
+                      {formatDate(selectedDate)}
+                    </button>
+                  }
+                >
+                  <DatePicker
+                    locale={ko}
+                    selected={selectedDate}
+                    onChange={(date) => setSelectedDate(date)}
+                    dateFormat="yyyy-MM-dd"
+                    className="date-display"
+                    showMonthDropdown
+                    showYearDropdown
+                    dropdownMode="select"
+                    withPortal
+                    autoFocus
+                  />
+                </Suspense>
+              ) : (
+                <button
+                  className="date-display"
+                  onClick={() => setIsDatePickerLoaded(true)}
+                >
+                  {formatDate(selectedDate)}
+                </button>
+              )}
               <button
                 onClick={handleNextDay}
                 className="date-nav-btn"
                 aria-label="다음 날짜"
               >
-                <i className="bi bi-chevron-right"></i>
+                <BsChevronRight />
               </button>
               <button onClick={handleToday} className="date-today-btn ms-2">
                 오늘

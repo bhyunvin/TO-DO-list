@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { BsEye, BsEyeSlash } from 'react-icons/bs';
+import { BsEye } from '@react-icons/all-files/bs/BsEye';
+import { BsEyeSlash } from '@react-icons/all-files/bs/BsEyeSlash';
 
 import { useAuthStore } from '../authStore/authStore';
 import { showConfirmAlert } from '../utils/alertUtils';

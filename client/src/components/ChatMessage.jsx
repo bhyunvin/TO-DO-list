@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import DOMPurify from 'dompurify';
-import { BsRobot, BsPersonFill } from 'react-icons/bs';
+import { FaRobot } from '@react-icons/all-files/fa/FaRobot';
+import { BsPersonFill } from '@react-icons/all-files/bs/BsPersonFill';
 import './ChatMessage.css';
 
 const ChatMessage = ({ message, isUser }) => {
@@ -70,7 +71,7 @@ const ChatMessage = ({ message, isUser }) => {
       <div className="message-container">
         {!isUser && (
           <div className="message-avatar" aria-hidden="true">
-            <BsRobot />
+            <FaRobot />
           </div>
         )}
         <div className="message-bubble">

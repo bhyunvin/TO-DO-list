@@ -1,13 +1,11 @@
 import { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Modal } from 'react-bootstrap';
-import {
-  BsRobot,
-  BsExclamationTriangleFill,
-  BsArrowClockwise,
-  BsSend,
-  BsArrowUpCircle,
-} from 'react-icons/bs';
+import { FaRobot } from '@react-icons/all-files/fa/FaRobot';
+import { BsFillExclamationTriangleFill } from '@react-icons/all-files/bs/BsFillExclamationTriangleFill';
+import { BsArrowClockwise } from '@react-icons/all-files/bs/BsArrowClockwise';
+import { MdSend } from '@react-icons/all-files/md/MdSend';
+import { FiArrowUpCircle } from '@react-icons/all-files/fi/FiArrowUpCircle';
 import ChatMessage from './ChatMessage';
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
 import './ChatModal.css';
@@ -140,7 +138,7 @@ const ChatModal = ({
     >
       <Modal.Header closeButton className="chat-modal-header">
         <Modal.Title id="chat-modal-title">
-          <BsRobot className="me-2" aria-hidden="true" /> Use AI Assistant AI
+          <FaRobot className="me-2" aria-hidden="true" /> Use AI Assistant AI
           어시스턴트
         </Modal.Title>
       </Modal.Header>
@@ -176,7 +174,7 @@ const ChatModal = ({
           {error && (
             <div className="error-message" role="alert" aria-live="assertive">
               <div className="error-content">
-                <BsExclamationTriangleFill
+                <BsFillExclamationTriangleFill
                   className="me-2"
                   aria-hidden="true"
                 />
@@ -235,14 +233,14 @@ const ChatModal = ({
                   aria-hidden="true"
                 ></span>
               ) : (
-                <BsSend />
+                <MdSend />
               )}
             </button>
           </div>
           <small id="chat-input-help" className="text-muted mt-1">
             {isLoading ? (
               <span className="text-primary">
-                <BsArrowUpCircle className="me-1" /> 메시지를 전송하고
+                <FiArrowUpCircle className="me-1" /> 메시지를 전송하고
                 있습니다...
               </span>
             ) : (

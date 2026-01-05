@@ -6,14 +6,14 @@ import ThemeToggle from './ThemeToggle';
 import { useThemeStore } from '../stores/themeStore';
 
 // Zustand 스토어 모킹
-jest.mock('../stores/themeStore');
+vi.mock('../stores/themeStore');
 
 describe('ThemeToggle', () => {
   let mockToggleTheme;
 
   beforeEach(() => {
     // 각 테스트 전에 mock 함수 초기화
-    mockToggleTheme = jest.fn();
+    mockToggleTheme = vi.fn();
 
     // useThemeStore의 기본 mock 구현
     useThemeStore.mockReturnValue({
@@ -23,7 +23,7 @@ describe('ThemeToggle', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Component Rendering', () => {
@@ -50,7 +50,8 @@ describe('ThemeToggle', () => {
     test('displays sun icon when theme is light', () => {
       render(<ThemeToggle />);
 
-      const sunIcon = document.querySelector('.bi-sun-fill');
+      // react-icons renders an svg
+      const sunIcon = document.querySelector('svg');
       expect(sunIcon).toBeInTheDocument();
     });
 
@@ -62,7 +63,7 @@ describe('ThemeToggle', () => {
 
       render(<ThemeToggle />);
 
-      const moonIcon = document.querySelector('.bi-moon-fill');
+      const moonIcon = document.querySelector('svg');
       expect(moonIcon).toBeInTheDocument();
     });
   });
@@ -135,7 +136,7 @@ describe('ThemeToggle', () => {
 
   describe('Event Propagation', () => {
     test('stops event propagation when wrapper is clicked', () => {
-      const mockParentClick = jest.fn();
+      const mockParentClick = vi.fn();
 
       const { container } = render(
         <button onClick={mockParentClick} className="theme-toggle-wrapper-mock">
@@ -153,7 +154,7 @@ describe('ThemeToggle', () => {
     });
 
     test('prevents dropdown from closing when toggle is clicked', () => {
-      const mockDropdownClick = jest.fn();
+      const mockDropdownClick = vi.fn();
 
       const { container } = render(
         <button className="dropdown-menu" onClick={mockDropdownClick}>

@@ -1,4 +1,5 @@
-import Swal from 'sweetalert2';
+import Swal from 'sweetalert2/dist/sweetalert2.min.js';
+import 'sweetalert2/dist/sweetalert2.min.css';
 
 /**
  * 공통 확인 알림을 표시합니다 (Outline 스타일, 버튼 순서 준수).

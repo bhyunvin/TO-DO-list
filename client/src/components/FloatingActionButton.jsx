@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
-import { BsXLg, BsChatDots } from 'react-icons/bs';
+import { BsX } from '@react-icons/all-files/bs/BsX';
+import { BsChatDots } from '@react-icons/all-files/bs/BsChatDots';
 import './FloatingActionButton.css';
 
 const FloatingActionButton = ({ isOpen, onClick, isFocused }) => {
@@ -20,7 +21,7 @@ const FloatingActionButton = ({ isOpen, onClick, isFocused }) => {
       type="button"
       tabIndex={0}
     >
-      {isOpen ? <BsXLg /> : <BsChatDots />}
+      {isOpen ? <BsX /> : <BsChatDots />}
     </button>
   );
 };

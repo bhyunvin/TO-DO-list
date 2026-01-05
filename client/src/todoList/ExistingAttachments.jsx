@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import Swal from 'sweetalert2';
-import { BsPaperclip, BsXLg } from 'react-icons/bs';
+import { BsPaperclip } from '@react-icons/all-files/bs/BsPaperclip';
+import { BsX } from '@react-icons/all-files/bs/BsX';
 import todoService from '../api/todoService';
 import { API_URL } from '../api/apiClient';
 import { useFileUploadValidator } from '../hooks/useFileUploadValidator';
@@ -93,7 +94,7 @@ const ExistingAttachments = ({ todoSeq }) => {
               onClick={() => handleDelete(file.fileNo)}
               title="삭제"
             >
-              <BsXLg />
+              <BsX />
             </button>
           </div>
         ))}

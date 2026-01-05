@@ -24,11 +24,11 @@ const createMatchMediaMock = (matches) => () => ({
   matches,
   media: '(prefers-color-scheme: dark)',
   onchange: null,
-  addListener: jest.fn(),
-  removeListener: jest.fn(),
-  addEventListener: jest.fn(),
-  removeEventListener: jest.fn(),
-  dispatchEvent: jest.fn(),
+  addListener: vi.fn(),
+  removeListener: vi.fn(),
+  addEventListener: vi.fn(),
+  removeEventListener: vi.fn(),
+  dispatchEvent: vi.fn(),
 });
 
 describe('themeStore', () => {
@@ -64,7 +64,7 @@ describe('themeStore', () => {
     if (originalMatchMedia) {
       globalThis.matchMedia = originalMatchMedia;
     }
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Initial State', () => {
@@ -188,7 +188,7 @@ describe('themeStore', () => {
     });
 
     test('should handle invalid theme value by defaulting to light', () => {
-      const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation();
 
       act(() => {
         useThemeStore.getState().setTheme('invalid');
@@ -368,11 +368,11 @@ describe('themeStore', () => {
 
     test('should handle matchMedia errors gracefully', () => {
       // matchMedia가 에러를 던지도록 설정
-      globalThis.matchMedia = jest.fn(() => {
+      globalThis.matchMedia = vi.fn(() => {
         throw new Error('matchMedia error');
       });
 
-      const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation();
 
       act(() => {
         useThemeStore.getState().initializeTheme();

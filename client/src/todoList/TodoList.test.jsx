@@ -6,19 +6,19 @@ import PropTypes from 'prop-types';
 import TodoContainer from './TodoList';
 
 // Mock SweetAlert2
-jest.mock('sweetalert2', () => ({
-  fire: jest.fn(() =>
+vi.mock('sweetalert2', () => ({
+  fire: vi.fn(() =>
     Promise.resolve({ isConfirmed: true }).then(() => ({ isConfirmed: true })),
   ),
 }));
 
 // Mock auth store
-const mockLogin = jest.fn();
-const mockLogout = jest.fn();
-const mockApi = jest.fn();
+const mockLogin = vi.fn();
+const mockLogout = vi.fn();
+const mockApi = vi.fn();
 
-jest.mock('../authStore/authStore', () => ({
-  useAuthStore: () => ({
+vi.mock('../authStore/authStore', () => {
+  const useAuthStore = vi.fn(() => ({
     user: {
       userName: 'Test User',
       userEmail: 'test@example.com',
@@ -27,40 +27,49 @@ jest.mock('../authStore/authStore', () => ({
     login: mockLogin,
     logout: mockLogout,
     api: mockApi,
-  }),
-}));
+  }));
+  useAuthStore.getState = vi.fn(() => ({
+    user: {
+      userName: 'Test User',
+      userEmail: 'test@example.com',
+      userDescription: 'Test description',
+    },
+    accessToken: 'test-token',
+    logout: mockLogout,
+  }));
+  return { useAuthStore };
+});
 
 // Mock file upload hooks
-jest.mock('../hooks/useFileUploadValidator', () => ({
+vi.mock('../hooks/useFileUploadValidator', () => ({
   useFileUploadValidator: () => ({
-    validateFiles: jest.fn(() => [
+    validateFiles: vi.fn(() => [
       { isValid: true, file: {}, fileName: 'test.jpg', fileSize: 1000 },
     ]),
-    formatFileSize: jest.fn((size) => `${size} bytes`),
-    getUploadPolicy: jest.fn(() => ({ maxSize: 10485760, maxCount: 5 })),
+    formatFileSize: vi.fn((size) => `${size} bytes`),
+    getUploadPolicy: vi.fn(() => ({ maxSize: 10485760, maxCount: 5 })),
     FILE_VALIDATION_ERRORS: {},
   }),
 }));
 
-jest.mock('../hooks/useFileUploadProgress', () => ({
+vi.mock('../hooks/useFileUploadProgress', () => ({
   useFileUploadProgress: () => ({
     uploadStatus: 'idle',
     uploadProgress: {},
     uploadErrors: [],
     validationResults: [],
-    resetUploadState: jest.fn(),
+    resetUploadState: vi.fn(),
   }),
 }));
 
 // Mock components
-jest.mock('../components/FileUploadProgress', () => {
-  const MockFileUploadProgress = () => (
+vi.mock('../components/FileUploadProgress', () => ({
+  default: () => (
     <div data-testid="file-upload-progress">File Upload Progress</div>
-  );
-  return MockFileUploadProgress;
-});
+  ),
+}));
 
-jest.mock('../components/ProfileUpdateForm', () => {
+vi.mock('../components/ProfileUpdateForm', () => {
   const MockProfileUpdateForm = ({ user, onSave, onCancel }) => (
     <div data-testid="profile-update-form">
       <h3>프로필 수정</h3>
@@ -68,16 +77,16 @@ jest.mock('../components/ProfileUpdateForm', () => {
       <button
         onClick={() => {
           const mockFormData = {
-            append: jest.fn(),
-            get: jest.fn(),
-            getAll: jest.fn(),
-            has: jest.fn(),
-            set: jest.fn(),
-            delete: jest.fn(),
-            keys: jest.fn(),
-            values: jest.fn(),
-            entries: jest.fn(),
-            forEach: jest.fn(),
+            append: vi.fn(),
+            get: vi.fn(),
+            getAll: vi.fn(),
+            has: vi.fn(),
+            set: vi.fn(),
+            delete: vi.fn(),
+            keys: vi.fn(),
+            values: vi.fn(),
+            entries: vi.fn(),
+            forEach: vi.fn(),
           };
           onSave({
             userName: 'Updated Name',
@@ -101,10 +110,10 @@ jest.mock('../components/ProfileUpdateForm', () => {
     onCancel: PropTypes.func.isRequired,
   };
 
-  return MockProfileUpdateForm;
+  return { default: MockProfileUpdateForm };
 });
 
-jest.mock('../components/PasswordChangeForm', () => {
+vi.mock('../components/PasswordChangeForm', () => {
   const MockPasswordChangeForm = ({ onSave, onCancel }) => (
     <div data-testid="password-change-form">
       <h3>비밀번호 변경</h3>
@@ -128,11 +137,11 @@ jest.mock('../components/PasswordChangeForm', () => {
     onCancel: PropTypes.func.isRequired,
   };
 
-  return MockPasswordChangeForm;
+  return { default: MockPasswordChangeForm };
 });
 
 // Mock DatePicker
-jest.mock('react-datepicker', () => {
+vi.mock('react-datepicker', () => {
   const MockDatePicker = ({ selected, onChange }) => (
     <input
       data-testid="date-picker"
@@ -149,12 +158,12 @@ jest.mock('react-datepicker', () => {
     onChange: PropTypes.func.isRequired,
   };
 
-  return MockDatePicker;
+  return { default: MockDatePicker };
 });
 
 describe('TodoContainer Profile Update Integration', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // Mock successful API responses
     mockApi.mockResolvedValue({
       ok: true,
@@ -516,7 +525,7 @@ describe('TodoContainer Profile Update Integration', () => {
 
 describe('TodoContainer Excel Export Button Rendering', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockApi.mockResolvedValue({
       ok: true,
       json: () => Promise.resolve([]),
@@ -652,7 +661,7 @@ describe('TodoContainer Excel Export Button Rendering', () => {
 
 describe('TodoContainer Date Range Modal Functionality', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockApi.mockResolvedValue({
       ok: true,
       json: () => Promise.resolve([]),
@@ -714,13 +723,13 @@ describe('TodoContainer Date Range Modal Functionality', () => {
     const mockEndDateInput = { value: '2024-01-31' };
 
     const originalGetElementById = document.getElementById;
-    document.getElementById = jest.fn((id) => {
+    document.getElementById = vi.fn((id) => {
       if (id === 'startDate') return mockStartDateInput;
       if (id === 'endDate') return mockEndDateInput;
       return originalGetElementById.call(document, id);
     });
 
-    Swal.showValidationMessage = jest.fn();
+    Swal.showValidationMessage = vi.fn();
 
     render(<TodoContainer />);
 
@@ -752,13 +761,13 @@ describe('TodoContainer Date Range Modal Functionality', () => {
     const mockEndDateInput = { value: '2024-01-31' };
 
     const originalGetElementById = document.getElementById;
-    document.getElementById = jest.fn((id) => {
+    document.getElementById = vi.fn((id) => {
       if (id === 'startDate') return mockStartDateInput;
       if (id === 'endDate') return mockEndDateInput;
       return originalGetElementById.call(document, id);
     });
 
-    Swal.showValidationMessage = jest.fn();
+    Swal.showValidationMessage = vi.fn();
 
     render(<TodoContainer />);
 
@@ -790,7 +799,7 @@ describe('TodoContainer Date Range Modal Functionality', () => {
     const mockEndDateInput = { value: '2024-01-31' };
 
     const originalGetElementById = document.getElementById;
-    document.getElementById = jest.fn((id) => {
+    document.getElementById = vi.fn((id) => {
       if (id === 'startDate') return mockStartDateInput;
       if (id === 'endDate') return mockEndDateInput;
       return originalGetElementById.call(document, id);
@@ -859,7 +868,7 @@ describe('TodoContainer File Download Handler', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // Clean up any previous renders
 
     mockApi.mockResolvedValue({
@@ -868,8 +877,8 @@ describe('TodoContainer File Download Handler', () => {
     });
 
     // Mock URL methods for file download
-    globalThis.URL.createObjectURL = jest.fn(() => 'blob:mock-url');
-    globalThis.URL.revokeObjectURL = jest.fn();
+    globalThis.URL.createObjectURL = vi.fn(() => 'blob:mock-url');
+    globalThis.URL.revokeObjectURL = vi.fn();
 
     // Mock SweetAlert to return cancelled by default
     const Swal = require('sweetalert2');
@@ -948,12 +957,12 @@ describe('TodoContainer File Download Handler', () => {
     const mockAnchor = {
       href: '',
       download: '',
-      click: jest.fn(),
-      remove: jest.fn(),
+      click: vi.fn(),
+      remove: vi.fn(),
     };
 
     const originalCreateElementFn = document.createElement;
-    document.createElement = jest.fn((tag) => {
+    document.createElement = vi.fn((tag) => {
       if (tag === 'a') return mockAnchor;
       return originalCreateElementFn.call(document, tag);
     });
@@ -1214,7 +1223,7 @@ describe('TodoContainer File Download Handler', () => {
 
 describe('TodoContainer Password Change Integration', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Mock successful API responses
     mockApi.mockResolvedValue({

@@ -1,10 +1,19 @@
-import { useEffect } from 'react';
+import { useEffect, Suspense, lazy } from 'react';
 import { Analytics } from '@vercel/analytics/react';
 import { useAuthStore } from './authStore/authStore';
 import { useThemeStore } from './stores/themeStore';
-import LoginForm from './loginForm/LoginForm';
-import TodoList from './todoList/TodoList';
 import './App.css';
+
+const LoginForm = lazy(() => import('./loginForm/LoginForm'));
+const TodoList = lazy(() => import('./todoList/TodoList'));
+
+const LoadingFallback = () => (
+  <div className="d-flex justify-content-center align-items-center vh-100">
+    <output className="spinner-border text-primary">
+      <span className="visually-hidden">Loading...</span>
+    </output>
+  </div>
+);
 
 const App = () => {
   const { user } = useAuthStore();
@@ -15,10 +24,10 @@ const App = () => {
   }, [initializeTheme]);
 
   return (
-    <>
+    <Suspense fallback={<LoadingFallback />}>
       {user ? <TodoList /> : <LoginForm />}
       <Analytics />
-    </>
+    </Suspense>
   );
 };
 
