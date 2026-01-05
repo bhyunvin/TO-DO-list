@@ -54,11 +54,16 @@ const request = async (endpoint, options = {}) => {
     'Content-Type': 'application/json',
   };
 
+  const { accessToken } = useAuthStore.getState();
+
   const config = {
     ...options,
     headers: { ...defaultHeaders, ...options.headers },
-    credentials: 'include', // 세션 쿠키 전송
   };
+
+  if (accessToken) {
+    config.headers['Authorization'] = `Bearer ${accessToken}`;
+  }
 
   // FormData인 경우 Content-Type 헤더 제거 (브라우저가 boundary 자동 설정)
   if (config.body instanceof FormData) {

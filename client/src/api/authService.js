@@ -1,4 +1,5 @@
 import apiClient from './apiClient';
+import { useAuthStore } from '../authStore/authStore';
 
 const authService = {
   /**
@@ -12,6 +13,12 @@ const authService = {
       userId,
       userPassword,
     });
+    // 백엔드에서 { access_token, user } 반환
+    const { access_token, user } = response.data;
+
+    // 스토어에 저장 (구독된 컴포넌트 자동 업데이트)
+    useAuthStore.getState().login(user, access_token);
+
     return response.data;
   },
 
@@ -20,7 +27,18 @@ const authService = {
    * @returns {Promise<void>}
    */
   async logout() {
-    await apiClient.post('/user/logout');
+    // API 호출 (선택 사항)
+    try {
+      await apiClient.post('/user/logout');
+    } catch (error) {
+      // 서버 로그아웃 실패해도 클라이언트 로그아웃은 진행
+      console.warn(
+        'Server logout failed (stateless logic safe to ignore)',
+        error,
+      );
+    }
+    // 클라이언트 상태 초기화
+    useAuthStore.getState().logout();
   },
 
   /**

@@ -4,7 +4,8 @@ TO-DO List 애플리케이션의 프론트엔드 클라이언트입니다. React
 
 ## 주요 기능
 
-- 사용자 인증 (로그인/회원가입)
+- 전역 상태 관리 (Zustand + Persist Middleware)
+- 사용자 인증 (JWT 기반 로그인/회원가입)
 - 날짜별 Todo 관리 인터페이스
 - AI 채팅 어시스턴트
 - 파일 업로드 (진행률 표시)
@@ -57,13 +58,14 @@ client/
 │   │   ├── ProfileComponent.js
 │   │   ├── FloatingActionButton.js
 │   │   └── *.css
-│   ├── authStore/              # Zustand 인증 상태
+│   ├── authStore/              # Zustand 인증 상태 (JWT 관리)
 │   │   └── authStore.js
 │   ├── stores/                 # 추가 Zustand 스토어
 │   │   └── chatStore.js
 │   ├── hooks/                  # 커스텀 React 훅
 │   │   ├── useScrollLock.js
-│   │   └── useFileUpload.js
+│   │   ├── useFileUpload.js
+│   │   └── useSecureImage.js   # JWT 기반 보안 이미지 로더
 │   └── setupProxy.js           # 개발 프록시 설정
 └── package.json
 ```
@@ -189,9 +191,9 @@ npm run lint -- --fix
 
 ### authStore (Zustand)
 
-- 사용자 인증 상태
-- 로그인/로그아웃 액션
-- 세션 확인
+- 사용자 인증 상태 및 JWT 토큰 관리
+- 로그인/로그아웃 액션 (토큰 저장/삭제)
+- Persist 미들웨어를 통한 상태 유지
 
 ### chatStore (Zustand)
 
@@ -207,8 +209,8 @@ npm run lint -- --fix
 
 ### Axios 설정
 
-- 자동 쿠키 전송
-- 에러 처리 인터셉터
+- 요청 인터셉터: `Authorization: Bearer <token>` 헤더 자동 주입
+- 에러 처리 인터셉터 (401 시 자동 로그아웃)
 - 응답 데이터 변환
 
 **보안 참고**: 프로덕션 환경에서는 적절한 CORS 설정과 API 엔드포인트를 구성하세요.
@@ -224,8 +226,8 @@ npm run lint -- --fix
 
 - HTML 새니타이제이션을 통한 XSS 방지
 - 입력 유효성 검사
-- CSRF 보호 (세션 기반)
-- 안전한 쿠키 전송
+- **JWT 인증**: Stateless 인증 방식 사용 (클라이언트 스토리지에 토큰 저장)
+- **보안 이미지 로딩**: `useSecureImage` 훅을 통해 Protected 경로 이미지도 토큰 인증 후 Blob으로 로드
 
 **중요**: 프로덕션 환경에서는 HTTPS를 사용하고, 적절한 보안 헤더를 설정하세요.
 
@@ -303,7 +305,8 @@ Frontend client for the TO-DO List application. Built with React 19 and React Bo
 
 ## Key Features
 
-- User authentication (login/signup)
+- Global State Management (Zustand + Persist Middleware)
+- User Authentication (JWT-based Login/Signup)
 - Date-based Todo management interface
 - AI chat assistant
 - File upload (with progress tracking)
@@ -351,13 +354,14 @@ client/
 │   │   ├── ProfileComponent.js
 │   │   ├── FloatingActionButton.js
 │   │   └── *.css
-│   ├── authStore/              # Zustand auth state
+│   ├── authStore/              # Zustand auth state (JWT management)
 │   │   └── authStore.js
 │   ├── stores/                 # Additional Zustand stores
 │   │   └── chatStore.js
 │   ├── hooks/                  # Custom React hooks
 │   │   ├── useScrollLock.js
-│   │   └── useFileUpload.js
+│   │   ├── useFileUpload.js
+│   │   └── useSecureImage.js   # JWT-based secure image loader
 │   └── setupProxy.js           # Development proxy configuration
 └── package.json
 ```
@@ -483,9 +487,9 @@ npm run lint -- --fix
 
 ### authStore (Zustand)
 
-- User authentication state
-- Login/logout actions
-- Session verification
+- User authentication state & JWT token management
+- Login/logout actions (Token persistence)
+- State persistence via middleware
 
 ### chatStore (Zustand)
 
@@ -501,8 +505,8 @@ Configures proxy for backend API in development environment.
 
 ### Axios Configuration
 
-- Automatic cookie transmission
-- Error handling interceptors
+- Request Interceptor: Auto-injection of `Authorization: Bearer <token>`
+- Error handling interceptors (Auto-logout on 401)
 - Response data transformation
 
 **Security Note**: Configure appropriate CORS settings and API endpoints in production.
@@ -518,8 +522,8 @@ Configures proxy for backend API in development environment.
 
 - XSS prevention via HTML sanitization
 - Input validation
-- CSRF protection (session-based)
-- Secure cookie transmission
+- **JWT Authentication**: Stateless authentication (Token storage in client state)
+- **Secure Image Loading**: `useSecureImage` hook loads protected images as Blobs with auth headers
 
 **Important**: Use HTTPS in production and configure appropriate security headers.
 
