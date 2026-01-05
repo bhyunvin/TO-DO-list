@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { API_URL } from '../api/apiClient';
 import PropTypes from 'prop-types';
 import Swal from 'sweetalert2';
 import { useFileUploadValidator } from '../hooks/useFileUploadValidator';
@@ -372,7 +373,12 @@ const ProfileUpdateForm = ({
         <div className="col-9">
           <div className="d-flex align-items-center">
             <img
-              src={profileImage}
+              src={
+                profileImage?.startsWith('data:') ||
+                profileImage?.startsWith('http')
+                  ? profileImage
+                  : `${API_URL}${profileImage?.replace(/^\/api/, '')}`
+              }
               alt="프로필 미리보기"
               style={{
                 width: '100px',
