@@ -2,19 +2,16 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ExpressAdapter } from '@nestjs/platform-express';
 
-import { Logger } from '@nestjs/common';
-
 const bootstrap = async () => {
-  const logger = new Logger('Bootstrap');
   const app = await NestFactory.create(AppModule, new ExpressAdapter());
+
+  // 프록시 신뢰 설정 추가
+  app.getHttpAdapter().getInstance().set('trust proxy', 1);
 
   const origins = ['http://localhost:5173'];
   if (process.env.FRONTEND_URL) {
     origins.push(process.env.FRONTEND_URL.replace(/\/$/, ''));
   }
-
-  logger.log(`Current NODE_ENV: ${process.env.NODE_ENV}`);
-  logger.log(`Configured CORS Origins: ${JSON.stringify(origins)}`);
 
   app.enableCors({
     origin: origins,
