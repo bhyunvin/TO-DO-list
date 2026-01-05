@@ -7,7 +7,11 @@ export const useAuthStore = create(
       user: null,
       accessToken: null, // JWT 토큰 저장
 
-      login: (userData, token) => set({ user: userData, accessToken: token }),
+      login: (userData, token) =>
+        set((state) => ({
+          user: userData,
+          accessToken: token || state.accessToken,
+        })),
       logout: () => set({ user: null, accessToken: null }),
     }),
     {

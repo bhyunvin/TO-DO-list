@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import Swal from 'sweetalert2';
-import { useAuthStore } from '../authStore/authStore';
 import authService from '../api/authService';
 import SignupForm from './SignupForm';
 
@@ -11,8 +10,6 @@ const LoginForm = () => {
   const [id, setId] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-
-  const { login } = useAuthStore();
 
   const idChangeHandler = (e) => {
     setId(e.target.value);
@@ -39,16 +36,13 @@ const LoginForm = () => {
     }
 
     try {
-      // authService.login 사용
       const data = await authService.login(
         String(id).trim(),
         String(password).trim(),
       );
 
-      if (data.userSeq) {
-        login(data);
-      } else {
-        // 204 No Content나 다른 상태는 axios catch 블록으로 가거나 여기서 처리
+      // data 구조: { access_token, user }
+      if (!data?.access_token) {
         Swal.fire({
           title: '로그인 실패',
           text: data.message || '다시 시도해 주세요.',
@@ -99,7 +93,7 @@ const LoginForm = () => {
         });
       }
     } finally {
-      setIsLoading(false); // Always reset loading
+      setIsLoading(false);
     }
   };
 
