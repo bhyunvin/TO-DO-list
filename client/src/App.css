@@ -468,8 +468,8 @@
 
 /* Dark Mode Overrides */
 [data-theme='dark'] .btn.btn-outline-adaptive {
-  color: #f8f9fa !important; /* Dark mode text (Light) */
-  border-color: #f8f9fa !important; /* Dark mode border (Light) */
+  color: var(--text-primary) !important;
+  border-color: var(--border-medium) !important;
 }
 
 [data-theme='dark'] .btn.btn-outline-adaptive:hover,
