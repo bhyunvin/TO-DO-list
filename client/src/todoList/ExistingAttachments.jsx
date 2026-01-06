@@ -28,9 +28,8 @@ const ExistingAttachments = ({ todoSeq }) => {
   }, [fetchAttachments]);
 
   const handleDelete = async (fileNo) => {
-    const { showConfirmAlert, showSuccessAlert, showErrorAlert } = await import(
-      '../utils/alertUtils'
-    );
+    const { showConfirmAlert, showSuccessAlert, showErrorAlert } =
+      await import('../utils/alertUtils');
     const result = await showConfirmAlert({
       title: '파일 삭제',
       text: '선택한 파일을 삭제하시겠습니까? 삭제 후 복구할 수 없습니다.',

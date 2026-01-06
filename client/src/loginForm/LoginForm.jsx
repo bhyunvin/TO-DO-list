@@ -23,9 +23,8 @@ const LoginForm = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    const { showWarningAlert, showErrorAlert } = await import(
-      '../utils/alertUtils'
-    );
+    const { showWarningAlert, showErrorAlert } =
+      await import('../utils/alertUtils');
 
     if (!id) {
       showWarningAlert('', '아이디를 입력해주세요.');

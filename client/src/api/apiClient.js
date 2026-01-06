@@ -11,10 +11,7 @@ const handleStatusErrors = async (response, endpoint) => {
     // 실제로 로그아웃 처리
     useAuthStore.getState().logout();
     const { showErrorAlert } = await import('../utils/alertUtils');
-    showErrorAlert(
-      '세션 만료',
-      '세션이 만료되었습니다. 다시 로그인해주세요.',
-    );
+    showErrorAlert('세션 만료', '세션이 만료되었습니다. 다시 로그인해주세요.');
   }
 
   // 504 Gateway Timeout 처리

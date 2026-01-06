@@ -80,9 +80,8 @@ const CreateTodoForm = ({ onAddTodo, onCancel }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const { showWarningAlert, showErrorAlert, showToast } = await import(
-      '../utils/alertUtils'
-    );
+    const { showWarningAlert, showErrorAlert, showToast } =
+      await import('../utils/alertUtils');
 
     if (!todoContent.trim()) {
       showWarningAlert('할 일을 입력해주세요.');
@@ -952,9 +951,8 @@ const TodoContainer = () => {
 
   const handleDeleteTodo = async (todoSeq) => {
     // 사용자에게 삭제 확인을 받음
-    const { showConfirmAlert, showToast, showErrorAlert } = await import(
-      '../utils/alertUtils'
-    );
+    const { showConfirmAlert, showToast, showErrorAlert } =
+      await import('../utils/alertUtils');
     await showConfirmAlert({
       title: '정말로 삭제하시겠습니까?',
       text: '삭제된 데이터는 복구할 수 없습니다.',
@@ -1050,10 +1048,7 @@ const TodoContainer = () => {
           });
           return { success: false, errors: errorData.errors || [] };
         } else {
-          showErrorAlert(
-            '오류',
-            errorData.message || '수정에 실패했습니다.',
-          );
+          showErrorAlert('오류', errorData.message || '수정에 실패했습니다.');
           return { success: false, error: errorData.message };
         }
       }
@@ -1250,9 +1245,8 @@ const TodoContainer = () => {
   };
 
   const handleLogout = async () => {
-    const { showConfirmAlert, showErrorAlert } = await import(
-      '../utils/alertUtils'
-    );
+    const { showConfirmAlert, showErrorAlert } =
+      await import('../utils/alertUtils');
     await showConfirmAlert({
       title: '로그아웃 하시겠습니까?',
       confirmButtonText: '로그아웃',
@@ -1274,10 +1268,7 @@ const TodoContainer = () => {
         } catch (error) {
           console.error('Logout Error : ', error);
           // 네트워크 오류 등이 발생해도 사용자에게 알린 후 로그아웃을 진행
-          showErrorAlert(
-            '오류 발생',
-            '서버와의 연결에 문제가 발생했습니다.',
-          );
+          showErrorAlert('오류 발생', '서버와의 연결에 문제가 발생했습니다.');
         } finally {
           logout();
         }
@@ -1524,9 +1515,7 @@ const TodoContainer = () => {
       globalThis.URL.revokeObjectURL(url);
       a.remove();
 
-      const { showSuccessAlert } = await import(
-        '../utils/alertUtils'
-      );
+      const { showSuccessAlert } = await import('../utils/alertUtils');
       showSuccessAlert('성공', 'Excel 파일이 다운로드되었습니다.');
     } catch (error) {
       console.error('Excel Export Error:', error);
