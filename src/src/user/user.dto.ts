@@ -6,6 +6,7 @@ import {
   MinLength,
   Matches,
   IsNotEmpty,
+  IsBoolean,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
 
@@ -57,6 +58,11 @@ export class UserDto {
   @IsOptional()
   @IsString()
   profileImage?: string; // 프로필 이미지 URL (응답용)
+
+  @IsOptional()
+  @IsBoolean()
+  @Transform(({ value }) => value === 'true' || value === true)
+  privacyAgreed?: boolean; // 개인정보 수집 이용 동의
 }
 
 export class UpdateUserDto {

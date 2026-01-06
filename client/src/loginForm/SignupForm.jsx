@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import 'sweetalert2/dist/sweetalert2.min.css';
-import { showAlert, showErrorAlert } from '../utils/alertUtils';
+import { showAlert, showErrorAlert, showToast } from '../utils/alertUtils';
 import authService from '../api/authService';
 import { useFileUploadValidator } from '../hooks/useFileUploadValidator';
 import { useFileUploadProgress } from '../hooks/useFileUploadProgress';
@@ -25,6 +25,7 @@ const SignupForm = ({ onSignupComplete }) => {
   const [profileImage, setProfileImage] = useState(null);
   const [profileImageFile, setProfileImageFile] = useState(null);
   const [profileImageValidation, setProfileImageValidation] = useState(null);
+  const [privacyAgreed, setPrivacyAgreed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleImageChange = (e) => {
@@ -239,6 +240,15 @@ const SignupForm = ({ onSignupComplete }) => {
       return false;
     }
 
+    if (!privacyAgreed) {
+      showToast({
+        title: '개인정보 수집 및 이용에 동의해주세요.',
+        icon: 'warning',
+        timer: 3000,
+      });
+      return false;
+    }
+
     return true;
   };
 
@@ -252,6 +262,8 @@ const SignupForm = ({ onSignupComplete }) => {
     signupFormData.append('userDescription', userDescription);
     if (profileImageFile)
       signupFormData.append('profileImage', profileImageFile);
+
+    signupFormData.append('privacyAgreed', privacyAgreed);
 
     try {
       const data = await authService.signup(signupFormData);
@@ -341,6 +353,66 @@ const SignupForm = ({ onSignupComplete }) => {
   };
 
   const passwordStrength = getPasswordStrength(userPassword);
+
+  const showPrivacyPolicy = () => {
+    showAlert({
+      title: '개인정보 처리방침',
+      html: `
+        <div style="text-align: left; max-height: 400px; overflow-y: auto; font-size: 0.9rem; line-height: 1.6;">
+          <p><strong>제1조 (목적)</strong><br/>
+          본 방침은 'My Todo App'(이하 '회사')이 제공하는 서비스 이용과 관련하여 회원의 개인정보를 보호하고, 이와 관련된 고충을 신속하고 원활하게 처리할 수 있도록 하기 위하여 수립되었습니다.</p>
+          
+          <hr style="margin: 10px 0; border: 0; border-top: 1px solid #eee;">
+
+          <p><strong>제2조 (수집하는 개인정보의 항목)</strong><br/>
+          회사는 회원가입 및 서비스 이용 과정에서 아래와 같은 개인정보를 수집합니다.<br/>
+          <ul style="margin: 5px 0 10px 20px; padding: 0;">
+            <li><strong>필수항목:</strong> 아이디, 비밀번호, 이름, 이메일</li>
+            <li><strong>선택항목:</strong> 프로필 이미지, 사용자 설명, AI API Key</li>
+            <li><strong>자동수집:</strong> 접속 IP 정보, 서비스 이용기록, 쿠키 (부정 이용 방지 및 감사 목적)</li>
+          </ul>
+          </p>
+          
+          <hr style="margin: 10px 0; border: 0; border-top: 1px solid #eee;">
+
+          <p><strong>제3조 (개인정보의 보유 및 이용기간)</strong><br/>
+          회사는 원칙적으로 개인정보 수집 및 이용목적이 달성된 후에는 해당 정보를 지체 없이 파기합니다. 단, 보안 및 감사 목적으로 아래의 정보는 명시된 기간 동안 보존합니다.<br/>
+          <ul style="margin: 5px 0 10px 20px; padding: 0;">
+            <li><strong>접속 로그 및 IP 정보:</strong> <span style="color: #d63384; font-weight: bold;">6개월</span> (통신비밀보호법 및 보안 감사)</li>
+            <li><strong>회원 정보:</strong> 회원 탈퇴 시까지</li>
+          </ul>
+          </p>
+
+          <hr style="margin: 10px 0; border: 0; border-top: 1px solid #eee;">
+
+          <p><strong>제4조 (개인정보의 암호화 및 보호 조치)</strong><br/>
+          회사는 이용자의 개인정보를 안전하게 보호하기 위해 주요 정보를 암호화하여 저장합니다.<br/>
+          <ul style="margin: 5px 0 10px 20px; padding: 0;">
+            <li><strong>암호화 저장 항목:</strong> <span style="font-weight: bold; color: #0d6efd;">비밀번호, 이메일, AI API Key</span></li>
+            <li><strong>통신 구간 암호화:</strong> 전체 서비스 구간에 SSL(HTTPS)을 적용하여 데이터를 안전하게 전송합니다.</li>
+          </ul>
+          </p>
+
+          <hr style="margin: 10px 0; border: 0; border-top: 1px solid #eee;">
+
+          <p><strong>제5조 (개인정보의 파기절차 및 방법)</strong><br/>
+          <ul style="margin: 5px 0 10px 20px; padding: 0;">
+            <li><strong>파기절차:</strong> 보유 기간(6개월)이 경과한 로그 및 IP 정보는 자동화된 시스템에 의해 영구 삭제됩니다.</li>
+            <li><strong>파기방법:</strong> DB에 저장된 데이터는 복구할 수 없는 방법으로 삭제하며, 파일 형태의 기록은 재생 불가능한 기술적 방법을 사용하여 삭제합니다.</li>
+          </ul>
+          </p>
+        </div>
+      `,
+      width: '600px',
+      confirmButtonText: '확인',
+      confirmButtonColor: '#0d6efd', // Bootstrap primary color 예시
+      scrollbarPadding: false,
+      customClass: {
+        htmlContainer: 'text-start',
+        popup: 'swal2-privacy-popup', // 필요시 css 커스텀을 위해 클래스 추가
+      },
+    });
+  };
 
   return (
     <div className="signup-container">
@@ -601,6 +673,36 @@ const SignupForm = ({ onSignupComplete }) => {
               onChange={userDescriptionChangeHandler}
               spellCheck="false"
             ></textarea>
+          </div>
+        </div>
+
+        {/* 개인정보 처리방침 동의 */}
+        <div className="form-group row mb-3">
+          <div className="col-3"></div>
+          <div className="col-9">
+            <div className="form-check d-flex align-items-center">
+              <input
+                className="form-check-input me-2"
+                type="checkbox"
+                id="privacyAgreement"
+                checked={privacyAgreed}
+                onChange={(e) => setPrivacyAgreed(e.target.checked)}
+              />
+              <label
+                className="form-check-label me-2"
+                htmlFor="privacyAgreement"
+                style={{ cursor: 'pointer', userSelect: 'none' }}
+              >
+                [필수] 개인정보 수집 및 이용에 동의합니다.
+              </label>
+              <button
+                type="button"
+                className="btn btn-sm btn-link p-0 text-decoration-none"
+                onClick={showPrivacyPolicy}
+              >
+                [내용 보기]
+              </button>
+            </div>
           </div>
         </div>
 

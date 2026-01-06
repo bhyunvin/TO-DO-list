@@ -157,6 +157,9 @@ export class UserService {
 
       // 유저 정보를 저장합니다.
       let newUser = this.userRepository.create(userDto);
+      if (userDto.privacyAgreed) {
+        newUser.privacyAgreedDtm = new Date();
+      }
       newUser = setAuditColumn({ entity: newUser, id: userId, ip });
       const savedUser = await transactionalEntityManager.save(
         UserEntity,

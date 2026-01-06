@@ -34,6 +34,12 @@ export class UserEntity {
   @Column({ name: 'admin_yn', length: 1 })
   adminYn: string;
 
+  @Column({
+    name: 'privacy_agreed_dtm',
+    type: 'timestamptz',
+  })
+  privacyAgreedDtm: Date;
+
   @Column(() => AuditColumns) // 복합 엔티티를 포함
   auditColumns: AuditColumns;
 

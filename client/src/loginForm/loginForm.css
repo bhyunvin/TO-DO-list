@@ -128,3 +128,49 @@
 [data-theme='dark'] .signup-container a:hover {
   color: var(--color-primary-dark);
 }
+
+/* Privacy Policy Popup Custom Styles */
+.swal2-privacy-popup {
+  transition:
+    background-color 0.3s,
+    color 0.3s;
+}
+
+/* Light Mode Defaults for Popup */
+html[data-theme='light'] body .swal2-popup.swal2-privacy-popup {
+  background: #ffffff !important;
+  color: #212529 !important;
+}
+
+/* Dark Mode Overrides for Popup */
+html[data-theme='dark'] body .swal2-popup.swal2-privacy-popup {
+  background: #2b3035 !important;
+  color: #dee2e6 !important;
+}
+
+/* Popup Content Scrollbar Styling */
+.swal2-privacy-popup .swal2-html-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.swal2-privacy-popup .swal2-html-container::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+}
+
+.swal2-privacy-popup .swal2-html-container::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+html[data-theme='dark']
+  .swal2-privacy-popup
+  .swal2-html-container::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+html[data-theme='dark']
+  .swal2-privacy-popup
+  .swal2-html-container::-webkit-scrollbar-thumb {
+  background: #4b5563;
+}
