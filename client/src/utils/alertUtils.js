@@ -1,10 +1,8 @@
 /**
  * SweetAlert2를 동적으로 로드합니다.
- * CSS도 함께 로드하여 스타일이 적용되도록 합니다.
  * @returns {Promise<typeof import('sweetalert2').default>}
  */
 export const loadSwal = async () => {
-  await import('sweetalert2/dist/sweetalert2.min.css');
   const { default: Swal } = await import('sweetalert2/dist/sweetalert2.min.js');
   return Swal;
 };
