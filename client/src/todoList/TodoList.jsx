@@ -361,13 +361,13 @@ const TodoList = ({
           <td className="text-center">{index + 1}</td>
           <td className="todo-content">
             <span className="text-truncate" title={todoContent}>
-              {todoContent}
+              {truncateText(todoContent)}
             </span>
           </td>
           <td className="text-center">{formatDateTime(completeDtm)}</td>
           <td>
             <span className="text-truncate" title={todoNote}>
-              {todoNote}
+              {truncateText(todoNote)}
             </span>
           </td>
           <td className="todo-actions-cell">
@@ -696,6 +696,12 @@ const formatDateTime = (isoString) => {
   return `${year}-${month}-${day} ${hours}:${minutes}`;
 };
 
+const truncateText = (text, maxLength = 30) => {
+  if (!text) return '';
+  if (text.length <= maxLength) return text;
+  return text.substring(0, maxLength) + '...';
+};
+
 const TodoContainer = () => {
   const { user, logout, login } = useAuthStore();
   const {
@@ -1016,14 +1022,8 @@ const TodoContainer = () => {
         });
       }
 
-      showAlert({
-        title: '성공',
-        html: `
-            <div class="text-center">
-              <p>할 일이 수정되었습니다.</p>
-              ${todoFiles && todoFiles.length > 0 ? `<p>✓ ${todoFiles.length}개 파일이 업로드되었습니다.</p>` : ''}
-            </div>
-          `,
+      showToast({
+        title: '할 일이 수정되었습니다.',
         icon: 'success',
       });
       setEditingTodo(null);
@@ -1130,7 +1130,7 @@ const TodoContainer = () => {
 
   const handleSaveProfile = async (profileData) => {
     try {
-      const { formData, profileImageFile } = profileData;
+      const { formData } = profileData;
 
       const updatedUser = await userService.updateProfile(formData);
 
@@ -1144,16 +1144,9 @@ const TodoContainer = () => {
 
       login(updatedUser);
 
-      showAlert({
-        title: '프로필 수정 완료!',
-        html: `
-            <div class="text-center">
-              <p><strong>프로필이 성공적으로 수정되었습니다.</strong></p>
-              ${profileImageFile ? `<p>✓ 프로필 이미지가 업데이트되었습니다.</p>` : ''}
-            </div>
-          `,
+      showToast({
+        title: '프로필이 수정되었습니다.',
         icon: 'success',
-        confirmButtonText: '확인',
       }).then(() => {
         setIsUpdatingProfile(false);
         setIsFormDirty(false);
@@ -1196,16 +1189,9 @@ const TodoContainer = () => {
         confirmPassword,
       });
 
-      showAlert({
-        title: '비밀번호 변경 완료',
-        html: `
-            <div class="text-center">
-              <p><strong>비밀번호가 성공적으로 변경되었습니다.</strong></p>
-              <p>보안을 위해 다시 로그인해주세요.</p>
-            </div>
-          `,
+      showToast({
+        title: '비밀번호가 변경되었습니다.',
         icon: 'success',
-        confirmButtonText: '확인',
       })
         .then(() => {})
         .then(() => {

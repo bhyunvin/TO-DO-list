@@ -74,9 +74,12 @@ export const showWarningAlert = async (title, text) => {
  */
 export const showToast = async ({ title, icon = 'success', timer = 3000 }) => {
   const Swal = await loadSwal();
+  // 모바일 환경(768px 미만)에서는 하단 중앙, 그 외에는 상단 우측
+  const position = window.innerWidth < 768 ? 'bottom' : 'top-end';
+
   return Swal.fire({
     toast: true,
-    position: 'top-end',
+    position,
     icon,
     title,
     showConfirmButton: false,
