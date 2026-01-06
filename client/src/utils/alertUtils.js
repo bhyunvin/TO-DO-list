@@ -1,3 +1,5 @@
+import { useThemeStore } from '../stores/themeStore';
+
 /**
  * SweetAlert2를 동적으로 로드합니다.
  * @returns {Promise<typeof import('sweetalert2')>}
@@ -5,8 +7,18 @@
 export const loadSwal = async () => {
   // 패키지 명만 사용하여 Vite가 최적의 모듈을 가져오게 함
   const module = await import('sweetalert2');
-  // sweetalert2는 export default를 주로 사용하므로 module.default 또는 module 자체를 반환
-  return module.default || module;
+  const Swal = module.default || module;
+
+  const { theme } = useThemeStore.getState();
+
+  if (theme === 'dark') {
+    return Swal.mixin({
+      background: '#2b3035', // Bootstrap dark modal background
+      color: '#dee2e6', // Bootstrap dark text color
+    });
+  }
+
+  return Swal;
 };
 
 /**
