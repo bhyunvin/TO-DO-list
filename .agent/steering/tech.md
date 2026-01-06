@@ -4,10 +4,13 @@
 - **Framework**: NestJS with Express adapter
 - **Language**: TypeScript
 - **Database**: PostgreSQL with TypeORM
-- **Authentication**: Express sessions with bcrypt password hashing
+- **Authentication**: JWT (stateless) with bcrypt password hashing
 - **Security**: Environment variables for secure credential storage, AES-256-GCM for data encryption
-- **AI Integration**: Google Gemini API via @nestjs/axios with function calling
+- **AI Integration**: Google Gemini API with function calling
+- **File Storage**: Cloudinary cloud storage
 - **File Upload**: Multer for multipart form handling
+- **Mail Service**: Nodemailer (Gmail)
+- **Scheduler**: @nestjs/schedule for cron jobs (IP anonymization, token cleanup)
 - **Markdown Processing**: marked for markdown parsing, sanitize-html for XSS protection
 
 ## Frontend (React)

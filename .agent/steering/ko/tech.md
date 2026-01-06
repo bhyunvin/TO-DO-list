@@ -4,10 +4,13 @@
 - **프레임워크**: Express 어댑터를 사용하는 NestJS
 - **언어**: TypeScript
 - **데이터베이스**: TypeORM을 사용하는 PostgreSQL
-- **인증**: bcrypt 비밀번호 해싱을 사용하는 Express 세션
+- **인증**: bcrypt 비밀번호 해싱을 사용하는 JWT (stateless)
 - **보안**: 안전한 자격 증명 저장을 위한 환경 변수, 데이터 암호화를 위한 AES-256-GCM
-- **AI 통합**: 함수 호출 기능을 갖춘 @nestjs/axios를 통한 Google Gemini API
+- **AI 통합**: 함수 호출 기능을 갖춘 Google Gemini API
+- **파일 스토리지**: Cloudinary 클라우드 스토리지
 - **파일 업로드**: multipart form 처리를 위한 Multer
+- **메일 서비스**: Nodemailer (Gmail)
+- **스케줄러**: cron jobs를 위한 @nestjs/schedule (IP 익명화, 토큰 정리)
 - **마크다운 처리**: 마크다운 파싱을 위한 marked, XSS 보호를 위한 sanitize-html
 
 ## 프론트엔드 (React)

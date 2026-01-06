@@ -18,11 +18,13 @@ myTodoApp/
 - `src/app.module.ts` - 데이터베이스, 세션 및 전역 프로바이더를 포함한 루트 모듈
 
 ### 기능 모듈 (도메인 주도)
-- `src/user/` - 사용자 인증 및 관리
+- `src/user/` - 사용자 인증 및 관리 (JWT 기반)
 - `src/todo/` - Todo CRUD 작업 및 날짜 기반 쿼리
 - `src/assistance/` - Gemini를 사용한 AI 지원 통합
-- `src/fileUpload/` - 파일 업로드 처리 및 저장
-- `src/logging/` - 애플리케이션 로깅 및 감사 추적
+- `src/fileUpload/` - Cloudinary 클라우드 스토리지를 사용한 파일 업로드 처리
+  - `validation/` - 서버 사이드 파일 검증 모듈
+- `src/mail/` - Contact Developer 기능을 위한 이메일 서비스
+- `src/logging/` - IP 익명화 스케줄러를 포함한 애플리케이션 로깅 및 감사 추적
 
 ### 인프라
 - `src/utils/` - 공유 유틸리티 (crypto, audit columns, naming strategy)

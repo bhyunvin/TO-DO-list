@@ -18,11 +18,13 @@ myTodoApp/
 - `src/app.module.ts` - Root module with database, session, and global providers
 
 ### Feature Modules (Domain-Driven)
-- `src/user/` - User authentication and management
+- `src/user/` - User authentication and management (JWT-based)
 - `src/todo/` - Todo CRUD operations and date-based queries
 - `src/assistance/` - AI assistance integration with Gemini
-- `src/fileUpload/` - File upload handling and storage
-- `src/logging/` - Application logging and audit trails
+- `src/fileUpload/` - File upload handling with Cloudinary cloud storage
+  - `validation/` - Server-side file validation module
+- `src/mail/` - Email service for contact developer feature
+- `src/logging/` - Application logging and audit trails with IP anonymization scheduler
 
 ### Infrastructure
 - `src/utils/` - Shared utilities (crypto, audit columns, naming strategy)
