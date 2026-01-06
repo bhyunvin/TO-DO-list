@@ -49,16 +49,17 @@ export default defineConfig({
     host: true,
   },
   build: {
-    minify: 'terser', // terser 사용 설정
-    terserOptions: {
-      compress: {
-        drop_console: true, // 콘솔 로그 제거
-        drop_debugger: true, // 디버거 제거
-      },
-      format: {
-        comments: false, // 주석 제거
-      },
-    },
+    minify: false,
+    // minify: 'terser', // terser 사용 설정
+    // terserOptions: {
+    //   compress: {
+    //     drop_console: true, // 콘솔 로그 제거
+    //     drop_debugger: true, // 디버거 제거
+    //   },
+    //   format: {
+    //     comments: false, // 주석 제거
+    //   },
+    // },
     rollupOptions: {
       output: {
         manualChunks: (id) => {
