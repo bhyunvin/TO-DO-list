@@ -23,7 +23,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 export class AssistanceService implements OnModuleInit {
   private readonly logger = new Logger(AssistanceService.name);
 
-  // Tool Definitions using SDK types
+  // SDK 타입을 사용한 도구 정의
   private readonly tools = [
     {
       functionDeclarations: [
@@ -134,8 +134,8 @@ export class AssistanceService implements OnModuleInit {
 
     const ai = new GoogleGenAI({ apiKey });
 
-    // Convert DTO history to SDK Content type
-    // Use 'any' or safe casting to bridge the types if strictly incompatible
+    // DTO 기록을 SDK Content 타입으로 변환
+    // 타입이 호환되지 않는 경우 'any' 사용 또는 안전한 캐스팅 사용
     const contents: Content[] = (requestAssistanceDto.history || []).map(
       (h) => ({
         role: h.role,
@@ -158,7 +158,7 @@ export class AssistanceService implements OnModuleInit {
         };
 
         this.logger.log(
-          `[Gemini SDK] Generating content (Turn ${turn + 1})...`,
+          `[Gemini SDK] 콘텐츠 생성 중 (턴 ${turn + 1})...`,
         );
 
         const response = await ai.models.generateContent({
@@ -185,7 +185,7 @@ export class AssistanceService implements OnModuleInit {
 
         if (functionCalls.length > 0) {
           this.logger.log(
-            `[Gemini SDK] Function calls detected: ${functionCalls.length}`,
+            `[Gemini SDK] 함수 호출 감지됨: ${functionCalls.length}개`,
           );
 
           const functionResponses = await Promise.all(
@@ -207,7 +207,7 @@ export class AssistanceService implements OnModuleInit {
             }),
           );
 
-          // 'function' role is standard for responses in Gemini
+          // 'function' 역할은 Gemini 응답의 표준입니다
           contents.push({
             role: 'function',
             parts: functionResponses as Part[],
@@ -221,7 +221,7 @@ export class AssistanceService implements OnModuleInit {
         const responseText = textPart ? textPart.text : '';
 
         if (!responseText && functionCalls.length === 0) {
-          this.logger.warn('[Gemini SDK] Empty response received');
+          this.logger.warn('[Gemini SDK] 빈 응답 수신');
         }
 
         const safeHtml = await this.processFinalResponse(responseText);
@@ -263,7 +263,7 @@ export class AssistanceService implements OnModuleInit {
   }
 
   private handleGeminiError(error: any) {
-    this.logger.error('Gemini API Error', error);
+    this.logger.error('Gemini API 오류', error);
     throw new InternalServerErrorException('AI Assistant request failed');
   }
 
@@ -293,7 +293,7 @@ export class AssistanceService implements OnModuleInit {
     return kstTime.toISOString().split('T')[0];
   }
 
-  // --- Function Implementations ---
+  // --- 함수 구현 ---
 
   private async executeFunctionCall(
     functionCall: any,
@@ -303,10 +303,10 @@ export class AssistanceService implements OnModuleInit {
   ): Promise<any> {
     const args = functionCall.args || {};
     this.logger.debug(
-      `[Exec] Function: ${functionCall.name}, Args: ${JSON.stringify(args)}`,
+      `[실행] 함수: ${functionCall.name}, 인자: ${JSON.stringify(args)}`,
     );
 
-    // Using map for cleaner dispatch
+    // 더 깔끔한 디스패치를 위해 map 사용
     const handlers: Record<string, () => Promise<any>> = {
       getTodos: () => this.getTodos(userSeq, args.status, args.days),
       createTodo: () =>
@@ -337,7 +337,7 @@ export class AssistanceService implements OnModuleInit {
     if (handler) {
       return await handler();
     } else {
-      this.logger.warn(`Unknown function: ${functionCall.name}`);
+      this.logger.warn(`알 수 없는 함수: ${functionCall.name}`);
       return { error: `Unknown function ${functionCall.name}` };
     }
   }
@@ -370,7 +370,7 @@ export class AssistanceService implements OnModuleInit {
         error: `"${contentToFind}"와 일치하는 할 일이 ${matches.length}개 있습니다. (미완료: ${incompleteMatches.length}개). 더 구체적으로 지정해주세요.`,
       };
     } catch (error) {
-      this.logger.error('[findTodoByContent] Error', error);
+      this.logger.error('[findTodoByContent] 오류', error);
       return { success: false, error: '할 일 검색에 실패했습니다.' };
     }
   }
@@ -423,7 +423,7 @@ export class AssistanceService implements OnModuleInit {
         queryParams: { status, days, targetDate },
       };
     } catch (error) {
-      this.logger.error('[getTodos] Error', error);
+      this.logger.error('[getTodos] 오류', error);
       return {
         success: false,
         error: 'Failed to retrieve todos',
@@ -472,7 +472,7 @@ export class AssistanceService implements OnModuleInit {
         refreshedList,
       };
     } catch (error) {
-      this.logger.error('[createTodo] Error', error);
+      this.logger.error('[createTodo] 오류', error);
       return { success: false, error: 'Failed to create todo' };
     }
   }
@@ -530,7 +530,7 @@ export class AssistanceService implements OnModuleInit {
         refreshedList,
       };
     } catch (error) {
-      this.logger.error('[updateTodo] Error', error);
+      this.logger.error('[updateTodo] 오류', error);
       return { success: false, error: 'Failed to update todo' };
     }
   }

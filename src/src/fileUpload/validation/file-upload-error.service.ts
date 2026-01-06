@@ -83,7 +83,7 @@ export class FileUploadErrorService {
     return {
       success: true,
       message:
-        message || `Successfully uploaded ${uploadedFiles.length} file(s)`,
+        message || `${uploadedFiles.length}개 파일이 성공적으로 업로드되었습니다`,
       uploadedFiles,
       timestamp: new Date().toISOString(),
       requestId,
@@ -95,12 +95,12 @@ export class FileUploadErrorService {
    */
   generateErrorMessage(errors: FileValidationError[]): string {
     if (errors.length === 0) {
-      return 'File upload failed';
+      return '파일 업로드에 실패했습니다';
     }
 
     if (errors.length === 1) {
       const [firstError] = errors;
-      return `File "${firstError.fileName}": ${this.getUserFriendlyMessage(firstError)}`;
+      return `파일 "${firstError.fileName}": ${this.getUserFriendlyMessage(firstError)}`;
     }
 
     // 여러 오류 - 오류 유형별로 그룹화
@@ -189,7 +189,7 @@ export class FileUploadErrorService {
     }
 
     securityErrors.forEach(({ fileName, fileType, fileSize }) => {
-      this.logger.warn(`SECURITY ALERT: Blocked file type upload attempt`, {
+      this.logger.warn(`보안 경고: 차단된 파일 형식 업로드 시도`, {
         fileName,
         fileType,
         fileSize,
@@ -221,7 +221,7 @@ export class FileUploadErrorService {
     }
 
     this.logger.warn(
-      `File validation failed for ${nonSecurityErrors.length} file(s)`,
+      `${nonSecurityErrors.length}개 파일 검증 실패`,
       {
         errors: nonSecurityErrors.map(
           ({ fileName, errorCode, fileSize, fileType }) => ({
@@ -246,7 +246,7 @@ export class FileUploadErrorService {
    * 성공적인 파일 업로드 로깅
    */
   logSuccessfulUpload(uploadedFiles: any[], context: ErrorLogContext): void {
-    this.logger.log(`Successfully uploaded ${uploadedFiles.length} file(s)`, {
+    this.logger.log(`${uploadedFiles.length}개 파일이 성공적으로 업로드되었습니다`, {
       fileCount: uploadedFiles.length,
       files: uploadedFiles.map((file) => ({
         fileName: file.originalFileName || file.fileName,
@@ -328,8 +328,8 @@ export class FileUploadErrorService {
   ): FileUploadErrorResponse {
     const message =
       errors.length > 0
-        ? `Partial upload success: ${uploadedFiles.length} file(s) uploaded, ${errors.length} failed`
-        : `Successfully uploaded ${uploadedFiles.length} file(s)`;
+        ? `부분 업로드 성공: ${uploadedFiles.length}개 파일 업로드됨, ${errors.length}개 실패`
+        : `${uploadedFiles.length}개 파일이 성공적으로 업로드되었습니다`;
 
     return {
       success: false,

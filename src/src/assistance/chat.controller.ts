@@ -33,7 +33,7 @@ export class ChatController {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         this.logger.log(
-          `Chat request from user ${user.userSeq} (attempt ${attempt}): ${chatRequestDto.prompt.substring(0, 50)}...`,
+          `사용자 ${user.userSeq}로부터 챗 요청 (시도 ${attempt}): ${chatRequestDto.prompt.substring(0, 50)}...`,
         );
 
         // 기존 서비스를 위한 요청 DTO 생성
@@ -61,7 +61,7 @@ export class ChatController {
         };
 
         this.logger.log(
-          `Chat response sent to user ${user.userSeq} on attempt ${attempt}`,
+          `사용자 ${user.userSeq}에게 챗 응답 전송 (시도 ${attempt})`,
         );
         return response;
       } catch (error) {
@@ -69,7 +69,7 @@ export class ChatController {
         const isLastAttempt = attempt === maxRetries;
 
         this.logger.error(
-          `Chat request failed for user ${user.userSeq} on attempt ${attempt}:`,
+          `사용자 ${user.userSeq}의 챗 요청 실패 (시도 ${attempt}):`,
           {
             error: error.message,
             status: error.response?.status || error.status,
@@ -82,7 +82,7 @@ export class ChatController {
         if (isRateLimited && !isLastAttempt) {
           const delay = this.calculateRetryDelay(attempt, baseDelay, error);
           this.logger.log(
-            `Rate limited. Retrying in ${delay}ms (attempt ${attempt + 1}/${maxRetries})`,
+            `속도 제한. ${delay}ms 후 재시도 (시도 ${attempt + 1}/${maxRetries})`,
           );
           await this.sleep(delay);
           continue;

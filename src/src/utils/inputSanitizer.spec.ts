@@ -7,24 +7,24 @@ describe('InputSanitizerService', () => {
     service = new InputSanitizerService();
   });
 
-  it('should be defined', () => {
+  it('정의되어야 함', () => {
     expect(service).toBeDefined();
   });
 
   describe('sanitizeString', () => {
-    it('should remove HTML tags by default', () => {
+    it('기본적으로 HTML 태그를 제거해야 함', () => {
       const input = '<script>alert("xss")</script>Hello World';
       const result = service.sanitizeString(input);
       expect(result).toBe('alert(xss)Hello World');
     });
 
-    it('should remove dangerous characters', () => {
+    it('위험한 문자를 제거해야 함', () => {
       const input = 'Hello"World\'Test;DROP';
       const result = service.sanitizeString(input);
       expect(result).toBe('HelloWorldTestDROP');
     });
 
-    it('should trim whitespace by default', () => {
+    it('기본적으로 공백을 제거해야 함', () => {
       const input = '  Hello World  ';
       const result = service.sanitizeString(input);
       expect(result).toBe('Hello World');
@@ -32,13 +32,13 @@ describe('InputSanitizerService', () => {
   });
 
   describe('sanitizeEmail', () => {
-    it('should convert to lowercase', () => {
+    it('소문자로 변환해야 함', () => {
       const input = 'TEST@EXAMPLE.COM';
       const result = service.sanitizeEmail(input);
       expect(result).toBe('test@example.com');
     });
 
-    it('should remove dangerous characters', () => {
+    it('위험한 문자를 제거해야 함', () => {
       const input = 'test"@example.com';
       const result = service.sanitizeEmail(input);
       expect(result).toBe('test@example.com');
@@ -46,13 +46,13 @@ describe('InputSanitizerService', () => {
   });
 
   describe('sanitizeName', () => {
-    it('should allow valid name characters', () => {
+    it('유효한 이름 문자를 허용해야 함', () => {
       const input = "John O'Connor-Smith Jr.";
       const result = service.sanitizeName(input);
       expect(result).toBe("John O'Connor-Smith Jr.");
     });
 
-    it('should remove invalid characters', () => {
+    it('유효하지 않은 문자를 제거해야 함', () => {
       const input = 'John<script>alert("xss")</script>Doe';
       const result = service.sanitizeName(input);
       expect(result).toBe('JohnscriptalertxssscriptDoe');

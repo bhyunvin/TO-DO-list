@@ -113,7 +113,7 @@ const validate = (config: Record<string, unknown>) => {
       }),
     }),
 
-    ScheduleModule.forRoot(), // Add ScheduleModule
+    ScheduleModule.forRoot(), // 스케줄 모듈 추가
 
     TodoModule,
     UserModule,
@@ -140,6 +140,6 @@ export class AppModule implements NestModule {
   constructor(private readonly configService: ConfigService) {}
 
   configure(_consumer: MiddlewareConsumer) {
-    // Session middleware removed
+    // 세션 미들웨어 제거됨
   }
 }

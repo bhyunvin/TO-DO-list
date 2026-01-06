@@ -91,7 +91,7 @@ export class TodoController {
       res.send(buffer);
     } catch (error) {
       const user = req.user as any;
-      this.logger.error('Excel export failed', {
+      this.logger.error('엑셀 내보내기 실패', {
         userId: user?.userSeq,
         startDate,
         endDate,
@@ -157,12 +157,12 @@ export class TodoController {
 
       return this.fileUploadErrorService.createSuccessResponse(
         Array.isArray(result) ? result : [result],
-        `Successfully uploaded ${files.length} attachment(s)`,
+        `${files.length}개의 첨부파일이 성공적으로 업로드되었습니다`,
         errorContext.requestId,
       );
     } catch (error) {
       const user = req.user as any;
-      this.logger.error('TODO attachment upload failed', {
+      this.logger.error('TODO 첨부파일 업로드 실패', {
         userId: user?.userSeq,
         error: error.message,
         fileCount: files?.length || 0,
@@ -217,7 +217,7 @@ export class TodoController {
       return result;
     } catch (error) {
       const user = req.user as any;
-      this.logger.error('TODO creation with files failed', {
+      this.logger.error('파일을 포함한 TODO 생성 실패', {
         userId: user.userSeq,
         error: error.message,
         fileCount: files?.length || 0,
@@ -273,7 +273,7 @@ export class TodoController {
       return result;
     } catch (error) {
       const user = req.user as any;
-      this.logger.error('TODO update with files failed', {
+      this.logger.error('파일을 포함한 TODO 수정 실패', {
         userId: user.userSeq,
         todoId: id,
         error: error.message,
@@ -326,12 +326,12 @@ export class TodoController {
 
       return this.fileUploadErrorService.createSuccessResponse(
         Array.isArray(result) ? result : [result],
-        `Successfully added ${files.length} attachment(s) to TODO ${id}`,
+        `할 일(ID: ${id})에 ${files.length}개의 첨부파일이 성공적으로 추가되었습니다`,
         errorContext.requestId,
       );
     } catch (error) {
       const user = req.user as any;
-      this.logger.error('TODO attachment addition failed', {
+      this.logger.error('TODO 첨부파일 추가 실패', {
         todoId: id,
         userId: user.userSeq,
         error: error.message,

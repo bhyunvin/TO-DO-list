@@ -4,12 +4,16 @@ TO-DO List 애플리케이션의 백엔드 서버입니다. NestJS 프레임워�
 
 ## 주요 기능
 
-- 사용자 인증 및 JWT 관리
+- 사용자 인증 및 JWT 관리 (개인정보 동의 포함)
 - Todo CRUD 작업 및 날짜 기반 쿼리
 - Google Gemini API를 활용한 AI 지원
-- 파일 업로드 및 관리
-- 포괄적인 감사 로깅
+- 파일 업로드 및 관리 (Cloudinary 클라우드 스토리지)
+  - 서버 사이드 파일 검증 (크기, 형식, 보안)
+  - 프로필 이미지 및 Todo 첨부파일 지원
+- Contact Developer (관리자 문의 메일 전송)
+- 포괄적인 감사 로깅 및 IP 익명화 스케줄러
 - 환경 변수를 통한 보안 자격 증명 관리
+- 데이터 암호화 (AES-256-GCM)
 
 ## 기술 스택
 
@@ -17,9 +21,13 @@ TO-DO List 애플리케이션의 백엔드 서버입니다. NestJS 프레임워�
 - **언어**: TypeScript 5.x
 - **데이터베이스**: PostgreSQL with TypeORM 0.3.x
 - **인증**: JWT (stateless) with bcrypt
-- **AI**: Google Gemini API via @nestjs/axios
+- **보안**: AES-256-GCM encryption
+- **AI**: Google Gemini API
+- **파일 스토리지**: Cloudinary
 - **파일 업로드**: Multer
+- **메일**: Nodemailer
 - **마크다운**: marked, sanitize-html
+- **스케줄러**: @nestjs/schedule (Cron jobs)
 - **테스트**: Jest, Supertest
 
 ## 프로젝트 구조
@@ -46,11 +54,23 @@ src/
 │   └── gemini.interface.ts
 ├── fileUpload/                  # 파일 업로드 모듈
 │   ├── file.controller.ts
+│   ├── file.entity.ts
 │   ├── cloudinary.service.ts
-│   └── validation/
+│   ├── fileUploadUtil.ts
+│   └── validation/              # 파일 검증 모듈
+│       ├── file-validation.service.ts
+│       ├── file-validation.interceptor.ts
+│       ├── file-upload-error.service.ts
+│       ├── file-validation.constants.ts
+│       └── file-validation.interfaces.ts
+├── mail/                        # 메일 모듈
+│   ├── mail.controller.ts
+│   ├── mail.service.ts
+│   └── dto/
 ├── logging/                     # 로깅 모듈
 │   ├── logging.service.ts
-│   └── logging.entity.ts
+│   ├── logging.entity.ts
+│   └── logging.schedule.ts      # IP 익명화 스케줄러
 ├── utils/                       # 유틸리티
 │   ├── cryptUtil.ts
 │   ├── auditColumns.ts
@@ -106,9 +126,22 @@ JWT_SECRET=...
 # Google Gemini API
 GEMINI_API_KEY=...
 
-# 파일 업로드 설정
-UPLOAD_DIR=...
-MAX_FILE_SIZE=...
+# 암호화 키 (32 bytes, Hex 형식 권장)
+ENCRYPTION_KEY=...
+DETERMINISTIC_IV=...
+
+# Cloudinary 설정
+CLOUDINARY_CLOUD_NAME=...
+CLOUDINARY_API_KEY=...
+CLOUDINARY_API_SECRET=...
+
+# 메일 설정 (Gmail)
+MAIL_USER=...
+MAIL_PASS=...
+
+# 파일 업로드 설정 (선택사항, Cloudinary 사용 시 불필요)
+UPLOAD_DIR=./upload
+MAX_FILE_SIZE=5242880
 ```
 
 **보안 참고**: 프로덕션 환경에서는 강력한 비밀번호와 시크릿 키를 사용하고, 환경 변수를 안전하게 관리하세요.
@@ -257,12 +290,16 @@ Backend server for the TO-DO List application. Built with NestJS framework and i
 
 ## Key Features
 
-- User authentication and JWT management
+- User authentication and JWT management (with privacy policy consent)
 - Todo CRUD operations and date-based queries
 - AI assistance powered by Google Gemini API
-- File upload and management
-- Comprehensive audit logging
+- File upload and management (Cloudinary cloud storage)
+  - Server-side file validation (size, format, security)
+  - Profile image and todo attachment support
+- Contact Developer (send inquiry email to administrator)
+- Comprehensive audit logging and IP anonymization scheduler
 - Secure credential management via environment variables
+- Data encryption (AES-256-GCM)
 
 ## Technology Stack
 
@@ -270,9 +307,13 @@ Backend server for the TO-DO List application. Built with NestJS framework and i
 - **Language**: TypeScript 5.x
 - **Database**: PostgreSQL with TypeORM 0.3.x
 - **Authentication**: JWT (stateless) with bcrypt
-- **AI**: Google Gemini API via @nestjs/axios
+- **Security**: AES-256-GCM encryption
+- **AI**: Google Gemini API
+- **File Storage**: Cloudinary
 - **File Upload**: Multer
+- **Mail**: Nodemailer
 - **Markdown**: marked, sanitize-html
+- **Scheduler**: @nestjs/schedule (Cron jobs)
 - **Testing**: Jest, Supertest
 
 ## Project Structure
@@ -359,9 +400,22 @@ JWT_SECRET=...
 # Google Gemini API
 GEMINI_API_KEY=...
 
-# File upload configuration
-UPLOAD_DIR=...
-MAX_FILE_SIZE=...
+# Encryption keys (32 bytes, Hex format recommended)
+ENCRYPTION_KEY=...
+DETERMINISTIC_IV=...
+
+# Cloudinary configuration
+CLOUDINARY_CLOUD_NAME=...
+CLOUDINARY_API_KEY=...
+CLOUDINARY_API_SECRET=...
+
+# Mail configuration (Gmail)
+MAIL_USER=...
+MAIL_PASS=...
+
+# File upload configuration (optional, not needed with Cloudinary)
+UPLOAD_DIR=./upload
+MAX_FILE_SIZE=5242880
 ```
 
 **Security Note**: Use strong passwords and secret keys in production, and manage environment variables securely.

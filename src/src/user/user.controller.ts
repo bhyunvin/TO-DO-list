@@ -129,7 +129,7 @@ export class UserController {
     } catch (error) {
       const { userId } = userDto;
       const { message } = error;
-      this.logger.error('Profile image upload failed during signup', {
+      this.logger.error('회원가입 중 프로필 이미지 업로드 실패', {
         userId,
         error: message,
         fileName: profileImageFile?.originalname,
@@ -198,7 +198,7 @@ export class UserController {
       }
       const { userSeq, userId } = user;
 
-      this.logger.log('Profile update attempt', {
+      this.logger.log('프로필 업데이트 시도', {
         userSeq,
         userId,
         updateFields: Object.keys(updateUserDto),
@@ -214,7 +214,7 @@ export class UserController {
       );
 
       const { userId: updatedUserId } = updatedUser;
-      this.logger.log('Profile update completed successfully', {
+      this.logger.log('프로필 업데이트 완료', {
         userSeq,
         userId: updatedUserId,
         updatedFields: Object.keys(updateUserDto),
@@ -227,7 +227,7 @@ export class UserController {
     } catch (error) {
       const { message } = error;
       const user = req.user as AuthenticatedUser;
-      this.logger.error('Profile update failed', {
+      this.logger.error('프로필 업데이트 실패', {
         userSeq: user?.userSeq,
         userId: user?.userId,
         error: message,
@@ -255,7 +255,7 @@ export class UserController {
       }
       const { userSeq, userId } = user;
 
-      this.logger.log('Password change attempt', {
+      this.logger.log('비밀번호 변경 시도', {
         userSeq,
         userId,
         ip,
@@ -263,7 +263,7 @@ export class UserController {
 
       await this.userService.changePassword(userSeq, changePasswordDto, ip);
 
-      this.logger.log('Password change completed successfully', {
+      this.logger.log('비밀번호 변경 완료', {
         userSeq,
         userId,
         ip,
@@ -273,7 +273,7 @@ export class UserController {
     } catch (error) {
       const { message } = error;
       const user = req.user as AuthenticatedUser;
-      this.logger.error('Password change failed', {
+      this.logger.error('비밀번호 변경 실패', {
         userSeq: user?.userSeq,
         userId: user?.userId,
         error: message,

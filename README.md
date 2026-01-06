@@ -4,18 +4,23 @@
 
 ## 주요 기능
 
-- JWT 기반 사용자 인증 및 회원가입
+- JWT 기반 사용자 인증 및 회원가입 (개인정보 동의 포함)
 - 날짜별 todo 생성, 조회, 수정, 삭제
-- 파일 업로드 및 첨부 기능 (진행률 표시)
+- 파일 업로드 및 첨부 기능 (Cloudinary 클라우드 스토리지)
+  - 진행률 표시
+  - 서버 사이드 파일 검증 (크기, 형식, 보안)
+  - 프로필 이미지 및 Todo 첨부파일 지원
 - Google Gemini API를 활용한 AI 채팅 어시스턴트
   - 멀티턴 대화 지원 (이전 대화 컨텍스트 유지)
   - Todo 읽기/생성/수정 가능
   - Function calling을 통한 실시간 Todo 조작
 - 프로필 이미지 업로드 및 관리
 - 비밀번호 변경 기능
+- Contact Developer (관리자 문의 메일 전송)
 - 마크다운 렌더링 (XSS 보호)
-- 포괄적인 감사 로깅
+- 포괄적인 감사 로깅 및 IP 익명화 스케줄러
 - 환경 변수를 통한 안전한 자격 증명 저장
+- 데이터 암호화 (AES-256-GCM)
 
 ## 기술 스택
 
@@ -25,9 +30,12 @@
 - **데이터베이스**: PostgreSQL with TypeORM
 - **인증**: JWT (stateless) with bcrypt
 - **보안**: AES-256-GCM encryption
-- **AI**: Google Gemini API via @nestjs/axios
+- **AI**: Google Gemini API
+- **파일 스토리지**: Cloudinary
 - **파일 업로드**: Multer
+- **메일**: Nodemailer
 - **마크다운**: marked, sanitize-html
+- **스케줄러**: @nestjs/schedule (Cron jobs)
 
 ### 프론트엔드 (React)
 - **프레임워크**: React 19 with Create React App
@@ -76,8 +84,8 @@ myTodoApp/
 │   ├── interceptor/            # 전역 인터셉터
 │   └── types/                  # TypeScript 타입 확장
 │
-├── upload/                      # 파일 업로드 저장소
-├── .kiro/                       # Kiro 설정 및 스티어링 규칙
+├── upload/                      # 파일 업로드 임시 저장소 (Cloudinary 사용)
+├── .agent/                      # Agent 설정 및 스티어링 규칙
 ├── package.json                 # 워크스페이스 구성
 ├── .nvmrc                       # Node 버전 명세
 └── README.md
@@ -124,8 +132,21 @@ PORT=...
 # JWT 설정 (강력한 랜덤 문자열 사용)
 JWT_SECRET=...
 
+# 암호화 키 (32 bytes, Hex 형식 권장)
+ENCRYPTION_KEY=...
+DETERMINISTIC_IV=...
+
+# Cloudinary 설정
+CLOUDINARY_CLOUD_NAME=...
+CLOUDINARY_API_KEY=...
+CLOUDINARY_API_SECRET=...
+
 # Google Gemini API
 GEMINI_API_KEY=...
+
+# 메일 설정 (Gmail)
+MAIL_USER=...
+MAIL_PASS=...
 ```
 
 **보안 참고**: 프로덕션 환경에서는 강력한 비밀번호와 시크릿 키를 사용하고, 환경 변수를 안전하게 관리하세요.
@@ -274,18 +295,23 @@ A full-stack TO-DO List application built with modern web technologies. Provides
 
 ## Key Features
 
-- JWT-based user authentication and registration
+- JWT-based user authentication and registration (with privacy policy consent)
 - Create, read, update, and delete todos by date
-- File upload and attachment functionality (with progress tracking)
+- File upload and attachment functionality (Cloudinary cloud storage)
+  - Progress tracking
+  - Server-side file validation (size, format, security)
+  - Profile image and todo attachment support
 - AI chat assistant powered by Google Gemini API
   - Multi-turn conversation support (maintains previous conversation context)
   - Can read/create/update todos
   - Real-time todo manipulation via function calling
 - Profile image upload and management
 - Password change functionality
+- Contact Developer (send inquiry email to administrator)
 - Markdown rendering (with XSS protection)
-- Comprehensive audit logging
+- Comprehensive audit logging and IP anonymization scheduler
 - Secure credential storage via environment variables
+- Data encryption (AES-256-GCM)
 
 ## Technology Stack
 
@@ -295,9 +321,12 @@ A full-stack TO-DO List application built with modern web technologies. Provides
 - **Database**: PostgreSQL with TypeORM
 - **Authentication**: JWT (stateless) with bcrypt
 - **Security**: AES-256-GCM encryption
-- **AI**: Google Gemini API via @nestjs/axios
+- **AI**: Google Gemini API
+- **File Storage**: Cloudinary
 - **File Upload**: Multer
+- **Mail**: Nodemailer
 - **Markdown**: marked, sanitize-html
+- **Scheduler**: @nestjs/schedule (Cron jobs)
 
 ### Frontend (React)
 - **Framework**: React 19 with Create React App
@@ -394,8 +423,21 @@ PORT=...
 # JWT configuration (use strong random string)
 JWT_SECRET=...
 
+# Encryption keys (32 bytes, Hex format recommended)
+ENCRYPTION_KEY=...
+DETERMINISTIC_IV=...
+
+# Cloudinary configuration
+CLOUDINARY_CLOUD_NAME=...
+CLOUDINARY_API_KEY=...
+CLOUDINARY_API_SECRET=...
+
 # Google Gemini API
 GEMINI_API_KEY=...
+
+# Mail configuration (Gmail)
+MAIL_USER=...
+MAIL_PASS=...
 ```
 
 **Security Note**: Use strong passwords and secret keys in production, and manage environment variables securely.

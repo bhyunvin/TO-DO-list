@@ -36,13 +36,13 @@ export class UserProfileValidationPipe implements PipeTransform<any> {
         })
         .join('; ');
 
-      this.logger.warn('Profile update validation failed', {
+      this.logger.warn('프로필 업데이트 검증 실패', {
         errors: errorMessages,
         sanitizedValue: this.logSafeValue(sanitizedValue),
       });
 
       throw new BadRequestException({
-        message: 'Validation failed',
+        message: '검증 실패',
         error: errorMessages,
         errorCode: 'VALIDATION_ERROR',
       });
@@ -95,15 +95,15 @@ export class UserProfileValidationPipe implements PipeTransform<any> {
 
       for (const pattern of sqlInjectionPatterns) {
         if (pattern.test(fieldValue)) {
-          this.logger.error('Potential SQL injection attempt detected', {
+          this.logger.error('잠재적인 SQL Injection 시도 감지됨', {
             field: fieldName,
             pattern: pattern.toString(),
             value: `${fieldValue.substring(0, 50)}...`,
           });
 
           throw new BadRequestException({
-            message: 'Invalid input detected',
-            error: `${fieldName} contains invalid characters`,
+            message: '부적절한 입력 감지됨',
+            error: `${fieldName}에 부적절한 문자가 포함되어 있습니다`,
             errorCode: 'SECURITY_VIOLATION',
           });
         }
@@ -133,7 +133,7 @@ export class UserProfileValidationPipe implements PipeTransform<any> {
 
         if (totalLength > 0 && specialCharCount / totalLength > 0.1) {
           this.logger.warn(
-            'Suspicious input with high special character ratio',
+            '특수 문자가 많은 의심스러운 입력',
             {
               field: key,
               specialCharRatio: specialCharCount / totalLength,
@@ -142,8 +142,8 @@ export class UserProfileValidationPipe implements PipeTransform<any> {
           );
 
           throw new BadRequestException({
-            message: 'Invalid input format',
-            error: `${key} contains too many special characters`,
+            message: '부적절한 입력 형식',
+            error: `${key}에 특수 문자가 너무 많이 포함되어 있습니다`,
             errorCode: 'INVALID_FORMAT',
           });
         }

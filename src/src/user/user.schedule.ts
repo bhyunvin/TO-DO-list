@@ -15,11 +15,11 @@ export class UserSchedule {
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async handleCron() {
-    this.logger.debug('Running expired refresh token cleanup...');
+    this.logger.debug('만료된 Refresh Token 정리 시작...');
     const now = new Date();
     const result = await this.refreshTokenRepository.delete({
       expDtm: LessThan(now),
     });
-    this.logger.debug(`Deleted ${result.affected} expired refresh tokens.`);
+    this.logger.debug(`${result.affected}개의 만료된 Refresh Token이 삭제되었습니다.`);
   }
 }

@@ -16,12 +16,12 @@ describe('FileValidationService', () => {
     service = module.get<FileValidationService>(FileValidationService);
   });
 
-  it('should be defined', () => {
+  it('정의되어야 함', () => {
     expect(service).toBeDefined();
   });
 
   describe('validateFileSize', () => {
-    it('should pass validation for file within size limit', () => {
+    it('파일이 제한 크기 내일 때 검증을 통과해야 함', () => {
       const mockFile = {
         size: 5 * 1024 * 1024,
         originalname: 'test.jpg',
@@ -34,7 +34,7 @@ describe('FileValidationService', () => {
       expect(result.errorMessage).toBeUndefined();
     });
 
-    it('should fail validation for file exceeding size limit', () => {
+    it('파일이 제한 크기를 초과할 때 검증에 실패해야 함', () => {
       const mockFile = {
         size: 15 * 1024 * 1024,
         originalname: 'large-file.jpg',
@@ -49,7 +49,7 @@ describe('FileValidationService', () => {
       );
     });
 
-    it('should handle zero-size files', () => {
+    it('크기가 0인 파일을 처리해야 함', () => {
       const mockFile = {
         size: 0,
         originalname: 'empty.txt',
@@ -62,7 +62,7 @@ describe('FileValidationService', () => {
   });
 
   describe('validateFileType', () => {
-    it('should pass validation for allowed file type', () => {
+    it('허용된 파일 형식일 때 검증을 통과해야 함', () => {
       const mockFile = {
         originalname: 'document.pdf',
         size: 1024,
@@ -73,7 +73,7 @@ describe('FileValidationService', () => {
       expect(result.isValid).toBe(true);
     });
 
-    it('should fail validation for disallowed file type', () => {
+    it('허용되지 않은 파일 형식일 때 검증에 실패해야 함', () => {
       const mockFile = {
         originalname: 'script.js',
         size: 1024,
@@ -85,7 +85,7 @@ describe('FileValidationService', () => {
       expect(result.errorCode).toBe(FILE_VALIDATION_ERRORS.INVALID_FILE_TYPE);
     });
 
-    it('should fail validation for blocked file type', () => {
+    it('차단된 파일 형식일 때 검증에 실패해야 함', () => {
       const mockFile = {
         originalname: 'malware.exe',
         size: 1024,
@@ -101,7 +101,7 @@ describe('FileValidationService', () => {
       expect(result.errorCode).toBe(FILE_VALIDATION_ERRORS.BLOCKED_FILE_TYPE);
     });
 
-    it('should handle files without extensions', () => {
+    it('확장자가 없는 파일을 처리해야 함', () => {
       const mockFile = {
         originalname: 'README',
         size: 1024,
@@ -113,7 +113,7 @@ describe('FileValidationService', () => {
       expect(result.errorCode).toBe(FILE_VALIDATION_ERRORS.INVALID_FILE_TYPE);
     });
 
-    it('should handle case-insensitive extensions', () => {
+    it('대소문자를 구분하지 않는 확장자를 처리해야 함', () => {
       const mockFile = {
         originalname: 'image.JPG',
         size: 1024,
@@ -126,7 +126,7 @@ describe('FileValidationService', () => {
   });
 
   describe('validateMultipleFiles', () => {
-    it('should validate multiple valid files', () => {
+    it('여러 유효한 파일을 검증해야 함', () => {
       const mockFiles = [
         { originalname: 'doc1.pdf', size: 1024 },
         { originalname: 'doc2.docx', size: 2048 },
@@ -146,7 +146,7 @@ describe('FileValidationService', () => {
       expect(results[1].isValid).toBe(true);
     });
 
-    it('should fail validation when file count exceeds limit', () => {
+    it('파일 수가 제한을 초과할 때 검증에 실패해야 함', () => {
       const mockFiles = [
         { originalname: 'doc1.pdf', size: 1024 },
         { originalname: 'doc2.pdf', size: 1024 },
@@ -169,7 +169,7 @@ describe('FileValidationService', () => {
       });
     });
 
-    it('should validate mixed valid and invalid files', () => {
+    it('유효한 파일과 유효하지 않은 파일이 섞여 있을 때 검증해야 함', () => {
       const mockFiles = [
         { originalname: 'valid.pdf', size: 1024 },
         { originalname: 'toolarge.pdf', size: 15 * 1024 * 1024 },
@@ -197,7 +197,7 @@ describe('FileValidationService', () => {
   });
 
   describe('validateFilesByCategory', () => {
-    it('should validate profile image files correctly', () => {
+    it('프로필 이미지 파일을 올바르게 검증해야 함', () => {
       const mockFiles = [
         { originalname: 'profile.jpg', size: 2 * 1024 * 1024 },
       ] as Express.Multer.File[];
@@ -211,7 +211,7 @@ describe('FileValidationService', () => {
       expect(results[0].isValid).toBe(true);
     });
 
-    it('should reject non-image files for profile category', () => {
+    it('프로필 카테고리에서 이미지 외의 파일을 거부해야 함', () => {
       const mockFiles = [
         { originalname: 'document.pdf', size: 1024 },
       ] as Express.Multer.File[];
@@ -228,7 +228,7 @@ describe('FileValidationService', () => {
       );
     });
 
-    it('should validate todo attachment files correctly', () => {
+    it('할 일 첨부 파일을 올바르게 검증해야 함', () => {
       const mockFiles = [
         { originalname: 'document.pdf', size: 1024 },
         { originalname: 'spreadsheet.xlsx', size: 2048 },
@@ -244,7 +244,7 @@ describe('FileValidationService', () => {
       expect(results[1].isValid).toBe(true);
     });
 
-    it('should reject blocked files for todo attachments', () => {
+    it('할 일 첨부 파일에서 차단된 파일을 거부해야 함', () => {
       const mockFiles = [
         { originalname: 'script.js', size: 1024 },
       ] as Express.Multer.File[];
@@ -263,7 +263,7 @@ describe('FileValidationService', () => {
   });
 
   describe('getValidationErrors', () => {
-    it('should extract errors for failed validations', () => {
+    it('실패한 검증에 대한 오류를 추출해야 함', () => {
       const mockFiles = [
         { originalname: 'valid.pdf', size: 1024 },
         { originalname: 'invalid.exe', size: 2048 },
@@ -289,7 +289,7 @@ describe('FileValidationService', () => {
       expect(errors[0].fileType).toBe('.exe');
     });
 
-    it('should return empty array when all validations pass', () => {
+    it('모든 검증을 통과하면 빈 배열을 반환해야 함', () => {
       const mockFiles = [
         { originalname: 'valid1.pdf', size: 1024 },
         { originalname: 'valid2.docx', size: 2048 },
@@ -304,7 +304,7 @@ describe('FileValidationService', () => {
   });
 
   describe('getValidFiles', () => {
-    it('should return only valid files', () => {
+    it('유효한 파일만 반환해야 함', () => {
       const mockFiles = [
         { originalname: 'valid.pdf', size: 1024 },
         { originalname: 'invalid.exe', size: 2048 },
@@ -328,7 +328,7 @@ describe('FileValidationService', () => {
       );
     });
 
-    it('should return empty array when no files are valid', () => {
+    it('유효한 파일이 없으면 빈 배열을 반환해야 함', () => {
       const mockFiles = [
         { originalname: 'invalid1.exe', size: 1024 },
         { originalname: 'invalid2.bat', size: 2048 },
@@ -346,21 +346,21 @@ describe('FileValidationService', () => {
   });
 
   describe('formatFileSize', () => {
-    it('should format bytes correctly', () => {
+    it('바이트를 올바르게 포맷팅해야 함', () => {
       expect(service.formatFileSize(0)).toBe('0 Bytes');
       expect(service.formatFileSize(1024)).toBe('1 KB');
       expect(service.formatFileSize(1024 * 1024)).toBe('1 MB');
       expect(service.formatFileSize(1024 * 1024 * 1024)).toBe('1 GB');
     });
 
-    it('should format decimal values correctly', () => {
+    it('소수 값을 올바르게 포맷팅해야 함', () => {
       expect(service.formatFileSize(1536)).toBe('1.5 KB');
       expect(service.formatFileSize(2.5 * 1024 * 1024)).toBe('2.5 MB');
     });
   });
 
   describe('isValidFileType', () => {
-    it('should return true for allowed file types', () => {
+    it('허용된 파일 형식에 대해 true를 반환해야 함', () => {
       const result = service.isValidFileType(
         'document.pdf',
         ['.pdf', '.docx'],
@@ -369,7 +369,7 @@ describe('FileValidationService', () => {
       expect(result).toBe(true);
     });
 
-    it('should return false for blocked file types', () => {
+    it('차단된 파일 형식에 대해 false를 반환해야 함', () => {
       const result = service.isValidFileType(
         'script.exe',
         ['.exe', '.pdf'],
@@ -378,7 +378,7 @@ describe('FileValidationService', () => {
       expect(result).toBe(false);
     });
 
-    it('should return false for disallowed file types', () => {
+    it('허용되지 않은 파일 형식에 대해 false를 반환해야 함', () => {
       const result = service.isValidFileType(
         'image.jpg',
         ['.pdf', '.docx'],
@@ -387,7 +387,7 @@ describe('FileValidationService', () => {
       expect(result).toBe(false);
     });
 
-    it('should handle case-insensitive extensions', () => {
+    it('대소문자를 구분하지 않는 확장자를 처리해야 함', () => {
       const result = service.isValidFileType('Document.PDF', ['.pdf'], []);
       expect(result).toBe(true);
     });

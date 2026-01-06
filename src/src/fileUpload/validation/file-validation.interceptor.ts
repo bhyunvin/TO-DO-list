@@ -78,7 +78,7 @@ export class FileValidationInterceptor implements NestInterceptor {
       // 표준화된 에러 응답 생성
       const errorResponse = this.fileUploadErrorService.createErrorResponse(
         validationErrors,
-        'File validation failed',
+        '파일 검증에 실패했습니다',
         [],
         errorContext.requestId,
       );
@@ -88,7 +88,7 @@ export class FileValidationInterceptor implements NestInterceptor {
 
     // 성공적인 검증 로깅
     this.logger.log(
-      `File validation passed for ${filesToValidate.length} file(s) in category: ${this.fileCategory}`,
+      `${this.fileCategory} 카테고리에서 ${filesToValidate.length}개 파일 검증 통과`,
     );
 
     return next.handle();

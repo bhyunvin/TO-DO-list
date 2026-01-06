@@ -37,7 +37,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       ip = xForwardedFor.split(',')[0].trim();
     }
 
-    this.logger.error(`HTTP Exception: ${message}`, exception.stack);
+    this.logger.error(`HTTP \uc608\uc678: ${message}`, exception.stack);
 
     const logEntity = new LogEntity();
     logEntity.userSeq = userSeq || null;

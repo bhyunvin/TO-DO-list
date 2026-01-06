@@ -59,7 +59,7 @@ export class CloudinaryService {
       const match = regex.exec(pathname);
       return match ? match[1] : '';
     } catch (error) {
-      this.logger.error('Failed to extract public_id:', error);
+      this.logger.error('public_id 추출 실패:', error);
       return '';
     }
   }

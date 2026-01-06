@@ -25,6 +25,7 @@ describe('UserService - Profile Update', () => {
     userProfileImageFileGroupNo: 1,
     aiApiKey: null,
     adminYn: 'N',
+    privacyAgreedDtm: new Date(),
     auditColumns: {
       regId: 'testuser',
       regDtm: new Date(),
@@ -87,7 +88,7 @@ describe('UserService - Profile Update', () => {
     inputSanitizer = module.get<InputSanitizerService>(InputSanitizerService);
   });
 
-  it('should be defined', () => {
+  it('정의되어야 함', () => {
     expect(service).toBeDefined();
   });
 
@@ -96,7 +97,7 @@ describe('UserService - Profile Update', () => {
       jest.clearAllMocks();
     });
 
-    it('should reject updates for suspended users', async () => {
+    it('정지된 사용자의 업데이트를 거부해야 함', async () => {
       const suspendedUser = { ...mockUser, adminYn: 'SUSPENDED' };
       const updateDto: UpdateUserDto = { userName: 'New Name' };
 
@@ -113,7 +114,7 @@ describe('UserService - Profile Update', () => {
       ).rejects.toThrow(ForbiddenException);
     });
 
-    it('should sanitize input data before processing', async () => {
+    it('처리 전에 입력 데이터를 정제해야 함', async () => {
       const updateDto: UpdateUserDto = {
         userName: '  John Doe  ',
         userEmail: '  JOHN@EXAMPLE.COM  ',

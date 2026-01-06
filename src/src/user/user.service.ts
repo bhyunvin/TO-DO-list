@@ -180,7 +180,7 @@ export class UserService {
 
           if (!isValid) {
             const { originalname } = profileImageFile;
-            this.logger.error('Profile image validation failed', {
+            this.logger.error('프로필 이미지 검증 실패', {
               userId,
               fileName: originalname,
               errorCode,
@@ -188,7 +188,7 @@ export class UserService {
             });
 
             throw new BadRequestException({
-              message: 'Profile image validation failed',
+              message: '프로필 이미지 검증 실패',
               error: errorMessage,
               errorCode,
             });
@@ -207,14 +207,14 @@ export class UserService {
           await transactionalEntityManager.save(UserEntity, savedUser);
 
           const { originalname } = profileImageFile;
-          this.logger.log('Profile image uploaded successfully', {
+          this.logger.log('프로필 이미지가 성공적으로 업로드되었습니다', {
             userId,
             fileName: originalname,
             fileGroupNo,
           });
         } catch (error) {
           const { message } = error;
-          this.logger.error('Profile image upload failed', {
+          this.logger.error('프로필 이미지 업로드 실패', {
             userId,
             fileName: profileImageFile?.originalname,
             error: message,
@@ -227,7 +227,7 @@ export class UserService {
 
           // 다른 오류의 경우, BadRequestException으로 래핑
           throw new BadRequestException({
-            message: 'Profile image upload failed',
+            message: '프로필 이미지 업로드 실패',
             error: message,
           });
         }
@@ -275,7 +275,7 @@ export class UserService {
         );
       }
 
-      this.logger.log('Profile update processing', {
+      this.logger.log('프로필 업데이트 처리 중', {
         userSeq,
         userId: currentUserId,
         updatedFields,
@@ -312,7 +312,7 @@ export class UserService {
 
       const { userId: savedUserId } = savedUser;
 
-      this.logger.log('Profile update completed successfully', {
+      this.logger.log('프로필 업데이트 완료', {
         userSeq,
         userId: savedUserId,
         updatedFields,
@@ -335,7 +335,7 @@ export class UserService {
     });
 
     if (!currentUser) {
-      this.logger.error('Profile update attempted for non-existent user', {
+      this.logger.error('존재하지 않는 사용자에 대한 프로필 업데이트 시도', {
         userSeq,
         ip,
       });
@@ -343,7 +343,7 @@ export class UserService {
     }
 
     if (currentUser.adminYn === 'SUSPENDED') {
-      this.logger.warn('Profile update attempted by suspended user', {
+      this.logger.warn('정지된 사용자에 의한 프로필 업데이트 시도', {
         userSeq,
         userId: currentUser.userId,
         ip,
@@ -370,7 +370,7 @@ export class UserService {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(newEmail)) {
       throw new BadRequestException({
-        message: 'Invalid email format',
+        message: '유효하지 않은 이메일 형식',
         error: '올바른 이메일 형식이 아닙니다.',
         errorCode: 'INVALID_EMAIL_FORMAT',
       });
@@ -386,14 +386,14 @@ export class UserService {
     });
 
     if (existingUser) {
-      this.logger.warn('Profile update attempted with duplicate email', {
+      this.logger.warn('중복된 이메일로 프로필 업데이트 시도', {
         userSeq,
         attemptedEmail: newEmail,
         existingUserSeq: existingUser.userSeq,
         ip,
       });
       throw new BadRequestException({
-        message: 'Email already in use',
+        message: '이미 사용 중인 이메일',
         error: '이미 사용 중인 이메일 주소입니다.',
         errorCode: 'DUPLICATE_EMAIL',
       });
@@ -502,7 +502,7 @@ export class UserService {
       const { originalname, size } = profileImageFile;
 
       if (!isValid) {
-        this.logger.error('Profile image validation failed during update', {
+        this.logger.error('업데이트 중 프로필 이미지 검증 실패', {
           userSeq,
           fileName: originalname,
           fileSize: size,
@@ -527,7 +527,7 @@ export class UserService {
       currentUser.userProfileImageFileGroupNo = fileGroupNo;
       updatedFields.push('profileImage');
 
-      this.logger.log('Profile image updated successfully', {
+      this.logger.log('프로필 이미지가 성공적으로 업데이트되었습니다', {
         userSeq,
         fileName: originalname,
         fileSize: size,
@@ -536,7 +536,7 @@ export class UserService {
       });
     } catch (error) {
       const { message } = error;
-      this.logger.error('Profile image upload failed during update', {
+      this.logger.error('업데이트 중 프로필 이미지 업로드 실패', {
         userSeq,
         fileName: profileImageFile?.originalname,
         fileSize: profileImageFile?.size,
@@ -568,7 +568,7 @@ export class UserService {
 
       if (sanitized.userName && sanitized.userName.length > 200) {
         throw new BadRequestException({
-          message: 'Name too long',
+          message: '이름이 너무 깁니다',
           error: '사용자명이 너무 깁니다.',
           errorCode: 'NAME_TOO_LONG',
         });
@@ -581,7 +581,7 @@ export class UserService {
 
       if (sanitized.userEmail && sanitized.userEmail.length > 100) {
         throw new BadRequestException({
-          message: 'Email too long',
+          message: '이메일이 너무 깁니다',
           error: '이메일이 너무 깁니다.',
           errorCode: 'EMAIL_TOO_LONG',
         });
@@ -598,7 +598,7 @@ export class UserService {
         sanitized.userDescription.length > 4000
       ) {
         throw new BadRequestException({
-          message: 'Description too long',
+          message: '설명이 너무 깁니다',
           error: '사용자설명이 너무 깁니다.',
           errorCode: 'DESCRIPTION_TOO_LONG',
         });
@@ -630,7 +630,7 @@ export class UserService {
 
     for (const pattern of suspiciousPatterns) {
       if (pattern.test(originalname)) {
-        this.logger.error('Suspicious profile image filename detected', {
+        this.logger.error('의심스러운 프로필 이미지 파일명 감지됨', {
           userSeq,
           fileName: originalname,
           pattern: pattern.toString(),
@@ -638,7 +638,7 @@ export class UserService {
         });
 
         throw new BadRequestException({
-          message: 'Invalid filename',
+          message: '유효하지 않은 파일명',
           error: '파일명에 허용되지 않는 문자가 포함되어 있습니다.',
           errorCode: 'INVALID_FILENAME',
         });
@@ -647,7 +647,7 @@ export class UserService {
 
     const maxSize = 5 * 1024 * 1024; // 5MB
     if (size > maxSize) {
-      this.logger.warn('Profile image file too large', {
+      this.logger.warn('프로필 이미지 파일이 너무 큼', {
         userSeq,
         fileName: originalname,
         fileSize: size,
@@ -656,7 +656,7 @@ export class UserService {
       });
 
       throw new BadRequestException({
-        message: 'File too large',
+        message: '파일이 너무 큽니다',
         error: '파일 크기가 너무 큽니다.',
         errorCode: 'FILE_TOO_LARGE',
       });
@@ -671,7 +671,7 @@ export class UserService {
     ];
 
     if (!allowedMimeTypes.includes(mimetype)) {
-      this.logger.error('Invalid profile image MIME type', {
+      this.logger.error('유효하지 않은 프로필 이미지 MIME 타입', {
         userSeq,
         fileName: originalname,
         mimeType: mimetype,
@@ -679,7 +679,7 @@ export class UserService {
       });
 
       throw new BadRequestException({
-        message: 'Invalid file type',
+        message: '유효하지 않은 파일 형식',
         error: '지원되지 않는 파일 형식입니다.',
         errorCode: 'INVALID_FILE_TYPE',
       });
@@ -697,7 +697,7 @@ export class UserService {
       });
 
       if (!currentUser) {
-        this.logger.error('Password change attempted for non-existent user', {
+        this.logger.error('존재하지 않는 사용자에 대한 비밀번호 변경 시도', {
           userSeq,
           ip,
         });
@@ -716,7 +716,7 @@ export class UserService {
 
       if (!isCurrentPasswordValid) {
         this.logger.warn(
-          'Password change attempted with incorrect current password',
+          '잘못된 현재 비밀번호로 비밀번호 변경 시도',
           {
             userSeq,
             userId,
@@ -753,7 +753,7 @@ export class UserService {
 
       await transactionalEntityManager.save(UserEntity, updatedUser);
 
-      this.logger.log('Password change completed successfully', {
+      this.logger.log('비밀번호 변경 완료', {
         userSeq,
         userId,
         ip,

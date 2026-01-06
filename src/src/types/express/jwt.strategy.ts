@@ -12,7 +12,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       secretOrKey:
         process.env.JWT_SECRET ||
         configService.get<string>('JWT_SECRET') ||
-        'defaultSecret', // Fallback for dev if env missing
+        'defaultSecret', // 환경 변수가 누락된 경우 개발용 폴백
     });
   }
 

@@ -6,13 +6,17 @@ TO-DO List 애플리케이션의 프론트엔드 클라이언트입니다. React
 
 - 전역 상태 관리 (Zustand + Persist Middleware)
 - 사용자 인증 (JWT 기반 로그인/회원가입)
+  - 개인정보 수집 이용 동의 필수
 - 날짜별 Todo 관리 인터페이스
-- AI 채팅 어시스턴트
-- 파일 업로드 (진행률 표시)
+- AI 챗 어시스턴트
+- 파일 업로드 (Cloudinary 클라우드 스토리지)
+  - 진행률 표시
+  - 클라이언트 사이드 파일 검증
 - 프로필 관리 및 이미지 업로드
 - 비밀번호 변경
+- Contact Developer (관리자 문의 메일 전송)
 - **디자인 원칙**:
-  - 모던하고 깔끔한 UI/UX 제공 (Glassmorphism, 고대비 모드 등)
+  - 모던하고 깨끗한 UI/UX 제공 (Glassmorphism, 고대비 모드 등)
   - 모든 버튼은 **Outline 스타일**(`btn-outline-*`)을 기본으로 사용하여 일관된 디자인 언어 유지
   - **버튼 순서**: '기타 행동/취소' -> '이동/확인' 순서(좌측부터)를 준수하며, 버튼 간 적절한 간격(margin) 유지
   - 사용자 경험을 위한 세심한 인터랙션 및 애니메이션 (SweetAlert2 활용 등)
@@ -307,11 +311,20 @@ Frontend client for the TO-DO List application. Built with React 19 and React Bo
 
 - Global State Management (Zustand + Persist Middleware)
 - User Authentication (JWT-based Login/Signup)
+  - Privacy policy consent required
 - Date-based Todo management interface
 - AI chat assistant
-- File upload (with progress tracking)
+- File upload (Cloudinary cloud storage)
+  - Progress tracking
+  - Client-side file validation
 - Profile management and image upload
 - Password change
+- Contact Developer (send inquiry email to administrator)
+- **Design Principles**:
+  - Modern and clean UI/UX (Glassmorphism, high contrast mode)
+  - All buttons use **Outline style** (`btn-outline-*`) for consistent design language
+  - **Button order**: 'Other actions/Cancel' -> 'Navigate/Confirm' (left to right) with proper spacing
+  - Thoughtful interactions and animations for user experience (SweetAlert2)
 - Responsive design (Bootstrap 5)
 - Real-time notifications (SweetAlert2)
 - Web Accessibility compliant (WCAG 2.1 AA, High contrast mode)

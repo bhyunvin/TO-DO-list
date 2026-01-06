@@ -57,7 +57,7 @@ describe('TodoService - Excel Export', () => {
     const startDate = '2024-01-01';
     const endDate = '2024-01-31';
 
-    it('should generate Excel file with valid data', async () => {
+    it('유효한 데이터로 엑셀 파일을 생성해야 함', async () => {
       const mockTodos: TodoEntity[] = [
         {
           todoSeq: 1,
@@ -114,7 +114,7 @@ describe('TodoService - Excel Export', () => {
         },
       });
 
-      // Verify Excel content
+      // 엑셀 내용 확인
       const workbook = new ExcelJS.Workbook();
       await workbook.xlsx.load(buffer as any);
       const worksheet = workbook.getWorksheet('Todos');
@@ -126,13 +126,13 @@ describe('TodoService - Excel Export', () => {
       expect(worksheet.getColumn('D').width).toBe(17);
       expect(worksheet.getColumn('E').width).toBe(90);
 
-      // Verify headers
+      // 헤더 확인
       expect(worksheet.getRow(2).getCell('B').value).toBe('번호');
       expect(worksheet.getRow(2).getCell('C').value).toBe('내용');
       expect(worksheet.getRow(2).getCell('D').value).toBe('완료일시');
       expect(worksheet.getRow(2).getCell('E').value).toBe('비고');
 
-      // Verify data rows
+      // 데이터 행 확인
       expect(worksheet.getRow(3).getCell('B').value).toBe(1);
       expect(worksheet.getRow(3).getCell('C').value).toBe('Test Todo 1');
       expect(worksheet.getRow(3).getCell('D').value).toBe('2024-01-15 10:30');
@@ -144,14 +144,14 @@ describe('TodoService - Excel Export', () => {
       expect(worksheet.getRow(4).getCell('E').value).toBe('');
     });
 
-    it('should handle empty result set', async () => {
+    it('빈 결과 집합을 처리해야 함', async () => {
       mockTodoRepository.find.mockResolvedValue([]);
 
       const buffer = await service.exportToExcel(userSeq, startDate, endDate);
 
       expect(buffer).toBeInstanceOf(Buffer);
 
-      // Verify Excel has headers but no data rows
+      // 엑셀에 헤더는 있지만 데이터 행이 없는지 확인
       const workbook = new ExcelJS.Workbook();
       await workbook.xlsx.load(buffer as any);
       const worksheet = workbook.getWorksheet('Todos');
@@ -161,7 +161,7 @@ describe('TodoService - Excel Export', () => {
       expect(worksheet.getRow(3).getCell('B').value).toBeNull();
     });
 
-    it('should filter by date range accurately', async () => {
+    it('날짜 범위로 정확하게 필터링해야 함', async () => {
       mockTodoRepository.find.mockResolvedValue([]);
 
       await service.exportToExcel(userSeq, startDate, endDate);
@@ -182,7 +182,7 @@ describe('TodoService - Excel Export', () => {
       });
     });
 
-    it('should filter by delYn = N', async () => {
+    it('delYn = N으로 필터링해야 함', async () => {
       mockTodoRepository.find.mockResolvedValue([]);
 
       await service.exportToExcel(userSeq, startDate, endDate);
@@ -196,7 +196,7 @@ describe('TodoService - Excel Export', () => {
       );
     });
 
-    it('should format completeDtm as YYYY-MM-DD HH:mm', async () => {
+    it('completeDtm을 YYYY-MM-DD HH:mm으로 포맷해야 함', async () => {
       const mockTodos: TodoEntity[] = [
         {
           todoSeq: 1,
@@ -230,7 +230,7 @@ describe('TodoService - Excel Export', () => {
       expect(completeDtmValue).toBe('2024-01-15 14:30');
     });
 
-    it('should handle null completeDtm', async () => {
+    it('null인 completeDtm을 처리해야 함', async () => {
       const mockTodos: TodoEntity[] = [
         {
           todoSeq: 1,
@@ -263,7 +263,7 @@ describe('TodoService - Excel Export', () => {
       expect(worksheet.getRow(3).getCell('D').value).toBe('');
     });
 
-    it('should handle null todoNote', async () => {
+    it('null인 todoNote를 처리해야 함', async () => {
       const mockTodos: TodoEntity[] = [
         {
           todoSeq: 1,
@@ -296,19 +296,19 @@ describe('TodoService - Excel Export', () => {
       expect(worksheet.getRow(3).getCell('E').value).toBe('');
     });
 
-    it('should throw error when startDate is missing', async () => {
+    it('startDate가 누락되었을 때 에러를 발생시켜야 함', async () => {
       await expect(service.exportToExcel(userSeq, '', endDate)).rejects.toThrow(
         'startDate and endDate are required',
       );
     });
 
-    it('should throw error when endDate is missing', async () => {
+    it('endDate가 누락되었을 때 에러를 발생시켜야 함', async () => {
       await expect(
         service.exportToExcel(userSeq, startDate, ''),
       ).rejects.toThrow('startDate and endDate are required');
     });
 
-    it('should throw error for invalid date format', async () => {
+    it('유효하지 않은 날짜 형식에 대해 에러를 발생시켜야 함', async () => {
       await expect(
         service.exportToExcel(userSeq, '2024/01/01', endDate),
       ).rejects.toThrow('Invalid date format. Use YYYY-MM-DD');
@@ -318,7 +318,7 @@ describe('TodoService - Excel Export', () => {
       ).rejects.toThrow('Invalid date format. Use YYYY-MM-DD');
     });
 
-    it('should apply header styling correctly', async () => {
+    it('헤더 스타일을 올바르게 적용해야 함', async () => {
       mockTodoRepository.find.mockResolvedValue([]);
 
       const buffer = await service.exportToExcel(userSeq, startDate, endDate);
@@ -340,7 +340,7 @@ describe('TodoService - Excel Export', () => {
       expect(cellB.alignment?.horizontal).toBe('center');
     });
 
-    it('should set row heights correctly', async () => {
+    it('행 높이를 올바르게 설정해야 함', async () => {
       mockTodoRepository.find.mockResolvedValue([]);
 
       const buffer = await service.exportToExcel(userSeq, startDate, endDate);

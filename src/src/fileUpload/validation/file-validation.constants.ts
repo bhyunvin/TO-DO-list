@@ -50,13 +50,13 @@ export const FILE_VALIDATION_ERRORS = {
 // 검증 실패에 대한 오류 메시지
 export const FILE_VALIDATION_MESSAGES = {
   [FILE_VALIDATION_ERRORS.FILE_TOO_LARGE]:
-    'File size exceeds the maximum limit of 10MB',
-  [FILE_VALIDATION_ERRORS.INVALID_FILE_TYPE]: 'File type is not allowed',
+    '파일 크기가 최대 제한인 10MB를 초과합니다',
+  [FILE_VALIDATION_ERRORS.INVALID_FILE_TYPE]: '허용되지 않는 파일 형식입니다',
   [FILE_VALIDATION_ERRORS.BLOCKED_FILE_TYPE]:
-    'File type is blocked for security reasons',
-  [FILE_VALIDATION_ERRORS.TOO_MANY_FILES]: 'Too many files selected',
-  [FILE_VALIDATION_ERRORS.UPLOAD_FAILED]: 'File upload failed',
-  [FILE_VALIDATION_ERRORS.STORAGE_ERROR]: 'File storage error occurred',
+    '보안상의 이유로 차단된 파일 형식입니다',
+  [FILE_VALIDATION_ERRORS.TOO_MANY_FILES]: '선택한 파일이 너무 많습니다',
+  [FILE_VALIDATION_ERRORS.UPLOAD_FAILED]: '파일 업로드에 실패했습니다',
+  [FILE_VALIDATION_ERRORS.STORAGE_ERROR]: '파일 저장 중 오류가 발생했습니다',
 } as const;
 
 // 파일 업로드 정책 설정

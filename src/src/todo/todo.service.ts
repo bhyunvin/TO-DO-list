@@ -240,7 +240,7 @@ export class TodoService {
       return {
         success: false,
         uploadedFiles: [],
-        message: 'No files provided for upload',
+        message: '업로드할 파일이 제공되지 않았습니다',
       };
     }
 
@@ -269,13 +269,13 @@ export class TodoService {
         success: true,
         uploadedFiles: attachmentResponses,
         fileGroupNo,
-        message: `Successfully uploaded ${savedFiles.length} file(s)`,
+        message: `${savedFiles.length}개 파일이 성공적으로 업로드되었습니다`,
       };
     } catch (error) {
       return {
         success: false,
         uploadedFiles: [],
-        message: `File upload failed: ${error.message}`,
+        message: `파일 업로드 실패: ${error.message}`,
       };
     }
   }
@@ -323,7 +323,7 @@ export class TodoService {
             uploadDate: file.auditColumns.regDtm.toISOString(),
           }));
         } catch (error) {
-          this.logger.error('File upload failed during TODO creation:', error);
+          this.logger.error('TODO 생성 중 파일 업로드 실패:', error);
           throw error; // 트랜잭션 롤백을 위해 에러 다시 던짐
         }
       }
@@ -359,7 +359,7 @@ export class TodoService {
       );
 
       if (!updatedTodo) {
-        throw new Error('TODO item not found or update failed');
+        throw new Error('할 일 항목을 찾을 수 없거나 업데이트에 실패했습니다');
       }
 
       // 2. 파일 처리
@@ -397,7 +397,7 @@ export class TodoService {
             await manager.save(updatedTodo);
           }
         } catch (error) {
-          this.logger.error('File upload failed during TODO update:', error);
+          this.logger.error('TODO 수정 중 파일 업로드 실패:', error);
           throw error; // 트랜잭션 롤백
         }
       }
@@ -421,7 +421,7 @@ export class TodoService {
       return {
         success: false,
         uploadedFiles: [],
-        message: 'TODO item not found or access denied',
+        message: '할 일 항목을 찾을 수 없거나 접근이 거부되었습니다',
       };
     }
 
@@ -429,7 +429,7 @@ export class TodoService {
       return {
         success: false,
         uploadedFiles: [],
-        message: 'No files provided for upload',
+        message: '업로드할 파일이 제공되지 않았습니다',
       };
     }
 
@@ -488,7 +488,7 @@ export class TodoService {
           success: true,
           uploadedFiles: attachmentResponses,
           fileGroupNo,
-          message: `Successfully added ${savedFiles.length} file(s) to existing TODO`,
+          message: `기존 할 일에 ${savedFiles.length}개 파일이 성공적으로 추가되었습니다`,
         };
       } else {
         const { savedFiles, fileGroupNo: newFileGroupNo } =
@@ -520,14 +520,14 @@ export class TodoService {
           success: true,
           uploadedFiles: attachmentResponses,
           fileGroupNo,
-          message: `Successfully added ${savedFiles.length} file(s) to TODO`,
+          message: `할 일에 ${savedFiles.length}개 파일이 성공적으로 추가되었습니다`,
         };
       }
     } catch (error) {
       return {
         success: false,
         uploadedFiles: [],
-        message: `File upload failed: ${error.message}`,
+        message: `파일 업로드 실패: ${error.message}`,
       };
     }
   }
