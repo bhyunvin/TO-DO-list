@@ -49,66 +49,35 @@ export default defineConfig({
     host: true,
   },
   build: {
-    minify: false,
-    // minify: 'terser', // terser 사용 설정
-    // terserOptions: {
-    //   compress: {
-    //     drop_console: true, // 콘솔 로그 제거
-    //     drop_debugger: true, // 디버거 제거
-    //   },
-    //   format: {
-    //     comments: false, // 주석 제거
-    //   },
-    // },
+    minify: 'terser', // terser 사용 설정
+    terserOptions: {
+      compress: {
+        drop_console: true, // 콘솔 로그 제거
+        drop_debugger: true, // 디버거 제거
+      },
+      format: {
+        comments: false, // 주석 제거
+      },
+    },
     rollupOptions: {
       output: {
         manualChunks: (id) => {
           if (id.includes('node_modules')) {
-            // SweetAlert2를 별도 청크로 분리하여 동적 로딩 충돌 방지
-            if (id.includes('sweetalert2')) {
-              return 'vendor-sweetalert2';
-            }
-
-            // UI 관련 라이브러리 - sweetalert2, datepicker는 동적 import로 분리됨
             if (
-              id.includes('bootstrap') ||
-              id.includes('react-bootstrap') ||
-              id.includes('@react-icons')
-            ) {
-              return 'ui-vendor';
-            }
-
-            // React 핵심 라이브러리
-            if (
-              id.includes('/react/') ||
-              id.includes('/react-dom/') ||
-              id.includes('/zustand/') ||
-              id.includes('/scheduler/') ||
-              id === 'react' ||
-              id === 'react-dom' ||
-              id === 'zustand'
+              id.includes('react') ||
+              id.includes('react-dom') ||
+              id.includes('react-router-dom') ||
+              id.includes('zustand')
             ) {
               return 'react-vendor';
             }
 
-            // 유틸리티
-            if (id.includes('date-fns') || id.includes('dompurify')) {
-              return 'utils-vendor';
+            if (id.includes('sweetalert2')) {
+              return 'libs-sweetalert';
             }
 
-            return 'vendor'; // 나머지
-          }
-
-          // src 파일 청크 분리
-          if (id.includes('/src/')) {
-            // 파일 업로드 관련 모듈 분리
-            if (id.includes('FileUpload') || id.includes('useFileUpload')) {
-              return 'file-upload';
-            }
-
-            // API 관련 모듈 분리
-            if (id.includes('/api/')) {
-              return 'api';
+            if (id.includes('bootstrap') || id.includes('react-bootstrap')) {
+              return 'libs-bootstrap';
             }
           }
         },

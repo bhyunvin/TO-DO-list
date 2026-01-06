@@ -6,7 +6,7 @@ import { useFileUploadValidator } from '../hooks/useFileUploadValidator';
 import { useFileUploadProgress } from '../hooks/useFileUploadProgress';
 import FileUploadProgress from './FileUploadProgress';
 import userService from '../api/userService';
-import { showConfirmAlert } from '../utils/alertUtils';
+import { showConfirmAlert, showErrorAlert } from '../utils/alertUtils';
 import useSecureImage from '../hooks/useSecureImage';
 
 const isValidEmail = (email) => {
@@ -116,7 +116,6 @@ const ProfileUpdateForm = ({
         if (user) {
           setUserEmail(user.userEmail || '');
         }
-        const { showErrorAlert } = await import('../utils/alertUtils');
         showErrorAlert('오류', '프로필 정보를 불러오는데 실패했습니다.');
       } finally {
         setIsLoadingDetail(false);

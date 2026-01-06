@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import 'sweetalert2/dist/sweetalert2.min.css';
+import { showWarningAlert, showErrorAlert } from '../utils/alertUtils';
 import authService from '../api/authService';
 import SignupForm from './SignupForm';
 
@@ -22,9 +23,6 @@ const LoginForm = () => {
   const submitLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-
-    const { showWarningAlert, showErrorAlert } =
-      await import('../utils/alertUtils');
 
     if (!id) {
       showWarningAlert('', '아이디를 입력해주세요.');

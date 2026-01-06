@@ -26,7 +26,16 @@ import ChatModal from '../components/ChatModal';
 import ThemeToggle from '../components/ThemeToggle';
 import './todoList.css';
 import { ko } from 'date-fns/locale';
-import { showNavigationConfirmAlert } from '../utils/alertUtils';
+import {
+  showNavigationConfirmAlert,
+  showWarningAlert,
+  showErrorAlert,
+  showToast,
+  showAlert,
+  showConfirmAlert,
+  showSuccessAlert,
+  loadSwal,
+} from '../utils/alertUtils';
 import 'react-datepicker/dist/react-datepicker.css';
 const DatePicker = lazy(() => import('react-datepicker'));
 import { API_URL } from '../api/apiClient';
@@ -79,9 +88,6 @@ const CreateTodoForm = ({ onAddTodo, onCancel }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const { showWarningAlert, showErrorAlert, showToast } =
-      await import('../utils/alertUtils');
 
     if (!todoContent.trim()) {
       showWarningAlert('할 일을 입력해주세요.');
@@ -500,7 +506,6 @@ const EditTodoForm = ({ todo, onSave, onCancel }) => {
         ({ isValid }) => !isValid,
       );
       if (invalidFiles.length > 0) {
-        const { showErrorAlert } = await import('../utils/alertUtils');
         showErrorAlert(
           '파일 오류',
           '유효하지 않은 파일이 있습니다. 파일을 다시 선택해주세요.',
@@ -802,7 +807,6 @@ const TodoContainer = () => {
         });
       }
 
-      const { showAlert } = await import('../utils/alertUtils');
       showAlert({
         title: '성공',
         html: `
@@ -820,7 +824,7 @@ const TodoContainer = () => {
       return { success: true, ...responseData };
     } catch (error) {
       console.error('Add Todo Error:', error);
-      const { showErrorAlert } = await import('../utils/alertUtils');
+
       showErrorAlert('오류', '할 일 추가 중 문제가 발생했습니다.');
       return { success: false, error };
     }
@@ -930,7 +934,6 @@ const TodoContainer = () => {
       // 에러 메시지 처리 및 알림 (헬퍼 함수 활용 가능)
       const errorMessage = getErrorMessage(error, error.response);
 
-      const { showToast } = await import('../utils/alertUtils');
       showToast({
         title: errorMessage,
         icon: 'error',
@@ -951,8 +954,7 @@ const TodoContainer = () => {
 
   const handleDeleteTodo = async (todoSeq) => {
     // 사용자에게 삭제 확인을 받음
-    const { showConfirmAlert, showToast, showErrorAlert } =
-      await import('../utils/alertUtils');
+
     await showConfirmAlert({
       title: '정말로 삭제하시겠습니까?',
       text: '삭제된 데이터는 복구할 수 없습니다.',
@@ -1014,7 +1016,6 @@ const TodoContainer = () => {
         });
       }
 
-      const { showAlert } = await import('../utils/alertUtils');
       showAlert({
         title: '성공',
         html: `
@@ -1031,7 +1032,6 @@ const TodoContainer = () => {
     } catch (error) {
       console.error('Save Todo Error:', error);
 
-      const { showAlert, showErrorAlert } = await import('../utils/alertUtils');
       const { response } = error;
       if (response && response.data) {
         const errorData = response.data;
@@ -1144,7 +1144,6 @@ const TodoContainer = () => {
 
       login(updatedUser);
 
-      const { showAlert } = await import('../utils/alertUtils');
       showAlert({
         title: '프로필 수정 완료!',
         html: `
@@ -1170,21 +1169,18 @@ const TodoContainer = () => {
             .map(({ fileName, errorMessage }) => `${fileName}: ${errorMessage}`)
             .join('<br>');
 
-          const { showAlert } = await import('../utils/alertUtils');
           showAlert({
             title: '파일 업로드 오류',
             html: errorMessages,
             icon: 'error',
           });
         } else {
-          const { showErrorAlert } = await import('../utils/alertUtils');
           showErrorAlert(
             '프로필 수정 실패',
             errorData.message || '서버 오류가 발생했습니다.',
           );
         }
       } else {
-        const { showErrorAlert } = await import('../utils/alertUtils');
         showErrorAlert('오류 발생', '서버와의 연결에 문제가 발생했습니다.');
       }
     }
@@ -1200,7 +1196,6 @@ const TodoContainer = () => {
         confirmPassword,
       });
 
-      const { showAlert } = await import('../utils/alertUtils');
       showAlert({
         title: '비밀번호 변경 완료',
         html: `
@@ -1222,7 +1217,6 @@ const TodoContainer = () => {
     } catch (error) {
       console.error('Password change error:', error);
 
-      const { showErrorAlert } = await import('../utils/alertUtils');
       const { response } = error;
       if (response && response.data) {
         const errorData = response.data;
@@ -1245,8 +1239,6 @@ const TodoContainer = () => {
   };
 
   const handleLogout = async () => {
-    const { showConfirmAlert, showErrorAlert } =
-      await import('../utils/alertUtils');
     await showConfirmAlert({
       title: '로그아웃 하시겠습니까?',
       confirmButtonText: '로그아웃',
@@ -1429,7 +1421,6 @@ const TodoContainer = () => {
     const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
     const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
-    const { loadSwal } = await import('../utils/alertUtils');
     const Swal = await loadSwal();
     const result = await Swal.fire({
       title: 'Excel 내보내기',
@@ -1515,12 +1506,10 @@ const TodoContainer = () => {
       globalThis.URL.revokeObjectURL(url);
       a.remove();
 
-      const { showSuccessAlert } = await import('../utils/alertUtils');
       showSuccessAlert('성공', 'Excel 파일이 다운로드되었습니다.');
     } catch (error) {
       console.error('Excel Export Error:', error);
 
-      const { showErrorAlert } = await import('../utils/alertUtils');
       const { response } = error;
       let errorMessage = 'Excel 내보내기에 실패했습니다.';
 

@@ -6,6 +6,11 @@ import { BsX } from '@react-icons/all-files/bs/BsX';
 import todoService from '../api/todoService';
 import { API_URL } from '../api/apiClient';
 import { useFileUploadValidator } from '../hooks/useFileUploadValidator';
+import {
+  showConfirmAlert,
+  showSuccessAlert,
+  showErrorAlert,
+} from '../utils/alertUtils';
 
 const ExistingAttachments = ({ todoSeq }) => {
   const [attachments, setAttachments] = useState([]);
@@ -28,8 +33,6 @@ const ExistingAttachments = ({ todoSeq }) => {
   }, [fetchAttachments]);
 
   const handleDelete = async (fileNo) => {
-    const { showConfirmAlert, showSuccessAlert, showErrorAlert } =
-      await import('../utils/alertUtils');
     const result = await showConfirmAlert({
       title: '파일 삭제',
       text: '선택한 파일을 삭제하시겠습니까? 삭제 후 복구할 수 없습니다.',
