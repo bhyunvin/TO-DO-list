@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { API_URL } from '../api/apiClient';
 import PropTypes from 'prop-types';
-import Swal from 'sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
 import { useFileUploadValidator } from '../hooks/useFileUploadValidator';
 import { useFileUploadProgress } from '../hooks/useFileUploadProgress';
 import FileUploadProgress from './FileUploadProgress';
@@ -116,7 +116,8 @@ const ProfileUpdateForm = ({
         if (user) {
           setUserEmail(user.userEmail || '');
         }
-        Swal.fire('오류', '프로필 정보를 불러오는데 실패했습니다.', 'error');
+        const { showErrorAlert } = await import('../utils/alertUtils');
+        showErrorAlert('오류', '프로필 정보를 불러오는데 실패했습니다.');
       } finally {
         setIsLoadingDetail(false);
       }

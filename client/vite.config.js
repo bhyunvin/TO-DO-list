@@ -63,13 +63,11 @@ export default defineConfig({
       output: {
         manualChunks: (id) => {
           if (id.includes('node_modules')) {
-            // UI 관련 라이브러리 먼저 체크
+            // UI 관련 라이브러리 - sweetalert2, datepicker는 동적 import로 분리됨
             if (
               id.includes('bootstrap') ||
               id.includes('react-bootstrap') ||
-              id.includes('@react-icons') ||
-              id.includes('sweetalert2') ||
-              id.includes('react-datepicker')
+              id.includes('@react-icons')
             ) {
               return 'ui-vendor';
             }

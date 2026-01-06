@@ -7,8 +7,7 @@ import {
   lazy,
 } from 'react';
 import PropTypes from 'prop-types';
-import Swal from 'sweetalert2/dist/sweetalert2.min.js';
-import 'sweetalert2/dist/sweetalert2.min.css';
+
 import { useAuthStore } from '../authStore/authStore';
 import { useChatStore } from '../stores/chatStore';
 import todoService from '../api/todoService';
@@ -81,8 +80,12 @@ const CreateTodoForm = ({ onAddTodo, onCancel }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const { showWarningAlert, showErrorAlert, showToast } = await import(
+      '../utils/alertUtils'
+    );
+
     if (!todoContent.trim()) {
-      Swal.fire('할 일을 입력해주세요.', '', 'warning');
+      showWarningAlert('할 일을 입력해주세요.');
       return;
     }
 
@@ -91,10 +94,9 @@ const CreateTodoForm = ({ onAddTodo, onCancel }) => {
         ({ isValid }) => !isValid,
       );
       if (invalidFiles.length > 0) {
-        Swal.fire(
+        showErrorAlert(
           '파일 오류',
           '유효하지 않은 파일이 있습니다. 파일을 다시 선택해주세요.',
-          'error',
         );
         return;
       }
@@ -110,10 +112,9 @@ const CreateTodoForm = ({ onAddTodo, onCancel }) => {
         setTodoNote('');
         resetFiles();
         resetUploadState();
-        Swal.fire({
+        showToast({
           icon: 'success',
           title: '할 일이 추가되었습니다.',
-          showConfirmButton: false,
           timer: 1500,
         });
       }
@@ -500,10 +501,10 @@ const EditTodoForm = ({ todo, onSave, onCancel }) => {
         ({ isValid }) => !isValid,
       );
       if (invalidFiles.length > 0) {
-        Swal.fire(
+        const { showErrorAlert } = await import('../utils/alertUtils');
+        showErrorAlert(
           '파일 오류',
           '유효하지 않은 파일이 있습니다. 파일을 다시 선택해주세요.',
-          'error',
         );
         return;
       }
@@ -802,7 +803,8 @@ const TodoContainer = () => {
         });
       }
 
-      Swal.fire({
+      const { showAlert } = await import('../utils/alertUtils');
+      showAlert({
         title: '성공',
         html: `
             <div class="text-center">
@@ -819,7 +821,8 @@ const TodoContainer = () => {
       return { success: true, ...responseData };
     } catch (error) {
       console.error('Add Todo Error:', error);
-      Swal.fire('오류', '할 일 추가 중 문제가 발생했습니다.', 'error');
+      const { showErrorAlert } = await import('../utils/alertUtils');
+      showErrorAlert('오류', '할 일 추가 중 문제가 발생했습니다.');
       return { success: false, error };
     }
   };
@@ -928,16 +931,12 @@ const TodoContainer = () => {
       // 에러 메시지 처리 및 알림 (헬퍼 함수 활용 가능)
       const errorMessage = getErrorMessage(error, error.response);
 
-      Swal.fire({
-        toast: true,
-        position: 'top-end',
-        icon: 'error',
+      const { showToast } = await import('../utils/alertUtils');
+      showToast({
         title: errorMessage,
-        showConfirmButton: false,
-        timer: 4000,
-        timerProgressBar: true,
+        icon: 'error',
       });
-
+    } finally {
       const { name, message } = error;
       console.error('Todo toggle failed:', {
         todoSeq,
@@ -947,52 +946,41 @@ const TodoContainer = () => {
         attemptedState: newCompleteDtm,
         timestamp: new Date().toISOString(),
       });
-    } finally {
       setTogglingTodoSeq(null);
     }
   };
 
   const handleDeleteTodo = async (todoSeq) => {
     // 사용자에게 삭제 확인을 받음
-    await Swal.fire({
+    const { showConfirmAlert, showToast, showErrorAlert } = await import(
+      '../utils/alertUtils'
+    );
+    await showConfirmAlert({
       title: '정말로 삭제하시겠습니까?',
       text: '삭제된 데이터는 복구할 수 없습니다.',
-      icon: 'warning',
-      showCancelButton: true,
-      reverseButtons: true, // 버튼 순서 반전 (취소 | 삭제)
-      confirmButtonColor: 'transparent',
-      cancelButtonColor: 'transparent',
-      customClass: {
-        confirmButton: 'btn btn-outline-danger',
-        cancelButton: 'btn btn-outline-secondary me-2',
-      },
-      buttonsStyling: false,
       confirmButtonText: '삭제',
-      cancelButtonText: '취소',
     }).then(async (result) => {
       // 사용자가 '네'를 클릭한 경우에만 삭제를 진행
       if (result.isConfirmed) {
         try {
           await todoService.deleteTodo(todoSeq);
 
-          Swal.fire(
-            '삭제 완료!',
-            '할 일이 성공적으로 삭제되었습니다.',
-            'success',
-          );
+          showToast({
+            title: '삭제 완료!',
+            icon: 'success',
+          });
           fetchTodos();
         } catch (error) {
           console.error('Delete Todo Error:', error);
 
           const { response } = error;
           if (response && response.data) {
-            Swal.fire(
+            showErrorAlert(
               '오류',
               `삭제에 실패했습니다: ${response.data.message}`,
-              'error',
             );
           } else {
-            Swal.fire('오류', '서버와의 통신 중 문제가 발생했습니다.', 'error');
+            showErrorAlert('오류', '서버와의 통신 중 문제가 발생했습니다.');
           }
         }
       }
@@ -1028,7 +1016,8 @@ const TodoContainer = () => {
         });
       }
 
-      Swal.fire({
+      const { showAlert } = await import('../utils/alertUtils');
+      showAlert({
         title: '성공',
         html: `
             <div class="text-center">
@@ -1044,6 +1033,7 @@ const TodoContainer = () => {
     } catch (error) {
       console.error('Save Todo Error:', error);
 
+      const { showAlert, showErrorAlert } = await import('../utils/alertUtils');
       const { response } = error;
       if (response && response.data) {
         const errorData = response.data;
@@ -1053,23 +1043,22 @@ const TodoContainer = () => {
             .map(({ fileName, errorMessage }) => `${fileName}: ${errorMessage}`)
             .join('<br>');
 
-          Swal.fire({
+          showAlert({
             title: '파일 업로드 오류',
             html: errorMessages,
             icon: 'error',
           });
           return { success: false, errors: errorData.errors || [] };
         } else {
-          Swal.fire(
+          showErrorAlert(
             '오류',
             errorData.message || '수정에 실패했습니다.',
-            'error',
           );
           return { success: false, error: errorData.message };
         }
       }
 
-      Swal.fire('오류', '서버와의 통신 중 문제가 발생했습니다.', 'error');
+      showErrorAlert('오류', '서버와의 통신 중 문제가 발생했습니다.');
       return { success: false, error: error.message };
     }
   };
@@ -1160,7 +1149,8 @@ const TodoContainer = () => {
 
       login(updatedUser);
 
-      Swal.fire({
+      const { showAlert } = await import('../utils/alertUtils');
+      showAlert({
         title: '프로필 수정 완료!',
         html: `
             <div class="text-center">
@@ -1185,20 +1175,22 @@ const TodoContainer = () => {
             .map(({ fileName, errorMessage }) => `${fileName}: ${errorMessage}`)
             .join('<br>');
 
-          Swal.fire({
+          const { showAlert } = await import('../utils/alertUtils');
+          showAlert({
             title: '파일 업로드 오류',
             html: errorMessages,
             icon: 'error',
           });
         } else {
-          Swal.fire(
+          const { showErrorAlert } = await import('../utils/alertUtils');
+          showErrorAlert(
             '프로필 수정 실패',
             errorData.message || '서버 오류가 발생했습니다.',
-            'error',
           );
         }
       } else {
-        Swal.fire('오류 발생', '서버와의 연결에 문제가 발생했습니다.', 'error');
+        const { showErrorAlert } = await import('../utils/alertUtils');
+        showErrorAlert('오류 발생', '서버와의 연결에 문제가 발생했습니다.');
       }
     }
   };
@@ -1213,7 +1205,8 @@ const TodoContainer = () => {
         confirmPassword,
       });
 
-      Swal.fire({
+      const { showAlert } = await import('../utils/alertUtils');
+      showAlert({
         title: '비밀번호 변경 완료',
         html: `
             <div class="text-center">
@@ -1234,6 +1227,7 @@ const TodoContainer = () => {
     } catch (error) {
       console.error('Password change error:', error);
 
+      const { showErrorAlert } = await import('../utils/alertUtils');
       const { response } = error;
       if (response && response.data) {
         const errorData = response.data;
@@ -1248,28 +1242,25 @@ const TodoContainer = () => {
           }
         }
 
-        Swal.fire('비밀번호 변경 실패', errorMessage, 'error');
+        showErrorAlert('비밀번호 변경 실패', errorMessage);
       } else {
-        Swal.fire('오류 발생', '서버와의 연결에 문제가 발생했습니다.', 'error');
+        showErrorAlert('오류 발생', '서버와의 연결에 문제가 발생했습니다.');
       }
     }
   };
 
   const handleLogout = async () => {
-    await Swal.fire({
+    const { showConfirmAlert, showErrorAlert } = await import(
+      '../utils/alertUtils'
+    );
+    await showConfirmAlert({
       title: '로그아웃 하시겠습니까?',
-      icon: 'warning',
-      showCancelButton: true,
-      reverseButtons: true,
-      confirmButtonColor: 'transparent',
-      cancelButtonColor: 'transparent',
+      confirmButtonText: '로그아웃',
+      cancelButtonText: '취소',
       customClass: {
         confirmButton: 'btn btn-outline-primary',
         cancelButton: 'btn btn-outline-secondary me-2',
       },
-      buttonsStyling: false,
-      confirmButtonText: '로그아웃',
-      cancelButtonText: '취소',
     }).then((result) => {
       // 사용자가 취소를 선택한 경우 로그아웃을 중단
       if (!result.isConfirmed) {
@@ -1283,10 +1274,9 @@ const TodoContainer = () => {
         } catch (error) {
           console.error('Logout Error : ', error);
           // 네트워크 오류 등이 발생해도 사용자에게 알린 후 로그아웃을 진행
-          Swal.fire(
+          showErrorAlert(
             '오류 발생',
             '서버와의 연결에 문제가 발생했습니다.',
-            'error',
           );
         } finally {
           logout();
@@ -1448,6 +1438,8 @@ const TodoContainer = () => {
     const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
     const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
+    const { loadSwal } = await import('../utils/alertUtils');
+    const Swal = await loadSwal();
     const result = await Swal.fire({
       title: 'Excel 내보내기',
       html: `
@@ -1532,10 +1524,14 @@ const TodoContainer = () => {
       globalThis.URL.revokeObjectURL(url);
       a.remove();
 
-      Swal.fire('성공', 'Excel 파일이 다운로드되었습니다.', 'success');
+      const { showSuccessAlert } = await import(
+        '../utils/alertUtils'
+      );
+      showSuccessAlert('성공', 'Excel 파일이 다운로드되었습니다.');
     } catch (error) {
       console.error('Excel Export Error:', error);
 
+      const { showErrorAlert } = await import('../utils/alertUtils');
       const { response } = error;
       let errorMessage = 'Excel 내보내기에 실패했습니다.';
 
@@ -1547,7 +1543,7 @@ const TodoContainer = () => {
         }
       }
 
-      Swal.fire('오류', errorMessage, 'error');
+      showErrorAlert('오류', errorMessage);
     }
   };
 

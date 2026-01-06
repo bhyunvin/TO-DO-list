@@ -1,7 +1,6 @@
 // 환경 변수에서 API URL 가져오기 (기본값 설정)
 export const API_URL = import.meta.env.VITE_API_URL || '/api';
 import { useAuthStore } from '../authStore/authStore';
-import Swal from 'sweetalert2';
 
 // 헬퍼 함수: 인증 및 서버 상태 에러 처리
 const handleStatusErrors = async (response, endpoint) => {
@@ -11,22 +10,20 @@ const handleStatusErrors = async (response, endpoint) => {
     console.error('인증 실패: 로그인이 필요합니다.');
     // 실제로 로그아웃 처리
     useAuthStore.getState().logout();
-    await Swal.fire({
-      title: '세션 만료',
-      text: '세션이 만료되었습니다. 다시 로그인해주세요.',
-      icon: 'warning',
-      confirmButtonText: '확인',
-    });
+    const { showErrorAlert } = await import('../utils/alertUtils');
+    showErrorAlert(
+      '세션 만료',
+      '세션이 만료되었습니다. 다시 로그인해주세요.',
+    );
   }
 
   // 504 Gateway Timeout 처리
   if (response.status === 504) {
     console.error('서버 응답 시간 초과');
-    Swal.fire({
+    const { showErrorAlert } = await import('../utils/alertUtils');
+    showErrorAlert({
       title: '서버 응답 시간 초과',
       text: '서버와의 연결이 원활하지 않습니다. 잠시 후 다시 시도해주세요.',
-      icon: 'error',
-      confirmButtonColor: '#d33',
       confirmButtonText: '확인',
     });
   }

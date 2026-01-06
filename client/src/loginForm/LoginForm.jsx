@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import Swal from 'sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
 import authService from '../api/authService';
 import SignupForm from './SignupForm';
 
@@ -23,14 +23,18 @@ const LoginForm = () => {
     e.preventDefault();
     setIsLoading(true);
 
+    const { showWarningAlert, showErrorAlert } = await import(
+      '../utils/alertUtils'
+    );
+
     if (!id) {
-      Swal.fire('', '아이디를 입력해주세요.', 'warning');
+      showWarningAlert('', '아이디를 입력해주세요.');
       setIsLoading(false);
       return;
     }
 
     if (!password) {
-      Swal.fire('', '비밀번호를 입력해주세요.', 'warning');
+      showWarningAlert('', '비밀번호를 입력해주세요.');
       setIsLoading(false);
       return;
     }
@@ -43,54 +47,21 @@ const LoginForm = () => {
 
       // data 구조: { access_token, user }
       if (!data?.access_token) {
-        Swal.fire({
-          title: '로그인 실패',
-          text: data.message || '다시 시도해 주세요.',
-          icon: 'error',
-          confirmButtonColor: 'transparent',
-          customClass: {
-            confirmButton: 'btn btn-outline-danger',
-          },
-          buttonsStyling: false,
-        });
+        showErrorAlert('로그인 실패', data.message || '다시 시도해 주세요.');
       }
     } catch (error) {
       console.error('LoginForm Login Error : ', error);
 
       const { response } = error;
       if (response && response.status === 204) {
-        Swal.fire({
-          title: '로그인 실패',
-          text: '사용자가 존재하지 않습니다.',
-          icon: 'error',
-          confirmButtonColor: 'transparent',
-          customClass: {
-            confirmButton: 'btn btn-outline-danger',
-          },
-          buttonsStyling: false,
-        });
+        showErrorAlert('로그인 실패', '사용자가 존재하지 않습니다.');
       } else if (response && response.data) {
-        Swal.fire({
-          title: '로그인 실패',
-          text: response.data.message || '다시 시도해 주세요.',
-          icon: 'error',
-          confirmButtonColor: 'transparent',
-          customClass: {
-            confirmButton: 'btn btn-outline-danger',
-          },
-          buttonsStyling: false,
-        });
+        showErrorAlert(
+          '로그인 실패',
+          response.data.message || '다시 시도해 주세요.',
+        );
       } else {
-        Swal.fire({
-          title: '오류 발생',
-          text: '서버와의 연결에 문제가 발생했습니다.',
-          icon: 'error',
-          confirmButtonColor: 'transparent',
-          customClass: {
-            confirmButton: 'btn btn-outline-danger',
-          },
-          buttonsStyling: false,
-        });
+        showErrorAlert('오류 발생', '서버와의 연결에 문제가 발생했습니다.');
       }
     } finally {
       setIsLoading(false);

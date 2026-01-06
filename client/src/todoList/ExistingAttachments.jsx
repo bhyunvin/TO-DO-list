@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import Swal from 'sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
 import { BsPaperclip } from '@react-icons/all-files/bs/BsPaperclip';
 import { BsX } from '@react-icons/all-files/bs/BsX';
 import todoService from '../api/todoService';
@@ -28,25 +28,24 @@ const ExistingAttachments = ({ todoSeq }) => {
   }, [fetchAttachments]);
 
   const handleDelete = async (fileNo) => {
-    const result = await Swal.fire({
+    const { showConfirmAlert, showSuccessAlert, showErrorAlert } = await import(
+      '../utils/alertUtils'
+    );
+    const result = await showConfirmAlert({
       title: '파일 삭제',
       text: '선택한 파일을 삭제하시겠습니까? 삭제 후 복구할 수 없습니다.',
-      icon: 'warning',
-      showCancelButton: true,
       confirmButtonText: '삭제',
       cancelButtonText: '취소',
-      confirmButtonColor: '#dc3545',
-      cancelButtonColor: '#6c757d',
     });
 
     if (result.isConfirmed) {
       try {
         await todoService.deleteAttachment(todoSeq, fileNo);
         setAttachments((prev) => prev.filter((file) => file.fileNo !== fileNo));
-        Swal.fire('삭제 완료', '파일이 삭제되었습니다.', 'success');
+        showSuccessAlert('삭제 완료', '파일이 삭제되었습니다.');
       } catch (error) {
         console.error('Delete attachment error:', error);
-        Swal.fire('오류', '파일 삭제에 실패했습니다.', 'error');
+        showErrorAlert('오류 발생', '파일 삭제 중 문제가 발생했습니다.');
       }
     }
   };

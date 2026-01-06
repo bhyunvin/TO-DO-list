@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import Swal from 'sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
+import { showAlert, showErrorAlert } from '../utils/alertUtils';
 import authService from '../api/authService';
 import { useFileUploadValidator } from '../hooks/useFileUploadValidator';
 import { useFileUploadProgress } from '../hooks/useFileUploadProgress';
@@ -95,7 +96,7 @@ const SignupForm = ({ onSignupComplete }) => {
       }
     } catch (error) {
       console.error('SignupForm Error : ', error);
-      Swal.fire('오류 발생', '서버와의 연결에 문제가 발생했습니다.', 'error');
+      showErrorAlert('오류 발생', '서버와의 연결에 문제가 발생했습니다.');
     }
   };
 
@@ -256,7 +257,7 @@ const SignupForm = ({ onSignupComplete }) => {
       const data = await authService.signup(signupFormData);
 
       if (data.userSeq) {
-        Swal.fire({
+        showAlert({
           title: '회원가입 완료!',
           html: `
               <div class="text-center">
@@ -273,7 +274,7 @@ const SignupForm = ({ onSignupComplete }) => {
         });
       } else {
         console.error('회원가입 실패 : ', data);
-        Swal.fire('', '회원가입에 실패했습니다.', 'error');
+        showErrorAlert('', '회원가입에 실패했습니다.');
       }
     } catch (error) {
       console.error('SignupForm Error : ', error);
@@ -287,26 +288,25 @@ const SignupForm = ({ onSignupComplete }) => {
             .map((err) => `${err.fileName}: ${err.errorMessage}`)
             .join('<br>');
 
-          Swal.fire({
+          showAlert({
             title: '파일 업로드 오류',
             html: errorMessages,
             icon: 'error',
           });
         } else {
-          Swal.fire(
+          showErrorAlert(
             '회원가입 실패',
             errorData.message || '서버 오류가 발생했습니다.',
-            'error',
           );
         }
       } else {
-        Swal.fire('오류 발생', '서버와의 연결에 문제가 발생했습니다.', 'error');
+        showErrorAlert('오류 발생', '서버와의 연결에 문제가 발생했습니다.');
       }
     }
   };
 
   const onCancel = () => {
-    Swal.fire({
+    showAlert({
       title: '정말 취소하시겠습니까?',
       text: '작성중인 내용이 사라집니다.',
       icon: 'warning',
