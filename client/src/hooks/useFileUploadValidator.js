@@ -6,14 +6,7 @@ import { useState, useCallback } from 'react';
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
 const ALLOWED_IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
-const ALLOWED_DOCUMENT_EXTENSIONS = [
-  '.xlsx',
-  '.pptx',
-  '.docx',
-  '.pdf',
-  '.hwp',
-  '.txt',
-];
+const ALLOWED_DOCUMENT_EXTENSIONS = [];
 const BLOCKED_EXTENSIONS = [
   '.exe',
   '.js',

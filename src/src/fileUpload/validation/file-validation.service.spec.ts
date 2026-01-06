@@ -123,6 +123,17 @@ describe('FileValidationService', () => {
 
       expect(result.isValid).toBe(true);
     });
+
+    it('허용 목록이 비어있을 때 차단되지 않은 파일은 통과해야 함', () => {
+      const mockFile = {
+        originalname: 'test.unknown',
+        size: 1024,
+      } as Express.Multer.File;
+
+      const result = service.validateFileType(mockFile, [], ['.exe']);
+
+      expect(result.isValid).toBe(true);
+    });
   });
 
   describe('validateMultipleFiles', () => {

@@ -577,12 +577,11 @@ const EditTodoForm = ({ todo, onSave, onCancel }) => {
           type="file"
           multiple={true}
           className={fileInputClass}
-          accept=".xlsx,.pptx,.docx,.pdf,.hwp,.txt"
           onChange={handleChange}
           name="TODO_FILES"
         />
         <small className="form-text text-muted">
-          허용 파일: XLSX, PPTX, DOCX, PDF, HWP, TXT | 최대 크기:{' '}
+          허용 파일: 모든 파일 (단, 일부 실행 파일 제외) | 최대 크기:{' '}
           {formatFileSize(policy?.maxSize || 0)} | 최대 {policy?.maxCount || 0}
           개
         </small>
@@ -625,10 +624,17 @@ const EditTodoForm = ({ todo, onSave, onCancel }) => {
           uploadStatus={uploadStatus} // 업로드 중에는 갱신 방지 등을 위해 전달 가능
         />
 
-        <div className="form-actions">
+        <div className="form-actions d-flex justify-content-end gap-2">
+          <button
+            type="button"
+            className="btn btn-outline-secondary"
+            onClick={onCancel}
+          >
+            취소
+          </button>
           <button
             type="submit"
-            className="btn btn-success"
+            className="btn btn-outline-success"
             disabled={
               isSubmitting ||
               uploadStatus === 'uploading' ||
@@ -650,13 +656,6 @@ const EditTodoForm = ({ todo, onSave, onCancel }) => {
             ) : (
               '수정'
             )}
-          </button>
-          <button
-            type="button"
-            className="btn btn-secondary ms-2"
-            onClick={onCancel}
-          >
-            취소
           </button>
         </div>
       </form>

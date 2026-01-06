@@ -68,7 +68,7 @@ export const FILE_UPLOAD_POLICY: FileUploadPolicyConfig = {
   },
   todoAttachment: {
     maxSize: MAX_FILE_SIZE,
-    allowedTypes: ALLOWED_DOCUMENT_EXTENSIONS,
+    allowedTypes: [], // 빈 배열: 모든 파일 허용 (blockedTypes 제외)
     blockedTypes: BLOCKED_EXTENSIONS,
     maxCount: 10,
   },

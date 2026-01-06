@@ -60,8 +60,12 @@ export class FileValidationService {
       };
     }
 
-    // 파일 유형이 허용 목록에 있는지 확인
-    if (!allowedTypes.includes(fileExtension)) {
+    // 파일 유형이 허용 목록에 있는지 확인 (허용 목록이 비어있으면 모든 파일 허용)
+    if (
+      allowedTypes &&
+      allowedTypes.length > 0 &&
+      !allowedTypes.includes(fileExtension)
+    ) {
       return {
         isValid: false,
         errorCode: FILE_VALIDATION_ERRORS.INVALID_FILE_TYPE,
