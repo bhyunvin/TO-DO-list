@@ -715,14 +715,11 @@ export class UserService {
       );
 
       if (!isCurrentPasswordValid) {
-        this.logger.warn(
-          '잘못된 현재 비밀번호로 비밀번호 변경 시도',
-          {
-            userSeq,
-            userId,
-            ip,
-          },
-        );
+        this.logger.warn('잘못된 현재 비밀번호로 비밀번호 변경 시도', {
+          userSeq,
+          userId,
+          ip,
+        });
         throw new UnauthorizedException('현재 비밀번호가 올바르지 않습니다.');
       }
 

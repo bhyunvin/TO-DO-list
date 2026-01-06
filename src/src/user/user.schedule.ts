@@ -20,6 +20,8 @@ export class UserSchedule {
     const result = await this.refreshTokenRepository.delete({
       expDtm: LessThan(now),
     });
-    this.logger.debug(`${result.affected}개의 만료된 Refresh Token이 삭제되었습니다.`);
+    this.logger.debug(
+      `${result.affected}개의 만료된 Refresh Token이 삭제되었습니다.`,
+    );
   }
 }

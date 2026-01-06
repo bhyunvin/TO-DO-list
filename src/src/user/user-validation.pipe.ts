@@ -132,14 +132,11 @@ export class UserProfileValidationPipe implements PipeTransform<any> {
         const totalLength = val.length;
 
         if (totalLength > 0 && specialCharCount / totalLength > 0.1) {
-          this.logger.warn(
-            '특수 문자가 많은 의심스러운 입력',
-            {
-              field: key,
-              specialCharRatio: specialCharCount / totalLength,
-              value: `${val.substring(0, 50)}...`,
-            },
-          );
+          this.logger.warn('특수 문자가 많은 의심스러운 입력', {
+            field: key,
+            specialCharRatio: specialCharCount / totalLength,
+            value: `${val.substring(0, 50)}...`,
+          });
 
           throw new BadRequestException({
             message: '부적절한 입력 형식',

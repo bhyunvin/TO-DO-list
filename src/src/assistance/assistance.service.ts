@@ -157,9 +157,7 @@ export class AssistanceService implements OnModuleInit {
           thinkingLevel: 'HIGH' as any,
         };
 
-        this.logger.log(
-          `[Gemini SDK] 콘텐츠 생성 중 (턴 ${turn + 1})...`,
-        );
+        this.logger.log(`[Gemini SDK] 콘텐츠 생성 중 (턴 ${turn + 1})...`);
 
         const response = await ai.models.generateContent({
           model: 'gemini-3-flash-preview',

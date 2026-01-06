@@ -83,7 +83,8 @@ export class FileUploadErrorService {
     return {
       success: true,
       message:
-        message || `${uploadedFiles.length}개 파일이 성공적으로 업로드되었습니다`,
+        message ||
+        `${uploadedFiles.length}개 파일이 성공적으로 업로드되었습니다`,
       uploadedFiles,
       timestamp: new Date().toISOString(),
       requestId,
@@ -220,19 +221,38 @@ export class FileUploadErrorService {
       return;
     }
 
-    this.logger.warn(
-      `${nonSecurityErrors.length}개 파일 검증 실패`,
+    this.logger.warn(`${nonSecurityErrors.length}개 파일 검증 실패`, {
+      errors: nonSecurityErrors.map(
+        ({ fileName, errorCode, fileSize, fileType }) => ({
+          fileName,
+          errorCode,
+          fileSize,
+          fileType,
+        }),
+      ),
+      clientIp: context.clientIp,
+      userAgent: context.userAgent,
+      userId: context.userId,
+      category: context.category,
+      endpoint: context.endpoint,
+      requestId: context.requestId,
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  /**
+   * 성공적인 파일 업로드 로깅
+   */
+  logSuccessfulUpload(uploadedFiles: any[], context: ErrorLogContext): void {
+    this.logger.log(
+      `${uploadedFiles.length}개 파일이 성공적으로 업로드되었습니다`,
       {
-        errors: nonSecurityErrors.map(
-          ({ fileName, errorCode, fileSize, fileType }) => ({
-            fileName,
-            errorCode,
-            fileSize,
-            fileType,
-          }),
-        ),
-        clientIp: context.clientIp,
-        userAgent: context.userAgent,
+        fileCount: uploadedFiles.length,
+        files: uploadedFiles.map((file) => ({
+          fileName: file.originalFileName || file.fileName,
+          fileSize: file.fileSize,
+          category: context.category,
+        })),
         userId: context.userId,
         category: context.category,
         endpoint: context.endpoint,
@@ -240,25 +260,6 @@ export class FileUploadErrorService {
         timestamp: new Date().toISOString(),
       },
     );
-  }
-
-  /**
-   * 성공적인 파일 업로드 로깅
-   */
-  logSuccessfulUpload(uploadedFiles: any[], context: ErrorLogContext): void {
-    this.logger.log(`${uploadedFiles.length}개 파일이 성공적으로 업로드되었습니다`, {
-      fileCount: uploadedFiles.length,
-      files: uploadedFiles.map((file) => ({
-        fileName: file.originalFileName || file.fileName,
-        fileSize: file.fileSize,
-        category: context.category,
-      })),
-      userId: context.userId,
-      category: context.category,
-      endpoint: context.endpoint,
-      requestId: context.requestId,
-      timestamp: new Date().toISOString(),
-    });
   }
 
   /**
