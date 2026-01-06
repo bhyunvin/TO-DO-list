@@ -63,6 +63,11 @@ export default defineConfig({
       output: {
         manualChunks: (id) => {
           if (id.includes('node_modules')) {
+            // SweetAlert2를 별도 청크로 분리하여 동적 로딩 충돌 방지
+            if (id.includes('sweetalert2')) {
+              return 'vendor-sweetalert2';
+            }
+
             // UI 관련 라이브러리 - sweetalert2, datepicker는 동적 import로 분리됨
             if (
               id.includes('bootstrap') ||
