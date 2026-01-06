@@ -21,6 +21,7 @@ import FileUploadProgress from '../components/FileUploadProgress';
 import ExistingAttachments from './ExistingAttachments';
 import ProfileUpdateForm from '../components/ProfileUpdateForm';
 import PasswordChangeForm from '../components/PasswordChangeForm';
+import ContactDeveloperModal from '../components/ContactDeveloperModal';
 import FloatingActionButton from '../components/FloatingActionButton';
 import ChatModal from '../components/ChatModal';
 import ThemeToggle from '../components/ThemeToggle';
@@ -157,7 +158,7 @@ const CreateTodoForm = ({ onAddTodo, onCancel }) => {
           maxLength={4000}
           required={true}
           rows={3}
-          style={{ resize: 'none' }}
+          style={{ resize: 'vertical' }}
         />
         <label className="mb-1" htmlFor="todoNote">
           비고
@@ -172,7 +173,7 @@ const CreateTodoForm = ({ onAddTodo, onCancel }) => {
           name="TODO_NOTE"
           maxLength={4000}
           rows={3}
-          style={{ resize: 'none' }}
+          style={{ resize: 'vertical' }}
         />
         <label className="mb-1" htmlFor="todoFiles">
           첨부파일
@@ -554,6 +555,7 @@ const EditTodoForm = ({ todo, onSave, onCancel }) => {
           onChange={handleChange}
           maxLength={4000}
           required
+          style={{ resize: 'vertical' }}
         />
         <label className="mb-1" htmlFor="todoNote">
           비고
@@ -565,6 +567,7 @@ const EditTodoForm = ({ todo, onSave, onCancel }) => {
           value={todoNote}
           onChange={handleChange}
           maxLength={4000}
+          style={{ resize: 'vertical' }}
         />
         <label className="mb-1" htmlFor="todoFiles">
           첨부파일
@@ -726,6 +729,7 @@ const TodoContainer = () => {
   const [isChatInputFocused, setIsChatInputFocused] = useState(false);
   const [isFormDirty, setIsFormDirty] = useState(false);
   const [isDatePickerLoaded, setIsDatePickerLoaded] = useState(false);
+  const [showContactModal, setShowContactModal] = useState(false);
 
   const userMenuRef = useRef(null);
 
@@ -1597,6 +1601,15 @@ const TodoContainer = () => {
               <button className="dropdown-item" onClick={handleChangePassword}>
                 비밀번호 변경
               </button>
+              <button
+                className="dropdown-item"
+                onClick={() => {
+                  setShowContactModal(true);
+                  setIsUserMenuOpen(false);
+                }}
+              >
+                개발자에게 문의하기
+              </button>
               <div className="dropdown-divider"></div>
               <ThemeToggle />
               <div className="dropdown-divider"></div>
@@ -1688,6 +1701,12 @@ const TodoContainer = () => {
         )}
 
       {renderContent()}
+
+      {/* 개발자에게 문의하기 모달 */}
+      <ContactDeveloperModal
+        show={showContactModal}
+        onHide={() => setShowContactModal(false)}
+      />
 
       <FloatingActionButton
         isOpen={isChatOpen}

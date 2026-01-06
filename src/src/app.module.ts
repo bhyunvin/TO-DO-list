@@ -9,6 +9,7 @@ import { UserModule } from './user/user.module';
 import { LoggingModule } from './logging/logging.module';
 import { AssistanceModule } from './assistance/assistance.module';
 import { FileUploadModule } from './fileUpload/fileUpload.module';
+import { MailModule } from './mail/mail.module';
 
 import { TodoEntity } from './todo/todo.entity';
 import { UserEntity } from './user/user.entity';
@@ -55,6 +56,10 @@ const envSchema = z.object({
   DETERMINISTIC_IV: z
     .string()
     .length(32, 'DETERMINISTIC_IV는 16byte hex string이어야 합니다 (32자).'),
+
+  // --- Gmail 설정 ---
+  GMAIL_USER: z.email({ message: 'GMAIL_USER는 유효한 이메일이어야 합니다.' }),
+  GMAIL_APP_PASSWORD: z.string().min(1, 'GMAIL_APP_PASSWORD는 필수입니다.'),
 });
 
 const validate = (config: Record<string, unknown>) => {
@@ -115,6 +120,7 @@ const validate = (config: Record<string, unknown>) => {
     LoggingModule,
     AssistanceModule,
     FileUploadModule,
+    MailModule,
   ],
   controllers: [WelcomeController],
   providers: [
