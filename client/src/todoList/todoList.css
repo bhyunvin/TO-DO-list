@@ -38,15 +38,35 @@
 
 /* 전체 TODO 컨테이너 */
 .todo-container {
-  max-width: var(--container-max-width);
-  margin: var(--spacing-2xl) auto;
+  max-width: none;
+  margin: 0;
   padding: var(--spacing-xl);
-  border: 1px solid var(--color-border-light);
-  border-radius: var(--border-radius-default);
-  box-shadow: var(--box-shadow-medium);
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
   background-color: var(--color-white);
-  min-height: auto;
-  overflow: visible;
+  min-height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  width: 100%;
+
+  /* Firefox 대응 */
+  scrollbar-width: thin;
+  scrollbar-color: #444 transparent;
+}
+
+/* 스크롤바 커스텀 스타일 (Webkit) */
+.todo-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.todo-container::-webkit-scrollbar-thumb {
+  background-color: #444;
+  border-radius: 10px;
+}
+
+.todo-container::-webkit-scrollbar-track {
+  background-color: transparent;
 }
 
 .todo-container > * {
@@ -54,12 +74,13 @@
 }
 
 /* 긴 텍스트를 자르고 말줄임표(...)로 표시하는 유틸리티 클래스 */
+/* 긴 텍스트를 줄바꿈하는 유틸리티 클래스 (기존 text-truncate 수정) */
 .text-truncate {
   display: block;
   max-width: 100%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: pre-wrap;
+  word-break: break-all;
+  overflow: visible;
 }
 
 /* 제목을 위한 헤더: 중앙 정렬 */
@@ -269,15 +290,15 @@
   box-shadow: none;
   min-height: auto;
   height: auto;
-  max-height: 50vh;
+  max-height: none;
 }
 
 .list-wrapper {
-  max-height: 60vh;
-  overflow-y: auto;
-  overflow-x: hidden;
+  max-height: none;
+  overflow-y: visible;
+  overflow-x: visible;
   border-radius: var(--border-radius-default);
-  box-shadow: var(--box-shadow-light);
+  box-shadow: none;
 }
 
 /* 날짜 네비게이터 컨테이너 */

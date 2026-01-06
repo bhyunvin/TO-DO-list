@@ -360,15 +360,11 @@ const TodoList = ({
           </td>
           <td className="text-center">{index + 1}</td>
           <td className="todo-content">
-            <span className="text-truncate" title={todoContent}>
-              {truncateText(todoContent)}
-            </span>
+            <span className="text-truncate">{todoContent}</span>
           </td>
           <td className="text-center">{formatDateTime(completeDtm)}</td>
           <td>
-            <span className="text-truncate" title={todoNote}>
-              {truncateText(todoNote)}
-            </span>
+            <span className="text-truncate">{todoNote}</span>
           </td>
           <td className="todo-actions-cell">
             <button
@@ -694,12 +690,6 @@ const formatDateTime = (isoString) => {
   const hours = String(date.getHours()).padStart(2, '0');
   const minutes = String(date.getMinutes()).padStart(2, '0');
   return `${year}-${month}-${day} ${hours}:${minutes}`;
-};
-
-const truncateText = (text, maxLength = 30) => {
-  if (!text) return '';
-  if (text.length <= maxLength) return text;
-  return text.substring(0, maxLength) + '...';
 };
 
 const TodoContainer = () => {
