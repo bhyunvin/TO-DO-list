@@ -27,9 +27,7 @@ export class LoggingSchedule {
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async handleCron() {
-    this.logger.debug(
-      '\ub9cc\ub8cc\ub41c \ub85c\uadf8 \uc815\ub9ac \ubc0f IP \uc775\uba85\ud654 \uc2e4\ud589 \uc911...',
-    );
+    this.logger.debug('만료된 로그 정리 및 IP 익명화 실행 중...');
 
     const sixMonthsAgo = new Date();
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);

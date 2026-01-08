@@ -34,7 +34,7 @@ export class LoggingInterceptor implements NestInterceptor {
     }
 
     this.logger.debug(
-      `\uc218\uc2e0 \uc694\uccad: ${method} ${url}. userSeq : ${Number.isNaN(userSeq) ? '\uc775\uba85 \uc0ac\uc6a9\uc790' : userSeq}`,
+      `수신 요청: ${method} ${url}. userSeq : ${Number.isNaN(userSeq) ? '익명 사용자' : userSeq}`,
     );
 
     return next.handle().pipe(
