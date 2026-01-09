@@ -183,12 +183,12 @@ const CreateTodoForm = ({ onAddTodo, onCancel }) => {
           type="file"
           multiple={true}
           className={fileInputClass}
-          accept=".xlsx,.pptx,.docx,.pdf,.hwp,.txt"
+
           onChange={handleChange}
           name="TODO_FILES"
         />
         <small className="form-text text-muted">
-          허용 파일: XLSX, PPTX, DOCX, PDF, HWP, TXT | 최대 크기:{' '}
+          허용 파일: 모든 파일 (단, 일부 실행 파일 제외) | 최대 크기:{' '}
           {formatFileSize(policy?.maxSize || 0)} | 최대 {policy?.maxCount || 0}
           개
         </small>
