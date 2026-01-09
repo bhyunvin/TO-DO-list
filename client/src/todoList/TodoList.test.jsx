@@ -6,16 +6,33 @@ import PropTypes from 'prop-types';
 import TodoContainer from './TodoList';
 
 // SweetAlert2 모의 객체
-vi.mock('sweetalert2', () => ({
-  fire: vi.fn(() =>
-    Promise.resolve({ isConfirmed: true }).then(() => ({ isConfirmed: true })),
-  ),
-}));
+// SweetAlert2 모의 객체
+vi.mock('sweetalert2', () => {
+  const Swal = {
+    fire: vi.fn(() =>
+      Promise.resolve({ isConfirmed: true }).then(() => ({
+        isConfirmed: true,
+      })),
+    ),
+    mixin: vi.fn(() => ({
+      fire: vi.fn(() =>
+        Promise.resolve({ isConfirmed: true }).then(() => ({
+          isConfirmed: true,
+        })),
+      ),
+    })),
+  };
+  return {
+    default: Swal,
+    ...Swal,
+  };
+});
 
 // 인증 스토어 모의 객체
 const mockLogin = vi.fn();
 const mockLogout = vi.fn();
 const mockApi = vi.fn();
+globalThis.fetch = mockApi;
 
 vi.mock('../authStore/authStore', () => {
   const useAuthStore = vi.fn(() => ({
@@ -168,6 +185,7 @@ describe('TodoContainer Profile Update Integration', () => {
     mockApi.mockResolvedValue({
       ok: true,
       json: () => Promise.resolve([]),
+      text: () => Promise.resolve('[]'),
     });
   });
 
@@ -303,11 +321,13 @@ describe('TodoContainer Profile Update Integration', () => {
         return Promise.resolve({
           ok: true,
           json: () => Promise.resolve(updatedUser),
+          text: () => Promise.resolve(JSON.stringify(updatedUser)),
         });
       }
       return Promise.resolve({
         ok: true,
         json: () => Promise.resolve([]),
+        text: () => Promise.resolve('[]'),
       });
     });
 
@@ -348,11 +368,16 @@ describe('TodoContainer Profile Update Integration', () => {
         return Promise.resolve({
           ok: false,
           json: () => Promise.resolve({ message: 'Email already exists' }),
+          text: () =>
+            Promise.resolve(
+              JSON.stringify({ message: 'Email already exists' }),
+            ),
         });
       }
       return Promise.resolve({
         ok: true,
         json: () => Promise.resolve([]),
+        text: () => Promise.resolve('[]'),
       });
     });
 
@@ -405,6 +430,19 @@ describe('TodoContainer Profile Update Integration', () => {
                 },
               ],
             }),
+          text: () =>
+            Promise.resolve(
+              JSON.stringify({
+                message: 'File upload error',
+                errors: [
+                  {
+                    fileName: 'profile.jpg',
+                    errorMessage: 'File too large',
+                    errorCode: 'FILE_TOO_LARGE',
+                  },
+                ],
+              }),
+            ),
         });
       }
       return Promise.resolve({
@@ -492,6 +530,17 @@ describe('TodoContainer Profile Update Integration', () => {
             completeDtm: null,
           },
         ]),
+      text: () =>
+        Promise.resolve(
+          JSON.stringify([
+            {
+              todoSeq: 1,
+              todoContent: 'Test todo',
+              todoNote: 'Test note',
+              completeDtm: null,
+            },
+          ]),
+        ),
     });
 
     render(<TodoContainer />);
@@ -529,6 +578,7 @@ describe('TodoContainer Excel Export Button Rendering', () => {
     mockApi.mockResolvedValue({
       ok: true,
       json: () => Promise.resolve([]),
+      text: () => Promise.resolve('[]'),
     });
   });
 
@@ -594,6 +644,17 @@ describe('TodoContainer Excel Export Button Rendering', () => {
             completeDtm: null,
           },
         ]),
+      text: () =>
+        Promise.resolve(
+          JSON.stringify([
+            {
+              todoSeq: 1,
+              todoContent: 'Test todo',
+              todoNote: 'Test note',
+              completeDtm: null,
+            },
+          ]),
+        ),
     });
 
     render(<TodoContainer />);
@@ -665,6 +726,7 @@ describe('TodoContainer Date Range Modal Functionality', () => {
     mockApi.mockResolvedValue({
       ok: true,
       json: () => Promise.resolve([]),
+      text: () => Promise.resolve('[]'),
     });
 
     // SweetAlert 모의 객체가 기본적으로 취소를 반환하도록 재설정
@@ -874,6 +936,7 @@ describe('TodoContainer File Download Handler', () => {
     mockApi.mockResolvedValue({
       ok: true,
       json: () => Promise.resolve([]),
+      text: () => Promise.resolve('[]'),
     });
 
     // 파일 다운로드를 위한 URL 메서드 모의
@@ -914,6 +977,7 @@ describe('TodoContainer File Download Handler', () => {
       .mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve([]),
+        text: () => Promise.resolve('[]'),
       })
       .mockResolvedValueOnce({
         ok: true,
@@ -972,6 +1036,7 @@ describe('TodoContainer File Download Handler', () => {
       .mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve([]),
+        text: () => Promise.resolve('[]'),
       })
       .mockResolvedValueOnce({
         ok: true,
@@ -1008,6 +1073,7 @@ describe('TodoContainer File Download Handler', () => {
       .mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve([]),
+        text: () => Promise.resolve('[]'),
       })
       .mockResolvedValueOnce({
         ok: true,
@@ -1044,11 +1110,14 @@ describe('TodoContainer File Download Handler', () => {
       .mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve([]),
+        text: () => Promise.resolve('[]'),
       })
       .mockResolvedValueOnce({
         ok: false,
         status: 400,
         json: () => Promise.resolve({ message: 'Invalid date format' }),
+        text: () =>
+          Promise.resolve(JSON.stringify({ message: 'Invalid date format' })),
       });
 
     Swal.fire.mockResolvedValueOnce({
@@ -1079,11 +1148,13 @@ describe('TodoContainer File Download Handler', () => {
       .mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve([]),
+        text: () => Promise.resolve('[]'),
       })
       .mockResolvedValueOnce({
         ok: false,
         status: 401,
         json: () => Promise.resolve({}),
+        text: () => Promise.resolve('{}'),
       });
 
     Swal.fire.mockResolvedValueOnce({
@@ -1114,11 +1185,13 @@ describe('TodoContainer File Download Handler', () => {
       .mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve([]),
+        text: () => Promise.resolve('[]'),
       })
       .mockResolvedValueOnce({
         ok: false,
         status: 500,
         json: () => Promise.resolve({}),
+        text: () => Promise.resolve('{}'),
       });
 
     Swal.fire.mockResolvedValueOnce({
@@ -1151,6 +1224,7 @@ describe('TodoContainer File Download Handler', () => {
       .mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve([]),
+        text: () => Promise.resolve('[]'),
       })
       .mockRejectedValueOnce(networkError);
 
@@ -1183,6 +1257,7 @@ describe('TodoContainer File Download Handler', () => {
       .mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve([]),
+        text: () => Promise.resolve('[]'),
       })
       .mockResolvedValueOnce({
         ok: true,
@@ -1229,6 +1304,7 @@ describe('TodoContainer Password Change Integration', () => {
     mockApi.mockResolvedValue({
       ok: true,
       json: () => Promise.resolve([]),
+      text: () => Promise.resolve('[]'),
     });
   });
 

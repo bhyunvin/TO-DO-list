@@ -1,0 +1,54 @@
+/* 폼 컨테이너 */
+.todo-form {
+  margin-bottom: var(--spacing-lg);
+}
+
+/* 폼 액션 버튼 컨테이너 - 오른쪽 정렬 */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-lg);
+}
+
+/* 폼 다크 모드 */
+[data-theme='dark'] .todo-form {
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .todo-form h3 {
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .todo-form label {
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .todo-form .form-control {
+  background-color: var(--bg-tertiary);
+  border-color: var(--border-medium);
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .todo-form .form-control:focus {
+  background-color: var(--bg-tertiary);
+  border-color: var(--color-primary);
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .todo-form .form-text {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme='dark'] .todo-form small.form-text,
+[data-theme='dark'] .todo-form small.text-muted {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme='dark'] .todo-form .text-danger {
+  color: var(--color-danger) !important;
+}
+
+[data-theme='dark'] .todo-form .text-success {
+  color: var(--color-success) !important;
+}
