@@ -1,4 +1,5 @@
 import bcrypt from 'bcrypt';
+import { Logger } from '@nestjs/common';
 import * as crypto from 'node:crypto';
 
 const ALGORITHM = 'aes-256-gcm';
@@ -97,7 +98,8 @@ export const decryptSymmetric = (text: string): string => {
     decrypted = Buffer.concat([decrypted, decipher.final()]);
 
     return decrypted.toString();
-  } catch {
+  } catch (error) {
+    Logger.error(`Symmetric decryption failed: ${error.message}`, 'CryptUtil');
     // 복호화 실패 시 원본 반환
     return text;
   }
@@ -160,7 +162,11 @@ export const decryptSymmetricDeterministic = (text: string): string => {
     decrypted = Buffer.concat([decrypted, decipher.final()]);
 
     return decrypted.toString();
-  } catch {
+  } catch (error) {
+    Logger.error(
+      `Deterministic decryption failed: ${error.message}`,
+      'CryptUtil',
+    );
     return text;
   }
 };

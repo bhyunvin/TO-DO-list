@@ -99,7 +99,10 @@ const ProfileUpdateForm = ({
         const detailUser = await userService.getUserProfileDetail();
         if (detailUser) {
           setUserName(detailUser.userName || '');
-          setUserEmail(detailUser.userEmail || '');
+          // 이메일이 평문인지 확인 (@ 포함 여부)
+          if (detailUser.userEmail && detailUser.userEmail.includes('@')) {
+            setUserEmail(detailUser.userEmail);
+          }
           setUserDescription(detailUser.userDescription || '');
 
           if (detailUser.profileImage) {
@@ -113,8 +116,8 @@ const ProfileUpdateForm = ({
         console.error('Failed to fetch profile detail:', error);
         // 실패 시 props로 받은 user 정보 사용 (이미 위에서 세팅됨)
         // 단, 마스킹된 이메일이 들어갈 수 있음 -> 사용자 수정 시 불편할 수 있음.
-        if (user) {
-          setUserEmail(user.userEmail || '');
+        if (user && user.userEmail && user.userEmail.includes('@')) {
+          setUserEmail(user.userEmail);
         }
         showErrorAlert('오류', '프로필 정보를 불러오는데 실패했습니다.');
       } finally {
