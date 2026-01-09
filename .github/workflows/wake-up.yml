@@ -1,0 +1,21 @@
+name: Wake up Render Server
+
+on:
+  schedule:
+    - cron: '0-1,12-13,24-25,36-37,48-49 0-2,4-10 * * 1-5'
+
+  workflow_dispatch:
+
+jobs:
+  wake-up:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wake up Render Server (GET Request)
+        run: |
+          echo "Sending GET request to wake up Render server..."
+          curl -i -s -L \
+            --max-time 180 \
+            --retry 3 \
+            -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" \
+            -w "\n\n[Execution Summary]\n- HTTP Status: %{http_code}\n- Total Time: %{time_total}s\n" \
+            https://to-do-list-backend-5u1a.onrender.com/

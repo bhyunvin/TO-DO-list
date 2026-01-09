@@ -17,6 +17,10 @@ describe('WelcomeController', () => {
   });
 
   it('should return welcome message', () => {
-    expect(controller.welcome()).toBe('Welcome to the Todo App API!');
+    expect(controller.welcome()).toEqual({ status: 'ok' });
+  });
+
+  it('should return 204 for favicon', () => {
+    expect(controller.favicon()).toBeUndefined();
   });
 });
