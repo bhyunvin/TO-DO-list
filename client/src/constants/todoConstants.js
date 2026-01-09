@@ -1,0 +1,9 @@
+export const TODO_CONSTANTS = {
+  INPUT_NAMES: {
+    CONTENT: 'TODO_CONTENT',
+    NOTE: 'TODO_NOTE',
+    FILES: 'TODO_FILES',
+  },
+  MAX_CONTENT_LENGTH: 4000,
+  UPLOAD_POLICY_KEY: 'todoAttachment',
+};
