@@ -78,6 +78,7 @@
 
 .user-message .message-container {
   margin-left: auto;
+  flex-direction: row-reverse;
 }
 
 .ai-message .message-container {
