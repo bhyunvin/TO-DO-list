@@ -1,0 +1,42 @@
+{
+  "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "files": [
+    "{projectRoot}/package.json",
+    "{projectRoot}/**/tsconfig.json",
+    "{projectRoot}/**/*.ts",
+    "{projectRoot}/**/*.tsx",
+    "{projectRoot}/**/*.js",
+    "{projectRoot}/**/*.jsx",
+    "{projectRoot}/**/*.css",
+    "{projectRoot}/**/*.md"
+  ],
+  "defaultBase": "main",
+  "targetDefaults": {
+    "build": {
+      "cache": true,
+      "dependsOn": ["^build"],
+      "inputs": ["default", "^default"]
+    },
+    "test": {
+      "cache": true,
+      "inputs": ["default", "^default", "{workspaceRoot}/jest.preset.js"]
+    },
+    "lint": {
+      "cache": true,
+      "inputs": ["default", "{workspaceRoot}/.eslintrc.json"]
+    },
+    "format": {
+      "cache": true
+    },
+    "dev": {
+      "cache": false
+    },
+    "start": {
+      "cache": false
+    }
+  },
+  "namedInputs": {
+    "default": ["{projectRoot}/**/*"],
+    "sharedGlobals": []
+  }
+}

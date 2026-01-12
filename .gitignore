@@ -47,3 +47,6 @@ build/
 # Coverage
 coverage/
 .nyc_output/
+
+# Nx
+.nx/
