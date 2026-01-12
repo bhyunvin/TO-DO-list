@@ -1,6 +1,6 @@
 # 프론트엔드 (React)
 
-TO-DO List 애플리케이션의 프론트엔드 클라이언트입니다. React 19와 React Bootstrap을 사용하여 구축되었으며, Zustand를 통한 상태 관리를 제공합니다
+TO-DO List 애플리케이션의 프론트엔드 클라이언트입니다. React 19와 React Bootstrap을 사용하여 구축되었으며, Zustand를 통한 상태 관리를 제공합니다.
 
 ## 주요 기능
 
