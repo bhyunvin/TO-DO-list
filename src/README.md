@@ -1,6 +1,6 @@
 # 백엔드 (NestJS)
 
-TO-DO List 애플리케이션의 백엔드 서버입니다. NestJS 프레임워크를 사용하여 구축되었으며, TypeORM을 통해 PostgreSQL 데이터베이스와 연동됩니다.
+TO-DO List 애플리케이션의 백엔드 서버입니다. NestJS 프레임워크를 사용하여 구축되었으며, TypeORM을 통해 PostgreSQL 데이터베이스와 연동됩니다
 
 ## 주요 기능
 
