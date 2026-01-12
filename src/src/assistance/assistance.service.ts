@@ -129,8 +129,10 @@ export class AssistanceService implements OnModuleInit {
     userName?: string,
     userId?: string,
   ): Promise<RequestAssistanceDto> {
-    const apiKey = await this.validateAndGetApiKey(userSeq);
-    const systemPrompt = this.loadSystemPrompt(userName);
+    const { apiKey, userName: dbUserName } =
+      await this.validateAndGetApiKey(userSeq);
+    const resolvedUserName = userName || dbUserName;
+    const systemPrompt = this.loadSystemPrompt(resolvedUserName);
 
     const ai = new GoogleGenAI({ apiKey });
 
@@ -236,7 +238,9 @@ export class AssistanceService implements OnModuleInit {
     }
   }
 
-  private async validateAndGetApiKey(userSeq?: number): Promise<string> {
+  private async validateAndGetApiKey(
+    userSeq?: number,
+  ): Promise<{ apiKey: string; userName: string }> {
     if (!userSeq) {
       throw new UnauthorizedException('로그인이 필요합니다.');
     }
@@ -252,7 +256,7 @@ export class AssistanceService implements OnModuleInit {
         'API Key 처리 중 오류가 발생했습니다.',
       );
     }
-    return apiKey;
+    return { apiKey, userName: user.userName };
   }
 
   private async processFinalResponse(text: string = ''): Promise<string> {

@@ -90,9 +90,6 @@ export class TodoService {
     userSeq: number,
     todoDate: string | null,
   ): Promise<TodoEntity[]> {
-    const startOfDay = `${todoDate} 00:00:00`;
-    const nextDayStr = `${format(addDays(new Date(todoDate), 1), 'yyyy-MM-dd')} 00:00:00`;
-
     const qb = this.todoRepository.createQueryBuilder('todo');
 
     qb.where('todo.delYn = :delYn', { delYn: 'N' }).andWhere(
@@ -101,6 +98,9 @@ export class TodoService {
     );
 
     if (todoDate) {
+      const startOfDay = `${todoDate} 00:00:00`;
+      const nextDayStr = `${format(addDays(new Date(todoDate), 1), 'yyyy-MM-dd')} 00:00:00`;
+
       qb.andWhere(
         new Brackets((subQuery) => {
           subQuery.where(
