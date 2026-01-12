@@ -234,6 +234,9 @@
   transition: var(--chat-modal-transition);
   background-color: var(--chat-modal-color-bg-primary);
   color: var(--chat-modal-color-text-primary);
+  resize: none;
+  height: 48px;
+  overflow-y: hidden;
 }
 
 .chat-input:focus {

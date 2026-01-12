@@ -207,9 +207,8 @@ const ChatModal = ({
       <Modal.Footer className="chat-modal-footer">
         <div className="chat-input-container">
           <div className="input-group">
-            <input
+            <textarea
               ref={inputRef}
-              type="text"
               className="form-control chat-input"
               placeholder="할 일에 대해 질문해보세요..."
               value={inputValue}
@@ -218,6 +217,7 @@ const ChatModal = ({
               onFocus={onInputFocus}
               onBlur={onInputBlur}
               disabled={isLoading}
+              rows={1}
               aria-label="채팅 메시지 입력"
               aria-describedby="chat-input-help"
             />
