@@ -78,7 +78,6 @@
 
 .user-message .message-container {
   margin-left: auto;
-  flex-direction: row-reverse;
 }
 
 .ai-message .message-container {
@@ -109,6 +108,7 @@
 }
 
 .user-message .message-avatar {
+  display: none;
   background: linear-gradient(
     135deg,
     var(--chat-msg-color-success) 0%,
