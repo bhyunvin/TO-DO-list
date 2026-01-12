@@ -295,7 +295,7 @@ const TodoContainer = () => {
         title: errorMessage,
         icon: 'error',
       });
-    } finally {
+
       const { name, message } = error;
       console.error('Todo toggle failed:', {
         todoSeq,
@@ -305,6 +305,7 @@ const TodoContainer = () => {
         attemptedState: newCompleteDtm,
         timestamp: new Date().toISOString(),
       });
+    } finally {
       setTogglingTodoSeq(null);
     }
   };
