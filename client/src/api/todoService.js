@@ -12,6 +12,20 @@ const todoService = {
   },
 
   /**
+   * 상세 검색
+   * @param {string} startDate
+   * @param {string} endDate
+   * @param {string} keyword
+   * @returns {Promise<Array>}
+   */
+  async searchTodos(startDate, endDate, keyword) {
+    const response = await apiClient.get('/todo/search', {
+      params: { startDate, endDate, keyword },
+    });
+    return response.data;
+  },
+
+  /**
    * 첨부파일 목록 조회
    * @param {number|string} todoSeq
    * @returns {Promise<Array>}

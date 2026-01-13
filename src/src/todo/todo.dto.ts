@@ -49,6 +49,18 @@ export class DeleteTodoDto {
   todoIds: number[];
 }
 
+export class SearchTodoDto {
+  @IsString()
+  startDate: string;
+
+  @IsString()
+  endDate: string;
+
+  @IsOptional()
+  @IsString()
+  keyword?: string;
+}
+
 export class FileAttachmentResponseDto {
   fileNo: number;
   originalFileName: string;

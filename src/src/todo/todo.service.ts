@@ -138,14 +138,34 @@ export class TodoService {
     return qb.getMany();
   }
 
-  async search(userSeq: number, keyword: string): Promise<TodoEntity[]> {
-    return this.todoRepository
+  async search(
+    userSeq: number,
+    startDate: string,
+    endDate: string,
+    keyword?: string,
+  ): Promise<TodoEntity[]> {
+    const qb = this.todoRepository
       .createQueryBuilder('todo')
       .where('todo.userSeq = :userSeq', { userSeq })
       .andWhere('todo.delYn = :delYn', { delYn: 'N' })
-      .andWhere('LOWER(todo.todoContent) LIKE LOWER(:keyword)', {
-        keyword: `%${keyword}%`,
-      })
+      .andWhere('todo.todoDate BETWEEN :startDate AND :endDate', {
+        startDate,
+        endDate,
+      });
+
+    if (keyword) {
+      qb.andWhere(
+        new Brackets((qb) => {
+          qb.where('LOWER(todo.todoContent) LIKE LOWER(:keyword)', {
+            keyword: `%${keyword}%`,
+          }).orWhere('LOWER(todo.todoNote) LIKE LOWER(:keyword)', {
+            keyword: `%${keyword}%`,
+          });
+        }),
+      );
+    }
+
+    return qb
       .orderBy('todo.todoDate', 'DESC')
       .addOrderBy('todo.todoSeq', 'DESC')
       .getMany();

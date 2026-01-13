@@ -126,13 +126,18 @@ const ContactDeveloperModal = ({ show, onHide }) => {
         </Modal.Body>
         <Modal.Footer className="d-flex justify-content-end gap-2">
           <Button
-            variant="secondary"
+            variant="outline-secondary"
             onClick={handleClose}
             disabled={isSending}
           >
             취소
           </Button>
-          <Button variant="primary" type="submit" disabled={isSending}>
+          <Button
+            variant="primary"
+            type="submit"
+            disabled={isSending}
+            className="btn-outline-adaptive"
+          >
             {isSending ? (
               <>
                 <Spinner

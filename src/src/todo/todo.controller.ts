@@ -25,6 +25,7 @@ import {
   UpdateTodoDto,
   CreateTodoWithFilesDto,
   UpdateTodoWithFilesDto,
+  SearchTodoDto,
 } from './todo.dto';
 import { AuthenticatedGuard } from '../types/express/auth.guard';
 import { TodoAttachmentValidationInterceptor } from '../fileUpload/validation/file-validation.interceptor';
@@ -52,10 +53,20 @@ export class TodoController {
   }
 
   @Get()
-  @Get()
   findAll(@Req() req: Request, @Query('date') date: string) {
     const user = req.user as any;
     return this.todoService.findAll(user.userSeq, date);
+  }
+
+  @Get('search')
+  async search(@Req() req: Request, @Query() query: SearchTodoDto) {
+    const user = req.user as any;
+    return this.todoService.search(
+      user.userSeq,
+      query.startDate,
+      query.endDate,
+      query.keyword,
+    );
   }
 
   @Get('excel')

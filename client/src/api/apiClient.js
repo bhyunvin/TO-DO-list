@@ -40,7 +40,21 @@ const parseResponseData = async (response, responseType) => {
 };
 
 const request = async (endpoint, options = {}) => {
-  const url = `${API_URL}${endpoint}`;
+  let url = `${API_URL}${endpoint}`;
+
+  // params 옵션이 있으면 쿼리 스트링으로 변환하여 URL에 추가
+  if (options.params) {
+    const searchParams = new URLSearchParams();
+    Object.entries(options.params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        searchParams.append(key, value);
+      }
+    });
+    const queryString = searchParams.toString();
+    if (queryString) {
+      url += (url.includes('?') ? '&' : '?') + queryString;
+    }
+  }
 
   // 기본 헤더 설정
   const defaultHeaders = {
@@ -49,9 +63,15 @@ const request = async (endpoint, options = {}) => {
 
   const { accessToken } = useAuthStore.getState();
 
+  // params는 URL 쿼리 스트링으로 처리되므로 fetch 옵션에서는 제거
+  const configOptions = { ...options };
+  delete configOptions.params;
+
+  const { headers, ...otherOptions } = configOptions;
+
   const config = {
-    ...options,
-    headers: { ...defaultHeaders, ...options.headers },
+    ...otherOptions,
+    headers: { ...defaultHeaders, ...headers },
   };
 
   if (accessToken) {

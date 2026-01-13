@@ -56,16 +56,20 @@
 }
 
 /* 스크롤바 커스텀 스타일 (Webkit) */
-.todo-container::-webkit-scrollbar {
+.todo-container::-webkit-scrollbar,
+.search-result-container::-webkit-scrollbar {
   width: 6px;
+  height: 6px;
 }
 
-.todo-container::-webkit-scrollbar-thumb {
+.todo-container::-webkit-scrollbar-thumb,
+.search-result-container::-webkit-scrollbar-thumb {
   background-color: #444;
   border-radius: 10px;
 }
 
-.todo-container::-webkit-scrollbar-track {
+.todo-container::-webkit-scrollbar-track,
+.search-result-container::-webkit-scrollbar-track {
   background-color: transparent;
 }
 
@@ -207,6 +211,31 @@
   width: auto;
   flex-grow: 0;
   min-width: 80px;
+}
+
+/* 날짜 선택 입력창 래퍼 */
+.date-picker-wrapper {
+  flex: 1;
+}
+
+.date-picker-wrapper .react-datepicker-wrapper,
+.date-picker-wrapper .react-datepicker__input-container {
+  width: 100%;
+  display: block;
+}
+
+/* 날짜 구분자 스타일 */
+.date-separator {
+  padding: 0 0.5rem; /* 좌우 여백 확보 (gap 대체) */
+  text-align: center;
+  transform: translateY(-2px); /* 시각적 중앙 정렬 보정 (살짝 위로) */
+}
+
+/* 모바일 뷰(576px 미만)에서 첫 번째 날짜 입력창에만 하단 여백 부여 */
+@media (max-width: 575.98px) {
+  .date-picker-wrapper:first-child {
+    margin-bottom: 0.5rem;
+  }
 }
 
 /* 날짜 네비게이터 컨테이너 */
@@ -440,3 +469,124 @@
 [data-theme='dark'] .date-today-btn:hover {
   background-color: var(--bg-hover);
 }
+
+/* ============================================
+   상세 검색 모달 스타일 (Round 2 Refinements)
+   ============================================ */
+
+/* 프리셋 버튼 컨테이너 */
+.preset-btn-container {
+  gap: 8px; /* 버튼 간격 증가 */
+}
+
+/* 프리셋 버튼 고정 크기 및 스타일 */
+.preset-btn {
+  width: 60px; /* 고정 너비 */
+  height: 32px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  border-color: var(--border-medium);
+}
+
+.preset-btn:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+/* 날짜 입력 필드 스타일 */
+.date-picker-input {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-medium) !important;
+}
+
+/* 검색어 입력 필드 스타일 */
+.search-input {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-medium) !important;
+}
+
+/* 검색 결과 컨테이너 */
+.search-result-container {
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid var(--border-medium);
+  border-radius: var(--border-radius-small);
+}
+
+/* 검색 결과 테이블 (Light/Dark 모드 대응) */
+.search-result-table {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  table-layout: fixed; /* 말줄임 처리를 위해 필수 */
+}
+
+.search-result-table thead th {
+  background-color: var(--bg-secondary); /* 헤더 배경 */
+  color: var(--text-primary);
+  border-bottom: 2px solid var(--border-medium);
+  vertical-align: middle; /* 수직 정렬 */
+  padding: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.search-result-table tbody td {
+  background-color: transparent;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-light);
+  vertical-align: middle; /* 수직 정렬: 행 높이 맞춤 */
+  padding: 8px 10px;
+  height: 50px; /* 행 높이 고정 (선택 사항) */
+}
+
+.search-result-table tbody tr:hover td {
+  background-color: var(--bg-hover);
+}
+
+/* 테이블 컬럼 너비 제어 (반응형 고려) */
+.col-content {
+  width: 40%;
+}
+.col-date {
+  width: 25%;
+}
+.col-note {
+  width: 20%;
+}
+.col-action {
+  width: 15%;
+  text-align: center;
+}
+
+/* 이동 버튼 스타일 */
+.move-btn {
+  padding: 2px 6px;
+  font-size: 0.8rem;
+  min-width: 44px;
+  line-height: 1.2;
+}
+
+/* 다크 모드에서의 추가 보정 (필요시) */
+[data-theme='dark'] .preset-btn {
+  color: var(--text-secondary);
+}
+
+[data-theme='dark'] .modal-content {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+/* 모달 헤더/푸터 보더 색상 */
+.modal-header.border-secondary,
+.modal-footer.border-secondary {
+  border-color: var(--border-separator) !important;
+}
+
+/* 모달 푸터 버튼 정렬 (글로벌 강제 스타일 제거 후 필요한 것만 추가) */
+/* .modal-footer .btn { ... } 제거됨 */

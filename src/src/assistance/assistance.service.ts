@@ -354,7 +354,12 @@ export class AssistanceService implements OnModuleInit {
     error?: string;
   }> {
     try {
-      const matches = await this.todoService.search(userSeq, contentToFind);
+      const matches = await this.todoService.search(
+        userSeq,
+        '1900-01-01',
+        '9999-12-31',
+        contentToFind,
+      );
       if (matches.length === 0)
         return { success: false, error: '일치하는 할 일을 찾을 수 없습니다.' };
       if (matches.length === 1)

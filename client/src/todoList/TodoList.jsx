@@ -14,6 +14,7 @@ import { BsFileEarmarkSpreadsheet } from '@react-icons/all-files/bs/BsFileEarmar
 import { BsPeopleCircle } from '@react-icons/all-files/bs/BsPeopleCircle';
 import { BsChevronLeft } from '@react-icons/all-files/bs/BsChevronLeft';
 import { BsChevronRight } from '@react-icons/all-files/bs/BsChevronRight';
+import { BsSearch } from '@react-icons/all-files/bs/BsSearch';
 
 // Stores
 import { useAuthStore } from '../authStore/authStore';
@@ -50,6 +51,7 @@ import ThemeToggle from '../components/ThemeToggle';
 import CreateTodoForm from './components/CreateTodoForm';
 import EditTodoForm from './components/EditTodoForm';
 import TodoTable from './components/TodoTable';
+import SearchModal from './components/SearchModal';
 
 // Styles
 import './todoList.css';
@@ -99,6 +101,7 @@ const TodoContainer = () => {
   const [isFormDirty, setIsFormDirty] = useState(false);
   const [isDatePickerLoaded, setIsDatePickerLoaded] = useState(false);
   const [showContactModal, setShowContactModal] = useState(false);
+  const [showSearchModal, setShowSearchModal] = useState(false);
 
   const userMenuRef = useRef(null);
 
@@ -1002,6 +1005,13 @@ const TodoContainer = () => {
           !isChangingPassword && (
             <>
               <button
+                className="btn btn-outline-secondary"
+                onClick={() => setShowSearchModal(true)}
+                aria-label="상세 검색"
+              >
+                <BsSearch />
+              </button>
+              <button
                 className="btn btn-outline-success"
                 onClick={handleExcelExport}
                 aria-label="Excel 내보내기"
@@ -1080,6 +1090,19 @@ const TodoContainer = () => {
       <ContactDeveloperModal
         show={showContactModal}
         onHide={() => setShowContactModal(false)}
+      />
+
+      <SearchModal
+        show={showSearchModal}
+        onHide={() => setShowSearchModal(false)}
+        onMoveToDate={(date) => {
+          const newDate = new Date(date);
+          if (Number.isNaN(newDate.getTime())) {
+            console.error('Invalid date received from SearchModal:', date);
+          } else {
+            setSelectedDate(newDate);
+          }
+        }}
       />
 
       <FloatingActionButton
