@@ -7,26 +7,29 @@ import {
   lazy,
 } from 'react';
 
+// Libraries
+import { ko } from 'date-fns/locale';
+import 'react-datepicker/dist/react-datepicker.css';
+import { BsFileEarmarkSpreadsheet } from '@react-icons/all-files/bs/BsFileEarmarkSpreadsheet';
+import { BsPeopleCircle } from '@react-icons/all-files/bs/BsPeopleCircle';
+import { BsChevronLeft } from '@react-icons/all-files/bs/BsChevronLeft';
+import { BsChevronRight } from '@react-icons/all-files/bs/BsChevronRight';
+
+// Stores
 import { useAuthStore } from '../authStore/authStore';
 import { useChatStore } from '../stores/chatStore';
+
+// APIs & Services
 import todoService from '../api/todoService';
 import userService from '../api/userService';
 import authService from '../api/authService';
 import aiService from '../api/aiService';
+import { API_URL } from '../api/apiClient';
 
-import ProfileUpdateForm from '../components/ProfileUpdateForm';
-import PasswordChangeForm from '../components/PasswordChangeForm';
-import ContactDeveloperModal from '../components/ContactDeveloperModal';
-import FloatingActionButton from '../components/FloatingActionButton';
-import ChatModal from '../components/ChatModal';
-import ThemeToggle from '../components/ThemeToggle';
+// Hooks
+import useDailyDateReset from '../hooks/useDailyDateReset';
 
-import CreateTodoForm from './components/CreateTodoForm';
-import EditTodoForm from './components/EditTodoForm';
-import TodoTable from './components/TodoTable';
-
-import './todoList.css';
-import { ko } from 'date-fns/locale';
+// Utils
 import {
   showNavigationConfirmAlert,
   showErrorAlert,
@@ -36,14 +39,23 @@ import {
   showSuccessAlert,
   loadSwal,
 } from '../utils/alertUtils';
-import 'react-datepicker/dist/react-datepicker.css';
-const DatePicker = lazy(() => import('react-datepicker'));
-import { API_URL } from '../api/apiClient';
 
-import { BsFileEarmarkSpreadsheet } from '@react-icons/all-files/bs/BsFileEarmarkSpreadsheet';
-import { BsPeopleCircle } from '@react-icons/all-files/bs/BsPeopleCircle';
-import { BsChevronLeft } from '@react-icons/all-files/bs/BsChevronLeft';
-import { BsChevronRight } from '@react-icons/all-files/bs/BsChevronRight';
+// Components
+import ProfileUpdateForm from '../components/ProfileUpdateForm';
+import PasswordChangeForm from '../components/PasswordChangeForm';
+import ContactDeveloperModal from '../components/ContactDeveloperModal';
+import FloatingActionButton from '../components/FloatingActionButton';
+import ChatModal from '../components/ChatModal';
+import ThemeToggle from '../components/ThemeToggle';
+import CreateTodoForm from './components/CreateTodoForm';
+import EditTodoForm from './components/EditTodoForm';
+import TodoTable from './components/TodoTable';
+
+// Styles
+import './todoList.css';
+
+// Lazy Loading
+const DatePicker = lazy(() => import('react-datepicker'));
 
 const formatDate = (date) => {
   const year = date.getFullYear();
@@ -91,6 +103,14 @@ const TodoContainer = () => {
   const userMenuRef = useRef(null);
 
   const [imgError, setImgError] = useState(false);
+
+  // 오늘 날짜로 이동하는 함수
+  const handleToday = () => {
+    setSelectedDate(new Date());
+  };
+
+  // 1일 1회 '오늘' 체크 및 리셋 훅
+  useDailyDateReset(selectedDate, handleToday);
 
   useEffect(() => {
     setImgError(false);
@@ -616,10 +636,6 @@ const TodoContainer = () => {
     const newDate = new Date(selectedDate);
     newDate.setDate(selectedDate.getDate() + 1);
     setSelectedDate(newDate);
-  };
-
-  const handleToday = () => {
-    setSelectedDate(new Date());
   };
 
   const handleChatToggle = () => {
