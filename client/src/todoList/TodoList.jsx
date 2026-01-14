@@ -1059,7 +1059,6 @@ const TodoContainer = () => {
                     showYearDropdown
                     dropdownMode="select"
                     withPortal
-                    autoFocus
                   />
                 </Suspense>
               ) : (
