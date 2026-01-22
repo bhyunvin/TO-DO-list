@@ -26,7 +26,7 @@ const App = () => {
 
   return (
     <Suspense fallback={<LoadingFallback />}>
-      {user ? <TodoList /> : <LoginForm />}
+      <main>{user ? <TodoList /> : <LoginForm />}</main>
       <Analytics />
       <SpeedInsights route={user ? '/todo' : '/login'} />
     </Suspense>

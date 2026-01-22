@@ -606,7 +606,7 @@ const TodoContainer = () => {
       cancelButtonText: '취소',
       customClass: {
         confirmButton: 'btn btn-outline-primary',
-        cancelButton: 'btn btn-outline-secondary me-2',
+        cancelButton: 'btn btn-outline-adaptive me-2',
       },
     }).then((result) => {
       // 사용자가 취소를 선택한 경우 로그아웃을 중단

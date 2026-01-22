@@ -103,6 +103,8 @@ export const showConfirmAlert = async ({
   text,
   confirmButtonText = '확인',
   cancelButtonText = '취소',
+  customClass = {},
+  ...otherOptions
 }) => {
   const Swal = await loadSwal();
   return Swal.fire({
@@ -115,9 +117,11 @@ export const showConfirmAlert = async ({
     customClass: {
       confirmButton: 'btn btn-outline-danger',
       cancelButton: 'btn btn-outline-secondary me-2',
+      ...customClass,
     },
     buttonsStyling: false,
     reverseButtons: true,
+    ...otherOptions,
   });
 };
 

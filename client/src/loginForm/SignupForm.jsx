@@ -328,7 +328,7 @@ const SignupForm = ({ onSignupComplete }) => {
       cancelButtonColor: 'transparent',
       customClass: {
         confirmButton: 'btn btn-outline-primary',
-        cancelButton: 'btn btn-outline-secondary me-2',
+        cancelButton: 'btn btn-outline-adaptive me-2',
       },
       buttonsStyling: false,
       confirmButtonText: '확인',
@@ -711,7 +711,7 @@ const SignupForm = ({ onSignupComplete }) => {
           <div className="col-3">
             <button
               type="button"
-              className="btn btn-outline-secondary w-100"
+              className="btn btn-outline-adaptive w-100"
               onClick={onCancel}
               disabled={
                 isSubmitting ||

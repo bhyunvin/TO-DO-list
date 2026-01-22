@@ -123,7 +123,7 @@ const LoginForm = () => {
           </button>
           <button
             type="button"
-            className="btn btn-outline-secondary"
+            className="btn btn-outline-adaptive"
             onClick={handleSignup}
             disabled={isLoading}
           >

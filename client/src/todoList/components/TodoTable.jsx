@@ -92,6 +92,7 @@ const TodoTable = ({
               disabled={togglingTodoSeq === todoSeq}
               onChange={() => onToggleComplete(todoSeq, !!completeDtm)}
               style={{ pointerEvents: 'none' }}
+              aria-label="할 일 완료 토글"
             />
           </td>
           <td className="text-center">{index + 1}</td>
@@ -108,6 +109,7 @@ const TodoTable = ({
               onClick={() =>
                 setOpenActionMenu(openActionMenu === todoSeq ? null : todoSeq)
               }
+              aria-label="추가 옵션"
             >
               <BsThreeDotsVertical />
             </button>
@@ -120,6 +122,7 @@ const TodoTable = ({
                     setOpenActionMenu(null);
                   }}
                   title="수정"
+                  aria-label="수정"
                 >
                   <BsPencilSquare />
                 </button>
@@ -127,6 +130,7 @@ const TodoTable = ({
                   className="btn btn-sm btn-outline-danger"
                   onClick={() => onDeleteTodo(todoSeq)}
                   title="삭제"
+                  aria-label="삭제"
                 >
                   <BsFillTrashFill />
                 </button>
