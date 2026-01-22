@@ -10,7 +10,7 @@
     "{projectRoot}/**/*.css",
     "{projectRoot}/**/*.md"
   ],
-  "defaultBase": "main",
+  "defaultBase": "master",
   "targetDefaults": {
     "build": {
       "cache": true,
