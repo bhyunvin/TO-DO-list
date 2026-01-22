@@ -5,7 +5,7 @@
 - **Language**: TypeScript
 - **Database**: PostgreSQL with TypeORM
 - **Authentication**: JWT (stateless) with Bun.password (bcrypt algorithm)
-- **Security**: Environment variables for secure credential storage, AES-256-GCM for data encryption
+- **Security**: Environment variables for secure credential storage, AES-256-GCM for data encryption (including secure deterministic encryption using plaintext-based IVs)
 - **AI Integration**: Google Gemini API with function calling
 - **File Storage**: Cloudinary cloud storage
 - **File Upload**: Multer for multipart form handling

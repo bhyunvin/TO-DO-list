@@ -117,11 +117,12 @@ export const encryptSymmetric = async (text: string): Promise<string> => {
       ['encrypt'],
     );
 
-    // 암호화
+    // 암호화 (tagLength 명시적 지정)
     const encrypted = await crypto.subtle.encrypt(
       {
         name: 'AES-GCM',
         iv: iv as BufferSource,
+        tagLength: 128, // 128비트 (16바이트) authTag 명시적 설정
       },
       key,
       new TextEncoder().encode(text),
@@ -187,27 +188,28 @@ export const decryptSymmetric = async (text: string): Promise<string> => {
   }
 };
 
-const getFixedIv = () => {
-  const envIv = process.env.DETERMINISTIC_IV;
-  // DETERMINISTIC_IV 처리 (16 bytes)
-  // 환경변수가 없으면 기본값('a1b2c3d4e5f6g7h8') 사용
-  const ivBuffer = getBufferFromEnv(
-    envIv,
-    16,
-    'a1b2c3d4e5f6g7h8', // 16글자 fallback
-  );
+/**
+ * 평문 기반 결정적 IV 생성
+ * - 평문의 SHA-256 해시에서 첫 16바이트 사용
+ * - 동일 평문 → 동일 IV (결정적, 검색 가능)
+ * - 다른 평문 → 다른 IV (안전, 고정 IV 문제 해결)
+ */
+const generateDeterministicIV = async (text: string): Promise<Uint8Array> => {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(text);
 
-  // 길이가 안맞으면 fallback으로 강제 (안전장치)
-  if (ivBuffer.length !== 16) {
-    return new TextEncoder().encode('a1b2c3d4e5f6g7h8');
-  }
-  return ivBuffer;
+  // SHA-256 해시 생성
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+
+  // 첫 16바이트를 IV로 사용
+  return new Uint8Array(hashBuffer).slice(0, 16);
 };
 
-const FIXED_IV = getFixedIv();
-
 /**
- * Web Crypto API를 사용한 확정적 대칭키 암호화 (고정 IV)
+ * Web Crypto API를 사용한 안전한 결정적 대칭키 암호화
+ * - 평문 기반 IV 생성으로 보안 문제 해결
+ * - 동일 평문 → 동일 암호문 (결정적, 이메일 검색 가능)
+ * - 다른 평문 → 다른 IV (안전)
  */
 export const encryptSymmetricDeterministic = async (
   text: string,
@@ -224,11 +226,15 @@ export const encryptSymmetricDeterministic = async (
       ['encrypt'],
     );
 
-    // 암호화
+    // 평문 기반 결정적 IV 생성
+    const iv = await generateDeterministicIV(text);
+
+    // 암호화 (tagLength 명시적 지정)
     const encrypted = await crypto.subtle.encrypt(
       {
         name: 'AES-GCM',
-        iv: FIXED_IV as BufferSource,
+        iv: iv as BufferSource,
+        tagLength: 128, // 128비트 (16바이트) authTag 명시적 설정
       },
       key,
       new TextEncoder().encode(text),
@@ -240,11 +246,7 @@ export const encryptSymmetricDeterministic = async (
     const ciphertext = encryptedArray.slice(0, -16);
 
     return (
-      bytesToHex(FIXED_IV) +
-      ':' +
-      bytesToHex(authTag) +
-      ':' +
-      bytesToHex(ciphertext)
+      bytesToHex(iv) + ':' + bytesToHex(authTag) + ':' + bytesToHex(ciphertext)
     );
   } catch (error) {
     Logger.error(

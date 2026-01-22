@@ -53,9 +53,6 @@ const envSchema = z.object({
   ENCRYPTION_KEY: z
     .string()
     .length(64, 'ENCRYPTION_KEY는 32byte hex string이어야 합니다 (64자).'),
-  DETERMINISTIC_IV: z
-    .string()
-    .length(32, 'DETERMINISTIC_IV는 16byte hex string이어야 합니다 (32자).'),
 
   // --- Gmail 설정 ---
   GMAIL_USER: z.email({ message: 'GMAIL_USER는 유효한 이메일이어야 합니다.' }),
