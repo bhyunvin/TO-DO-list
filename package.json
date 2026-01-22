@@ -25,7 +25,6 @@
   },
   "devDependencies": {
     "@types/multer": "^2.0.0",
-    "baseline-browser-mapping": "^2.9.17",
     "concurrently": "^9.2.1",
     "nx": "^22.4.0",
     "prettier": "^3.8.1"
@@ -37,6 +36,10 @@
     "css-select": "^6.0.0",
     "glob": ">=11.0.4",
     "lodash": "4.17.23",
-    "diff": "8.0.3"
+    "diff": "8.0.3",
+    "baseline-browser-mapping": "^2.9.17"
+  },
+  "resolutions": {
+    "baseline-browser-mapping": "^2.9.17"
   }
 }
