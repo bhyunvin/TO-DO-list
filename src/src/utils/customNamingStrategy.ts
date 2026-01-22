@@ -1,6 +1,6 @@
 import { DefaultNamingStrategy, NamingStrategyInterface } from 'typeorm';
 
-// TypeORM 내부 StringUtils API 접근 불가로 인해 로컬 구현 사용
+// TypeORM 내부 StringUtils API는 public API가 아니므로 직접 구현
 // (Bun 런타임에서 'typeorm/util/StringUtils' import 불가 문제 해결)
 function snakeCase(str: string): string {
   return str

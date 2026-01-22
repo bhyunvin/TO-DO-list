@@ -5,7 +5,7 @@
 - **언어**: TypeScript
 - **데이터베이스**: TypeORM을 사용하는 PostgreSQL
 - **인증**: Bun.password (bcrypt 알고리즘)를 사용하는 JWT (stateless)
-- **보안**: 안전한 자격 증명 저장을 위한 환경 변수, 데이터 암호화를 위한 AES-256-GCM (평문 기반 IV를 사용한 안전한 결정적 암호화 포함)
+- **보안**: 안전한 자격 증명 저장을 위한 환경 변수, 데이터 암호화를 위한 AES-256-GCM (Synthetic IV를 사용하는 AES-SIV 결정적 암호화 포함)
 - **AI 통합**: 함수 호출 기능을 갖춘 Google Gemini API
 - **파일 스토리지**: Cloudinary 클라우드 스토리지
 - **파일 업로드**: multipart form 처리를 위한 Multer
