@@ -134,6 +134,9 @@ CLOUDINARY_API_SECRET=...
 MAIL_USER=...
 MAIL_PASS=...
 
+# Baseline Browser Mapping 경고 무시 설정
+BASELINE_BROWSER_MAPPING_IGNORE_OLD_DATA=true
+
 # 파일 업로드 설정 (선택사항, Cloudinary 사용 시 불필요)
 UPLOAD_DIR=./upload
 MAX_FILE_SIZE=5242880
@@ -397,6 +400,9 @@ CLOUDINARY_API_SECRET=...
 # Mail configuration (Gmail)
 MAIL_USER=...
 MAIL_PASS=...
+
+# Baseline Browser Mapping Warning Suppression
+BASELINE_BROWSER_MAPPING_IGNORE_OLD_DATA=true
 
 # File upload configuration (optional, not needed with Cloudinary)
 UPLOAD_DIR=./upload

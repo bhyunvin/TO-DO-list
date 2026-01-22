@@ -141,6 +141,9 @@ GEMINI_API_KEY=...
 # 메일 설정 (Gmail)
 MAIL_USER=...
 MAIL_PASS=...
+
+# Baseline Browser Mapping 경고 무시 설정
+BASELINE_BROWSER_MAPPING_IGNORE_OLD_DATA=true
 ```
 
 **보안 참고**: 프로덕션 환경에서는 강력한 비밀번호와 시크릿 키를 사용하고, 환경 변수를 안전하게 관리하세요.
@@ -414,6 +417,9 @@ GEMINI_API_KEY=...
 # Mail configuration (Gmail)
 MAIL_USER=...
 MAIL_PASS=...
+
+# Baseline Browser Mapping Warning Suppression
+BASELINE_BROWSER_MAPPING_IGNORE_OLD_DATA=true
 ```
 
 **Security Note**: Use strong passwords and secret keys in production, and manage environment variables securely.
