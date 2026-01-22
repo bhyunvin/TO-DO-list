@@ -119,9 +119,6 @@ PORT=...
 # JWT 설정 (강력한 랜덤 문자열 사용)
 JWT_SECRET=...
 
-# Google Gemini API
-GEMINI_API_KEY=...
-
 # 암호화 키 (32 bytes, Hex 형식 권장)
 ENCRYPTION_KEY=...
 
@@ -268,7 +265,7 @@ bun run format
 ### 환경 변수 오류
 
 - `.env` 파일에 모든 필수 환경 변수가 설정되어 있는지 확인
-- `DB_DEV_PASSWORD`, `JWT_SECRET`, `GEMINI_API_KEY` 등이 올바르게 설정되어 있는지 확인
+- `DB_DEV_PASSWORD`, `JWT_SECRET` 등이 올바르게 설정되어 있는지 확인
 
 ## 라이선스
 
@@ -384,9 +381,6 @@ PORT=...
 
 # JWT configuration (use strong random string)
 JWT_SECRET=...
-
-# Google Gemini API
-GEMINI_API_KEY=...
 
 # Encryption keys (32 bytes, Hex format recommended)
 ENCRYPTION_KEY=...
@@ -535,7 +529,7 @@ For detailed API specifications, please refer to the separate API documentation.
 ### Environment Variable Error
 
 - Verify all required environment variables are set in `.env` file
-- Check that `DB_DEV_PASSWORD`, `JWT_SECRET`, `GEMINI_API_KEY` are properly configured
+- Check that `DB_DEV_PASSWORD`, `JWT_SECRET` are properly configured
 
 ## License
 

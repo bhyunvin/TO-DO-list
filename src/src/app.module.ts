@@ -35,7 +35,6 @@ const envSchema = z.object({
   DB_DEV_PASSWORD: z.string().min(1, 'DB_DEV_PASSWORD는 필수입니다.'),
   DB_DEV_DATABASE: z.string().min(1, 'DB_DEV_DATABASE는 필수입니다.'),
 
-  GEMINI_API_KEY: z.string().min(1, 'GEMINI_API_KEY는 필수입니다.'),
   SYSTEM_PROMPT_PATH: z
     .string()
     .default('./src/assistance/assistance.systemPrompt.txt'),
