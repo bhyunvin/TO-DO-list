@@ -28,7 +28,7 @@ const App = () => {
     <Suspense fallback={<LoadingFallback />}>
       {user ? <TodoList /> : <LoginForm />}
       <Analytics />
-      <SpeedInsights />
+      <SpeedInsights route={user ? '/todo' : '/login'} />
     </Suspense>
   );
 };
