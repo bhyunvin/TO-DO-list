@@ -12,7 +12,7 @@
     "start:server": "cd src && bun run start:dev",
     "start:client": "cd client && bun run dev",
     "build": "bun run nx run-many --target=build --all",
-    "format": "prettier --write \"{src,client}/**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
+    "format": "prettier --write \"{src,client}/**/*.{js,jsx,ts,tsx,json,css,scss,md,html}\"",
     "lint": "bun run nx run-many --target=lint --all",
     "lint:server": "cd src && bun run lint",
     "lint:client": "cd client && bun run lint",
