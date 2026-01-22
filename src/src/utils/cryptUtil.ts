@@ -87,7 +87,6 @@ export const encrypt = async (rawText: string): Promise<string> => {
       algorithm: 'bcrypt',
       cost: 10,
     });
-
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
     Logger.error(`Password hashing failed: ${errorMsg}`, 'CryptUtil');
@@ -200,14 +199,12 @@ export const decryptSymmetric = async (text: string): Promise<string> => {
     );
 
     return new TextDecoder().decode(decrypted);
-
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
     Logger.error(`Symmetric decryption failed: ${errorMsg}`, 'CryptUtil');
     throw new Error('Failed to decrypt data');
   }
 };
-
 
 // AES-SIV 키 캐싱
 let _sivKeyPromise: Promise<Uint8Array> | null = null;
@@ -272,13 +269,9 @@ export const encryptSymmetricDeterministic = async (
     const siv = aessiv(key);
     const encrypted = siv.encrypt(new TextEncoder().encode(text));
     return bytesToHex(encrypted);
-
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
-    Logger.error(
-      `Deterministic encryption failed: ${errorMsg}`,
-      'CryptUtil',
-    );
+    Logger.error(`Deterministic encryption failed: ${errorMsg}`, 'CryptUtil');
     throw new Error('Failed to encrypt data deterministically');
   }
 };
@@ -297,13 +290,9 @@ export const decryptSymmetricDeterministic = async (
     const siv = aessiv(key);
     const decrypted = siv.decrypt(hexToBytes(text));
     return new TextDecoder().decode(decrypted);
-
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
-    Logger.error(
-      `Deterministic decryption failed: ${errorMsg}`,
-      'CryptUtil',
-    );
+    Logger.error(`Deterministic decryption failed: ${errorMsg}`, 'CryptUtil');
     throw new Error('Failed to decrypt data deterministically');
   }
 };
