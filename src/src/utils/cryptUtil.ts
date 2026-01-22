@@ -1,4 +1,5 @@
 import { Logger } from '@nestjs/common';
+import { aessiv } from '@noble/ciphers/aes';
 
 /**
  * 환경 변수 값을 버퍼로 변환하는 헬퍼 함수
@@ -100,6 +101,7 @@ export const isHashValid = async (
 
 /**
  * Web Crypto API를 사용한 대칭키 암호화 (랜덤 IV)
+ * @throws {Error} 암호화 실패 시 에러를 발생시킵니다.
  */
 export const encryptSymmetric = async (text: string): Promise<string> => {
   if (!text) return text;
@@ -145,6 +147,7 @@ export const encryptSymmetric = async (text: string): Promise<string> => {
 
 /**
  * Web Crypto API를 사용한 대칭키 복호화 (랜덤 IV)
+ * @throws {Error} 복호화 실패 시 에러를 발생시킵니다.
  */
 export const decryptSymmetric = async (text: string): Promise<string> => {
   if (!text) return text;
@@ -188,28 +191,57 @@ export const decryptSymmetric = async (text: string): Promise<string> => {
   }
 };
 
+
+// AES-SIV 키 캐싱
+let _sivKeyPromise: Promise<Uint8Array> | null = null;
+
 /**
- * 평문 기반 결정적 IV 생성
- * - 평문의 SHA-256 해시에서 첫 16바이트 사용
- * - 동일 평문 → 동일 IV (결정적, 검색 가능)
- * - 다른 평문 → 다른 IV (안전, 고정 IV 문제 해결)
+ * HKDF를 사용하여 32바이트 마스터 키에서 64바이트 SIV 키 파생
+ * (AES-256-SIV는 64바이트 키 필요: 32B enc + 32B mac)
  */
-const generateDeterministicIV = async (text: string): Promise<Uint8Array> => {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(text);
+const getSivKey = (): Promise<Uint8Array> => {
+  if (_sivKeyPromise !== null) return _sivKeyPromise;
 
-  // SHA-256 해시 생성
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  _sivKeyPromise = (async () => {
+    try {
+      const masterKey = await crypto.subtle.importKey(
+        'raw',
+        ENCRYPTION_KEY_BUF as BufferSource,
+        { name: 'HKDF' },
+        false,
+        ['deriveBits'],
+      );
 
-  // 첫 16바이트를 IV로 사용
-  return new Uint8Array(hashBuffer).slice(0, 16);
+      const derivedBits = await crypto.subtle.deriveBits(
+        {
+          name: 'HKDF',
+          hash: 'SHA-256',
+          salt: new TextEncoder().encode('TODO-APP-SIV-SALT-V1'),
+          info: new TextEncoder().encode('AES-SIV-DERIVED-KEY'),
+        },
+        masterKey,
+        512, // 64 bytes * 8 bits
+      );
+
+      return new Uint8Array(derivedBits);
+    } catch (error) {
+      Logger.error(`SIV key derivation failed: ${error.message}`, 'CryptUtil');
+      throw new Error('Failed to derive SIV key');
+    }
+  })();
+
+  return _sivKeyPromise;
 };
 
 /**
- * Web Crypto API를 사용한 안전한 결정적 대칭키 암호화
- * - 평문 기반 IV 생성으로 보안 문제 해결
- * - 동일 평문 → 동일 암호문 (결정적, 이메일 검색 가능)
- * - 다른 평문 → 다른 IV (안전)
+ * AES-SIV (RFC 5297)를 사용한 강력한 결정적 암호화
+ *
+ * [보안 특징]
+ * - 동일한 평문에 대해 항상 동일한 암호문을 생성합니다. (Deterministic)
+ * - Synthetic IV(SIV) 모드를 사용하여 Nonce 재사용 문제에 내성이 있습니다.
+ * - AES-GCM 방식과 달리 Semantic Security를 최대한 보장하면서 결정적 암호화를 제공합니다.
+ *
+ * @throws {Error} 암호화 실패 시 에러를 발생시킵니다.
  */
 export const encryptSymmetricDeterministic = async (
   text: string,
@@ -217,37 +249,10 @@ export const encryptSymmetricDeterministic = async (
   if (!text) return text;
 
   try {
-    // CryptoKey 가져오기
-    const key = await crypto.subtle.importKey(
-      'raw',
-      ENCRYPTION_KEY_BUF as BufferSource,
-      { name: 'AES-GCM' },
-      false,
-      ['encrypt'],
-    );
-
-    // 평문 기반 결정적 IV 생성
-    const iv = await generateDeterministicIV(text);
-
-    // 암호화 (tagLength 명시적 지정)
-    const encrypted = await crypto.subtle.encrypt(
-      {
-        name: 'AES-GCM',
-        iv: iv as BufferSource,
-        tagLength: 128, // 128비트 (16바이트) authTag 명시적 설정
-      },
-      key,
-      new TextEncoder().encode(text),
-    );
-
-    // 결과는 [iv:authTag:encryptedData] 형태로 저장
-    const encryptedArray = new Uint8Array(encrypted);
-    const authTag = encryptedArray.slice(-16);
-    const ciphertext = encryptedArray.slice(0, -16);
-
-    return (
-      bytesToHex(iv) + ':' + bytesToHex(authTag) + ':' + bytesToHex(ciphertext)
-    );
+    const key = await getSivKey();
+    const siv = aessiv(key);
+    const encrypted = siv.encrypt(new TextEncoder().encode(text));
+    return bytesToHex(encrypted);
   } catch (error) {
     Logger.error(
       `Deterministic encryption failed: ${error.message}`,
@@ -258,7 +263,8 @@ export const encryptSymmetricDeterministic = async (
 };
 
 /**
- * Web Crypto API를 사용한 확정적 대칭키 복호화 (고정 IV)
+ * AES-SIV를 사용한 결정적 복호화
+ * @throws {Error} 복호화 실패 시 에러를 발생시킵니다.
  */
 export const decryptSymmetricDeterministic = async (
   text: string,
@@ -266,37 +272,9 @@ export const decryptSymmetricDeterministic = async (
   if (!text) return text;
 
   try {
-    const textParts = text.split(':');
-    if (textParts.length < 3) return text;
-
-    const ivMsg = textParts[0];
-    const authTag = hexToBytes(textParts[1]);
-    const ciphertext = hexToBytes(textParts.slice(2).join(':'));
-
-    // GCM 모드에서는 authTag를 암호문 뒤에 붙여야 함
-    const encryptedData = new Uint8Array(ciphertext.length + authTag.length);
-    encryptedData.set(ciphertext);
-    encryptedData.set(authTag, ciphertext.length);
-
-    // CryptoKey 가져오기
-    const key = await crypto.subtle.importKey(
-      'raw',
-      ENCRYPTION_KEY_BUF as BufferSource,
-      { name: 'AES-GCM' },
-      false,
-      ['decrypt'],
-    );
-
-    // 복호화
-    const decrypted = await crypto.subtle.decrypt(
-      {
-        name: 'AES-GCM',
-        iv: hexToBytes(ivMsg) as BufferSource,
-      },
-      key,
-      encryptedData as BufferSource,
-    );
-
+    const key = await getSivKey();
+    const siv = aessiv(key);
+    const decrypted = siv.decrypt(hexToBytes(text));
     return new TextDecoder().decode(decrypted);
   } catch (error) {
     Logger.error(
