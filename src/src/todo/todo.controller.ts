@@ -17,7 +17,7 @@ import {
   UseGuards,
   Ip,
 } from '@nestjs/common';
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { TodoService } from './todo.service';
 import {

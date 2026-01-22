@@ -4,7 +4,7 @@
 - **Framework**: NestJS with Express adapter
 - **Language**: TypeScript
 - **Database**: PostgreSQL with TypeORM
-- **Authentication**: JWT (stateless) with bcrypt password hashing
+- **Authentication**: JWT (stateless) with Bun.password (bcrypt algorithm)
 - **Security**: Environment variables for secure credential storage, AES-256-GCM for data encryption
 - **AI Integration**: Google Gemini API with function calling
 - **File Storage**: Cloudinary cloud storage
@@ -25,76 +25,62 @@
 - **Theming**: CSS Custom Properties for dynamic light/dark mode
 
 ## Development Tools
-- **Package Manager**: npm with workspaces
+- **Runtime**: Bun 1.0.0+
+- **Package Manager**: Bun (npm workspaces compatible)
 - **Code Formatting**: Prettier (single quotes, trailing commas)
 - **Process Management**: Concurrently for running multiple services
-- **Node Version**: 24.0.0+ (managed via .nvmrc)
 
 ## Common Commands
 
-**IMPORTANT**: Always run `nvm use 24` before executing any commands to ensure correct Node.js version.
-
 ### Development
 ```bash
-# Switch to correct Node version (REQUIRED)
-nvm use 24
-
 # Start both frontend and backend
-npm start
+bun start
 
 # Start backend only
-npm run start:server
+bun run start:server
 
 # Start frontend only  
-npm run start:client
+bun run start:client
 
 # Build both applications
-npm run build
+bun run build
 ```
 
 ### Backend Specific (from src/ directory)
 ```bash
-# Switch to correct Node version (REQUIRED)
-nvm use 24
-
 # Development with hot reload
-npm run start:dev
+bun run start:dev
 
 # Production build
-npm run build
+bun run build
 
 # Run tests
-npm test
+bun test
 
 # Lint and fix
-npm run lint
+bun run lint
 ```
 
 ### Frontend Specific (from client/ directory)
 ```bash
-# Switch to correct Node version (REQUIRED)
-nvm use 24
-
 # Development server
-npm start
+bun run dev
 
 # Production build
-npm run build
+bun run build
 
 # Run tests
-npm test
+bun test
 ```
 
 ### Testing Commands
 ```bash
-# Switch to correct Node version (REQUIRED)
-nvm use 24
-
 # Run specific test files
-npm test -- --testPathPatterns=filename.spec.ts
+bun test -- --testPathPatterns=filename.spec.ts
 
 # Run tests with specific pattern
-npm test -- --testNamePattern="test name pattern"
+bun test -- --testNamePattern="test name pattern"
 ```
 
 ## Environment Configuration

@@ -1,5 +1,12 @@
 import { DefaultNamingStrategy, NamingStrategyInterface } from 'typeorm';
-import { snakeCase } from 'typeorm/util/StringUtils';
+
+// TypeORM의 snakeCase 함수를 직접 구현 (Bun 호환성)
+function snakeCase(str: string): string {
+  return str
+    .replaceAll(/([A-Z])/g, '_$1')
+    .toLowerCase()
+    .replaceAll(/^_/, '');
+}
 
 export class CustomNamingStrategy
   extends DefaultNamingStrategy

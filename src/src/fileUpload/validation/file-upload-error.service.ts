@@ -1,10 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Request } from 'express';
+import type { Request } from 'express';
 import { extname } from 'node:path';
 import {
   FileValidationError,
   ValidationResult,
-  FileCategory,
+  type FileCategory,
 } from './file-validation.interfaces';
 import {
   FILE_VALIDATION_ERRORS,

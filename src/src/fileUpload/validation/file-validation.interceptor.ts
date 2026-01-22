@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { FileValidationService } from './file-validation.service';
-import { FileCategory } from './file-validation.interfaces';
+import type { FileCategory } from './file-validation.interfaces';
 import { FileUploadErrorService } from './file-upload-error.service';
 
 /**

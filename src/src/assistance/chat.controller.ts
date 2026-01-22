@@ -8,7 +8,7 @@ import {
   HttpStatus,
   Ip,
 } from '@nestjs/common';
-import { Request } from 'express';
+import type { Request } from 'express';
 import { ChatRequestDto, ChatResponseDto } from './assistance.dto';
 import { AssistanceService } from './assistance.service';
 import { AuthenticatedGuard } from '../types/express/auth.guard';

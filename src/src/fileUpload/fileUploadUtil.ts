@@ -6,7 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, EntityManager } from 'typeorm';
 import { FileInfoEntity } from './file.entity';
 import { FileValidationService } from './validation/file-validation.service';
-import { FileCategory } from './validation/file-validation.interfaces';
+import type { FileCategory } from './validation/file-validation.interfaces';
 import { FILE_UPLOAD_POLICY } from './validation/file-validation.constants';
 import { CloudinaryService } from './cloudinary.service';
 import { UploadApiResponse } from 'cloudinary';

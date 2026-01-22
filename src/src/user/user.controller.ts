@@ -15,7 +15,7 @@ import {
   UseGuards,
   Patch,
 } from '@nestjs/common';
-import { Request } from 'express';
+import type { Request } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { profileImageMulterOptions } from '../fileUpload/fileUploadUtil';
 import { ProfileImageValidationInterceptor } from '../fileUpload/validation/file-validation.interceptor';
@@ -305,6 +305,6 @@ export class UserController {
     }
     const fullUser = await this.userService.getUser(user.userSeq);
     const userForClient = { ...fullUser };
-    return this.userService.decryptUserInfo(userForClient);
+    return await this.userService.decryptUserInfo(userForClient);
   }
 }

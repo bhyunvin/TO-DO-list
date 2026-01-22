@@ -44,17 +44,17 @@ export class UserService {
     private readonly dataSource: DataSource,
   ) {}
 
-  decryptUserInfo<T extends Partial<UserEntity>>(user: T): T {
+  async decryptUserInfo<T extends Partial<UserEntity>>(user: T): Promise<T> {
     if (!user) return user;
 
     // 이메일 복호화 (결정적 암호화 사용)
     if (user.userEmail) {
-      user.userEmail = decryptSymmetricDeterministic(user.userEmail);
+      user.userEmail = await decryptSymmetricDeterministic(user.userEmail);
     }
 
     // API Key 복호화 (일반 양방향 암호화 사용)
     if (user.aiApiKey) {
-      user.aiApiKey = decryptSymmetric(user.aiApiKey);
+      user.aiApiKey = await decryptSymmetric(user.aiApiKey);
     }
 
     return user;
@@ -139,7 +139,7 @@ export class UserService {
     return this.dataSource.transaction(async (transactionalEntityManager) => {
       // 이메일 고유성 확인 (결정적 암호화 값으로 조회)
       const { userEmail, userPassword, userId } = userDto;
-      const encryptedEmail = encryptSymmetricDeterministic(userEmail);
+      const encryptedEmail = await encryptSymmetricDeterministic(userEmail);
 
       const existingUserWithEmail = await transactionalEntityManager.findOne(
         UserEntity,
@@ -264,7 +264,10 @@ export class UserService {
         ip,
       );
 
-      const updatedFields = this.updateUserFields(currentUser, sanitizedDto);
+      const updatedFields = await this.updateUserFields(
+        currentUser,
+        sanitizedDto,
+      );
 
       if (profileImageFile) {
         await this.handleProfileImageUpdate(
@@ -376,7 +379,7 @@ export class UserService {
       });
     }
 
-    const encryptedNewEmail = encryptSymmetricDeterministic(newEmail);
+    const encryptedNewEmail = await encryptSymmetricDeterministic(newEmail);
 
     const existingUser = await entityManager.findOne(UserEntity, {
       where: {
@@ -400,10 +403,10 @@ export class UserService {
     }
   }
 
-  private updateUserFields(
+  private async updateUserFields(
     currentUser: UserEntity,
     sanitizedDto: UpdateUserDto,
-  ): string[] {
+  ): Promise<string[]> {
     const updatedFields: string[] = [];
     const {
       userName: newName,
@@ -425,7 +428,7 @@ export class UserService {
     }
 
     if (this.shouldUpdate(newUserEmail, currentUserEmail)) {
-      currentUser.userEmail = encryptSymmetricDeterministic(newUserEmail);
+      currentUser.userEmail = await encryptSymmetricDeterministic(newUserEmail);
       updatedFields.push('userEmail');
     }
 
@@ -435,7 +438,7 @@ export class UserService {
     }
 
     if (newApiKey !== undefined) {
-      const apiKeyUpdated = this.updateApiKey(
+      const apiKeyUpdated = await this.updateApiKey(
         currentUser,
         newApiKey,
         currentApiKey,
@@ -459,11 +462,11 @@ export class UserService {
     );
   }
 
-  private updateApiKey(
+  private async updateApiKey(
     currentUser: UserEntity,
     newApiKey: string,
     currentApiKey: string | null,
-  ): boolean {
+  ): Promise<boolean> {
     if (newApiKey === '') {
       if (currentApiKey !== null) {
         currentUser.aiApiKey = null;
@@ -472,7 +475,7 @@ export class UserService {
       return false;
     }
 
-    const encryptedKey = encryptSymmetric(newApiKey);
+    const encryptedKey = await encryptSymmetric(newApiKey);
     if (currentUser.aiApiKey !== encryptedKey) {
       currentUser.aiApiKey = encryptedKey;
       return true;

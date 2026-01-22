@@ -18,10 +18,11 @@ TO-DO List 애플리케이션의 백엔드 서버입니다. NestJS 프레임워�
 ## 기술 스택
 
 - **프레임워크**: NestJS 11.x with Express
+- **런타임**: Bun 1.0+ (Node.js 호환)
 - **언어**: TypeScript 5.x
 - **데이터베이스**: PostgreSQL with TypeORM 0.3.x
-- **인증**: JWT (stateless) with bcrypt
-- **보안**: AES-256-GCM encryption
+- **인증**: JWT (stateless) with Bun.password
+- **보안**: Web Crypto API (AES-256-GCM encryption)
 - **AI**: Google Gemini API
 - **파일 스토리지**: Cloudinary
 - **파일 업로드**: Multer
@@ -90,19 +91,14 @@ src/
 
 ## 사전 요구사항
 
-- Node.js 24.0.0 이상
-- npm 8 이상
+- Bun 1.0.0 이상
 - PostgreSQL (최신 버전)
-- nvm (권장)
 
 ## 설치 방법
 
 ```bash
-# Node 버전 설정 (필수)
-nvm use 24
-
 # 의존성 설치
-npm install
+bun install
 ```
 
 ## 환경 변수 설정
@@ -149,61 +145,55 @@ MAX_FILE_SIZE=5242880
 ## 실행 방법
 
 ```bash
-# Node 버전 설정 (필수)
-nvm use 24
-
 # 개발 모드 (핫 리로드)
-npm run start:dev
+bun run start:dev
 
 # 일반 개발 모드
-npm run start
+bun run start
 
 # 디버그 모드
-npm run start:debug
+bun run start:debug
 
 # 프로덕션 빌드
-npm run build
+bun run build
 
 # 프로덕션 실행
-npm run start:prod
+bun run start:prod
 ```
 
 ## 테스트
 
 ```bash
-# Node 버전 설정 (필수)
-nvm use 24
-
 # 단위 테스트
-npm test
+bun test
 
 # 단위 테스트 (watch 모드)
-npm run test:watch
+bun run test:watch
 
 # E2E 테스트
-npm run test:e2e
+bun run test:e2e
 
 # 테스트 커버리지
-npm run test:cov
+bun run test:cov
 
 # 특정 테스트 파일 실행
-npm test -- --testPathPattern=user.service.spec.ts
+bun test -- --testPathPattern=user.service.spec.ts
 
 # 특정 테스트 이름 패턴으로 실행
-npm test -- --testNamePattern="should create user"
+bun test -- --testNamePattern="should create user"
 ```
 
 ## 코드 품질
 
 ```bash
 # Lint 검사
-npm run lint
+bun run lint
 
 # Lint 자동 수정
-npm run lint -- --fix
+bun run lint -- --fix
 
 # 코드 포맷팅
-npm run format
+bun run format
 ```
 
 ## API 엔드포인트
@@ -236,7 +226,7 @@ npm run format
 
 ## 보안
 
-- 강력한 암호화 알고리즘을 사용한 비밀번호 해싱 (bcrypt) 및 데이터 암호화 (AES-256-GCM)
+- 강력한 암호화 알고리즘을 사용한 비밀번호 해싱 (Bun.password) 및 데이터 암호화 (Web Crypto API - AES-256-GCM)
 - JWT 기반 인증 시스템
 - 안전한 자격 증명 저장 메커니즘
 - XSS 및 CSRF 공격 방지
@@ -304,10 +294,11 @@ Backend server for the TO-DO List application. Built with NestJS framework and i
 ## Technology Stack
 
 - **Framework**: NestJS 11.x with Express
+- **Runtime**: Bun 1.0+ (Node.js compatible)
 - **Language**: TypeScript 5.x
 - **Database**: PostgreSQL with TypeORM 0.3.x
-- **Authentication**: JWT (stateless) with bcrypt
-- **Security**: AES-256-GCM encryption
+- **Authentication**: JWT (stateless) with Bun.password
+- **Security**: Web Crypto API (AES-256-GCM encryption)
 - **AI**: Google Gemini API
 - **File Storage**: Cloudinary
 - **File Upload**: Multer
@@ -364,19 +355,14 @@ src/
 
 ## Prerequisites
 
-- Node.js 24.0.0 or higher
-- npm 8 or higher
+- Bun 1.0.0 or higher
 - PostgreSQL (latest version)
-- nvm (recommended)
 
 ## Installation
 
 ```bash
-# Set Node version (required)
-nvm use 24
-
 # Install dependencies
-npm install
+bun install
 ```
 
 ## Environment Configuration
@@ -423,61 +409,55 @@ MAX_FILE_SIZE=5242880
 ## Running the Application
 
 ```bash
-# Set Node version (required)
-nvm use 24
-
 # Development mode (hot reload)
-npm run start:dev
+bun run start:dev
 
 # Regular development mode
-npm run start
+bun run start
 
 # Debug mode
-npm run start:debug
+bun run start:debug
 
 # Production build
-npm run build
+bun run build
 
 # Production run
-npm run start:prod
+bun run start:prod
 ```
 
 ## Testing
 
 ```bash
-# Set Node version (required)
-nvm use 24
-
 # Unit tests
-npm test
+bun test
 
 # Unit tests (watch mode)
-npm run test:watch
+bun run test:watch
 
 # E2E tests
-npm run test:e2e
+bun run test:e2e
 
 # Test coverage
-npm run test:cov
+bun run test:cov
 
 # Run specific test file
-npm test -- --testPathPattern=user.service.spec.ts
+bun test -- --testPathPattern=user.service.spec.ts
 
 # Run tests matching pattern
-npm test -- --testNamePattern="should create user"
+bun test -- --testNamePattern="should create user"
 ```
 
 ## Code Quality
 
 ```bash
 # Lint check
-npm run lint
+bun run lint
 
 # Lint auto-fix
-npm run lint -- --fix
+bun run lint -- --fix
 
 # Code formatting
-npm run format
+bun run format
 ```
 
 ## API Endpoints
@@ -510,7 +490,7 @@ For detailed API specifications, please refer to the separate API documentation.
 
 ## Security
 
-- Strong encryption algorithm for password hashing (bcrypt) and data encryption (AES-256-GCM)
+- Strong encryption algorithm for password hashing (Bun.password) and data encryption (Web Crypto API - AES-256-GCM)
 - JWT-based authentication system
 - Secure credential storage mechanism
 - XSS and CSRF attack prevention
