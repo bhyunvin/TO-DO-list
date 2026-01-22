@@ -1,5 +1,6 @@
 import { useEffect, Suspense, lazy } from 'react';
 import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import { useAuthStore } from './authStore/authStore';
 import { useThemeStore } from './stores/themeStore';
 import './App.css';
@@ -27,6 +28,7 @@ const App = () => {
     <Suspense fallback={<LoadingFallback />}>
       {user ? <TodoList /> : <LoginForm />}
       <Analytics />
+      <SpeedInsights />
     </Suspense>
   );
 };

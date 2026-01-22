@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ExpressAdapter } from '@nestjs/platform-express';
-import { Logger, ValidationPipe } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common';
 
 const bootstrap = async () => {
   const app = await NestFactory.create(AppModule, new ExpressAdapter());
@@ -30,11 +30,8 @@ const bootstrap = async () => {
     }),
   );
 
-  const port = process.env.PORT || 3001;
-  const logger = new Logger('Bootstrap');
-  logger.log(`Attempting to bind to 0.0.0.0:${port}`);
-  await app.listen(port, '0.0.0.0');
-  logger.log(`Application is running on: ${await app.getUrl()}`);
+  const PORT = process.env.PORT || 3001;
+  await app.listen(PORT, '0.0.0.0');
 };
 
 bootstrap();
