@@ -72,10 +72,15 @@ if (ENCRYPTION_KEY_BUF.length !== 32) {
  * 비밀번호를 Bun.password로 해싱
  */
 export const encrypt = async (rawText: string): Promise<string> => {
-  return await Bun.password.hash(rawText, {
-    algorithm: 'bcrypt',
-    cost: 10,
-  });
+  try {
+    return await Bun.password.hash(rawText, {
+      algorithm: 'bcrypt',
+      cost: 10,
+    });
+  } catch (error) {
+    Logger.error(`Password hashing failed: ${error.message}`, 'CryptUtil');
+    throw new Error('Failed to hash password');
+  }
 };
 
 /**
@@ -85,7 +90,12 @@ export const isHashValid = async (
   rawText: string,
   hashedText: string,
 ): Promise<boolean> => {
-  return await Bun.password.verify(rawText, hashedText, 'bcrypt');
+  try {
+    return await Bun.password.verify(rawText, hashedText, 'bcrypt');
+  } catch (error) {
+    Logger.error(`Password verification failed: ${error.message}`, 'CryptUtil');
+    throw new Error('Failed to verify password');
+  }
 };
 
 /**
@@ -128,7 +138,7 @@ export const encryptSymmetric = async (text: string): Promise<string> => {
     );
   } catch (error) {
     Logger.error(`Symmetric encryption failed: ${error.message}`, 'CryptUtil');
-    return text;
+    throw new Error('Failed to encrypt data');
   }
 };
 
@@ -173,8 +183,7 @@ export const decryptSymmetric = async (text: string): Promise<string> => {
     return new TextDecoder().decode(decrypted);
   } catch (error) {
     Logger.error(`Symmetric decryption failed: ${error.message}`, 'CryptUtil');
-    // 복호화 실패 시 원본 반환
-    return text;
+    throw new Error('Failed to decrypt data');
   }
 };
 
@@ -242,7 +251,7 @@ export const encryptSymmetricDeterministic = async (
       `Deterministic encryption failed: ${error.message}`,
       'CryptUtil',
     );
-    return text;
+    throw new Error('Failed to encrypt data deterministically');
   }
 };
 
@@ -292,6 +301,6 @@ export const decryptSymmetricDeterministic = async (
       `Deterministic decryption failed: ${error.message}`,
       'CryptUtil',
     );
-    return text;
+    throw new Error('Failed to decrypt data deterministically');
   }
 };

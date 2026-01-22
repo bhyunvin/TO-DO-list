@@ -3,9 +3,9 @@ import { DefaultNamingStrategy, NamingStrategyInterface } from 'typeorm';
 // TypeORM의 snakeCase 함수를 직접 구현 (Bun 호환성)
 function snakeCase(str: string): string {
   return str
-    .replaceAll(/([A-Z])/g, '_$1')
-    .toLowerCase()
-    .replaceAll(/^_/, '');
+    .replaceAll(/([a-z])([A-Z])/g, '$1_$2') // camelCase 경계
+    .replaceAll(/([A-Z])([A-Z][a-z])/g, '$1_$2') // XMLParser → XML_Parser
+    .toLowerCase();
 }
 
 export class CustomNamingStrategy
