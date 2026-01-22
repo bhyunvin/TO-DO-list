@@ -76,10 +76,6 @@ npm test -- --config=test/jest-e2e.json --verbose
 - `TEST_DB_PASSWORD`: 테스트용 데이터베이스 비밀번호
 - `TEST_JWT_SECRET`: 테스트용 JWT 시크릿
 
-### 선택 사항
-
-- `GEMINI_API_KEY`: AI 지원 기능 테스트 시 필요
-
 **보안 참고**: 테스트 환경에서도 프로덕션과 다른 자격 증명을 사용하고, 테스트 데이터베이스를 별도로 구성하세요.
 
 ## 테스트 구조
@@ -276,10 +272,6 @@ npm test -- --config=test/jest-e2e.json --verbose
 - `DB_DEV_DATABASE`: Database name
 - `TEST_DB_PASSWORD`: Database password for tests
 - `TEST_JWT_SECRET`: Session secret for tests
-
-### Optional
-
-- `GEMINI_API_KEY`: Required if testing AI assistance features
 
 **Security Note**: Use different credentials for test environment than production, and configure a separate test database.
 

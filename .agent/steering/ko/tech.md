@@ -4,8 +4,8 @@
 - **프레임워크**: Express 어댑터를 사용하는 NestJS
 - **언어**: TypeScript
 - **데이터베이스**: TypeORM을 사용하는 PostgreSQL
-- **인증**: bcrypt 비밀번호 해싱을 사용하는 JWT (stateless)
-- **보안**: 안전한 자격 증명 저장을 위한 환경 변수, 데이터 암호화를 위한 AES-256-GCM
+- **인증**: Bun.password (bcrypt 알고리즘)를 사용하는 JWT (stateless)
+- **보안**: 안전한 자격 증명 저장을 위한 환경 변수, 데이터 암호화를 위한 AES-256-GCM (Synthetic IV를 사용하는 AES-SIV 결정적 암호화 포함)
 - **AI 통합**: 함수 호출 기능을 갖춘 Google Gemini API
 - **파일 스토리지**: Cloudinary 클라우드 스토리지
 - **파일 업로드**: multipart form 처리를 위한 Multer
@@ -25,76 +25,62 @@
 - **테마**: 동적 라이트/다크 모드를 위한 CSS Custom Properties
 
 ## 개발 도구
-- **패키지 매니저**: workspaces를 사용하는 npm
+- **런타임**: Bun 1.0.0+
+- **패키지 매니저**: Bun (npm workspaces 호환)
 - **코드 포맷팅**: Prettier (작은따옴표, 후행 쉼표)
 - **프로세스 관리**: 여러 서비스 실행을 위한 Concurrently
-- **Node 버전**: 24.0.0+ (.nvmrc로 관리)
 
 ## 공통 명령어
 
-**중요**: 올바른 Node.js 버전을 보장하기 위해 모든 명령어 실행 전에 항상 `nvm use 24`를 실행하세요.
-
 ### 개발
 ```bash
-# 올바른 Node 버전으로 전환 (필수)
-nvm use 24
-
 # 프론트엔드와 백엔드 모두 시작
-npm start
+bun start
 
 # 백엔드만 시작
-npm run start:server
+bun run start:server
 
 # 프론트엔드만 시작
-npm run start:client
+bun run start:client
 
 # 두 애플리케이션 모두 빌드
-npm run build
+bun run build
 ```
 
 ### 백엔드 전용 (src/ 디렉토리에서)
 ```bash
-# 올바른 Node 버전으로 전환 (필수)
-nvm use 24
-
 # 핫 리로드를 사용한 개발
-npm run start:dev
+bun run start:dev
 
 # 프로덕션 빌드
-npm run build
+bun run build
 
 # 테스트 실행
-npm test
+bun test
 
 # Lint 및 수정
-npm run lint
+bun run lint
 ```
 
 ### 프론트엔드 전용 (client/ 디렉토리에서)
 ```bash
-# 올바른 Node 버전으로 전환 (필수)
-nvm use 24
-
 # 개발 서버
-npm start
+bun run dev
 
 # 프로덕션 빌드
-npm run build
+bun run build
 
 # 테스트 실행
-npm test
+bun test
 ```
 
 ### 테스트 명령어
 ```bash
-# 올바른 Node 버전으로 전환 (필수)
-nvm use 24
-
 # 특정 테스트 파일 실행
-npm test -- --testPathPatterns=filename.spec.ts
+bun test -- --testPathPatterns=filename.spec.ts
 
 # 특정 패턴으로 테스트 실행
-npm test -- --testNamePattern="test name pattern"
+bun test -- --testNamePattern="test name pattern"
 ```
 
 ## 환경 설정

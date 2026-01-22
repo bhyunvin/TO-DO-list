@@ -28,7 +28,7 @@
 - **프레임워크**: NestJS with Express
 - **언어**: TypeScript
 - **데이터베이스**: PostgreSQL with TypeORM
-- **인증**: JWT (stateless) with bcrypt
+- **인증**: JWT (stateless) with Bun.password (bcrypt algorithm)
 - **보안**: AES-256-GCM encryption
 - **AI**: Google Gemini API
 - **파일 스토리지**: Cloudinary
@@ -47,10 +47,10 @@
 - **보안**: DOMPurify
 
 ### 개발 도구
-- **패키지 매니저**: npm with workspaces
+- **런타임**: Bun 1.0.0+
+- **패키지 매니저**: Bun (npm workspaces 호환)
 - **코드 포맷팅**: Prettier
 - **프로세스 관리**: Concurrently
-- **Node 버전**: 24.0.0+ (.nvmrc로 관리)
 
 ## 프로젝트 구조
 
@@ -93,10 +93,8 @@ myTodoApp/
 
 ## 사전 요구사항
 
-- **Node.js**: 24.0.0 이상
-- **npm**: 8 이상
+- **Bun**: 1.0.0 이상
 - **PostgreSQL**: 최신 버전
-- **nvm**: Node 버전 관리 (권장)
 
 ## 설치 방법
 
@@ -107,11 +105,8 @@ myTodoApp/
 git clone <repository-url>
 cd myTodoApp
 
-# Node 버전 설정 (필수)
-nvm use 24
-
-# 모든 의존성 설치 (루트, 백엔드, 프론트엔드)
-npm install
+# 의존성 설치 (루트, 백엔드, 프론트엔드)
+bun install
 ```
 
 ### 2. 환경 변수 설정
@@ -134,19 +129,18 @@ JWT_SECRET=...
 
 # 암호화 키 (32 bytes, Hex 형식 권장)
 ENCRYPTION_KEY=...
-DETERMINISTIC_IV=...
 
 # Cloudinary 설정
 CLOUDINARY_CLOUD_NAME=...
 CLOUDINARY_API_KEY=...
 CLOUDINARY_API_SECRET=...
 
-# Google Gemini API
-GEMINI_API_KEY=...
-
 # 메일 설정 (Gmail)
 MAIL_USER=...
 MAIL_PASS=...
+
+# Baseline Browser Mapping 경고 무시 설정
+BASELINE_BROWSER_MAPPING_IGNORE_OLD_DATA=true
 ```
 
 **보안 참고**: 프로덕션 환경에서는 강력한 비밀번호와 시크릿 키를 사용하고, 환경 변수를 안전하게 관리하세요.
@@ -168,28 +162,20 @@ PostgreSQL 데이터베이스를 생성하고 TypeORM이 자동으로 테이블�
 
 ### 개발 환경
 
-**중요**: 모든 명령어 실행 전에 `nvm use 24`를 실행하여 올바른 Node.js 버전을 사용하세요.
-
 ```bash
-# Node 버전 설정 (필수)
-nvm use 24
-
 # 프론트엔드와 백엔드 동시 실행
-npm start
+bun start
 
 # 또는 개별 실행
-npm run start:server    # 백엔드만 실행 (포트 3001)
-npm run start:client    # 프론트엔드만 실행 (포트 5173)
+bun run start:server    # 백엔드만 실행 (포트 3001)
+bun run start:client    # 프론트엔드만 실행 (포트 5173)
 ```
 
 ### 프로덕션 빌드
 
 ```bash
-# Node 버전 설정 (필수)
-nvm use 24
-
 # 프론트엔드와 백엔드 모두 빌드
-npm run build
+bun run build
 ```
 
 ### 백엔드 전용 명령어 (src/ 디렉토리)
@@ -197,23 +183,20 @@ npm run build
 ```bash
 cd src
 
-# Node 버전 설정 (필수)
-nvm use 24
-
 # 개발 모드 (핫 리로드)
-npm run start:dev
+bun run start:dev
 
 # 프로덕션 빌드
-npm run build
+bun run build
 
 # 프로덕션 실행
-npm run start:prod
+bun run start:prod
 
 # 테스트 실행
-npm test
+bun test
 
 # Lint 및 수정
-npm run lint
+bun run lint
 ```
 
 **보안 참고**: 프로덕션 배포 시 환경 변수, 방화벽 설정, HTTPS 인증서 등을 적절히 구성하세요.
@@ -223,17 +206,14 @@ npm run lint
 ```bash
 cd client
 
-# Node 버전 설정 (필수)
-nvm use 24
-
 # 개발 서버
-npm start
+bun run dev
 
 # 프로덕션 빌드
-npm run build
+bun run build
 
 # 테스트 실행
-npm test
+bun test
 ```
 
 ## 명명 규칙
@@ -274,7 +254,8 @@ npm test
 
 ## 보안
 
-- 강력한 암호화 알고리즘을 사용한 비밀번호 해싱
+- Bun.password를 사용한 강력한 비밀번호 해싱 (bcrypt algorithm)
+- Web Crypto API를 사용한 AES-256-GCM 데이터 암호화
 - JWT 기반 인증 시스템
 - 안전한 자격 증명 저장 메커니즘
 - XSS 및 CSRF 공격 방지
@@ -319,7 +300,7 @@ A full-stack TO-DO List application built with modern web technologies. Provides
 - **Framework**: NestJS with Express
 - **Language**: TypeScript
 - **Database**: PostgreSQL with TypeORM
-- **Authentication**: JWT (stateless) with bcrypt
+- **Authentication**: JWT (stateless) with Bun.password (bcrypt algorithm)
 - **Security**: AES-256-GCM encryption
 - **AI**: Google Gemini API
 - **File Storage**: Cloudinary
@@ -338,10 +319,10 @@ A full-stack TO-DO List application built with modern web technologies. Provides
 - **Security**: DOMPurify
 
 ### Development Tools
-- **Package Manager**: npm with workspaces
+- **Runtime**: Bun 1.0.0+
+- **Package Manager**: Bun (npm workspaces compatible)
 - **Code Formatting**: Prettier
 - **Process Management**: Concurrently
-- **Node Version**: 24.0.0+ (managed via .nvmrc)
 
 ## Project Structure
 
@@ -384,10 +365,8 @@ myTodoApp/
 
 ## Prerequisites
 
-- **Node.js**: 24.0.0 or higher
-- **npm**: 8 or higher
+- **Bun**: 1.0.0 or higher
 - **PostgreSQL**: Latest version
-- **nvm**: Node version manager (recommended)
 
 ## Installation
 
@@ -398,11 +377,8 @@ myTodoApp/
 git clone <repository-url>
 cd myTodoApp
 
-# Set Node version (required)
-nvm use 24
-
 # Install all dependencies (root, backend, frontend)
-npm install
+bun install
 ```
 
 ### 2. Environment Configuration
@@ -425,19 +401,19 @@ JWT_SECRET=...
 
 # Encryption keys (32 bytes, Hex format recommended)
 ENCRYPTION_KEY=...
-DETERMINISTIC_IV=...
+
 
 # Cloudinary configuration
 CLOUDINARY_CLOUD_NAME=...
 CLOUDINARY_API_KEY=...
 CLOUDINARY_API_SECRET=...
 
-# Google Gemini API
-GEMINI_API_KEY=...
-
 # Mail configuration (Gmail)
 MAIL_USER=...
 MAIL_PASS=...
+
+# Baseline Browser Mapping Warning Suppression
+BASELINE_BROWSER_MAPPING_IGNORE_OLD_DATA=true
 ```
 
 **Security Note**: Use strong passwords and secret keys in production, and manage environment variables securely.
@@ -459,28 +435,20 @@ After creating the database, configure the connection information in the `.env` 
 
 ### Development Environment
 
-**Important**: Always run `nvm use 24` before executing any commands to ensure the correct Node.js version.
-
 ```bash
-# Set Node version (required)
-nvm use 24
-
 # Run both frontend and backend
-npm start
+bun start
 
 # Or run individually
-npm run start:server    # Backend only (port 3001)
-npm run start:client    # Frontend only (port 5173)
+bun run start:server    # Backend only (port 3001)
+bun run start:client    # Frontend only (port 5173)
 ```
 
 ### Production Build
 
 ```bash
-# Set Node version (required)
-nvm use 24
-
 # Build both frontend and backend
-npm run build
+bun run build
 ```
 
 ### Backend-Specific Commands (src/ directory)
@@ -488,23 +456,20 @@ npm run build
 ```bash
 cd src
 
-# Set Node version (required)
-nvm use 24
-
 # Development mode (hot reload)
-npm run start:dev
+bun run start:dev
 
 # Production build
-npm run build
+bun run build
 
 # Production run
-npm run start:prod
+bun run start:prod
 
 # Run tests
-npm test
+bun test
 
 # Lint and fix
-npm run lint
+bun run lint
 ```
 
 **Security Note**: When deploying to production, properly configure environment variables, firewall settings, HTTPS certificates, etc.
@@ -514,17 +479,14 @@ npm run lint
 ```bash
 cd client
 
-# Set Node version (required)
-nvm use 24
-
 # Development server
-npm start
+bun run dev
 
 # Production build
-npm run build
+bun run build
 
 # Run tests
-npm test
+bun test
 ```
 
 ## Naming Conventions
@@ -565,7 +527,8 @@ npm test
 
 ## Security
 
-- Strong encryption algorithm for password hashing
+- Strong password hashing using Bun.password (bcrypt algorithm)
+- AES-256-GCM data encryption using Web Crypto API
 - JWT-based authentication system
 - Secure credential storage mechanism
 - XSS and CSRF attack prevention

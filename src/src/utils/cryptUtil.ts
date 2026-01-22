@@ -1,8 +1,8 @@
-import bcrypt from 'bcrypt';
 import { Logger } from '@nestjs/common';
-import * as crypto from 'node:crypto';
+import { aessiv } from '@noble/ciphers/aes.js';
 
-const ALGORITHM = 'aes-256-gcm';
+// Web Crypto API 전역 객체 타입 선언 (Bun/Node 19+)
+declare const crypto: Crypto;
 
 /**
  * 환경 변수 값을 버퍼로 변환하는 헬퍼 함수
@@ -14,7 +14,7 @@ const getBufferFromEnv = (
   val: string | undefined,
   expectedByteLength: number,
   fallbackVal?: string,
-): Buffer => {
+): Uint8Array => {
   // 값이 없으면 fallback 사용
   if (!val && fallbackVal) {
     val = fallbackVal;
@@ -22,13 +22,13 @@ const getBufferFromEnv = (
 
   if (!val) {
     // 값도 없고 fallback도 없으면 빈 버퍼 반환 (호출처에서 에러 처리 유도 가능)
-    return Buffer.alloc(0);
+    return new Uint8Array(0);
   }
 
   // Hex String 감지 (길이가 2배이면 Hex일 확률이 높음)
   if (val.length === expectedByteLength * 2) {
     // Hex 디코딩 시도
-    const hexBuffer = Buffer.from(val, 'hex');
+    const hexBuffer = hexToBytes(val);
     // Hex 디코딩 결과 길이가 맞으면 성공으로 간주
     if (hexBuffer.length === expectedByteLength) {
       return hexBuffer;
@@ -36,7 +36,33 @@ const getBufferFromEnv = (
   }
 
   // 일반 문자열로 간주
-  return Buffer.from(val);
+  return new TextEncoder().encode(val);
+};
+
+/**
+ * Hex 문자열을 Uint8Array로 변환
+ */
+const hexToBytes = (hex: string): Uint8Array => {
+  if (hex.length % 2 !== 0) {
+    throw new Error('Invalid hex string: length must be even');
+  }
+  if (!/^[0-9a-fA-F]*$/.test(hex)) {
+    throw new Error('Invalid hex string: contains non-hex characters');
+  }
+  const bytes = new Uint8Array(hex.length / 2);
+  for (let i = 0; i < hex.length; i += 2) {
+    bytes[i / 2] = Number.parseInt(hex.substring(i, i + 2), 16);
+  }
+  return bytes;
+};
+
+/**
+ * Uint8Array를 Hex 문자열로 변환
+ */
+const bytesToHex = (bytes: Uint8Array): string => {
+  return Array.from(bytes)
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
 };
 
 // ENCRYPTION_KEY 로딩
@@ -52,121 +78,221 @@ if (ENCRYPTION_KEY_BUF.length !== 32) {
   throw new Error('ENCRYPTION_KEY must be 32 bytes long for AES-256');
 }
 
+/**
+ * 비밀번호를 Bun.password로 해싱
+ */
 export const encrypt = async (rawText: string): Promise<string> => {
-  const saltOrRounds = 10;
-  return await bcrypt.hash(rawText, saltOrRounds);
+  try {
+    return await Bun.password.hash(rawText, {
+      algorithm: 'bcrypt',
+      cost: 10,
+    });
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    Logger.error(`Password hashing failed: ${errorMsg}`, 'CryptUtil');
+    throw new Error('Failed to hash password');
+  }
 };
 
+/**
+ * 해시된 비밀번호를 Bun.password로 검증
+ */
 export const isHashValid = async (
   rawText: string,
   hashedText: string,
 ): Promise<boolean> => {
-  return await bcrypt.compare(rawText, hashedText);
+  try {
+    return await Bun.password.verify(rawText, hashedText, 'bcrypt');
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    Logger.error(`Password verification failed: ${errorMsg}`, 'CryptUtil');
+    throw new Error('Failed to verify password');
+  }
 };
 
-export const encryptSymmetric = (text: string): string => {
+/**
+ * Web Crypto API를 사용한 대칭키 암호화 (랜덤 IV)
+ * @throws {Error} 암호화 실패 시 에러를 발생시킵니다.
+ */
+export const encryptSymmetric = async (text: string): Promise<string> => {
   if (!text) return text;
 
-  const iv = crypto.randomBytes(IV_LENGTH);
-  const cipher = crypto.createCipheriv(ALGORITHM, ENCRYPTION_KEY_BUF, iv);
-  let encrypted = cipher.update(text);
-  encrypted = Buffer.concat([encrypted, cipher.final()]);
-  const authTag = cipher.getAuthTag();
+  try {
+    // 랜덤 IV 생성
+    const iv = crypto.getRandomValues(new Uint8Array(IV_LENGTH));
 
-  return (
-    iv.toString('hex') +
-    ':' +
-    authTag.toString('hex') +
-    ':' +
-    encrypted.toString('hex')
-  );
+    // CryptoKey 가져오기
+    const key = await crypto.subtle.importKey(
+      'raw',
+      ENCRYPTION_KEY_BUF as BufferSource,
+      { name: 'AES-GCM' },
+      false,
+      ['encrypt'],
+    );
+
+    // 암호화 (tagLength 명시적 지정)
+    const encrypted = await crypto.subtle.encrypt(
+      {
+        name: 'AES-GCM',
+        iv: iv as BufferSource,
+        tagLength: 128, // 128비트 (16바이트) authTag 명시적 설정
+      },
+      key,
+      new TextEncoder().encode(text),
+    );
+
+    // 결과는 [iv:authTag:encryptedData] 형태로 저장
+    // AES-GCM에서 authTag는 암호화 결과의 마지막 16바이트
+    const encryptedArray = new Uint8Array(encrypted);
+    const authTag = encryptedArray.slice(-16);
+    const ciphertext = encryptedArray.slice(0, -16);
+
+    return (
+      bytesToHex(iv) + ':' + bytesToHex(authTag) + ':' + bytesToHex(ciphertext)
+    );
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    Logger.error(`Symmetric encryption failed: ${errorMsg}`, 'CryptUtil');
+    throw new Error('Failed to encrypt data');
+  }
 };
 
-export const decryptSymmetric = (text: string): string => {
+/**
+ * Web Crypto API를 사용한 대칭키 복호화 (랜덤 IV)
+ * @throws {Error} 복호화 실패 시 에러를 발생시킵니다.
+ */
+export const decryptSymmetric = async (text: string): Promise<string> => {
   if (!text) return text;
 
   try {
     const textParts = text.split(':');
-    if (textParts.length < 3) return text;
+    if (textParts.length < 3) {
+      throw new Error('Invalid ciphertext format');
+    }
 
-    const iv = Buffer.from(textParts.shift(), 'hex');
-    const authTag = Buffer.from(textParts.shift(), 'hex');
-    const encryptedText = Buffer.from(textParts.join(':'), 'hex');
-    const decipher = crypto.createDecipheriv(ALGORITHM, ENCRYPTION_KEY_BUF, iv);
-    decipher.setAuthTag(authTag);
-    let decrypted = decipher.update(encryptedText);
-    decrypted = Buffer.concat([decrypted, decipher.final()]);
+    const iv = hexToBytes(textParts[0]);
+    const authTag = hexToBytes(textParts[1]);
+    const ciphertext = hexToBytes(textParts.slice(2).join(':'));
 
-    return decrypted.toString();
+    // GCM 모드에서는 authTag를 암호문 뒤에 붙여야 함
+    const encryptedData = new Uint8Array(ciphertext.length + authTag.length);
+    encryptedData.set(ciphertext);
+    encryptedData.set(authTag, ciphertext.length);
+
+    // CryptoKey 가져오기
+    const key = await crypto.subtle.importKey(
+      'raw',
+      ENCRYPTION_KEY_BUF as BufferSource,
+      { name: 'AES-GCM' },
+      false,
+      ['decrypt'],
+    );
+
+    // 복호화
+    const decrypted = await crypto.subtle.decrypt(
+      {
+        name: 'AES-GCM',
+        iv: iv as BufferSource,
+      },
+      key,
+      encryptedData as BufferSource,
+    );
+
+    return new TextDecoder().decode(decrypted);
   } catch (error) {
-    Logger.error(`Symmetric decryption failed: ${error.message}`, 'CryptUtil');
-    // 복호화 실패 시 원본 반환
-    return text;
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    Logger.error(`Symmetric decryption failed: ${errorMsg}`, 'CryptUtil');
+    throw new Error('Failed to decrypt data');
   }
 };
 
-const getFixedIv = () => {
-  const envIv = process.env.DETERMINISTIC_IV;
-  // DETERMINISTIC_IV 처리 (16 bytes)
-  // 환경변수가 없으면 기본값('a1b2c3d4e5f6g7h8') 사용
-  const ivBuffer = getBufferFromEnv(
-    envIv,
-    16,
-    'a1b2c3d4e5f6g7h8', // 16글자 fallback
-  );
+// AES-SIV 키 캐싱
+let _sivKeyPromise: Promise<Uint8Array> | null = null;
 
-  // 길이가 안맞으면 fallback으로 강제 (안전장치)
-  if (ivBuffer.length !== 16) {
-    return Buffer.from('a1b2c3d4e5f6g7h8');
-  }
-  return ivBuffer;
+/**
+ * HKDF를 사용하여 32바이트 마스터 키에서 64바이트 SIV 키 파생
+ * (AES-256-SIV는 64바이트 키 필요: 32B enc + 32B mac)
+ */
+const getSivKey = (): Promise<Uint8Array> => {
+  if (_sivKeyPromise !== null) return _sivKeyPromise;
+
+  _sivKeyPromise = (async () => {
+    try {
+      const masterKey = await crypto.subtle.importKey(
+        'raw',
+        ENCRYPTION_KEY_BUF as BufferSource,
+        { name: 'HKDF' },
+        false,
+        ['deriveBits'],
+      );
+
+      const derivedBits = await crypto.subtle.deriveBits(
+        {
+          name: 'HKDF',
+          hash: 'SHA-256',
+          salt: new TextEncoder().encode('TODO-APP-SIV-SALT-V1'),
+          info: new TextEncoder().encode('AES-SIV-DERIVED-KEY'),
+        },
+        masterKey,
+        512, // 64 bytes * 8 bits
+      );
+
+      return new Uint8Array(derivedBits);
+    } catch (error) {
+      _sivKeyPromise = null; // Reset promise on failure to allow retry
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      Logger.error(`SIV key derivation failed: ${errorMsg}`, 'CryptUtil');
+      throw new Error('Failed to derive SIV key');
+    }
+  })();
+
+  return _sivKeyPromise;
 };
 
-const FIXED_IV = getFixedIv();
-
-export const encryptSymmetricDeterministic = (text: string): string => {
-  if (!text) return text;
-
-  const cipher = crypto.createCipheriv(ALGORITHM, ENCRYPTION_KEY_BUF, FIXED_IV);
-  let encrypted = cipher.update(text);
-  encrypted = Buffer.concat([encrypted, cipher.final()]);
-  const authTag = cipher.getAuthTag();
-
-  return (
-    FIXED_IV.toString('hex') +
-    ':' +
-    authTag.toString('hex') +
-    ':' +
-    encrypted.toString('hex')
-  );
-};
-
-export const decryptSymmetricDeterministic = (text: string): string => {
+/**
+ * AES-SIV (RFC 5297)를 사용한 강력한 결정적 암호화
+ *
+ * [보안 특징]
+ * - 동일한 평문에 대해 항상 동일한 암호문을 생성합니다. (Deterministic)
+ * - Synthetic IV(SIV) 모드를 사용하여 Nonce 재사용 문제에 내성이 있습니다.
+ * - AES-GCM 방식과 달리 Semantic Security를 최대한 보장하면서 결정적 암호화를 제공합니다.
+ *
+ * @throws {Error} 암호화 실패 시 에러를 발생시킵니다.
+ */
+export const encryptSymmetricDeterministic = async (
+  text: string,
+): Promise<string> => {
   if (!text) return text;
 
   try {
-    const textParts = text.split(':');
-    if (textParts.length < 3) return text;
-
-    const ivMsg = textParts.shift();
-    const authTag = Buffer.from(textParts.shift(), 'hex');
-    const encryptedText = Buffer.from(textParts.join(':'), 'hex');
-
-    const decipher = crypto.createDecipheriv(
-      ALGORITHM,
-      ENCRYPTION_KEY_BUF,
-      Buffer.from(ivMsg, 'hex'),
-    );
-    decipher.setAuthTag(authTag);
-    let decrypted = decipher.update(encryptedText);
-    decrypted = Buffer.concat([decrypted, decipher.final()]);
-
-    return decrypted.toString();
+    const key = await getSivKey();
+    const siv = aessiv(key);
+    const encrypted = siv.encrypt(new TextEncoder().encode(text));
+    return bytesToHex(encrypted);
   } catch (error) {
-    Logger.error(
-      `Deterministic decryption failed: ${error.message}`,
-      'CryptUtil',
-    );
-    return text;
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    Logger.error(`Deterministic encryption failed: ${errorMsg}`, 'CryptUtil');
+    throw new Error('Failed to encrypt data deterministically');
+  }
+};
+
+/**
+ * AES-SIV를 사용한 결정적 복호화
+ * @throws {Error} 복호화 실패 시 에러를 발생시킵니다.
+ */
+export const decryptSymmetricDeterministic = async (
+  text: string,
+): Promise<string> => {
+  if (!text) return text;
+
+  try {
+    const key = await getSivKey();
+    const siv = aessiv(key);
+    const decrypted = siv.decrypt(hexToBytes(text));
+    return new TextDecoder().decode(decrypted);
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    Logger.error(`Deterministic decryption failed: ${errorMsg}`, 'CryptUtil');
+    throw new Error('Failed to decrypt data deterministically');
   }
 };

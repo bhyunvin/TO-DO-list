@@ -250,7 +250,7 @@ export class AssistanceService implements OnModuleInit {
         'AI API Key가 설정되지 않았습니다. 프로필 설정에서 등록해주세요.',
       );
     }
-    const apiKey = decryptSymmetric(user.aiApiKey);
+    const apiKey = await decryptSymmetric(user.aiApiKey);
     if (!apiKey) {
       throw new InternalServerErrorException(
         'API Key 처리 중 오류가 발생했습니다.',

@@ -30,7 +30,7 @@ export class MailController {
   ) {
     const { userSeq } = req.user;
     const user = await this.userService.getUser(userSeq);
-    const decryptedUser = this.userService.decryptUserInfo(user);
+    const decryptedUser = await this.userService.decryptUserInfo(user);
     const userEmail = decryptedUser.userEmail;
 
     await this.mailService.sendContactEmail(userEmail, contactDto, file);

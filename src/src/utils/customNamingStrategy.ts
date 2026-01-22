@@ -1,5 +1,13 @@
 import { DefaultNamingStrategy, NamingStrategyInterface } from 'typeorm';
-import { snakeCase } from 'typeorm/util/StringUtils';
+
+// TypeORM 내부 StringUtils API는 public API가 아니므로 직접 구현
+// (Bun 런타임에서 'typeorm/util/StringUtils' import 불가 문제 해결)
+function snakeCase(str: string): string {
+  return str
+    .replaceAll(/([a-z])([A-Z])/g, '$1_$2') // camelCase 경계
+    .replaceAll(/([A-Z])([A-Z][a-z])/g, '$1_$2') // XMLParser → XML_Parser
+    .toLowerCase();
+}
 
 export class CustomNamingStrategy
   extends DefaultNamingStrategy

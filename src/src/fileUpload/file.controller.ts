@@ -8,7 +8,7 @@ import {
   Req,
   ForbiddenException,
 } from '@nestjs/common';
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { FileInfoEntity } from './file.entity';

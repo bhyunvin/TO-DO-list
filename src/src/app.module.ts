@@ -35,7 +35,6 @@ const envSchema = z.object({
   DB_DEV_PASSWORD: z.string().min(1, 'DB_DEV_PASSWORD는 필수입니다.'),
   DB_DEV_DATABASE: z.string().min(1, 'DB_DEV_DATABASE는 필수입니다.'),
 
-  GEMINI_API_KEY: z.string().min(1, 'GEMINI_API_KEY는 필수입니다.'),
   SYSTEM_PROMPT_PATH: z
     .string()
     .default('./src/assistance/assistance.systemPrompt.txt'),
@@ -53,9 +52,6 @@ const envSchema = z.object({
   ENCRYPTION_KEY: z
     .string()
     .length(64, 'ENCRYPTION_KEY는 32byte hex string이어야 합니다 (64자).'),
-  DETERMINISTIC_IV: z
-    .string()
-    .length(32, 'DETERMINISTIC_IV는 16byte hex string이어야 합니다 (32자).'),
 
   // --- Gmail 설정 ---
   GMAIL_USER: z.email({ message: 'GMAIL_USER는 유효한 이메일이어야 합니다.' }),

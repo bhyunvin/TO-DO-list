@@ -3,7 +3,7 @@ import { extname } from 'node:path';
 import {
   ValidationResult,
   ValidationConfig,
-  FileCategory,
+  type FileCategory,
   FileValidationError,
 } from './file-validation.interfaces';
 import {

@@ -76,18 +76,13 @@ client/
 
 ## 사전 요구사항
 
-- Node.js 24.0.0 이상
-- npm 8 이상
-- nvm (권장)
+- Bun 1.0.0 이상
 
 ## 설치 방법
 
 ```bash
-# Node 버전 설정 (필수)
-nvm use 24
-
 # 의존성 설치
-npm install
+bun install
 ```
 
 ## 환경 변수 설정
@@ -107,17 +102,14 @@ REACT_APP_MAX_FILE_SIZE=...
 ## 실행 방법
 
 ```bash
-# Node 버전 설정 (필수)
-nvm use 24
-
 # 개발 서버 시작 (포트 5173)
-npm start
+bun run dev
 
 # 프로덕션 빌드
-npm run build
+bun run build
 
 # 빌드된 애플리케이션 테스트 (serve 필요)
-npx serve -s build
+bunx serve -s build
 ```
 
 개발 서버가 시작되면 브라우저에서 애플리케이션을 확인할 수 있습니다.
@@ -125,27 +117,24 @@ npx serve -s build
 ## 테스트
 
 ```bash
-# Node 버전 설정 (필수)
-nvm use 24
-
 # 테스트 실행 (watch 모드)
-npm test
+bun test
 
 # 테스트 커버리지
-npm test -- --coverage
+bun test -- --coverage
 
 # 특정 테스트 파일 실행
-npm test -- LoginForm.test.js
+bun test -- LoginForm.test.js
 ```
 
 ## 코드 품질
 
 ```bash
 # Lint 검사
-npm run lint
+bun run lint
 
 # Lint 자동 수정 (package.json에 스크립트 추가 필요)
-npm run lint -- --fix
+bun run lint -- --fix
 ```
 
 ## 주요 컴포넌트
@@ -254,11 +243,8 @@ npm run lint -- --fix
 ### 프로덕션 빌드
 
 ```bash
-# Node 버전 설정 (필수)
-nvm use 24
-
 # 빌드 생성
-npm run build
+bun run build
 ```
 
 빌드된 파일은 `build/` 디렉토리에 생성됩니다.
@@ -282,9 +268,9 @@ npm run build
 
 ### 빌드 오류
 
-- Node 버전 확인 (`nvm use 24`)
+- Node 버전 확인 (Bun 사용)
 - `node_modules` 삭제 후 재설치
-- 캐시 정리: `npm cache clean --force`
+- 캐시 정리: `bun pm cache rm`
 
 ### 스타일 오류
 
@@ -381,18 +367,13 @@ client/
 
 ## Prerequisites
 
-- Node.js 24.0.0 or higher
-- npm 8 or higher
-- nvm (recommended)
+- Bun 1.0.0 or higher
 
 ## Installation
 
 ```bash
-# Set Node version (required)
-nvm use 24
-
 # Install dependencies
-npm install
+bun install
 ```
 
 ## Environment Configuration
@@ -412,17 +393,14 @@ REACT_APP_MAX_FILE_SIZE=...
 ## Running the Application
 
 ```bash
-# Set Node version (required)
-nvm use 24
-
 # Start development server (port 5173)
-npm start
+bun run dev
 
 # Production build
-npm run build
+bun run build
 
 # Test built application (requires serve)
-npx serve -s build
+bunx serve -s build
 ```
 
 Once the development server starts, you can view the application in your browser.
@@ -430,27 +408,24 @@ Once the development server starts, you can view the application in your browser
 ## Testing
 
 ```bash
-# Set Node version (required)
-nvm use 24
-
 # Run tests (watch mode)
-npm test
+bun test
 
 # Test coverage
-npm test -- --coverage
+bun test -- --coverage
 
 # Run specific test file
-npm test -- LoginForm.test.js
+bun test -- LoginForm.test.js
 ```
 
 ## Code Quality
 
 ```bash
 # Lint check
-npm run lint
+bun run lint
 
 # Lint auto-fix (requires script in package.json)
-npm run lint -- --fix
+bun run lint -- --fix
 ```
 
 ## Main Components
@@ -559,11 +534,8 @@ Configures proxy for backend API in development environment.
 ### Production Build
 
 ```bash
-# Set Node version (required)
-nvm use 24
-
 # Create build
-npm run build
+bun run build
 ```
 
 Built files are generated in the `build/` directory.
@@ -587,9 +559,9 @@ Deploy built files to a static file server:
 
 ### Build Error
 
-- Check Node version (`nvm use 24`)
+- Check Bun version
 - Delete `node_modules` and reinstall
-- Clear cache: `npm cache clean --force`
+- Clear cache: `bun pm cache rm`
 
 ### Style Error
 

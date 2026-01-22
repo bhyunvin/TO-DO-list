@@ -17,7 +17,7 @@ This is a full-stack TO-DO List application built with modern web technologies. 
 - Contact Developer feature (send inquiry emails to administrator)
 - Dark mode theme toggle with persistent user preference
 - Comprehensive audit logging for all operations with IP anonymization scheduler
-- Secure password encryption (bcrypt) and data encryption (AES-256-GCM)
+- Secure password encryption using Bun.password (bcrypt algorithm) and data encryption (AES-256-GCM)
 - Environment-based credential management
 - Markdown rendering with XSS protection
 
