@@ -304,9 +304,7 @@ export class UserService {
 
   // private async decryptUserFields... (userPhone 없으므로 일단 제외)
 
-  async toUserResponse(
-    user: UserEntity,
-  ): Promise<UserResponseDto> {
+  async toUserResponse(user: UserEntity): Promise<UserResponseDto> {
     return {
       userNo: user.userSeq,
       userEmail: user.userEmail,

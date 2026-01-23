@@ -243,7 +243,7 @@ describe('TodoContainer Sorting Behavior', () => {
     });
 
     // 초기 순서 확인
-    let rows = screen.getAllByRole('row');
+    const rows = screen.getAllByRole('row');
     expect(rows[1]).toHaveTextContent('Todo 2');
     expect(rows[2]).toHaveTextContent('Todo 1');
 

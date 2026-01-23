@@ -1,5 +1,5 @@
 import { api } from './client';
-// import { useAuthStore } from '../authStore/authStore'; // 순환 참조 우려가 있지만 일단 유지? 
+// import { useAuthStore } from '../authStore/authStore'; // 순환 참조 우려가 있지만 일단 유지?
 // authService 내에서 useAuthStore.getState() 사용함.
 
 // 순환 참조 방지: authStore가 authService를 쓰는지 확인 필요.
@@ -24,7 +24,11 @@ const authService = {
       // 에러 처리: error.value는 에러 메시지 또는 객체
       // Elysia 에러 응답 구조 확인 필요. 보통 string or object.
       // 기존 로직은 apiClient가 에러를 throw.
-      throw new Error(typeof error.value === 'string' ? error.value : JSON.stringify(error.value));
+      throw new Error(
+        typeof error.value === 'string'
+          ? error.value
+          : JSON.stringify(error.value),
+      );
     }
 
     if (!data) throw new Error('No data received');
@@ -58,19 +62,23 @@ const authService = {
     // 백엔드 /user/register는 Body(JSON)만 받음 (Step 592 확인).
     // 따라서 FormData를 JSON으로 변환해야 함.
     // 프로필 이미지는 제외됨 (백엔드가 multipart 지원 안 함).
-    
+
     let payload = formData;
     if (formData instanceof FormData) {
-        payload = Object.fromEntries(formData.entries());
-        // userEmail, userPw, userName, userPhone 등
-        // userPhone이 빈 문자열이면 undefined로 처리?
-        if (payload.userPhone === '') delete payload.userPhone;
+      payload = Object.fromEntries(formData.entries());
+      // userEmail, userPw, userName, userPhone 등
+      // userPhone이 빈 문자열이면 undefined로 처리?
+      if (payload.userPhone === '') delete payload.userPhone;
     }
 
     const { data, error } = await api.user.register.post(payload);
-    
+
     if (error) {
-       throw new Error(typeof error.value === 'string' ? error.value : JSON.stringify(error.value));
+      throw new Error(
+        typeof error.value === 'string'
+          ? error.value
+          : JSON.stringify(error.value),
+      );
     }
 
     return data;
@@ -81,7 +89,7 @@ const authService = {
    * 기존: /user/duplicate/:userId -> Elysia에는 없음 (Step 592).
    * Elysia user.routes.ts에는 duplicate 체크 API가 없음.
    * ==> 누락된 기능!
-   * 해결책: 일단 주석 처리하거나 에러 발생. 
+   * 해결책: 일단 주석 처리하거나 에러 발생.
    * 혹은 프론트엔드에서 duplicate check 호출 부분을 제거해야 함.
    * 백엔드 마이그레이션(Phase 2) 때 놓친 것일 수 있음.
    * 또는 /user/profile 조회로 대체? 아니면 register 시 에러 처리?
@@ -92,7 +100,7 @@ const authService = {
   async checkDuplicateId(userId: string) {
     console.warn('checkDuplicateId API is not implemented in backend.');
     // 임시: 중복 아님 처리 (가입 시도 시 에러로 잡도록)
-    return false; 
+    return false;
   },
 };
 

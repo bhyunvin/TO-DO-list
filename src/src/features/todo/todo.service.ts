@@ -1,9 +1,4 @@
-import {
-  Repository,
-  DataSource,
-  Brackets,
-  Between,
-} from 'typeorm';
+import { Repository, DataSource, Brackets, Between } from 'typeorm';
 import { TodoEntity } from './todo.entity';
 import { FileInfoEntity } from '../../fileUpload/file.entity'; // 경로 확인 필요 (file.entity.ts)
 import { FileUploadUtil } from '../../fileUpload/fileUploadUtil';
@@ -140,12 +135,11 @@ export class TodoService {
         // files가 File[] 인지 확인 (Elysia t.Files는 File[])
         const files = dto.files as File[];
 
-        const { fileGroupNo } =
-          await this.fileUploadUtil.saveFileInfo(
-            files,
-            { entity: null, id: String(userSeq), ip, isUpdate: false },
-            manager,
-          );
+        const { fileGroupNo } = await this.fileUploadUtil.saveFileInfo(
+          files,
+          { entity: null, id: String(userSeq), ip, isUpdate: false },
+          manager,
+        );
 
         if (fileGroupNo) {
           savedTodo.todoFileGroupNo = fileGroupNo;

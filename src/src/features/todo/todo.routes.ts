@@ -31,7 +31,10 @@ export const todoRoutes = new Elysia({ prefix: '/todo' })
     async ({ user, query, todoService }) => {
       const todoDate = query.date || null;
       // jwtPlugin user payload has 'sub' not 'id'
-      const todos = await todoService.findAll(Number((user as any)!.sub), todoDate);
+      const todos = await todoService.findAll(
+        Number((user as any)!.sub),
+        todoDate,
+      );
 
       const result = [];
       for (const todo of todos) {
@@ -159,7 +162,11 @@ export const todoRoutes = new Elysia({ prefix: '/todo' })
     async ({ user, body, todoService, request }) => {
       const clientIp = getClientIp(request);
       // body.todoIds 접근을 위해 any 캐스팅
-      await todoService.delete((body as any).todoIds, Number((user as any)!.sub), clientIp);
+      await todoService.delete(
+        (body as any).todoIds,
+        Number((user as any)!.sub),
+        clientIp,
+      );
       return { success: true };
     },
     {

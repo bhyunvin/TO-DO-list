@@ -47,7 +47,7 @@ export const useThemeStore = create(
         }
 
         // 저장된 테마가 없으면 시스템 선호도 확인
-        let initialTheme = 'dark';
+        const initialTheme = 'dark';
 
         try {
           if (
