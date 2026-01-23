@@ -9,19 +9,10 @@ import { UserEntity } from '../user/user.entity';
 import { decryptSymmetric } from '../../utils/cryptUtil';
 import { ChatRequestDto, ChatResponseDto } from './assistance.schema';
 
-// 로거 대체 (console 사용)
-const logger = {
-  log: (msg: string, ...args: any[]) =>
-    console.log(`[AssistanceService] ${msg}`, ...args),
-  warn: (msg: string, ...args: any[]) =>
-    console.warn(`[AssistanceService] ${msg}`, ...args),
-  error: (msg: string, ...args: any[]) =>
-    console.error(`[AssistanceService] ${msg}`, ...args),
-  debug: (msg: string, ...args: any[]) =>
-    console.debug(`[AssistanceService] ${msg}`, ...args),
-};
+import { Logger } from '../../utils/logger';
 
 export class AssistanceService {
+  private readonly logger = new Logger(AssistanceService.name);
   private readonly userRepository: Repository<UserEntity>;
 
   // SDK 타입을 사용한 도구 정의
@@ -132,7 +123,7 @@ export class AssistanceService {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         if (attempt > 1) {
-          logger.log(`재시도 중... (시도 ${attempt}/${maxRetries})`);
+          this.logger.log(`재시도 중... (시도 ${attempt}/${maxRetries})`);
         }
 
         const result = await this.getGeminiResponse(
@@ -152,7 +143,7 @@ export class AssistanceService {
         const isRateLimited = this.isRetryableError(error);
         const isLastAttempt = attempt === maxRetries;
 
-        logger.error(`챗 요청 실패 (시도 ${attempt}): ${error.message}`);
+        this.logger.error(`챗 요청 실패 (시도 ${attempt}): ${error.message}`);
 
         if (isRateLimited && !isLastAttempt) {
           const delay = this.calculateRetryDelay(attempt, baseDelay, error);
@@ -287,7 +278,7 @@ export class AssistanceService {
       // Function Call 확인
       const functionCalls = parts.filter((p) => p.functionCall);
       if (functionCalls.length > 0) {
-        logger.log(`함수 호출 감지: ${functionCalls.length}개`);
+        this.logger.log(`함수 호출 감지: ${functionCalls.length}개`);
 
         const functionResponses = await Promise.all(
           functionCalls.map(async (part) => {
@@ -353,8 +344,8 @@ export class AssistanceService {
       systemPrompt += `\n\n[CURRENT_DATE]\n오늘 날짜: ${currentDate} (YYYY-MM-DD)\n`;
 
       return systemPrompt;
-    } catch (error) {
-      logger.error('시스템 프롬프트 로드 실패', error);
+    } catch (error: any) {
+      this.logger.error('시스템 프롬프트 로드 실패', error.message);
       return '당신은 도움이 되는 비서입니다.';
     }
   }
@@ -403,7 +394,7 @@ export class AssistanceService {
       }
       return { error: `Unknown function ${name}` };
     } catch (e: any) {
-      logger.error(`Tool execution failed: ${e.message}`);
+      this.logger.error(`Tool execution failed: ${e.message}`);
       return { error: e.message };
     }
   }

@@ -8,8 +8,8 @@ import {
   FILE_VALIDATION_ERRORS,
   FILE_VALIDATION_MESSAGES,
 } from './file-validation.constants';
+import { Logger } from '../../utils/logger';
 
-// ... 인터페이스 정의는 유지 ...
 export interface FileUploadErrorResponse {
   success: false;
   message: string;
@@ -37,7 +37,7 @@ export interface ErrorLogContext {
 }
 
 export class FileUploadErrorService {
-  // Logger -> console 대체
+  private readonly logger = new Logger(FileUploadErrorService.name);
 
   /**
    * 파일 업로드 실패에 대한 표준화된 에러 응답 생성
@@ -176,18 +176,20 @@ export class FileUploadErrorService {
     }
 
     securityErrors.forEach(({ fileName, fileType, fileSize }) => {
-      console.warn(`보안 경고: 차단된 파일 형식 업로드 시도`, {
-        fileName,
-        fileType,
-        fileSize,
-        clientIp: context.clientIp,
-        userAgent: context.userAgent,
-        userId: context.userId,
-        category: context.category,
-        endpoint: context.endpoint,
-        requestId: context.requestId,
-        timestamp: new Date().toISOString(),
-      });
+      this.logger.warn(
+        `보안 경고: 차단된 파일 형식 업로드 시도`,
+        JSON.stringify({
+          fileName,
+          fileType,
+          fileSize,
+          clientIp: context.clientIp,
+          userAgent: context.userAgent,
+          userId: context.userId,
+          category: context.category,
+          endpoint: context.endpoint,
+          requestId: context.requestId,
+        }),
+      );
     });
   }
 
@@ -204,29 +206,31 @@ export class FileUploadErrorService {
       return;
     }
 
-    console.warn(`${nonSecurityErrors.length}개 파일 검증 실패`, {
-      errors: nonSecurityErrors.map(
-        ({ fileName, errorCode, fileSize, fileType }) => ({
-          fileName,
-          errorCode,
-          fileSize,
-          fileType,
-        }),
-      ),
-      clientIp: context.clientIp,
-      userAgent: context.userAgent,
-      userId: context.userId,
-      category: context.category,
-      endpoint: context.endpoint,
-      requestId: context.requestId,
-      timestamp: new Date().toISOString(),
-    });
+    this.logger.warn(
+      `${nonSecurityErrors.length}개 파일 검증 실패`,
+      JSON.stringify({
+        errors: nonSecurityErrors.map(
+          ({ fileName, errorCode, fileSize, fileType }) => ({
+            fileName,
+            errorCode,
+            fileSize,
+            fileType,
+          }),
+        ),
+        clientIp: context.clientIp,
+        userAgent: context.userAgent,
+        userId: context.userId,
+        category: context.category,
+        endpoint: context.endpoint,
+        requestId: context.requestId,
+      }),
+    );
   }
 
   logSuccessfulUpload(uploadedFiles: any[], context: ErrorLogContext): void {
-    console.log(
+    this.logger.log(
       `${uploadedFiles.length}개 파일이 성공적으로 업로드되었습니다`,
-      {
+      JSON.stringify({
         fileCount: uploadedFiles.length,
         files: uploadedFiles.map((file) => ({
           fileName: file.originalFileName || file.fileName,
@@ -237,8 +241,7 @@ export class FileUploadErrorService {
         category: context.category,
         endpoint: context.endpoint,
         requestId: context.requestId,
-        timestamp: new Date().toISOString(),
-      },
+      }),
     );
   }
 
