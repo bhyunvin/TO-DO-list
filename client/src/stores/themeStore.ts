@@ -1,12 +1,22 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
+type Theme = 'light' | 'dark';
+
+// ThemeStore 인터페이스 정의
+interface ThemeStore {
+  theme: Theme;
+  toggleTheme: () => void;
+  setTheme: (theme: Theme) => void;
+  initializeTheme: () => void;
+}
+
 /**
  * 테마 상태 관리를 위한 Zustand 스토어
  * localStorage를 사용하여 사용자의 테마 선호도를 영구 저장
  */
-export const useThemeStore = create(
-  persist(
+export const useThemeStore = create<ThemeStore>()(
+  persist<ThemeStore>(
     (set, get) => ({
       // 현재 활성화된 테마 ('light' 또는 'dark')
       theme: 'dark',
@@ -25,7 +35,7 @@ export const useThemeStore = create(
        * 특정 테마로 설정
        * @param {string} theme - 'light' 또는 'dark'
        */
-      setTheme: (theme) => {
+      setTheme: (theme: Theme) => {
         if (theme !== 'light' && theme !== 'dark') {
           theme = 'dark';
         }
@@ -50,10 +60,7 @@ export const useThemeStore = create(
         const initialTheme = 'dark';
 
         try {
-          if (
-            globalThis.matchMedia &&
-            globalThis.matchMedia('(prefers-color-scheme: dark)').matches
-          ) {
+          if (globalThis.matchMedia?.('(prefers-color-scheme: dark)').matches) {
             // 이미 'dark'로 초기화되어 있으므로 추가 작업 필요 없음
           }
         } catch (error) {

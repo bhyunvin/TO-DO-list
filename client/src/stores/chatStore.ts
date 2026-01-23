@@ -1,19 +1,56 @@
- 
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { useAuthStore } from '../authStore/authStore';
 
-// 채팅 메시지 인터페이스 구조
-// {
-//   id: string,
-//   content: string,
-//   isUser: boolean,
-//   timestamp: Date,
-//   isHtml?: boolean
-// }
+// 채팅 메시지 인터페이스
+interface ChatMessage {
+  id: string;
+  content: string;
+  isUser: boolean;
+  timestamp: Date;
+  isHtml?: boolean;
+  type?: string;
+}
+
+interface MessageData {
+  content: string;
+  isUser: boolean;
+  isHtml?: boolean;
+}
+
+// ChatStore 인터페이스 정의
+interface ChatStore {
+  messages: ChatMessage[];
+  isLoading: boolean;
+  error: string | null;
+  retryCount: number;
+  lastFailedMessage: string | null;
+  requestInProgress: boolean;
+  lastRequestTime: number;
+  todoRefreshTrigger: number;
+
+  hasApiKey: () => boolean;
+  addMessage: (messageData: MessageData) => void;
+  addWelcomeMessage: () => void;
+  setLoading: (loading: boolean) => void;
+  setError: (error: string | null, errorType?: string) => void;
+  clearMessages: () => void;
+  clearError: () => void;
+  handleApiError: (
+    error: any,
+    response?: any,
+  ) => { shouldRetry: boolean; errorType: string };
+  canSendRequest: () => boolean;
+  setRetryMessage: (message: string | null) => void;
+  getRetryMessage: () => string | null;
+  incrementRetryCount: () => void;
+  resetRetryState: () => void;
+  getRecentMessages: (count?: number) => ChatMessage[];
+  triggerTodoRefresh: () => void;
+}
 
 // 다양한 실패 시나리오에 대한 한국어 오류 메시지
-const ERROR_MESSAGES = {
+const ERROR_MESSAGES: Record<string, string> = {
   NETWORK_ERROR: '네트워크 연결을 확인해주세요.',
   API_ERROR: 'AI 서비스에 일시적인 문제가 발생했습니다.',
   AUTH_ERROR: '로그인이 필요합니다.',
@@ -26,8 +63,8 @@ const ERROR_MESSAGES = {
     '여러 번 시도했지만 실패했습니다. 잠시 후 다시 시도해주세요.',
 };
 
-export const useChatStore = create(
-  persist(
+export const useChatStore = create<ChatStore>()(
+  persist<ChatStore>(
     (set, get) => ({
       // 영구 저장되는 상태
       messages: [],
@@ -44,7 +81,7 @@ export const useChatStore = create(
       hasApiKey: () => {
         try {
           const user = useAuthStore.getState().user;
-          return !!(user && user.aiApiKey);
+          return !!user?.aiApiKey;
         } catch (e) {
           console.error('Failed to check auth store', e);
           return false;
@@ -78,8 +115,8 @@ export const useChatStore = create(
           }
         }
 
-        const message = {
-          id: `${Date.now()}${Math.random().toString(36).substr(2, 9)}`,
+        const message: ChatMessage = {
+          id: `${Date.now()}${Math.random().toString(36).substring(2, 11)}`,
           timestamp: new Date(),
           ...messageData,
         };
@@ -185,10 +222,7 @@ export const useChatStore = create(
         set((state) => ({
           isLoading: loading,
           requestInProgress: loading,
-          lastRequestTime:
-            lastRequestTime === undefined
-              ? state.lastRequestTime
-              : lastRequestTime,
+          lastRequestTime: lastRequestTime ?? state.lastRequestTime,
         }));
       },
 
