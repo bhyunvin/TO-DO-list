@@ -1,4 +1,3 @@
-import { Injectable } from '@nestjs/common';
 import { extname } from 'node:path';
 import {
   ValidationResult,
@@ -16,7 +15,7 @@ import {
 /**
  * 크기 및 유형 제한으로 파일 업로드를 검증하는 서비스
  */
-@Injectable()
+
 export class FileValidationService {
   /**
    * 단일 파일의 크기를 최대 허용 크기와 비교하여 검증합니다

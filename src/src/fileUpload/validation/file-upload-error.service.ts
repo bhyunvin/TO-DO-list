@@ -1,5 +1,3 @@
-import { Injectable, Logger } from '@nestjs/common';
-import type { Request } from 'express';
 import { extname } from 'node:path';
 import {
   FileValidationError,
@@ -11,9 +9,7 @@ import {
   FILE_VALIDATION_MESSAGES,
 } from './file-validation.constants';
 
-/**
- * 파일 업로드를 위한 표준화된 에러 응답 형식
- */
+// ... 인터페이스 정의는 유지 ...
 export interface FileUploadErrorResponse {
   success: false;
   message: string;
@@ -23,9 +19,6 @@ export interface FileUploadErrorResponse {
   requestId?: string;
 }
 
-/**
- * 파일 업로드를 위한 성공 응답 형식
- */
 export interface FileUploadSuccessResponse {
   success: true;
   message: string;
@@ -34,9 +27,6 @@ export interface FileUploadSuccessResponse {
   requestId?: string;
 }
 
-/**
- * 보안 및 디버깅을 위한 에러 로깅 컨텍스트
- */
 export interface ErrorLogContext {
   clientIp: string;
   userAgent: string;
@@ -46,12 +36,8 @@ export interface ErrorLogContext {
   endpoint: string;
 }
 
-/**
- * 표준화된 응답 및 로깅으로 파일 업로드 에러를 처리하는 서비스
- */
-@Injectable()
 export class FileUploadErrorService {
-  private readonly logger = new Logger(FileUploadErrorService.name);
+  // Logger -> console 대체
 
   /**
    * 파일 업로드 실패에 대한 표준화된 에러 응답 생성
@@ -177,7 +163,7 @@ export class FileUploadErrorService {
    * 차단된 파일 시도에 대한 보안 이벤트 로깅
    */
   logSecurityEvent(
-    files: Express.Multer.File[],
+    files: any[],
     errors: FileValidationError[],
     context: ErrorLogContext,
   ): void {
@@ -190,7 +176,7 @@ export class FileUploadErrorService {
     }
 
     securityErrors.forEach(({ fileName, fileType, fileSize }) => {
-      this.logger.warn(`보안 경고: 차단된 파일 형식 업로드 시도`, {
+      console.warn(`보안 경고: 차단된 파일 형식 업로드 시도`, {
         fileName,
         fileType,
         fileSize,
@@ -205,11 +191,8 @@ export class FileUploadErrorService {
     });
   }
 
-  /**
-   * 디버깅을 위한 검증 에러 로깅
-   */
   logValidationErrors(
-    files: Express.Multer.File[],
+    files: any[],
     errors: FileValidationError[],
     context: ErrorLogContext,
   ): void {
@@ -221,7 +204,7 @@ export class FileUploadErrorService {
       return;
     }
 
-    this.logger.warn(`${nonSecurityErrors.length}개 파일 검증 실패`, {
+    console.warn(`${nonSecurityErrors.length}개 파일 검증 실패`, {
       errors: nonSecurityErrors.map(
         ({ fileName, errorCode, fileSize, fileType }) => ({
           fileName,
@@ -240,11 +223,8 @@ export class FileUploadErrorService {
     });
   }
 
-  /**
-   * 성공적인 파일 업로드 로깅
-   */
   logSuccessfulUpload(uploadedFiles: any[], context: ErrorLogContext): void {
-    this.logger.log(
+    console.log(
       `${uploadedFiles.length}개 파일이 성공적으로 업로드되었습니다`,
       {
         fileCount: uploadedFiles.length,
@@ -266,17 +246,17 @@ export class FileUploadErrorService {
    * 요청으로부터 에러 로깅 컨텍스트 추출
    */
   extractErrorContext(
-    request: Request,
+    request: any,
     category: FileCategory,
     userId?: number,
   ): ErrorLogContext {
     return {
       clientIp: request.ip || request.socket?.remoteAddress || 'unknown',
-      userAgent: request.get('User-Agent') || 'unknown',
+      userAgent: request.headers['user-agent'] || 'unknown',
       userId,
       category,
       requestId: request.headers['x-request-id'] as string,
-      endpoint: `${request.method} ${request.path}`,
+      endpoint: `${request.method} ${request.url || request.path}`,
     };
   }
 
@@ -299,7 +279,7 @@ export class FileUploadErrorService {
    * 검증 결과를 파일 검증 에러로 매핑
    */
   mapValidationResultsToErrors(
-    files: Express.Multer.File[],
+    files: any[],
     validationResults: ValidationResult[],
   ): FileValidationError[] {
     return files.reduce((errors, file, i) => {

@@ -1,253 +1,112 @@
-# 백엔드 (NestJS)
+# 백엔드 (ElysiaJS)
 
-TO-DO List 애플리케이션의 백엔드 서버입니다. NestJS 프레임워크를 사용하여 구축되었으며, TypeORM을 통해 PostgreSQL 데이터베이스와 연동됩니다.
+TO-DO List 애플리케이션의 백엔드 서버입니다. **ElysiaJS** 프레임워크와 **Bun** 런타임을 사용하여 고성능으로 구축되었으며, TypeORM을 통해 PostgreSQL 데이터베이스와 연동됩니다.
 
 ## 주요 기능
 
 - 사용자 인증 및 JWT 관리 (개인정보 동의 포함)
-- Todo CRUD 작업 및 날짜 기반 쿼리
-- Google Gemini API를 활용한 AI 지원
-- 파일 업로드 및 관리 (Cloudinary 클라우드 스토리지)
-  - 서버 사이드 파일 검증 (크기, 형식, 보안)
-  - 프로필 이미지 및 Todo 첨부파일 지원
-- Contact Developer (관리자 문의 메일 전송)
-- 포괄적인 감사 로깅 및 IP 익명화 스케줄러
-- 환경 변수를 통한 보안 자격 증명 관리
-- 데이터 암호화 (AES-256-GCM)
+- Todo CRUD 작업 및 검색, 엑셀 다운로드
+- Google Gemini API를 활용한 AI 지원 (채팅, 도구 호출)
+- 파일 업로드 및 관리 (Cloudinary)
+- Contact Developer (문의 메일)
+- 포괄적인 감사 로깅 및 IP 추적
+- 환경 변수를 통한 보안 구성
+- Swagger를 통한 API 문서화
 
 ## 기술 스택
 
-- **프레임워크**: NestJS 11.x with Express
-- **런타임**: Bun 1.0+ (Node.js 호환)
-- **언어**: TypeScript 5.x
-- **데이터베이스**: PostgreSQL with TypeORM 0.3.x
-- **인증**: JWT (stateless) with Bun.password
-- **보안**: Web Crypto API (AES-256-GCM encryption)
-- **AI**: Google Gemini API
-- **파일 스토리지**: Cloudinary
-- **파일 업로드**: Multer
+- **프레임워크**: ElysiaJS
+- **런타임**: Bun (Node.js 호환)
+- **언어**: TypeScript
+- **데이터베이스**: PostgreSQL with TypeORM
+- **인증**: JWT, Bun.password
+- **AI**: Google Gemini SDK (Function Calling 지원)
+- **스토리지**: Cloudinary
 - **메일**: Nodemailer
-- **마크다운**: marked, sanitize-html
-- **스케줄러**: @nestjs/schedule (Cron jobs)
-- **테스트**: Jest, Supertest
+- **문서화**: Swagger UI
 
-## 프로젝트 구조
+## 프로젝트 구조 (Elysia 스타일)
 
 ```
 src/
-├── main.ts                      # 애플리케이션 부트스트랩
-├── app.module.ts                # 루트 모듈
-├── user/                        # 사용자 모듈
-│   ├── user.controller.ts
-│   ├── user.service.ts
-│   ├── user.entity.ts
-│   ├── user.dto.ts
-│   └── user-validation.pipe.ts
-├── todo/                        # Todo 모듈
-│   ├── todo.controller.ts
-│   ├── todo.service.ts
-│   ├── todo.entity.ts
-│   └── todo.dto.ts
-├── assistance/                  # AI 지원 모듈
-│   ├── assistance.controller.ts
-│   ├── assistance.service.ts
-│   ├── assistance.dto.ts
-│   └── gemini.interface.ts
-├── fileUpload/                  # 파일 업로드 모듈
-│   ├── file.controller.ts
-│   ├── file.entity.ts
-│   ├── cloudinary.service.ts
-│   ├── fileUploadUtil.ts
-│   └── validation/              # 파일 검증 모듈
-│       ├── file-validation.service.ts
-│       ├── file-validation.interceptor.ts
-│       ├── file-upload-error.service.ts
-│       ├── file-validation.constants.ts
-│       └── file-validation.interfaces.ts
-├── mail/                        # 메일 모듈
-│   ├── mail.controller.ts
-│   ├── mail.service.ts
-│   └── dto/
-├── logging/                     # 로깅 모듈
-│   ├── logging.service.ts
-│   ├── logging.entity.ts
-│   └── logging.schedule.ts      # IP 익명화 스케줄러
+├── main.ts                      # 애플리케이션 엔트리포인트 (App 등록)
+├── plugins/                     # 공통 플러그인
+│   ├── config.ts                # 환경설정
+│   ├── cors.ts                  # CORS 설정
+│   ├── database.ts              # DB 연결
+│   ├── jwt.ts                   # JWT 인증
+│   └── swagger.ts               # API 문서
+├── features/                    # 기능 모듈 (라우트, 서비스, 스키마)
+│   ├── user/                    # 사용자 기능
+│   │   ├── user.routes.ts
+│   │   ├── user.service.ts
+│   │   ├── user.schema.ts
+│   │   └── user.entity.ts
+│   ├── todo/                    # 할 일 기능
+│   ├── assistance/              # AI 비서 기능
+│   ├── mail/                    # 메일 기능
+│   └── fileUpload/              # 파일 업로드 기능
 ├── utils/                       # 유틸리티
-│   ├── cryptUtil.ts
 │   ├── auditColumns.ts
-│   ├── customNamingStrategy.ts
-│   └── inputSanitizer.ts
-├── filter/                      # 전역 필터
-│   └── http-exception.filter.ts
-├── interceptor/                 # 전역 인터셉터
-│   └── logging.interceptor.ts
-├── types/                       # 타입 정의
-│   ├── express/
-│   │   ├── auth.guard.ts
-│   │   ├── auth.service.ts
-│   │   └── jwt.strategy.ts
-└── test/                        # E2E 테스트
+│   └── cryptUtil.ts
+└── test/                        # 테스트
 ```
 
 ## 사전 요구사항
 
 - Bun 1.0.0 이상
-- PostgreSQL (최신 버전)
+- PostgreSQL
 
-## 설치 방법
+## 설치 및 실행
 
 ```bash
 # 의존성 설치
 bun install
+
+# 개발 모드 실행 (핫 리로드)
+bun dev
+
+# 프로덕션 빌드 및 실행
+bun run build
+bun start
 ```
+
+## API 문서
+
+서버 실행 후 `/swagger` 경로에서 Swagger UI를 확인할 수 있습니다.
+예: `http://localhost:3001/swagger`
 
 ## 환경 변수 설정
 
 `.env` 파일을 생성하고 다음 변수들을 설정하세요:
 
 ```env
-# 데이터베이스 설정
+# 데이터베이스
 DB_HOST=...
 DB_PORT=...
 DB_USERNAME=...
 DB_PASSWORD=...
 DB_DATABASE=...
 
-# 서버 포트
-PORT=...
+# 서버
+PORT=3001
 
-# JWT 설정 (강력한 랜덤 문자열 사용)
+# JWT & 보안
 JWT_SECRET=...
-
-# 암호화 키 (32 bytes, Hex 형식 권장)
 ENCRYPTION_KEY=...
 
-# Cloudinary 설정
+# Cloudinary
 CLOUDINARY_CLOUD_NAME=...
 CLOUDINARY_API_KEY=...
 CLOUDINARY_API_SECRET=...
 
-# 메일 설정 (Gmail)
-MAIL_USER=...
-MAIL_PASS=...
+# Mail (Gmail)
+GMAIL_USER=...
+GMAIL_APP_PASSWORD=...
 
-# Baseline Browser Mapping 경고 무시 설정
-BASELINE_BROWSER_MAPPING_IGNORE_OLD_DATA=true
-
-# 파일 업로드 설정 (선택사항, Cloudinary 사용 시 불필요)
-UPLOAD_DIR=./upload
-MAX_FILE_SIZE=5242880
+# AI
+GEMINI_API_KEY=... (User DB에 저장된 키 사용 시 불필요할 수 있으나 기본 설정 권장)
 ```
-
-**보안 참고**: 프로덕션 환경에서는 강력한 비밀번호와 시크릿 키를 사용하고, 환경 변수를 안전하게 관리하세요.
-
-## 실행 방법
-
-```bash
-# 개발 모드 (핫 리로드)
-bun run start:dev
-
-# 일반 개발 모드
-bun run start
-
-# 디버그 모드
-bun run start:debug
-
-# 프로덕션 빌드
-bun run build
-
-# 프로덕션 실행
-bun run start:prod
-```
-
-## 테스트
-
-```bash
-# 단위 테스트
-bun test
-
-# 단위 테스트 (watch 모드)
-bun run test:watch
-
-# E2E 테스트
-bun run test:e2e
-
-# 테스트 커버리지
-bun run test:cov
-
-# 특정 테스트 파일 실행
-bun test -- --testPathPattern=user.service.spec.ts
-
-# 특정 테스트 이름 패턴으로 실행
-bun test -- --testNamePattern="should create user"
-```
-
-## 코드 품질
-
-```bash
-# Lint 검사
-bun run lint
-
-# Lint 자동 수정
-bun run lint -- --fix
-
-# 코드 포맷팅
-bun run format
-```
-
-## API 엔드포인트
-
-애플리케이션은 RESTful API를 제공하며, 다음과 같은 주요 기능을 포함합니다:
-
-- 사용자 인증 및 JWT 관리
-- 사용자 프로필 관리
-- Todo 항목 CRUD 작업
-- AI 채팅 지원
-- 파일 업로드
-
-자세한 API 명세는 별도의 API 문서를 참조하세요.
-
-## 데이터베이스
-
-### 명명 규칙
-
-- **테이블**: 프로젝트 접두사 + snake_case
-- **컬럼**: snake_case
-- **엔티티**: PascalCase + `Entity` 접미사
-- **DTO**: PascalCase + `Dto` 접미사
-
-### 주요 기능
-
-- 사용자 정보 관리
-- Todo 항목 저장
-- 감사 로그 기록
-- 자동 타임스탬프 관리
-
-## 보안
-
-- 강력한 암호화 알고리즘을 사용한 비밀번호 해싱 (Bun.password) 및 데이터 암호화 (Web Crypto API - AES-256-GCM)
-- JWT 기반 인증 시스템
-- 안전한 자격 증명 저장 메커니즘
-- XSS 및 CSRF 공격 방지
-- 입력 유효성 검사 및 새니타이제이션
-- CORS 설정을 통한 교차 출처 요청 제어
-- 인증 가드를 통한 라우트 보호
-
-**중요**: 프로덕션 환경에서는 추가적인 보안 조치(HTTPS, 방화벽, 레이트 리미팅, 보안 헤더 등)를 반드시 적용하세요.
-
-## 아키텍처 패턴
-
-- **모듈 기반 아키텍처**: 각 기능은 독립적인 NestJS 모듈
-- **리포지토리 패턴**: TypeORM 엔티티와 서비스 레이어 추상화
-- **가드 패턴**: 인증 가드를 통한 라우트 보호
-- **인터셉터 패턴**: 로깅 및 에러 처리
-- **감사 패턴**: 모든 엔티티에 표준화된 감사 컬럼
-
-## 코드 주석 작성 가이드라인
-
-- **모든 코드 주석은 한글로 작성**해야 하며, 문법상 필요한 요소(예: JSDoc 태그)는 예외입니다
-- 변수명, 함수명, 기술 용어는 영문으로 유지합니다
-- 주석의 설명 내용만 한글로 작성합니다
 
 ## 문제 해결
 

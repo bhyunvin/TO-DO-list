@@ -1,37 +1,64 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { ExpressAdapter } from '@nestjs/platform-express';
-import { ValidationPipe } from '@nestjs/common';
+import { Elysia } from 'elysia';
+import 'jose';
 
-const bootstrap = async () => {
-  const app = await NestFactory.create(AppModule, new ExpressAdapter());
+import { corsPlugin } from './plugins/cors';
+import { configPlugin, env } from './plugins/config';
+import { databasePlugin } from './plugins/database';
+import { jwtPlugin } from './plugins/jwt';
+import { swaggerPlugin } from './plugins/swagger';
 
-  // 프록시 신뢰 설정 추가
-  app.getHttpAdapter().getInstance().set('trust proxy', 1);
+import { userRoutes } from './features/user/user.routes';
+import { todoRoutes } from './features/todo/todo.routes';
+import { assistanceRoutes } from './features/assistance/assistance.routes';
+import { mailRoutes } from './features/mail/mail.routes';
+import { fileRoutes } from './features/fileUpload/file.routes';
 
-  const origins = ['http://localhost:5173'];
-  if (process.env.FRONTEND_URL) {
-    origins.push(process.env.FRONTEND_URL.replace(/\/$/, ''));
-  }
+/**
+ * 메인 Elysia 애플리케이션
+ *
+ * 모든 플러그인과 라우트를 통합하여 서버를 구성합니다.
+ */
+const app = new Elysia()
+  // 플러그인 등록
+  .use(corsPlugin)
+  .use(configPlugin)
+  .use(databasePlugin)
+  .use(jwtPlugin)
+  .use(swaggerPlugin)
 
-  app.enableCors({
-    origin: origins,
-    methods: 'GET,POST,PATCH,DELETE,OPTIONS',
-    allowedHeaders: 'Content-Type, Authorization',
-    credentials: true,
-  });
+  // 모듈 라우트 등록
+  .use(userRoutes)
+  .use(todoRoutes)
+  .use(assistanceRoutes)
+  .use(mailRoutes)
+  .use(fileRoutes)
 
-  // 글로벌 파이프 설정 (자동 변환 및 유효성 검사, 화이트리스트 적용)
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true, // DTO에 정의되지 않은 속성은 제거함
-      forbidNonWhitelisted: true, // DTO에 없는 속성이 들어오면 요청 자체를 거부함
-      transform: true, // 데이터를 지정한 타입으로 자동 변환함
-    }),
-  );
+  // Welcome 엔드포인트
+  .get('/', () => ({ status: 'ok' }), {
+    detail: {
+      tags: ['Welcome'],
+      summary: '서버 상태 확인',
+      description: '서버가 정상적으로 실행 중인지 확인합니다.',
+    },
+  })
 
-  const PORT = process.env.PORT || 3001;
-  await app.listen(PORT, '0.0.0.0');
-};
+  .get('/favicon.ico', () => {}, {
+    detail: {
+      tags: ['Welcome'],
+      summary: 'Favicon 요청 처리',
+      description: 'Favicon 요청에 대해 204 No Content를 반환합니다.',
+    },
+  })
 
-bootstrap();
+  // 서버 시작
+  .listen(env.PORT || 3001);
+
+console.log(`
+🦊 Elysia 서버가 실행 중입니다!
+📍 주소: http://${app.server?.hostname}:${app.server?.port}
+📚 Swagger 문서: http://${app.server?.hostname}:${app.server?.port}/swagger
+🌍 환경: ${env.NODE_ENV}
+`);
+
+// 타입 내보내기 (Eden Treaty용)
+export type App = typeof app;

@@ -1,9 +1,7 @@
-import { Injectable } from '@nestjs/common';
-
 /**
  * 보안 취약점을 방지하기 위해 사용자 입력을 정제하는 유틸리티 서비스
  */
-@Injectable()
+
 export class InputSanitizerService {
   /**
    * 잠재적으로 위험한 문자를 제거하여 문자열 입력을 정제합니다

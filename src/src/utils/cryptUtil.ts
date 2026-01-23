@@ -1,4 +1,3 @@
-import { Logger } from '@nestjs/common';
 import { aessiv } from '@noble/ciphers/aes.js';
 
 // Web Crypto API 전역 객체 타입 선언 (Bun/Node 19+)
@@ -89,7 +88,7 @@ export const encrypt = async (rawText: string): Promise<string> => {
     });
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
-    Logger.error(`Password hashing failed: ${errorMsg}`, 'CryptUtil');
+    console.error(`Password hashing failed: ${errorMsg}`);
     throw new Error('Failed to hash password');
   }
 };
@@ -105,7 +104,7 @@ export const isHashValid = async (
     return await Bun.password.verify(rawText, hashedText, 'bcrypt');
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
-    Logger.error(`Password verification failed: ${errorMsg}`, 'CryptUtil');
+    console.error(`Password verification failed: ${errorMsg}`);
     throw new Error('Failed to verify password');
   }
 };
@@ -152,7 +151,7 @@ export const encryptSymmetric = async (text: string): Promise<string> => {
     );
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
-    Logger.error(`Symmetric encryption failed: ${errorMsg}`, 'CryptUtil');
+    console.error(`Symmetric encryption failed: ${errorMsg}`);
     throw new Error('Failed to encrypt data');
   }
 };
@@ -201,7 +200,7 @@ export const decryptSymmetric = async (text: string): Promise<string> => {
     return new TextDecoder().decode(decrypted);
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
-    Logger.error(`Symmetric decryption failed: ${errorMsg}`, 'CryptUtil');
+    console.error(`Symmetric decryption failed: ${errorMsg}`);
     throw new Error('Failed to decrypt data');
   }
 };
@@ -241,7 +240,7 @@ const getSivKey = (): Promise<Uint8Array> => {
     } catch (error) {
       _sivKeyPromise = null; // Reset promise on failure to allow retry
       const errorMsg = error instanceof Error ? error.message : String(error);
-      Logger.error(`SIV key derivation failed: ${errorMsg}`, 'CryptUtil');
+      console.error(`SIV key derivation failed: ${errorMsg}`);
       throw new Error('Failed to derive SIV key');
     }
   })();
@@ -271,7 +270,7 @@ export const encryptSymmetricDeterministic = async (
     return bytesToHex(encrypted);
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
-    Logger.error(`Deterministic encryption failed: ${errorMsg}`, 'CryptUtil');
+    console.error(`Deterministic encryption failed: ${errorMsg}`);
     throw new Error('Failed to encrypt data deterministically');
   }
 };
@@ -292,7 +291,7 @@ export const decryptSymmetricDeterministic = async (
     return new TextDecoder().decode(decrypted);
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
-    Logger.error(`Deterministic decryption failed: ${errorMsg}`, 'CryptUtil');
+    console.error(`Deterministic decryption failed: ${errorMsg}`);
     throw new Error('Failed to decrypt data deterministically');
   }
 };
