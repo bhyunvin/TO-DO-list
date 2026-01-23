@@ -1,7 +1,7 @@
 /// <reference types="vitest" />
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
-import purgecss from '@fullhuman/postcss-purgecss';
+import { purgeCSSPlugin as purgecss } from '@fullhuman/postcss-purgecss';
 
 // https://vitejs.dev/config/
 export default defineConfig({
