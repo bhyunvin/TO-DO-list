@@ -4,10 +4,11 @@ import { TodoEntity } from '../features/todo/todo.entity';
 import { UserEntity } from '../features/user/user.entity';
 import { FileInfoEntity } from '../fileUpload/file.entity';
 import { RefreshTokenEntity } from '../features/user/refresh-token.entity';
+import { LogEntity } from '../features/logging/log.entity';
 import { CustomNamingStrategy } from '../utils/customNamingStrategy';
 
 // 데이터베이스 연결 인스턴스 생성
-const dataSource = new DataSource({
+export const dataSource = new DataSource({
   type: 'postgres',
   host: process.env.DB_DEV_SERVER || 'localhost',
   port: Number.parseInt(process.env.DB_DEV_PORT || '5432', 10),
@@ -20,6 +21,7 @@ const dataSource = new DataSource({
     UserEntity,
     FileInfoEntity,
     RefreshTokenEntity,
+    LogEntity,
   ],
   namingStrategy: new CustomNamingStrategy(),
   synchronize: false,

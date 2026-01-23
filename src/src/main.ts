@@ -3,6 +3,7 @@ import 'jose';
 
 import { corsPlugin } from './plugins/cors';
 import { loggerPlugin } from './plugins/logger';
+import { dbLoggingPlugin } from './plugins/db-logging';
 import { configPlugin, env } from './plugins/config';
 import { databasePlugin } from './plugins/database';
 import { jwtPlugin } from './plugins/jwt';
@@ -26,6 +27,7 @@ const app = new Elysia()
   .use(configPlugin)
   .use(databasePlugin)
   .use(jwtPlugin)
+  .use(dbLoggingPlugin)
   .use(swaggerPlugin)
 
   // 모듈 라우트 등록
