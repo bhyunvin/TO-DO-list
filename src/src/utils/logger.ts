@@ -72,4 +72,3 @@ export class Logger {
     this.context = context;
   }
 }
-

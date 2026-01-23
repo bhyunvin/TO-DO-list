@@ -34,7 +34,7 @@ export const dbLoggingPlugin = (app: any) =>
       statusCode,
       errorMsg,
     });
-    
+
     // 중요: app을 반환해야 체이닝 가능
     return app;
   });

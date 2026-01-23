@@ -164,10 +164,7 @@ export class FileValidationService {
   /**
    * 유효하지 않은 파일을 필터링하고 유효한 파일만 반환합니다
    */
-  getValidFiles(
-    files: File[],
-    validationResults: ValidationResult[],
-  ): File[] {
+  getValidFiles(files: File[], validationResults: ValidationResult[]): File[] {
     return files.filter((_, i) => validationResults[i].isValid);
   }
 

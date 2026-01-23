@@ -57,7 +57,7 @@ describe('CryptUtil', () => {
     it('should return original text if input is empty', async () => {
       const emptyEncrypted = await encryptSymmetric('');
       expect(emptyEncrypted).toBe('');
-      
+
       const emptyDecrypted = await decryptSymmetric('');
       expect(emptyDecrypted).toBe('');
     });

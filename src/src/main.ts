@@ -33,14 +33,14 @@ const app = new Elysia()
   .use(jwtPlugin)
   .use(dbLoggingPlugin)
   .use(swaggerPlugin)
-  
+
   // 전역 에러 핸들링 (HttpExceptionFilter 대체)
   .onError(({ code, error, set, request }) => {
     const statusCode = set.status ? Number(set.status) : 500;
-    
+
     // 에러 상세 로깅 (Stack Trace 포함)
     logger.error(`Global Error: ${error.message}`, error.stack);
-   
+
     return {
       success: false,
       statusCode,
@@ -48,7 +48,7 @@ const app = new Elysia()
       timestamp: new Date().toISOString(),
       path: request.url,
       // code가 'VALIDATION' 등인 경우 상세 정보 추가 가능
-      errors: 'all' in error ? error.all : undefined, 
+      errors: 'all' in error ? error.all : undefined,
     };
   })
 
