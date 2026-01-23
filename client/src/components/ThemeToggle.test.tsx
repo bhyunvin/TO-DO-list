@@ -139,9 +139,9 @@ describe('ThemeToggle', () => {
       const mockParentClick = vi.fn();
 
       const { container } = render(
-        <button onClick={mockParentClick} className="theme-toggle-wrapper-mock">
+        <div onClick={mockParentClick} className="theme-toggle-wrapper-mock">
           <ThemeToggle />
-        </button>,
+        </div>,
       );
 
       const toggleWrapper = container.querySelector('.theme-toggle-wrapper');
@@ -157,9 +157,9 @@ describe('ThemeToggle', () => {
       const mockDropdownClick = vi.fn();
 
       const { container } = render(
-        <button className="dropdown-menu" onClick={mockDropdownClick}>
+        <div className="dropdown-menu" onClick={mockDropdownClick}>
           <ThemeToggle />
-        </button>,
+        </div>,
       );
 
       const toggleWrapper = container.querySelector('.theme-toggle-wrapper');

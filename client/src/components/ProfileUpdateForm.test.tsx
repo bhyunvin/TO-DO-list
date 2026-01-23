@@ -3,44 +3,52 @@ import {
   screen,
   fireEvent,
   waitFor,
-  within,
+
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ProfileUpdateForm from './ProfileUpdateForm';
 
-// SweetAlert2 모킹
-jest.mock('sweetalert2', () => ({
-  fire: jest.fn(() => Promise.resolve({ isConfirmed: true })),
+// alertUtils 모킹
+vi.mock('../utils/alertUtils', () => ({
+  showErrorAlert: vi.fn(),
+  showConfirmAlert: vi.fn(),
+}));
+
+// userService 모킹
+vi.mock('../api/userService', () => ({
+  default: {
+    getUserProfileDetail: vi.fn().mockResolvedValue(null),
+  },
 }));
 
 // 파일 업로드 훅 모킹
-jest.mock('../hooks/useFileUploadValidator', () => ({
+vi.mock('../hooks/useFileUploadValidator', () => ({
   useFileUploadValidator: () => ({
-    validateFiles: jest.fn(() => [
+    validateFiles: vi.fn(() => [
       { isValid: true, file: {}, fileName: 'test.jpg', fileSize: 1000 },
     ]),
-    formatFileSize: jest.fn((size) => `${size} bytes`),
-    getUploadPolicy: jest.fn(() => ({ maxSize: 10485760 })),
+    formatFileSize: vi.fn((size) => `${size} bytes`),
+    getUploadPolicy: vi.fn(() => ({ maxSize: 10485760 })),
     FILE_VALIDATION_ERRORS: {},
   }),
 }));
 
-jest.mock('../hooks/useFileUploadProgress', () => ({
+vi.mock('../hooks/useFileUploadProgress', () => ({
   useFileUploadProgress: () => ({
     uploadStatus: 'idle',
     uploadProgress: {},
     uploadErrors: [],
     validationResults: [],
-    resetUploadState: jest.fn(),
+    resetUploadState: vi.fn(),
   }),
 }));
 
 // FileUploadProgress 컴포넌트 모킹
-jest.mock('./FileUploadProgress', () => {
+vi.mock('./FileUploadProgress', () => {
   const MockFileUploadProgress = () => (
     <div data-testid="file-upload-progress">File Upload Progress</div>
   );
-  return MockFileUploadProgress;
+  return { default: MockFileUploadProgress };
 });
 
 describe('ProfileUpdateForm', () => {
@@ -50,23 +58,24 @@ describe('ProfileUpdateForm', () => {
     userDescription: 'Test description',
   };
 
-  const mockOnSave = jest.fn();
-  const mockOnCancel = jest.fn();
+  const mockOnSave = vi.fn();
+  const mockOnCancel = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
-  test('renders profile update form with user data', () => {
+  test('renders profile update form with user data', async () => {
     render(
       <ProfileUpdateForm
         user={mockUser}
         onSave={mockOnSave}
         onCancel={mockOnCancel}
+        onDirtyChange={vi.fn()}
       />,
     );
 
-    expect(screen.getByDisplayValue('Test User')).toBeInTheDocument();
+    expect(await screen.findByDisplayValue('Test User')).toBeInTheDocument();
     expect(screen.getByDisplayValue('test@example.com')).toBeInTheDocument();
     expect(screen.getByDisplayValue('Test description')).toBeInTheDocument();
     expect(screen.getByText('프로필 수정')).toBeInTheDocument();
@@ -79,10 +88,11 @@ describe('ProfileUpdateForm', () => {
         user={mockUser}
         onSave={mockOnSave}
         onCancel={mockOnCancel}
+        onDirtyChange={vi.fn()}
       />,
     );
 
-    const nameInput = screen.getByLabelText(/이름/);
+    const nameInput = await screen.findByLabelText(/이름/);
     await user.clear(nameInput);
     await user.tab();
 
@@ -98,10 +108,11 @@ describe('ProfileUpdateForm', () => {
         user={mockUser}
         onSave={mockOnSave}
         onCancel={mockOnCancel}
+        onDirtyChange={vi.fn()}
       />,
     );
 
-    const emailInput = screen.getByLabelText(/이메일/);
+    const emailInput = await screen.findByLabelText(/이메일/);
     await user.clear(emailInput);
     await user.type(emailInput, 'invalid-email');
     await user.tab();
@@ -120,11 +131,12 @@ describe('ProfileUpdateForm', () => {
         user={mockUser}
         onSave={mockOnSave}
         onCancel={mockOnCancel}
+        onDirtyChange={vi.fn()}
       />,
     );
 
-    const nameInput = screen.getByLabelText(/이름/);
-    const submitButton = screen.getByRole('button', { name: /저장/ });
+    const nameInput = await screen.findByLabelText(/이름/);
+    const submitButton = await screen.findByRole('button', { name: /저장/ });
 
     // maxLength를 초과하는 매우 긴 이름을 지우고 추가
     await user.clear(nameInput);
@@ -148,11 +160,12 @@ describe('ProfileUpdateForm', () => {
         user={mockUser}
         onSave={mockOnSave}
         onCancel={mockOnCancel}
+        onDirtyChange={vi.fn()}
       />,
     );
 
-    const emailInput = screen.getByLabelText(/이메일/);
-    const submitButton = screen.getByRole('button', { name: /저장/ });
+    const emailInput = await screen.findByLabelText(/이메일/);
+    const submitButton = await screen.findByRole('button', { name: /저장/ });
 
     // maxLength를 초과하는 매우 긴 이메일을 지우고 추가
     await user.clear(emailInput);
@@ -178,10 +191,11 @@ describe('ProfileUpdateForm', () => {
         user={mockUser}
         onSave={mockOnSave}
         onCancel={mockOnCancel}
+        onDirtyChange={vi.fn()}
       />,
     );
 
-    const fileInput = screen.getByLabelText(/프로필 이미지/);
+    const fileInput = await screen.findByLabelText<HTMLInputElement>(/프로필 이미지/);
     const file = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
 
     await user.upload(fileInput, file);
@@ -190,16 +204,17 @@ describe('ProfileUpdateForm', () => {
     expect(fileInput.files).toHaveLength(1);
   });
 
-  test('shows character count for description field', () => {
+  test('shows character count for description field', async () => {
     render(
       <ProfileUpdateForm
         user={mockUser}
         onSave={mockOnSave}
         onCancel={mockOnCancel}
+        onDirtyChange={vi.fn()}
       />,
     );
 
-    expect(screen.getByText('16/4000 자')).toBeInTheDocument();
+    expect(await screen.findByText('16/4000 자')).toBeInTheDocument();
   });
 
   test('updates character count when typing in description', async () => {
@@ -209,10 +224,11 @@ describe('ProfileUpdateForm', () => {
         user={mockUser}
         onSave={mockOnSave}
         onCancel={mockOnCancel}
+        onDirtyChange={vi.fn()}
       />,
     );
 
-    const descriptionInput = screen.getByLabelText(/추가 설명/);
+    const descriptionInput = await screen.findByLabelText(/추가 설명/);
     await user.clear(descriptionInput);
     await user.type(descriptionInput, 'New description');
 
@@ -226,13 +242,14 @@ describe('ProfileUpdateForm', () => {
         user={mockUser}
         onSave={mockOnSave}
         onCancel={mockOnCancel}
+        onDirtyChange={vi.fn()}
       />,
     );
 
-    const nameInput = screen.getByLabelText(/이름/);
-    const emailInput = screen.getByLabelText(/이메일/);
-    const descriptionInput = screen.getByLabelText(/추가 설명/);
-    const submitButton = screen.getByRole('button', { name: /저장/ });
+    const nameInput = await screen.findByLabelText(/이름/);
+    const emailInput = await screen.findByLabelText(/이메일/);
+    const descriptionInput = await screen.findByLabelText(/추가 설명/);
+    const submitButton = await screen.findByRole('button', { name: /저장/ });
 
     await user.clear(nameInput);
     await user.type(nameInput, 'Updated Name');
@@ -263,11 +280,12 @@ describe('ProfileUpdateForm', () => {
         user={mockUser}
         onSave={mockOnSave}
         onCancel={mockOnCancel}
+        onDirtyChange={vi.fn()}
       />,
     );
 
-    const nameInput = screen.getByLabelText(/이름/);
-    const submitButton = screen.getByRole('button', { name: /저장/ });
+    const nameInput = await screen.findByLabelText(/이름/);
+    const submitButton = await screen.findByRole('button', { name: /저장/ });
 
     await user.clear(nameInput);
     await user.click(submitButton);
@@ -286,11 +304,12 @@ describe('ProfileUpdateForm', () => {
         user={mockUser}
         onSave={mockOnSave}
         onCancel={mockOnCancel}
+        onDirtyChange={vi.fn()}
       />,
     );
 
-    const nameInput = screen.getByLabelText(/이름/);
-    const submitButton = screen.getByRole('button', { name: /저장/ });
+    const nameInput = await screen.findByLabelText(/이름/);
+    const submitButton = await screen.findByRole('button', { name: /저장/ });
 
     await user.clear(nameInput);
     await user.tab();
@@ -307,31 +326,31 @@ describe('ProfileUpdateForm', () => {
         user={mockUser}
         onSave={mockOnSave}
         onCancel={mockOnCancel}
+        onDirtyChange={vi.fn()}
       />,
     );
 
-    const cancelButton = screen.getByRole('button', { name: /취소/ });
+    const cancelButton = await screen.findByRole('button', { name: /취소/ });
     await user.click(cancelButton);
 
     expect(mockOnCancel).toHaveBeenCalled();
   });
 
-  test('shows loading state when submitting', () => {
+  test('shows loading state when submitting', async () => {
     render(
       <ProfileUpdateForm
         user={mockUser}
         onSave={mockOnSave}
         onCancel={mockOnCancel}
+        onDirtyChange={vi.fn()}
         isSubmitting={true}
       />,
     );
 
-    const submitButton = screen.getByRole('button', { name: /저장 중.../ });
+    const submitButton = await screen.findByRole('button', { name: /저장 중.../ });
     expect(submitButton).toBeDisabled();
     expect(screen.getByText('저장 중...')).toBeInTheDocument();
-    expect(
-      within(submitButton).getByRole('status', { hidden: true }),
-    ).toBeInTheDocument();
+    expect(submitButton.querySelector('.spinner-border')).toBeInTheDocument();
   });
 
   test('trims whitespace from form inputs', async () => {
@@ -341,13 +360,14 @@ describe('ProfileUpdateForm', () => {
         user={mockUser}
         onSave={mockOnSave}
         onCancel={mockOnCancel}
+        onDirtyChange={vi.fn()}
       />,
     );
 
-    const nameInput = screen.getByLabelText(/이름/);
-    const emailInput = screen.getByLabelText(/이메일/);
-    const descriptionInput = screen.getByLabelText(/추가 설명/);
-    const submitButton = screen.getByRole('button', { name: /저장/ });
+    const nameInput = await screen.findByLabelText(/이름/);
+    const emailInput = await screen.findByLabelText(/이메일/);
+    const descriptionInput = await screen.findByLabelText(/추가 설명/);
+    const submitButton = await screen.findByRole('button', { name: /저장/ });
 
     await user.clear(nameInput);
     await user.type(nameInput, '  Trimmed Name  ');
