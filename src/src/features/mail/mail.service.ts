@@ -1,7 +1,10 @@
 import * as nodemailer from 'nodemailer';
 
+import { Logger } from '../../utils/logger';
+
 export class MailService {
   private readonly transporter: nodemailer.Transporter;
+  private readonly logger = new Logger('MailService');
 
   constructor() {
     this.transporter = nodemailer.createTransport({
@@ -56,7 +59,7 @@ ${content}
     try {
       await this.transporter.sendMail(mailOptions);
     } catch (error) {
-      console.error('Email sending failed:', error);
+      this.logger.error('Email sending failed', String(error));
       throw new Error('메일 발송에 실패했습니다.');
     }
   }

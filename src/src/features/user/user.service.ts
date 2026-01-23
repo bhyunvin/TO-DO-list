@@ -4,7 +4,14 @@ import { RefreshTokenEntity } from './refresh-token.entity';
 import { FileInfoEntity } from '../../fileUpload/file.entity';
 import { FileUploadUtil } from '../../fileUpload/fileUploadUtil';
 import { InputSanitizerService } from '../../utils/inputSanitizer';
-import { encrypt, isHashValid } from '../../utils/cryptUtil';
+import {
+  encrypt,
+  isHashValid,
+  encryptSymmetric,
+  decryptSymmetric,
+  encryptSymmetricDeterministic,
+  decryptSymmetricDeterministic,
+} from '../../utils/cryptUtil';
 import { CloudinaryService } from '../../fileUpload/cloudinary.service';
 import {
   LoginDto,
@@ -48,6 +55,41 @@ export class UserService {
     return !!user;
   }
 
+  // --- 암호화/복호화 메서드 ---
+
+  /**
+   * 사용자 정보 복호화
+   * - 이메일: 결정적 암호화 복호화
+   * - API Key: 일반 양방향 암호화 복호화
+   */
+  async decryptUserInfo<T extends Partial<UserEntity>>(user: T): Promise<T> {
+    if (!user) return user;
+
+    // 이메일 복호화 (결정적 암호화 사용)
+    if (user.userEmail) {
+      user.userEmail = await decryptSymmetricDeterministic(user.userEmail);
+    }
+
+    // API Key 복호화 (일반 양방향 암호화 사용)
+    if (user.aiApiKey) {
+      user.aiApiKey = await decryptSymmetric(user.aiApiKey);
+    }
+
+    return user;
+  }
+
+  /**
+   * 공개 사용자 정보 반환 (민감 정보 제외)
+   * - API Key 등의 민감 정보를 제외하고 반환
+   */
+  getPublicUserInfo<T extends Partial<UserEntity>>(user: T): Partial<T> {
+    if (!user) return user;
+
+    // API Key와 같은 민감 정보 제외
+    const { aiApiKey: _aiApiKey, userPw: _userPw, ...publicInfo } = user as any;
+    return publicInfo;
+  }
+
   // --- 인증 로직 ---
 
   async register(
@@ -62,9 +104,10 @@ export class UserService {
     try {
       const { userEmail, userPw, userName } = registerDto;
 
-      // 1. 이메일 중복 확인
+      // 1. 이메일 암호화 및 중복 확인
+      const encryptedEmail = await encryptSymmetricDeterministic(userEmail);
       const existingUser = await queryRunner.manager.findOne(UserEntity, {
-        where: { userEmail },
+        where: { userEmail: encryptedEmail },
       });
       if (existingUser) {
         throw new Error('이미 존재하는 이메일입니다.');
@@ -73,10 +116,10 @@ export class UserService {
       // 2. 비밀번호 해싱
       const hashedPassword = await encrypt(userPw);
 
-      // 3. 사용자 엔티티 생성
+      // 3. 사용자 엔티티 생성 (암호화된 이메일 저장)
       const newUser = queryRunner.manager.create(UserEntity, {
-        userId: userEmail,
-        userEmail: this.inputSanitizer.sanitizeEmail(userEmail),
+        userId: encryptedEmail, // userId도 암호화된 이메일로 저장
+        userEmail: encryptedEmail, // 암호화된 이메일 저장
         userPw: hashedPassword,
         userName: this.inputSanitizer.sanitizeName(userName),
         adminYn: 'N',
@@ -140,18 +183,24 @@ export class UserService {
 
   async login(loginDto: LoginDto): Promise<UserEntity> {
     const { userEmail, userPw } = loginDto;
-    const user = await this.userRepository.findOne({ where: { userEmail } });
+
+    // 이메일을 암호화하여 조회
+    const encryptedEmail = await encryptSymmetricDeterministic(userEmail);
+    const user = await this.userRepository.findOne({
+      where: { userEmail: encryptedEmail },
+    });
 
     if (!user) {
       throw new Error('이메일 또는 비밀번호가 올바르지 않습니다.');
     }
 
-    const isPwValid = await isHashValid(userPw, user.userPw); // userPw 컬럼
+    const isPwValid = await isHashValid(userPw, user.userPw);
     if (!isPwValid) {
       throw new Error('이메일 또는 비밀번호가 올바르지 않습니다.');
     }
 
-    return user;
+    // 사용자 정보 복호화 후 반환
+    return await this.decryptUserInfo(user);
   }
 
   async saveRefreshToken(
@@ -232,6 +281,17 @@ export class UserService {
         user.userDescription = this.inputSanitizer.sanitizeDescription(
           updateUserDto.userDescription,
         );
+      }
+
+      // API Key 업데이트 (암호화)
+      if (updateUserDto.aiApiKey !== undefined) {
+        if (updateUserDto.aiApiKey === '' || updateUserDto.aiApiKey === null) {
+          // 빈 문자열이나 null이면 삭제
+          user.aiApiKey = null as any;
+        } else {
+          // 암호화하여 저장
+          user.aiApiKey = await encryptSymmetric(updateUserDto.aiApiKey);
+        }
       }
 
       // 프로필 이미지 업데이트

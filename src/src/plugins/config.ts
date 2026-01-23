@@ -1,5 +1,8 @@
 import { Elysia } from 'elysia';
 import { z } from 'zod';
+import { Logger } from '../utils/logger';
+
+const logger = new Logger('Config');
 
 /**
  * 환경 변수 스키마 정의
@@ -52,17 +55,19 @@ const envSchema = z.object({
 const validateEnv = (): z.infer<typeof envSchema> => {
   try {
     const validatedEnv = envSchema.parse(process.env);
-    console.log('✅ 환경 변수 유효성 검사 완료');
+    logger.log('✅ 환경 변수 유효성 검사 완료');
     return validatedEnv;
   } catch (error) {
     if (error instanceof z.ZodError) {
-      console.error('=== ❌ 환경 변수 유효성 검사 실패 ===');
-      error.issues.forEach((err) => {
-        console.error(
-          `  - [${err.path.join('.') || 'config'}]: ${err.message}`,
-        );
-      });
-      console.error('======================================');
+      if (error instanceof z.ZodError) {
+        logger.error('=== ❌ 환경 변수 유효성 검사 실패 ===');
+        error.issues.forEach((err) => {
+          logger.error(
+            `  - [${err.path.join('.') || 'config'}]: ${err.message}`,
+          );
+        });
+        logger.error('======================================');
+      }
     }
     throw new Error(
       '환경 변수 설정이 올바르지 않습니다. .env 파일을 확인하세요.',

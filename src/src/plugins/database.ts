@@ -6,6 +6,9 @@ import { FileInfoEntity } from '../fileUpload/file.entity';
 import { RefreshTokenEntity } from '../features/user/refresh-token.entity';
 import { LogEntity } from '../features/logging/log.entity';
 import { CustomNamingStrategy } from '../utils/customNamingStrategy';
+import { Logger } from '../utils/logger';
+
+const logger = new Logger('DatabasePlugin');
 
 // 데이터베이스 연결 인스턴스 생성
 export const dataSource = new DataSource({
@@ -37,12 +40,12 @@ export const databasePlugin = new Elysia({ name: 'database' })
   .onStart(async () => {
     if (!dataSource.isInitialized) {
       await dataSource.initialize();
-      console.log('✅ PostgreSQL 데이터베이스 연결 완료');
+      logger.log('✅ PostgreSQL 데이터베이스 연결 완료');
     }
   })
   .onStop(async () => {
     if (dataSource.isInitialized) {
       await dataSource.destroy();
-      console.log('🔌 PostgreSQL 데이터베이스 연결 종료');
+      logger.log('🔌 PostgreSQL 데이터베이스 연결 종료');
     }
   });

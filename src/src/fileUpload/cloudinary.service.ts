@@ -12,7 +12,10 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+import { Logger } from '../utils/logger';
+
 export class CloudinaryService {
+  private readonly logger = new Logger('CloudinaryService');
   /**
    * 파일을 Cloudinary에 업로드
    * @param file 업로드할 파일 (Standard File object)
@@ -66,7 +69,7 @@ export class CloudinaryService {
       const match = regex.exec(pathname);
       return match ? match[1] : '';
     } catch (error) {
-      console.error('public_id 추출 실패:', error);
+      this.logger.error('public_id 추출 실패', String(error));
       return '';
     }
   }

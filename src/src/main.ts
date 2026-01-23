@@ -14,6 +14,7 @@ import { todoRoutes } from './features/todo/todo.routes';
 import { assistanceRoutes } from './features/assistance/assistance.routes';
 import { mailRoutes } from './features/mail/mail.routes';
 import { fileRoutes } from './features/fileUpload/file.routes';
+import { LoggingScheduler } from './features/logging/logging.scheduler';
 
 import { Logger } from './utils/logger';
 
@@ -35,7 +36,7 @@ const app = new Elysia()
   .use(swaggerPlugin)
 
   // 전역 에러 핸들링 (HttpExceptionFilter 대체)
-  .onError(({ code, error, set, request }) => {
+  .onError(({ code: _code, error, set, request }) => {
     const statusCode = set.status ? Number(set.status) : 500;
 
     // 에러 상세 로깅 (Stack Trace 포함)
@@ -79,12 +80,30 @@ const app = new Elysia()
   // 서버 시작
   .listen(env.PORT || 3001);
 
-console.log(`
+logger.log(`
 🦊 Elysia 서버가 실행 중입니다!
 📍 주소: http://${app.server?.hostname}:${app.server?.port}
 📚 Swagger 문서: http://${app.server?.hostname}:${app.server?.port}/swagger
 🌍 환경: ${env.NODE_ENV}
 `);
+
+// 로그 스케줄러 초기화 및 등록
+const loggingScheduler = new LoggingScheduler(app.decorator.db);
+
+// 매일 자정에 실행 (24시간 = 24 * 60 * 60 * 1000ms)
+setInterval(
+  () => {
+    loggingScheduler.cleanupOldLogsAndAnonymizeIp();
+  },
+  24 * 60 * 60 * 1000,
+);
+
+// 서버 시작 시 한 번 실행 (백그라운드)
+setTimeout(() => {
+  loggingScheduler.cleanupOldLogsAndAnonymizeIp();
+}, 5000); // 5초 후 시작 (서버 초기화 완료 대기)
+
+logger.log('📅 로그 스케줄러가 등록되었습니다. (매일 자정 실행)');
 
 // 타입 내보내기 (Eden Treaty용)
 export type App = typeof app;

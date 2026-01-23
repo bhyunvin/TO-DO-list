@@ -80,10 +80,10 @@ export const userRoutes = new Elysia({ prefix: '/user' })
       const user = await userService.login(body as LoginDto);
       const clientIp = getClientIp(request);
 
-      // 액세스 토큰 생성
+      // 액세스 토큰 생성 (복호화된 이메일 사용)
       const accessToken = await jwt.sign({
         sub: String(user.userSeq),
-        email: user.userEmail,
+        email: user.userEmail, // 이미 복호화됨
         name: user.userName,
       } as any);
 
@@ -101,9 +101,12 @@ export const userRoutes = new Elysia({ prefix: '/user' })
       refresh_token.path = '/';
       refresh_token.secure = true; // HTTPS 환경에서
 
+      // 민감 정보 제외하고 반환
+      const publicUser = userService.getPublicUserInfo(user);
+
       return {
         accessToken,
-        user: await userService.toUserResponse(user),
+        user: await userService.toUserResponse(publicUser as any),
       };
     },
     {
@@ -126,7 +129,13 @@ export const userRoutes = new Elysia({ prefix: '/user' })
       const foundUser = await userService.findById(Number(user.id));
       if (!foundUser) throw new Error('User not found');
 
-      return userService.toUserResponse(foundUser);
+      // 사용자 정보 복호화
+      const decryptedUser = await userService.decryptUserInfo(foundUser);
+
+      // 민감 정보 제외하고 반환
+      const publicUser = userService.getPublicUserInfo(decryptedUser);
+
+      return userService.toUserResponse(publicUser as any);
     },
     {
       detail: {
