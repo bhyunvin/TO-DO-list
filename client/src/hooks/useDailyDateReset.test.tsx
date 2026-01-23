@@ -9,20 +9,29 @@ vi.mock('../utils/alertUtils', () => ({
 
 describe('useDailyDateReset', () => {
   const handleTodayForTest = vi.fn();
+  let dateNowSpy: ReturnType<typeof vi.spyOn>;
+
+  // Date.now()를 mocking하는 helper 함수
+  const mockDateNow = (dateString: string) => {
+    const mockTime = new Date(dateString).getTime();
+    dateNowSpy = vi.spyOn(Date, 'now').mockReturnValue(mockTime);
+  };
 
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.clear();
-    // Date 객체 모킹 (고정된 시간 설정)
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date('2025-01-01T10:00:00'));
   });
 
   afterEach(() => {
-    vi.useRealTimers();
+    if (dateNowSpy) {
+      dateNowSpy.mockRestore();
+    }
   });
 
   it('should reset date to today and show toast if accessing for the first time today', () => {
+    // 현재 시간을 2025-01-01로 설정
+    mockDateNow('2025-01-01T10:00:00');
+
     const yesterday = new Date('2024-12-31T10:00:00');
 
     renderHook(() => useDailyDateReset(yesterday, handleTodayForTest));
@@ -33,6 +42,9 @@ describe('useDailyDateReset', () => {
   });
 
   it('should not reset date if already accessing today', () => {
+    // 현재 시간을 2025-01-01로 설정
+    mockDateNow('2025-01-01T10:00:00');
+
     const today = new Date('2025-01-01T10:00:00');
 
     // localStorage 설정을 위한 첫 렌더링
@@ -45,6 +57,9 @@ describe('useDailyDateReset', () => {
   });
 
   it('should trigger reset on visibility change if new day comes', () => {
+    // 초기 시간을 2025-01-01로 설정
+    mockDateNow('2025-01-01T10:00:00');
+
     const todayInitial = new Date('2025-01-01T10:00:00');
     // 설정: 사용자가 어제 방문함
     localStorage.setItem('lastDailyReset', '2024-12-31');
@@ -53,16 +68,11 @@ describe('useDailyDateReset', () => {
       useDailyDateReset(todayInitial, handleTodayForTest),
     );
 
-    // 초기 체크 (2025-01-01에 페이지 로드 시뮬레이션) -> 대기, 훅 내부 로직이 현재 시간을 체크함.
-    // 테스트 설정에서 "현재"는 2025-01-01임.
-    // 따라서 selectedDate로 "2025-01-01"을 전달하면 selectedDate가 오늘과 같으므로 handleToday가 호출되지 않음.
-    // 하지만 localStorage는 업데이트되어야 함.
-
     expect(localStorage.getItem('lastDailyReset')).toBe('2025-01-01');
-    expect(handleTodayForTest).not.toHaveBeenCalled(); // selectedDate가 오늘과 일치하므로 호출되지 않음
+    expect(handleTodayForTest).not.toHaveBeenCalled();
 
-    // 이제 "수면 모드" 시뮬레이션 ... 시간이 흘러 2025-01-02가 됨
-    vi.setSystemTime(new Date('2025-01-02T10:00:00'));
+    // 이제 시간이 흘러 2025-01-02가 됨
+    mockDateNow('2025-01-02T10:00:00');
 
     // 탭 활성화 (visibility change)
     Object.defineProperty(document, 'visibilityState', {
@@ -71,7 +81,7 @@ describe('useDailyDateReset', () => {
     });
     document.dispatchEvent(new Event('visibilitychange'));
 
-    expect(handleTodayForTest).toHaveBeenCalledTimes(1); // selectedDate (2025-01-01) != 새로운 오늘 (2025-01-02) 이므로 handleToday 호출되어야 함
+    expect(handleTodayForTest).toHaveBeenCalledTimes(1);
     expect(localStorage.getItem('lastDailyReset')).toBe('2025-01-02');
 
     unmount();
