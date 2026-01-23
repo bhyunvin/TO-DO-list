@@ -146,10 +146,7 @@ const todoService = {
           : JSON.stringify(error.value),
       );
     }
-    return data; // Blob 이어야 함. Eden이 Blob 반환하는지 확인 필요.
-    // 백엔드 핸들러는 buffer 반환, 헤더 설정함.
-    // Eden Treaty Client는 text/json 이외의 Content-Type이면 data가 Blob/Buffer일 수 있음.
-    // 확인 필요하나 일단 리턴.
+    return data;
   },
 };
 

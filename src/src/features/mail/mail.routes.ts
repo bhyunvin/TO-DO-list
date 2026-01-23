@@ -25,21 +25,7 @@ export const mailRoutes = new Elysia({ prefix: '/mail' })
       const userInfo = await userService.findById(Number(user.id));
       if (!userInfo) throw new Error('User not found');
 
-      // 유저 정보 복호화 로직은 UserService에 있어야 함 (getUser vs findById).
-      // UserService.findById는 복호화된 정보를 반환하는가?
-      // user.service.ts를 보면 toUserResponse에서 복호화된 이메일을 사용하거나,
-      // create/update시 평문 저장인지 확인 필요.
-      // cryptUtil을 사용하므로 DB엔 암호화되어 있을 수 있음.
-      // UserService의 findById가 Entity를 반환한다면 암호화된 상태일 수 있음.
-      // Entity에서 userEmail은 암호화된 컬럼인가? 스키마엔 일반 string.
-      // 기존 MailController에서는 userService.decryptUserInfo를 호출함.
-      // 현재 UserService에 decryptUserInfo 메서드가 있는지 확인해야 함.
-
-      // user.service.ts 분석 시 decryptUserInfo를 옮겼는지 확인 못함.
-      // 만약 없다면 평문 이메일을 jwt payload (sub, email, name)에서 가져오는 게 나음.
-      // jwtPlugin은 payload.email을 user.email로 매핑함.
-
-      const userEmail = user.email || userInfo.userEmail; // JWT에 이메일이 있다면 사용
+      const userEmail = user.email || userInfo.userEmail;
 
       const emailBody = body as ContactEmailDto;
       await mailService.sendContactEmail(

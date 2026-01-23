@@ -1,33 +1,38 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  CreateDateColumn,
-} from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { CreateAuditColumns } from '../../utils/auditColumns';
 
 @Entity('nj_user_log')
 export class LogEntity {
-  @PrimaryGeneratedColumn({ name: 'seq' })
-  seq: number;
+  constructor() {
+    this.auditColumns = new CreateAuditColumns();
+  }
 
-  @Column({ name: 'user_id', nullable: true })
-  userId: string; // 로그인하지 않은 경우 null 가능
+  @PrimaryGeneratedColumn({ name: 'log_seq' })
+  logSeq: number;
 
-  @Column({ name: 'client_ip', nullable: true })
-  clientIp: string;
+  @Column({ name: 'user_seq', type: 'int', nullable: true })
+  userSeq: number;
 
-  @Column({ name: 'method', length: 10 })
+  @Column({ name: 'connect_url', type: 'text', nullable: true })
+  connectUrl: string;
+
+  @Column({
+    name: 'connect_dtm',
+    type: 'timestamptz',
+    nullable: true,
+    default: () => 'NOW()',
+  })
+  connectDtm: Date;
+
+  @Column({ name: 'error_content', type: 'text', nullable: true })
+  errorContent: string;
+
+  @Column({ name: 'method', type: 'varchar', length: 10, nullable: false })
   method: string;
 
-  @Column({ name: 'url', type: 'text' })
-  url: string;
+  @Column({ name: 'request_body', type: 'text', nullable: true })
+  requestBody: string;
 
-  @Column({ name: 'status_code' })
-  statusCode: number;
-
-  @Column({ name: 'error_msg', type: 'text', nullable: true })
-  errorMsg: string;
-
-  @CreateDateColumn({ name: 'reg_dtm' })
-  regDtm: Date;
+  @Column(() => CreateAuditColumns)
+  auditColumns: CreateAuditColumns;
 }

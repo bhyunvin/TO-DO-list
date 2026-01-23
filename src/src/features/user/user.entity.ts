@@ -1,50 +1,53 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  CreateDateColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { AuditColumns } from '../../utils/auditColumns';
 
-@Entity('tb_user')
+@Entity('nj_user_info')
 export class UserEntity {
-  // export default 아님
+  constructor() {
+    this.auditColumns = new AuditColumns();
+  }
+
   @PrimaryGeneratedColumn({ name: 'user_seq' })
   userSeq: number;
 
-  @Column({ name: 'user_id', unique: true })
+  @Column({ name: 'user_id', length: 40, nullable: false })
   userId: string;
 
-  @Column({ name: 'user_pw' })
-  userPw: string;
-
-  @Column({ name: 'user_name' })
+  @Column({ name: 'user_name', length: 40, nullable: false })
   userName: string;
 
-  @Column({ name: 'user_email' })
+  @Column({ name: 'user_password', type: 'text', nullable: true })
+  userPw: string;
+
+  @Column({ name: 'user_email', type: 'text', nullable: true })
   userEmail: string;
 
-  @Column({ name: 'user_auth_code', nullable: true })
-  userAuthCode: string;
-
-  @Column({ name: 'ai_api_key', nullable: true })
-  aiApiKey: string;
-
-  @Column({ name: 'refresh_token', nullable: true })
-  refreshToken: string;
-
-  @Column({ name: 'privacy_policy_consent', default: false })
-  privacyPolicyConsent: boolean;
-
-  @Column({ name: 'user_profile_image_file_group_no', nullable: true })
-  userProfileImageFileGroupNo: number; // Cloudinary나 파일 그룹 ID
-
-  @Column({ name: 'user_description', nullable: true, type: 'text' })
+  @Column({ name: 'user_description', type: 'text', nullable: true })
   userDescription: string;
 
-  @CreateDateColumn({ name: 'reg_dtm' })
-  regDtm: Date;
+  @Column({
+    name: 'user_profile_image_file_group_no',
+    type: 'integer',
+    nullable: true,
+  })
+  userProfileImageFileGroupNo: number;
 
-  @UpdateDateColumn({ name: 'mod_dtm' })
-  modDtm: Date;
+  @Column({ name: 'admin_yn', type: 'char', length: 1, default: 'N' })
+  adminYn: string;
+
+  @Column({ name: 'ai_api_key', type: 'text', nullable: true })
+  aiApiKey: string;
+
+  @Column({
+    name: 'privacy_agreed_dtm',
+    type: 'timestamp with time zone',
+    nullable: true,
+  })
+  privacyAgreedDtm: Date;
+
+  @Column(() => AuditColumns)
+  auditColumns: AuditColumns;
+
+  // 프로필 이미지 URL (조회 시 동적으로 설정)
+  profileImage?: string;
 }

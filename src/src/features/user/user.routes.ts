@@ -50,6 +50,22 @@ export const userRoutes = new Elysia({ prefix: '/user' })
     },
   )
 
+  // 아이디 중복 체크
+  .get(
+    '/duplicate/:userId',
+    async ({ params: { userId }, userService }) => {
+      const isDuplicated = await userService.checkDuplicateId(userId);
+      return { isDuplicated };
+    },
+    {
+      detail: {
+        tags: ['User'],
+        summary: '아이디 중복 체크',
+        description: '회원가입 시 아이디 중복 여부를 확인합니다.',
+      },
+    },
+  )
+
   // 로그인
   .post(
     '/login',

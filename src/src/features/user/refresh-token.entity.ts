@@ -1,24 +1,24 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  CreateDateColumn,
-} from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { AuditColumns } from '../../utils/auditColumns';
 
-@Entity('tb_refresh_token')
+@Entity('nj_user_refresh_token')
 export class RefreshTokenEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
+  constructor() {
+    this.auditColumns = new AuditColumns();
+  }
 
-  @Column({ name: 'token', length: 500 })
-  refreshToken: string;
+  @PrimaryGeneratedColumn({ name: 'token_seq' })
+  tokenSeq: number;
 
-  @Column({ name: 'user_seq' })
+  @Column({ name: 'user_seq', type: 'int', nullable: false })
   userSeq: number;
 
-  @Column({ name: 'exp_dtm' })
+  @Column({ name: 'refresh_token', type: 'text', nullable: false })
+  refreshToken: string;
+
+  @Column({ name: 'exp_dtm', type: 'timestamptz', nullable: false })
   expDtm: Date;
 
-  @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
+  @Column(() => AuditColumns)
+  auditColumns: AuditColumns;
 }

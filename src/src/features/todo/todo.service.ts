@@ -1,6 +1,6 @@
 import { Repository, DataSource, Brackets, Between } from 'typeorm';
 import { TodoEntity } from './todo.entity';
-import { FileInfoEntity } from '../../fileUpload/file.entity'; // 경로 확인 필요 (file.entity.ts)
+import { FileInfoEntity } from '../../fileUpload/file.entity';
 import { FileUploadUtil } from '../../fileUpload/fileUploadUtil';
 import { CloudinaryService } from '../../fileUpload/cloudinary.service';
 import { setAuditColumn } from '../../utils/auditColumns';

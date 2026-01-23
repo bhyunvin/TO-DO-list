@@ -4,7 +4,7 @@ import { RefreshTokenEntity } from './refresh-token.entity';
 import { FileInfoEntity } from '../../fileUpload/file.entity';
 import { FileUploadUtil } from '../../fileUpload/fileUploadUtil';
 import { InputSanitizerService } from '../../utils/inputSanitizer';
-import { encrypt, isHashValid, encryptSymmetric } from '../../utils/cryptUtil';
+import { encrypt, isHashValid } from '../../utils/cryptUtil';
 import { CloudinaryService } from '../../fileUpload/cloudinary.service';
 import {
   LoginDto,
@@ -43,6 +43,11 @@ export class UserService {
     return this.userRepository.findOne({ where: { userSeq } });
   }
 
+  async checkDuplicateId(userId: string): Promise<boolean> {
+    const user = await this.userRepository.findOne({ where: { userId } });
+    return !!user;
+  }
+
   // --- 인증 로직 ---
 
   async register(
@@ -55,7 +60,7 @@ export class UserService {
     await queryRunner.startTransaction();
 
     try {
-      const { userEmail, userPw, userName, userPhone } = registerDto;
+      const { userEmail, userPw, userName } = registerDto;
 
       // 1. 이메일 중복 확인
       const existingUser = await queryRunner.manager.findOne(UserEntity, {
@@ -70,19 +75,13 @@ export class UserService {
 
       // 3. 사용자 엔티티 생성
       const newUser = queryRunner.manager.create(UserEntity, {
-        userId: userEmail, // userId는 이메일과 동일하게 설정 (정책에 따라 변경 가능)
+        userId: userEmail,
         userEmail: this.inputSanitizer.sanitizeEmail(userEmail),
-        userPw: hashedPassword, // 컬럼명 주의: userPw
+        userPw: hashedPassword,
         userName: this.inputSanitizer.sanitizeName(userName),
-        userPhone: userPhone ? await encryptSymmetric(userPhone) : undefined, // userPhone 컬럼이 없다면(Entity에 없음) 무시되거나 에러. Entity 확인 필요.
-        // UserEntity에 userPhone이 없음. user_phone이 없다면 제외. Entity 다시 확인하니 userPhone 없음. -> 수정 필요
         adminYn: 'N',
         userDescription: '',
       });
-      // UserEntity에 userPhone이 확인되지 않았음(Entity 파일 내용에는 없음).
-      // 일단 userPhone 제외하고 진행. 필요시 Entity 수정.
-      // -> 확인결과: UserEntity에 userPhone 없음. RegisterDto에는 있음.
-      // -> 비즈니스 요구사항에 따라 Entity 추가하거나 DTO에서 제거해야 함. 일단 저장하지 않음.
 
       // Audit 설정
       const auditSettings: AuditSettings = {
@@ -234,7 +233,6 @@ export class UserService {
           updateUserDto.userDescription,
         );
       }
-      // Phone 로직 대기 (Entity 없음)
 
       // 프로필 이미지 업데이트
       if (file) {
@@ -302,17 +300,15 @@ export class UserService {
 
   // --- 유틸리티 메서드 ---
 
-  // private async decryptUserFields... (userPhone 없으므로 일단 제외)
-
   async toUserResponse(user: UserEntity): Promise<UserResponseDto> {
     return {
       userNo: user.userSeq,
       userEmail: user.userEmail,
       userName: user.userName,
-      userPhone: undefined, // userPhone 컬럼 부재
+      userPhone: undefined,
       fileGroupNo: user.userProfileImageFileGroupNo || undefined,
-      createdAt: user.regDtm,
-      updatedAt: user.modDtm,
+      createdAt: user.auditColumns?.regDtm,
+      updatedAt: user.auditColumns?.updDtm,
     };
   }
 }
