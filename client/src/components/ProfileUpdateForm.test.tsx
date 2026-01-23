@@ -347,7 +347,6 @@ describe('ProfileUpdateForm', () => {
     });
     expect(submitButton).toBeDisabled();
     expect(screen.getByText('저장 중...')).toBeInTheDocument();
-    // eslint-disable-next-line testing-library/no-node-access
     expect(submitButton.querySelector('.spinner-border')).toBeInTheDocument();
   });
 

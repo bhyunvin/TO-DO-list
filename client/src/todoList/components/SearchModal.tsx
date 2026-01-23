@@ -105,7 +105,6 @@ const SearchModal = ({ show, onHide, onMoveToDate }) => {
     setDebounceTimer(timer);
     return () => clearTimeout(timer);
     // debounceTimer는 상태이지만 effect 내에서 set하므로 의존성에서 제외 (무한루프 방지)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [keyword, startDate, endDate, performSearch, show, isValidRange]);
 
   const setPreset = (months) => {

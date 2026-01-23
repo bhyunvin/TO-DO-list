@@ -101,7 +101,6 @@ const authService = {
    * 여기서는 에러를 throw해서 기능 미구현임을 알림.
    */
   async checkDuplicateId(_userId: string) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     console.warn(
       'checkDuplicateId API is not implemented in backend: ' + _userId,
     );
