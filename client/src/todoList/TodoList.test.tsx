@@ -35,7 +35,7 @@ const mockApi = vi.fn();
 globalThis.fetch = mockApi;
 
 vi.mock('../authStore/authStore', () => {
-  const useAuthStore = vi.fn(() => ({
+  const useAuthStore: any = vi.fn(() => ({
     user: {
       userName: 'Test User',
       userEmail: 'test@example.com',

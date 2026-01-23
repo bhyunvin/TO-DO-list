@@ -19,15 +19,16 @@ const useSecureImage = (src) => {
 
   useEffect(() => {
     // 로컬 API 파일 요청만 인터셉트
-    if (src && src.startsWith('/api/file/') && !src.startsWith('http')) {
+    if (src?.startsWith('/api/file/') && !src.startsWith('http')) {
       let isMounted = true;
       let objectUrl = null;
 
       const fetchImage = async () => {
         try {
-          const blob = await apiClient.get(src, { responseType: 'blob' });
+          const response = await apiClient.get(src, { responseType: 'blob' });
+          const blob = response.data || response; // axios wraps response, raw fetch might not
           if (isMounted) {
-            objectUrl = URL.createObjectURL(blob);
+            objectUrl = URL.createObjectURL(blob as Blob);
             setBlobUrl(objectUrl);
           }
         } catch (error) {

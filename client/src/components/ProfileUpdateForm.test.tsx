@@ -1,10 +1,4 @@
-import {
-  render,
-  screen,
-  fireEvent,
-  waitFor,
-
-} from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ProfileUpdateForm from './ProfileUpdateForm';
 
@@ -195,7 +189,8 @@ describe('ProfileUpdateForm', () => {
       />,
     );
 
-    const fileInput = await screen.findByLabelText<HTMLInputElement>(/프로필 이미지/);
+    const fileInput =
+      await screen.findByLabelText<HTMLInputElement>(/프로필 이미지/);
     const file = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
 
     await user.upload(fileInput, file);
@@ -347,7 +342,9 @@ describe('ProfileUpdateForm', () => {
       />,
     );
 
-    const submitButton = await screen.findByRole('button', { name: /저장 중.../ });
+    const submitButton = await screen.findByRole('button', {
+      name: /저장 중.../,
+    });
     expect(submitButton).toBeDisabled();
     expect(screen.getByText('저장 중...')).toBeInTheDocument();
     // eslint-disable-next-line testing-library/no-node-access

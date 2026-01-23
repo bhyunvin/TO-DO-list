@@ -15,10 +15,10 @@ const ContactDeveloperModal = ({ show, onHide }) => {
   const [isSending, setIsSending] = useState(false);
 
   // 파일 입력 초기화를 위한 Ref
-  const fileInputRef = useRef(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
     if (selectedFile) {
       // 이미지 파일만 허용 (간단한 체크)
       if (!selectedFile.type.startsWith('image/')) {

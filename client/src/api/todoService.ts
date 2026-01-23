@@ -36,6 +36,22 @@ const todoService = {
     return data;
   },
 
+  async getAttachments(todoSeq: number | string) {
+    const idStr = String(todoSeq);
+    const { data, error } = await todoApi[idStr].file.get();
+
+    if (error) {
+      // 404 is acceptable if no files exist, but here we likely get an array (empty or not)
+      // If backend throws for no files, handle specific status codes if needed.
+      throw new Error(
+        typeof error.value === 'string'
+          ? error.value
+          : JSON.stringify(error.value),
+      );
+    }
+    return data;
+  },
+
   async deleteAttachment(todoSeq: number | string, fileNo: number | string) {
     const todoIdStr = String(todoSeq);
     const fileNoStr = String(fileNo);

@@ -1,19 +1,53 @@
 import { useState, useCallback, useRef } from 'react';
-import { useFileUploadValidator } from './useFileUploadValidator';
+import {
+  useFileUploadValidator,
+  ValidationResult,
+} from './useFileUploadValidator';
+
+interface UploadedFile {
+  originalFileName?: string;
+  fileName?: string;
+  fileSize?: number;
+  url?: string;
+}
+
+interface UploadError {
+  fileName?: string;
+  errorCode?: string;
+  errorMessage?: string;
+}
+
+interface UploadResponse {
+  success: boolean;
+  data?: any;
+  uploadedFiles?: UploadedFile[];
+  partialSuccess?: boolean;
+  totalFiles?: number;
+  successfulUploads?: number;
+  errors?: UploadError[] | ValidationResult[];
+  message?: string;
+  cancelled?: boolean;
+}
 
 /**
  * 파일 업로드 진행 상황 및 상태를 관리하는 커스텀 훅
  */
 export const useFileUploadProgress = () => {
-  const [uploadStatus, setUploadStatus] = useState('idle');
-  const [uploadProgress, setUploadProgress] = useState({});
-  const [uploadErrors, setUploadErrors] = useState([]);
-  const [uploadedFiles, setUploadedFiles] = useState([]);
-  const [validationResults, setValidationResults] = useState([]);
+  const [uploadStatus, setUploadStatus] = useState<string>('idle');
+  const [uploadProgress, setUploadProgress] = useState<Record<string, number>>(
+    {},
+  );
+  const [uploadErrors, setUploadErrors] = useState<
+    (UploadError | ValidationResult)[]
+  >([]);
+  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
+  const [validationResults, setValidationResults] = useState<
+    ValidationResult[]
+  >([]);
 
   const { validateFiles, parseServerErrors, formatErrorSummary } =
     useFileUploadValidator();
-  const xhrRef = useRef(null);
+  const xhrRef = useRef<XMLHttpRequest | null>(null);
 
   /**
    * 업로드 상태 초기화
@@ -33,24 +67,30 @@ export const useFileUploadProgress = () => {
   /**
    * 특정 파일의 진행 상황 업데이트
    */
-  const updateFileProgress = useCallback((fileName, progress) => {
-    setUploadProgress((prev) => ({
-      ...prev,
-      [fileName]: Math.round(progress),
-    }));
-  }, []);
+  const updateFileProgress = useCallback(
+    (fileName: string, progress: number) => {
+      setUploadProgress((prev) => ({
+        ...prev,
+        [fileName]: Math.round(progress),
+      }));
+    },
+    [],
+  );
 
   /**
    * 개별 파일 진행 상황을 기반으로 전체 진행 상황 업데이트
    */
   const updateOverallProgress = useCallback(
-    (files) => {
+    (files: File[] | FileList) => {
+      const fileCount = files.length;
+      if (fileCount === 0) return 0;
+
       const totalProgress = Object.values(uploadProgress).reduce(
         (sum, progress) => sum + progress,
         0,
       );
-      const averageProgress =
-        files.length > 0 ? totalProgress / files.length : 0;
+
+      const averageProgress = totalProgress / fileCount;
       return Math.round(averageProgress);
     },
     [uploadProgress],
@@ -60,7 +100,7 @@ export const useFileUploadProgress = () => {
    * 업로드 전 파일 유효성 검사
    */
   const validateFilesForUpload = useCallback(
-    (files, category) => {
+    (files: File[] | FileList, category: string) => {
       setUploadStatus('validating');
 
       try {
@@ -77,17 +117,18 @@ export const useFileUploadProgress = () => {
 
         setUploadErrors([]);
         return { isValid: true, errors: [] };
-      } catch (error) {
+      } catch (error: any) {
         const errorMessage = error.message || 'Validation failed';
         setUploadErrors([
           {
             fileName: 'Validation',
             errorCode: 'VALIDATION_ERROR',
             errorMessage,
+            isValid: false,
           },
         ]);
         setUploadStatus('error');
-        return { isValid: false, errors: [{ errorMessage }] };
+        return { isValid: false, errors: [{ errorMessage, isValid: false }] };
       }
     },
     [validateFiles],
@@ -97,8 +138,11 @@ export const useFileUploadProgress = () => {
    * 진행 상황 추적과 함께 파일 업로드
    */
   /* Helper to process failed files */
-  const getFailedFilesErrors = (files, uploadedFilesList) => {
-    const failedFiles = [];
+  const getFailedFilesErrors = (
+    files: File[],
+    uploadedFilesList: UploadedFile[],
+  ) => {
+    const failedFiles: File[] = [];
     for (const file of files) {
       const isUploaded = uploadedFilesList.some(
         ({ originalFileName, fileName }) =>
@@ -117,7 +161,11 @@ export const useFileUploadProgress = () => {
   };
 
   const uploadFiles = useCallback(
-    async (files, uploadUrl, additionalData = {}) => {
+    async (
+      files: File[],
+      uploadUrl: string,
+      additionalData: Record<string, any> = {},
+    ): Promise<UploadResponse> => {
       if (!files || files.length === 0) {
         throw new Error('No files to upload');
       }
@@ -132,7 +180,7 @@ export const useFileUploadProgress = () => {
 
         xhr.open('POST', uploadUrl, true);
 
-        const handleProgress = (event) => {
+        const handleProgress = (event: ProgressEvent) => {
           if (!event.lengthComputable) return;
           const progress = (event.loaded / event.total) * 100;
           for (const file of files) {
@@ -140,7 +188,7 @@ export const useFileUploadProgress = () => {
           }
         };
 
-        const handleSuccessState = (uploadedFilesList) => {
+        const handleSuccessState = (uploadedFilesList: UploadedFile[]) => {
           setUploadedFiles(uploadedFilesList);
           const totalFiles = files.length;
           const successfulUploads = uploadedFilesList.length;
@@ -160,7 +208,7 @@ export const useFileUploadProgress = () => {
           setUploadStatus('error');
         };
 
-        const handleSuccess = (response) => {
+        const handleSuccess = (response: any) => {
           const { uploadedFiles: uploadedFilesList = [] } = response;
           handleSuccessState(uploadedFilesList);
 
@@ -178,7 +226,7 @@ export const useFileUploadProgress = () => {
           });
         };
 
-        const handleError = (status, responseText) => {
+        const handleError = (status: number, responseText: string) => {
           try {
             const errorData = JSON.parse(responseText);
             const serverErrors = parseServerErrors(errorData);
@@ -266,8 +314,14 @@ export const useFileUploadProgress = () => {
    * 유효성 검사와 함께 파일 업로드
    */
   const uploadFilesWithValidation = useCallback(
-    async (files, uploadUrl, category, additionalData = {}) => {
-      const validation = validateFilesForUpload(files, category);
+    async (
+      files: File[] | FileList,
+      uploadUrl: string,
+      category: string,
+      additionalData: Record<string, any> = {},
+    ) => {
+      const validationFiles = Array.from(files);
+      const validation = validateFilesForUpload(validationFiles, category);
       if (!validation.isValid) {
         return {
           success: false,
@@ -276,7 +330,7 @@ export const useFileUploadProgress = () => {
         };
       }
 
-      return await uploadFiles(files, uploadUrl, additionalData);
+      return await uploadFiles(validationFiles, uploadUrl, additionalData);
     },
     [validateFilesForUpload, uploadFiles],
   );
@@ -298,7 +352,11 @@ export const useFileUploadProgress = () => {
    * 실패한 업로드 재시도
    */
   const retryUpload = useCallback(
-    async (files, uploadUrl, additionalData = {}) => {
+    async (
+      files: File[],
+      uploadUrl: string,
+      additionalData: Record<string, any> = {},
+    ) => {
       resetUploadState();
       return await uploadFiles(files, uploadUrl, additionalData);
     },
@@ -360,8 +418,8 @@ export const useFileUploadProgress = () => {
           ) / totalFiles
         : 0;
 
-    const totalSize = validationResults.reduce((sum, { file }) => {
-      return sum + (file?.size || 0);
+    const totalSize = validationResults.reduce((sum, { fileSize = 0 }) => {
+      return sum + fileSize;
     }, 0);
 
     const uploadedSize = uploadedFiles.reduce((sum, { fileSize = 0 }) => {

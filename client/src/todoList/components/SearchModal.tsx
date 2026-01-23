@@ -283,7 +283,7 @@ const SearchModal = ({ show, onHide, onMoveToDate }) => {
                     ) : (
                       <tr>
                         <td
-                          colSpan="4"
+                          colSpan={4}
                           className="text-center text-secondary py-3"
                         >
                           검색 결과가 없습니다.

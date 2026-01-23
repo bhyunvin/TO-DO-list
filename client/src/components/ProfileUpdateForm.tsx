@@ -16,7 +16,7 @@ const isValidEmail = (email) => {
 
 const getInputClass = (error, value) => {
   if (error) return 'form-control is-invalid';
-  if (value && value.trim()) return 'form-control is-valid';
+  if (value?.trim()) return 'form-control is-valid';
   return 'form-control';
 };
 
@@ -100,7 +100,7 @@ const ProfileUpdateForm = ({
         if (detailUser) {
           setUserName(detailUser.userName || '');
           // 이메일이 평문인지 확인 (@ 포함 여부)
-          if (detailUser.userEmail && detailUser.userEmail.includes('@')) {
+          if (detailUser.userEmail?.includes('@')) {
             setUserEmail(detailUser.userEmail);
           }
           setUserDescription(detailUser.userDescription || '');
@@ -116,7 +116,7 @@ const ProfileUpdateForm = ({
         console.error('Failed to fetch profile detail:', error);
         // 실패 시 props로 받은 user 정보 사용 (이미 위에서 세팅됨)
         // 단, 마스킹된 이메일이 들어갈 수 있음 -> 사용자 수정 시 불편할 수 있음.
-        if (user && user.userEmail && user.userEmail.includes('@')) {
+        if (user?.userEmail?.includes('@')) {
           setUserEmail(user.userEmail);
         }
         showErrorAlert('오류', '프로필 정보를 불러오는데 실패했습니다.');
@@ -600,7 +600,7 @@ const ProfileUpdateForm = ({
               <textarea
                 className="form-control"
                 id="userDescription"
-                rows="3"
+                rows={3}
                 placeholder="추가 설명을 입력해주세요."
                 value={userDescription}
                 onChange={handleDescriptionChange}
@@ -637,9 +637,9 @@ const ProfileUpdateForm = ({
                   isSubmitting ||
                   uploadStatus === 'uploading' ||
                   uploadStatus === 'validating' ||
-                  nameError ||
-                  emailError ||
-                  profileImageError
+                  !!nameError ||
+                  !!emailError ||
+                  !!profileImageError
                 }
               >
                 {isSubmitting ||

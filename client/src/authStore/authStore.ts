@@ -4,9 +4,11 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 // User 타입 정의
 interface User {
   userNo: number;
+  userId?: string;
   userEmail: string;
   userName: string;
   userPhone?: string;
+  profileImage?: string;
   aiApiKey?: string;
   fileGroupNo?: number;
   createdAt?: Date;

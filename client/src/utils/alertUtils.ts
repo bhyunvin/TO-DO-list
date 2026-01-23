@@ -7,7 +7,8 @@ import { useThemeStore } from '../stores/themeStore';
 export const loadSwal = async () => {
   // 패키지 명만 사용하여 Vite가 최적의 모듈을 가져오게 함
   const module = await import('sweetalert2');
-  const Swal = module.default || module;
+  const Swal = (module.default ||
+    module) as typeof import('sweetalert2').default;
 
   const { theme } = useThemeStore.getState();
 
@@ -37,7 +38,7 @@ export const showAlert = async (options) => {
  * @param {string} [text] 내용
  * @returns {Promise<import('sweetalert2').SweetAlertResult>}
  */
-export const showSuccessAlert = async (title, text) => {
+export const showSuccessAlert = async (title, text?) => {
   const Swal = await loadSwal();
   return Swal.fire(title, text || '', 'success');
 };
@@ -48,7 +49,7 @@ export const showSuccessAlert = async (title, text) => {
  * @param {string} [text] 내용
  * @returns {Promise<import('sweetalert2').SweetAlertResult>}
  */
-export const showErrorAlert = async (title, text) => {
+export const showErrorAlert = async (title, text?) => {
   const Swal = await loadSwal();
   return Swal.fire(title, text || '', 'error');
 };
@@ -59,7 +60,7 @@ export const showErrorAlert = async (title, text) => {
  * @param {string} [text] 내용
  * @returns {Promise<import('sweetalert2').SweetAlertResult>}
  */
-export const showWarningAlert = async (title, text) => {
+export const showWarningAlert = async (title, text?) => {
   const Swal = await loadSwal();
   return Swal.fire(title, text || '', 'warning');
 };
@@ -80,7 +81,7 @@ export const showToast = async ({ title, icon = 'success', timer = 3000 }) => {
   return Swal.fire({
     toast: true,
     position,
-    icon,
+    icon: icon as import('sweetalert2').SweetAlertIcon,
     title,
     showConfirmButton: false,
     timer,

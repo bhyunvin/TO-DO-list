@@ -263,7 +263,7 @@ const SignupForm = ({ onSignupComplete }) => {
     if (profileImageFile)
       signupFormData.append('profileImage', profileImageFile);
 
-    signupFormData.append('privacyAgreed', privacyAgreed);
+    signupFormData.append('privacyAgreed', String(privacyAgreed));
 
     try {
       const data = await authService.signup(signupFormData);
@@ -292,7 +292,7 @@ const SignupForm = ({ onSignupComplete }) => {
       console.error('SignupForm Error : ', error);
 
       // authService/apiClient 에러 처리: 에러 응답이 있으면 data 사용
-      if (error.response && error.response.data) {
+      if (error.response?.data) {
         const errorData = error.response.data;
 
         if (errorData.errors && Array.isArray(errorData.errors)) {
@@ -667,7 +667,7 @@ const SignupForm = ({ onSignupComplete }) => {
             <textarea
               className="form-control"
               id="userDescription"
-              rows="3"
+              rows={3}
               placeholder="추가 설명을 입력해주세요."
               style={{ resize: 'none' }}
               onChange={userDescriptionChangeHandler}

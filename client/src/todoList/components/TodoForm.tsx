@@ -14,7 +14,7 @@ const TodoForm = ({
   onCancel,
   submitLabel,
   title,
-  children, // ExistingAttachments 컴포넌트나 기타 주입된 콘텐츠를 위함
+  children = null, // ExistingAttachments 컴포넌트나 기타 주입된 콘텐츠를 위함
 }) => {
   const { formatFileSize, getUploadPolicy, validateFiles } =
     useFileUploadValidator();
@@ -100,7 +100,7 @@ const TodoForm = ({
         // onSubmit이 Promise를 반환한다고 가정함.
       });
 
-      if (result && result.success) {
+      if (result?.success) {
         // "생성" 타입 액션이거나 명시적으로 요청된 경우에만 필드 초기화?
         // 편집(Edit)의 경우 보통 폼을 닫음.
         // 생성(Create)의 경우 필드를 초기화할 수 있음.

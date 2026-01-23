@@ -71,7 +71,7 @@ const request = async (endpoint: string, options: RequestOptions = {}) => {
   // params는 URL 쿼리 스트링으로 처리되므로 fetch 옵션에서는 제거
   const configOptions = { ...options };
   delete configOptions.params;
-  
+
   const { headers, ...otherOptions } = configOptions;
 
   const config: RequestInit = {
@@ -80,7 +80,8 @@ const request = async (endpoint: string, options: RequestOptions = {}) => {
   };
 
   if (accessToken) {
-    (config.headers as Record<string, string>)['Authorization'] = `Bearer ${accessToken}`;
+    (config.headers as Record<string, string>)['Authorization'] =
+      `Bearer ${accessToken}`;
   }
 
   // FormData인 경우 Content-Type 헤더 제거 (브라우저가 boundary 자동 설정)

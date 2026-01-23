@@ -36,7 +36,7 @@ const FileUploadProgress = ({
   uploadStatus = 'idle', // 'idle', 'validating', 'uploading', 'success', 'error', 'partial_success'
   uploadErrors = [],
   uploadedFiles = [],
-  onRemoveFile,
+  onRemoveFile = null,
   onRetryUpload,
   showValidation = true,
   showProgress = true,

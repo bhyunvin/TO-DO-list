@@ -1,13 +1,19 @@
 import { useState } from 'react';
-import { useFileUploadValidator } from './useFileUploadValidator';
+import {
+  useFileUploadValidator,
+  ValidationResult,
+} from './useFileUploadValidator';
 
 export const useTodoFileHandler = () => {
   const { validateFiles } = useFileUploadValidator();
-  const [todoFiles, setTodoFiles] = useState([]);
-  const [fileValidationResults, setFileValidationResults] = useState([]);
+  const [todoFiles, setTodoFiles] = useState<File[]>([]);
+  const [fileValidationResults, setFileValidationResults] = useState<
+    ValidationResult[]
+  >([]);
   const [fileError, setFileError] = useState('');
 
-  const handleFileChange = (e) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return;
     const selectedFiles = Array.from(e.target.files);
 
     // 이전 상태 초기화
@@ -33,7 +39,7 @@ export const useTodoFileHandler = () => {
     }
   };
 
-  const removeFile = (index) => {
+  const removeFile = (index: number) => {
     const newFiles = todoFiles.filter((_, i) => i !== index);
     const newValidationResults = fileValidationResults.filter(
       (_, i) => i !== index,
@@ -45,7 +51,9 @@ export const useTodoFileHandler = () => {
     if (newFiles.length === 0) {
       setFileError('');
       // 파일 입력 초기화
-      const fileInput = document.getElementById('todoFiles');
+      const fileInput = document.getElementById(
+        'todoFiles',
+      ) as HTMLInputElement;
       if (fileInput) fileInput.value = '';
     }
   };

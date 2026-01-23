@@ -9,7 +9,7 @@ const EditTodoForm = ({ todo, onSave, onCancel }) => {
   const handleSave = async (formData) => {
     // formData: { todoContent, todoNote, todoFiles }
     const result = await onSave(todoSeq, formData);
-    if (result && result.success) {
+    if (result?.success) {
       return { success: true, resetFields: false }; // 수정 성공 시 필드를 초기화하지 않음 (보통 폼이 닫힘)
     }
     return result;

@@ -6,7 +6,7 @@ import { useState, useCallback } from 'react';
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
 const ALLOWED_IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
-const ALLOWED_DOCUMENT_EXTENSIONS = [];
+const ALLOWED_DOCUMENT_EXTENSIONS: string[] = [];
 const BLOCKED_EXTENSIONS = [
   '.exe',
   '.js',
@@ -22,9 +22,11 @@ const FILE_VALIDATION_ERRORS = {
   INVALID_FILE_TYPE: 'INVALID_FILE_TYPE',
   BLOCKED_FILE_TYPE: 'BLOCKED_FILE_TYPE',
   TOO_MANY_FILES: 'TOO_MANY_FILES',
-};
+} as const;
 
-const FILE_VALIDATION_MESSAGES = {
+type FileValidationErrorKey = keyof typeof FILE_VALIDATION_ERRORS;
+
+const FILE_VALIDATION_MESSAGES: Record<string, string> = {
   [FILE_VALIDATION_ERRORS.FILE_TOO_LARGE]:
     '파일 크기가 최대 제한인 10MB를 초과합니다',
   [FILE_VALIDATION_ERRORS.INVALID_FILE_TYPE]: '허용되지 않는 파일 형식입니다',
@@ -36,7 +38,7 @@ const FILE_VALIDATION_MESSAGES = {
 /**
  * 추가 컨텍스트가 포함된 사용자 친화적 오류 메시지
  */
-const USER_FRIENDLY_MESSAGES = {
+const USER_FRIENDLY_MESSAGES: Record<string, string> = {
   [FILE_VALIDATION_ERRORS.FILE_TOO_LARGE]:
     '파일이 너무 큽니다. 10MB보다 작은 파일을 선택해주세요.',
   [FILE_VALIDATION_ERRORS.INVALID_FILE_TYPE]:
@@ -47,7 +49,14 @@ const USER_FRIENDLY_MESSAGES = {
     '너무 많은 파일을 선택했습니다. 파일 수를 줄여주세요.',
 };
 
-const FILE_UPLOAD_POLICY = {
+interface FileUploadConfig {
+  maxSize: number;
+  allowedTypes?: string[];
+  blockedTypes?: string[];
+  maxCount: number;
+}
+
+const FILE_UPLOAD_POLICY: Record<string, FileUploadConfig> = {
   profileImage: {
     maxSize: MAX_FILE_SIZE,
     allowedTypes: ALLOWED_IMAGE_EXTENSIONS,
@@ -61,19 +70,37 @@ const FILE_UPLOAD_POLICY = {
   },
 };
 
+export interface ValidationResult {
+  file?: File;
+  fileName?: string;
+  fileSize?: number;
+  fileType?: string;
+  isValid: boolean;
+  errorCode?: string;
+  errorMessage?: string;
+}
+
+interface ValidationSingleResult {
+  isValid: boolean;
+  errorCode?: string;
+  errorMessage?: string;
+}
+
 /**
  * 파일 업로드 유효성 검사를 위한 커스텀 훅
  * @returns {Object} 유효성 검사 함수 및 유틸리티
  */
 export const useFileUploadValidator = () => {
-  const [validationResults, setValidationResults] = useState([]);
+  const [validationResults, setValidationResults] = useState<
+    ValidationResult[]
+  >([]);
 
   /**
    * 파일명에서 파일 확장자 가져오기
    * @param {string} fileName - 파일명
    * @returns {string} 소문자 파일 확장자
    */
-  const getFileExtension = useCallback((fileName) => {
+  const getFileExtension = useCallback((fileName: string) => {
     const lastDot = fileName.lastIndexOf('.');
     return lastDot === -1 ? '' : fileName.substring(lastDot).toLowerCase();
   }, []);
@@ -83,7 +110,7 @@ export const useFileUploadValidator = () => {
    * @param {number} bytes - 바이트 단위 파일 크기
    * @returns {string} 포맷된 파일 크기
    */
-  const formatFileSize = useCallback((bytes) => {
+  const formatFileSize = useCallback((bytes: number) => {
     if (bytes === 0) return '0 Bytes';
 
     const k = 1024;
@@ -102,7 +129,7 @@ export const useFileUploadValidator = () => {
    * @returns {Object} 유효성 검사 결과
    */
   const validateFileSize = useCallback(
-    (file, maxSize) => {
+    (file: File, maxSize: number): ValidationSingleResult => {
       if (file.size > maxSize) {
         return {
           isValid: false,
@@ -123,7 +150,11 @@ export const useFileUploadValidator = () => {
    * @returns {Object} 유효성 검사 결과
    */
   const validateFileType = useCallback(
-    (file, allowedTypes = [], blockedTypes = []) => {
+    (
+      file: File,
+      allowedTypes: string[] = [],
+      blockedTypes: string[] = [],
+    ): ValidationSingleResult => {
       const fileExtension = getFileExtension(file.name);
 
       if (blockedTypes.length > 0 && blockedTypes.includes(fileExtension)) {
@@ -153,17 +184,20 @@ export const useFileUploadValidator = () => {
    * @param {number} maxCount - 최대 허용 파일 개수
    * @returns {Object} 유효성 검사 결과
    */
-  const validateFileCount = useCallback((files, maxCount) => {
-    const fileCount = files.length;
-    if (fileCount > maxCount) {
-      return {
-        isValid: false,
-        errorCode: FILE_VALIDATION_ERRORS.TOO_MANY_FILES,
-        errorMessage: `${FILE_VALIDATION_MESSAGES[FILE_VALIDATION_ERRORS.TOO_MANY_FILES]} (${fileCount}/${maxCount})`,
-      };
-    }
-    return { isValid: true };
-  }, []);
+  const validateFileCount = useCallback(
+    (files: File[] | FileList, maxCount: number): ValidationSingleResult => {
+      const fileCount = files.length;
+      if (fileCount > maxCount) {
+        return {
+          isValid: false,
+          errorCode: FILE_VALIDATION_ERRORS.TOO_MANY_FILES,
+          errorMessage: `${FILE_VALIDATION_MESSAGES[FILE_VALIDATION_ERRORS.TOO_MANY_FILES]} (${fileCount}/${maxCount})`,
+        };
+      }
+      return { isValid: true };
+    },
+    [],
+  );
 
   /**
    * 구성에 따라 단일 파일 유효성 검사
@@ -172,7 +206,7 @@ export const useFileUploadValidator = () => {
    * @returns {Object} 파일 정보가 포함된 유효성 검사 결과
    */
   const validateSingleFile = useCallback(
-    (file, config) => {
+    (file: File, config: FileUploadConfig): ValidationResult => {
       const { maxSize, allowedTypes = [], blockedTypes = [] } = config;
       const { name, size } = file;
       const fileType = getFileExtension(name);
@@ -184,7 +218,9 @@ export const useFileUploadValidator = () => {
           fileName: name,
           fileSize: size,
           fileType,
-          ...sizeValidation,
+          isValid: false,
+          errorCode: sizeValidation.errorCode,
+          errorMessage: sizeValidation.errorMessage,
         };
       }
 
@@ -195,7 +231,9 @@ export const useFileUploadValidator = () => {
           fileName: name,
           fileSize: size,
           fileType,
-          ...typeValidation,
+          isValid: false,
+          errorCode: typeValidation.errorCode,
+          errorMessage: typeValidation.errorMessage,
         };
       }
 
@@ -217,7 +255,7 @@ export const useFileUploadValidator = () => {
    * @returns {Object[]} 유효성 검사 결과 배열
    */
   const validateFiles = useCallback(
-    (files, category) => {
+    (files: File[] | FileList, category: string): ValidationResult[] => {
       const config = FILE_UPLOAD_POLICY[category];
       if (!config) {
         throw new Error(`Invalid file category: ${category}`);
@@ -235,7 +273,9 @@ export const useFileUploadValidator = () => {
             fileName: name,
             fileSize: size,
             fileType: getFileExtension(name),
-            ...countValidation,
+            isValid: false,
+            errorCode: countValidation.errorCode,
+            errorMessage: countValidation.errorMessage,
           };
         });
       }
@@ -255,7 +295,7 @@ export const useFileUploadValidator = () => {
    * @returns {File[]} 유효한 파일 배열
    */
   const getValidFiles = useCallback(
-    (files, category) => {
+    (files: File[] | FileList, category: string) => {
       const results = validateFiles(files, category);
       return results
         .filter((result) => result.isValid)
@@ -271,13 +311,13 @@ export const useFileUploadValidator = () => {
    * @returns {boolean} 파일 유형이 유효하면 true
    */
   const isValidFileType = useCallback(
-    (fileName, category) => {
+    (fileName: string, category: string) => {
       const config = FILE_UPLOAD_POLICY[category];
       if (!config) return false;
 
       const fileExtension = getFileExtension(fileName);
 
-      if (config.blockedTypes && config.blockedTypes.includes(fileExtension)) {
+      if (config.blockedTypes?.includes(fileExtension)) {
         return false;
       }
 
@@ -295,7 +335,7 @@ export const useFileUploadValidator = () => {
    * @param {string} category - 파일 카테고리
    * @returns {Object} 정책 구성
    */
-  const getUploadPolicy = useCallback((category) => {
+  const getUploadPolicy = useCallback((category: string) => {
     return FILE_UPLOAD_POLICY[category] || null;
   }, []);
 
@@ -305,14 +345,17 @@ export const useFileUploadValidator = () => {
    * @returns {string} 사용자 친화적 오류 메시지
    */
   const getUserFriendlyMessage = useCallback(
-    (error) => {
+    (error: ValidationResult) => {
       const {
         errorCode,
         errorMessage,
         fileSize = 0,
         fileType = 'unknown',
       } = error;
-      const baseMessage = USER_FRIENDLY_MESSAGES[errorCode] || errorMessage;
+      const baseMessage =
+        (errorCode && USER_FRIENDLY_MESSAGES[errorCode]) ||
+        errorMessage ||
+        'Unknown error';
 
       switch (errorCode) {
         case FILE_VALIDATION_ERRORS.FILE_TOO_LARGE:
@@ -335,7 +378,7 @@ export const useFileUploadValidator = () => {
    * @returns {string} 포맷된 오류 요약
    */
   const formatErrorSummary = useCallback(
-    (errors) => {
+    (errors: ValidationResult[]) => {
       if (errors.length === 0) {
         return '';
       }
@@ -345,16 +388,19 @@ export const useFileUploadValidator = () => {
         return `"${fileName}": ${getUserFriendlyMessage(errors[0])}`;
       }
 
-      const errorGroups = errors.reduce((groups, error) => {
-        const { errorCode } = error;
-        if (!groups[errorCode]) {
-          groups[errorCode] = [];
-        }
-        groups[errorCode].push(error);
-        return groups;
-      }, {});
+      const errorGroups = errors.reduce<Record<string, ValidationResult[]>>(
+        (groups, error) => {
+          const errorCode = error.errorCode || 'UNKNOWN';
+          if (!groups[errorCode]) {
+            groups[errorCode] = [];
+          }
+          groups[errorCode].push(error);
+          return groups;
+        },
+        {},
+      );
 
-      const messages = [];
+      const messages: string[] = [];
       for (const [, fileErrors] of Object.entries(errorGroups)) {
         if (fileErrors.length === 1) {
           const { fileName } = fileErrors[0];
@@ -381,33 +427,38 @@ export const useFileUploadValidator = () => {
    * @param {Object} errorResponse - 서버 오류 응답
    * @returns {Object[]} 유효성 검사 오류 배열
    */
-  const parseServerErrors = useCallback((errorResponse) => {
-    if (errorResponse?.errors && Array.isArray(errorResponse.errors)) {
-      return errorResponse.errors;
-    }
+  const parseServerErrors = useCallback(
+    (errorResponse: any): ValidationResult[] => {
+      if (errorResponse?.errors && Array.isArray(errorResponse.errors)) {
+        return errorResponse.errors;
+      }
 
-    if (errorResponse?.response?.data?.errors) {
-      return errorResponse.response.data.errors;
-    }
+      if (errorResponse?.response?.data?.errors) {
+        return errorResponse.response.data.errors;
+      }
 
-    if (errorResponse?.message) {
+      if (errorResponse?.message) {
+        return [
+          {
+            fileName: 'Unknown',
+            errorCode: 'UPLOAD_FAILED',
+            errorMessage: errorResponse.message,
+            isValid: false,
+          },
+        ];
+      }
+
       return [
         {
           fileName: 'Unknown',
           errorCode: 'UPLOAD_FAILED',
-          errorMessage: errorResponse.message,
+          errorMessage: '파일 업로드 중 예기치 않은 오류가 발생했습니다',
+          isValid: false,
         },
       ];
-    }
-
-    return [
-      {
-        fileName: 'Unknown',
-        errorCode: 'UPLOAD_FAILED',
-        errorMessage: '파일 업로드 중 예기치 않은 오류가 발생했습니다',
-      },
-    ];
-  }, []);
+    },
+    [],
+  );
 
   /**
    * 유효성 검사 결과 초기화

@@ -13,6 +13,7 @@ import './ChatModal.css';
 const ChatModal = ({
   isOpen,
   onClose,
+  user,
   messages,
   onSendMessage,
   isLoading,
@@ -270,6 +271,10 @@ ChatModal.propTypes = {
   onClearError: PropTypes.func.isRequired,
   onInputFocus: PropTypes.func,
   onInputBlur: PropTypes.func,
+  user: PropTypes.shape({
+    userName: PropTypes.string,
+    profileImage: PropTypes.string,
+  }),
 };
 
 export default ChatModal;

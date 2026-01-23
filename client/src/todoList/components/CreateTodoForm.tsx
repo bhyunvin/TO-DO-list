@@ -8,7 +8,7 @@ const CreateTodoForm = ({ onAddTodo, onCancel }) => {
     // formData: { todoContent, todoNote, todoFiles }
     const result = await onAddTodo(formData);
 
-    if (result && result.success) {
+    if (result?.success) {
       showToast({
         icon: 'success',
         title: '할 일이 추가되었습니다.',

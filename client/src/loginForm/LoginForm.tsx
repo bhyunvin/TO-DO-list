@@ -50,9 +50,9 @@ const LoginForm = () => {
       console.error('LoginForm Login Error : ', error);
 
       const { response } = error;
-      if (response && response.status === 204) {
+      if (response?.status === 204) {
         showErrorAlert('로그인 실패', '사용자가 존재하지 않습니다.');
-      } else if (response && response.data) {
+      } else if (response?.data) {
         showErrorAlert(
           '로그인 실패',
           response.data.message || '다시 시도해 주세요.',

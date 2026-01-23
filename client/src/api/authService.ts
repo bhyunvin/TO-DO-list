@@ -102,7 +102,9 @@ const authService = {
    */
   async checkDuplicateId(_userId: string) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    console.warn('checkDuplicateId API is not implemented in backend: ' + _userId);
+    console.warn(
+      'checkDuplicateId API is not implemented in backend: ' + _userId,
+    );
     // 임시: 중복 아님 처리 (가입 시도 시 에러로 잡도록)
     return false;
   },

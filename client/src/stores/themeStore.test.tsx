@@ -366,7 +366,9 @@ describe('themeStore', () => {
         throw new Error('matchMedia error');
       });
 
-      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const consoleWarnSpy = vi
+        .spyOn(console, 'warn')
+        .mockImplementation(() => {});
 
       act(() => {
         useThemeStore.getState().initializeTheme();

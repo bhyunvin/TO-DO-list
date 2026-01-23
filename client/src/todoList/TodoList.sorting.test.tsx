@@ -2,53 +2,53 @@ import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import TodoList from './TodoList';
 
-const mockApi = jest.fn();
+const mockApi = vi.fn();
 
-jest.mock('../authStore/authStore', () => ({
+vi.mock('../authStore/authStore', () => ({
   useAuthStore: () => ({
     user: { userId: 'testuser', userName: 'Test User', userSeq: 1 },
-    logout: jest.fn(),
+    logout: vi.fn(),
     api: mockApi,
-    login: jest.fn(),
+    login: vi.fn(),
   }),
 }));
 
-jest.mock('../stores/chatStore', () => ({
+vi.mock('../stores/chatStore', () => ({
   useChatStore: () => ({
     messages: [],
     isLoading: false,
     error: null,
-    addMessage: jest.fn(),
-    setLoading: jest.fn(),
-    clearError: jest.fn(),
-    handleApiError: jest.fn(),
-    setRetryMessage: jest.fn(),
-    getRetryMessage: jest.fn(),
-    resetRetryState: jest.fn(),
-    canSendRequest: jest.fn(() => true),
+    addMessage: vi.fn(),
+    setLoading: vi.fn(),
+    clearError: vi.fn(),
+    handleApiError: vi.fn(),
+    setRetryMessage: vi.fn(),
+    getRetryMessage: vi.fn(),
+    resetRetryState: vi.fn(),
+    canSendRequest: vi.fn(() => true),
   }),
 }));
 
-jest.mock('../hooks/useFileUploadValidator', () => ({
+vi.mock('../hooks/useFileUploadValidator', () => ({
   useFileUploadValidator: () => ({
-    validateFiles: jest.fn(() => []),
-    formatFileSize: jest.fn(() => '10MB'),
-    getUploadPolicy: jest.fn(() => ({ maxSize: 10485760, maxCount: 10 })),
+    validateFiles: vi.fn(() => []),
+    formatFileSize: vi.fn(() => '10MB'),
+    getUploadPolicy: vi.fn(() => ({ maxSize: 10485760, maxCount: 10 })),
   }),
 }));
 
-jest.mock('../hooks/useFileUploadProgress', () => ({
+vi.mock('../hooks/useFileUploadProgress', () => ({
   useFileUploadProgress: () => ({
     uploadStatus: 'idle',
     uploadProgress: {},
     uploadErrors: [],
     uploadedFiles: [],
-    resetUploadState: jest.fn(),
+    resetUploadState: vi.fn(),
   }),
 }));
 
-jest.mock('sweetalert2', () => ({
-  fire: jest.fn(() => Promise.resolve({ isConfirmed: true })),
+vi.mock('sweetalert2', () => ({
+  fire: vi.fn(() => Promise.resolve({ isConfirmed: true })),
 }));
 
 describe('TodoContainer Sorting Behavior', () => {
@@ -57,7 +57,7 @@ describe('TodoContainer Sorting Behavior', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('completed todo moves to bottom after toggle', async () => {

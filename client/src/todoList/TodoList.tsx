@@ -355,7 +355,7 @@ const TodoContainer = () => {
           console.error('Delete Todo Error:', error);
 
           const { response } = error;
-          if (response && response.data) {
+          if (response?.data) {
             showErrorAlert(
               '오류',
               `삭제에 실패했습니다: ${response.data.message}`,
@@ -408,7 +408,7 @@ const TodoContainer = () => {
       console.error('Save Todo Error:', error);
 
       const { response } = error;
-      if (response && response.data) {
+      if (response?.data) {
         const errorData = response.data;
         // 파일 업로드 오류를 구체적으로 처리
         if (errorData.errors && Array.isArray(errorData.errors)) {
@@ -530,7 +530,7 @@ const TodoContainer = () => {
       console.error('Profile update error:', error);
 
       const { response } = error;
-      if (response && response.data) {
+      if (response?.data) {
         const errorData = response.data;
         if (errorData.errors && Array.isArray(errorData.errors)) {
           const errorMessages = errorData.errors
@@ -556,13 +556,9 @@ const TodoContainer = () => {
 
   const handleSavePassword = async (passwordData) => {
     try {
-      const { currentPassword, newPassword, confirmPassword } = passwordData;
+      const { currentPassword, newPassword } = passwordData;
 
-      await userService.changePassword({
-        currentPassword,
-        newPassword,
-        confirmPassword,
-      });
+      await userService.changePassword(currentPassword, newPassword);
 
       showToast({
         title: '비밀번호가 변경되었습니다.',
@@ -579,7 +575,7 @@ const TodoContainer = () => {
       console.error('Password change error:', error);
 
       const { response } = error;
-      if (response && response.data) {
+      if (response?.data) {
         const errorData = response.data;
         const { message } = errorData;
         let errorMessage = '비밀번호 변경에 실패했습니다.';
@@ -608,6 +604,7 @@ const TodoContainer = () => {
         confirmButton: 'btn btn-outline-primary',
         cancelButton: 'btn btn-outline-adaptive me-2',
       },
+      text: '로그아웃 하시겠습니까?', // text 속성 추가
     }).then((result) => {
       // 사용자가 취소를 선택한 경우 로그아웃을 중단
       if (!result.isConfirmed) {
@@ -818,8 +815,11 @@ const TodoContainer = () => {
       buttonsStyling: false,
       focusConfirm: false,
       preConfirm: () => {
-        const startDate = document.getElementById('startDate').value;
-        const endDate = document.getElementById('endDate').value;
+        const startDate = (
+          document.getElementById('startDate') as HTMLInputElement
+        ).value;
+        const endDate = (document.getElementById('endDate') as HTMLInputElement)
+          .value;
 
         if (!startDate || !endDate) {
           Swal.showValidationMessage('날짜를 선택해주세요');

@@ -5,56 +5,56 @@ import PropTypes from 'prop-types';
 import TodoContainer from './TodoList';
 
 // Mock SweetAlert2
-jest.mock('sweetalert2', () => ({
-  fire: jest.fn(() => Promise.resolve({ isConfirmed: true })),
+vi.mock('sweetalert2', () => ({
+  fire: vi.fn(() => Promise.resolve({ isConfirmed: true })),
 }));
 
 // Mock auth store
-const mockApi = jest.fn();
-jest.mock('../authStore/authStore', () => ({
+const mockApi = vi.fn();
+vi.mock('../authStore/authStore', () => ({
   useAuthStore: () => ({
     user: {
       userName: 'Test User',
       userEmail: 'test@example.com',
       userDescription: 'Test description',
     },
-    login: jest.fn(),
-    logout: jest.fn(),
+    login: vi.fn(),
+    logout: vi.fn(),
     api: mockApi,
   }),
 }));
 
 // Mock file upload hooks
-jest.mock('../hooks/useFileUploadValidator', () => ({
+vi.mock('../hooks/useFileUploadValidator', () => ({
   useFileUploadValidator: () => ({
-    validateFiles: jest.fn(() => [
+    validateFiles: vi.fn(() => [
       { isValid: true, file: {}, fileName: 'test.jpg', fileSize: 1000 },
     ]),
-    formatFileSize: jest.fn((size) => `${size} bytes`),
-    getUploadPolicy: jest.fn(() => ({ maxSize: 10485760, maxCount: 5 })),
+    formatFileSize: vi.fn((size) => `${size} bytes`),
+    getUploadPolicy: vi.fn(() => ({ maxSize: 10485760, maxCount: 5 })),
     FILE_VALIDATION_ERRORS: {},
   }),
 }));
 
-jest.mock('../hooks/useFileUploadProgress', () => ({
+vi.mock('../hooks/useFileUploadProgress', () => ({
   useFileUploadProgress: () => ({
     uploadStatus: 'idle',
     uploadProgress: {},
     uploadErrors: [],
     validationResults: [],
-    resetUploadState: jest.fn(),
+    resetUploadState: vi.fn(),
   }),
 }));
 
 // Mock components
-jest.mock('../components/FileUploadProgress', () => {
+vi.mock('../components/FileUploadProgress', () => {
   const MockFileUploadProgress = () => (
     <div data-testid="file-upload-progress">File Upload Progress</div>
   );
   return MockFileUploadProgress;
 });
 
-jest.mock('../components/ProfileUpdateForm', () => {
+vi.mock('../components/ProfileUpdateForm', () => {
   const MockProfileUpdateForm = ({ onCancel }) => (
     <div data-testid="profile-update-form">
       <button onClick={onCancel}>Cancel</button>
@@ -68,7 +68,7 @@ jest.mock('../components/ProfileUpdateForm', () => {
   return MockProfileUpdateForm;
 });
 
-jest.mock('../components/PasswordChangeForm', () => {
+vi.mock('../components/PasswordChangeForm', () => {
   const MockPasswordChangeForm = ({ onCancel }) => (
     <div data-testid="password-change-form">
       <button onClick={onCancel}>Cancel</button>
@@ -82,7 +82,7 @@ jest.mock('../components/PasswordChangeForm', () => {
   return MockPasswordChangeForm;
 });
 
-jest.mock('react-datepicker', () => {
+vi.mock('react-datepicker', () => {
   const MockDatePicker = ({ selected, onChange }) => (
     <input
       data-testid="date-picker"
@@ -104,7 +104,7 @@ jest.mock('react-datepicker', () => {
 
 describe('TodoContainer Checkbox Cell Click Functionality', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     const Swal = require('sweetalert2');
     Swal.fire.mockResolvedValue({ isConfirmed: true });
 

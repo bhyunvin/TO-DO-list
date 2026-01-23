@@ -219,10 +219,7 @@ const test5_SystemPreferenceDetection = async () => {
   // 시스템 선호도 확인
   let systemPreference = 'light';
   try {
-    if (
-      globalThis.matchMedia &&
-      globalThis.matchMedia('(prefers-color-scheme: dark)').matches
-    ) {
+    if (globalThis.matchMedia?.('(prefers-color-scheme: dark)').matches) {
       systemPreference = 'dark';
     }
   } catch (error) {

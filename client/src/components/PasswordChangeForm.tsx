@@ -10,7 +10,7 @@ import { getPasswordStrength } from '../utils/passwordUtils';
 
 const getInputClass = (error, value) => {
   if (error) return 'form-control is-invalid';
-  if (value && value.trim()) return 'form-control is-valid';
+  if (value?.trim()) return 'form-control is-valid';
   return 'form-control';
 };
 
@@ -384,13 +384,15 @@ const PasswordChangeForm = ({
               type="submit"
               className="btn btn-outline-primary w-100"
               disabled={
-                isSubmitting ||
-                currentPasswordError ||
-                newPasswordError ||
-                confirmPasswordError ||
-                !currentPassword ||
-                !newPassword ||
-                !confirmPassword
+                !!(
+                  isSubmitting ||
+                  currentPasswordError ||
+                  newPasswordError ||
+                  confirmPasswordError ||
+                  !currentPassword ||
+                  !newPassword ||
+                  !confirmPassword
+                )
               }
             >
               {isSubmitting ? (
