@@ -34,7 +34,8 @@ const authService = {
     if (!data) throw new Error('No data received');
 
     // 백엔드 응답: { accessToken, user }
-    const { accessToken, user } = data;
+    // 타입 assertion으로 타입 안전성 확보
+    const { accessToken, user } = data as { accessToken: string; user: any };
 
     // 스토어에 저장
     // user 타입 호환성: 백엔드 UserResponseDto와 프론트엔드 User 타입이 다를 수 있음.
@@ -57,7 +58,7 @@ const authService = {
   /**
    * 회원가입
    */
-  async signup(formData: FormData | any) {
+  async signup(formData: FormData | Record<string, any>) {
     // formData가 넘어왔다고 가정.
     // 백엔드 /user/register는 Body(JSON)만 받음 (Step 592 확인).
     // 따라서 FormData를 JSON으로 변환해야 함.
@@ -97,7 +98,7 @@ const authService = {
    * 임시 조치: 항상 false(중복 아님) 반환하거나, 에러 처리.
    * 여기서는 에러를 throw해서 기능 미구현임을 알림.
    */
-  async checkDuplicateId(userId: string) {
+  async checkDuplicateId(_userId: string) {
     console.warn('checkDuplicateId API is not implemented in backend.');
     // 임시: 중복 아님 처리 (가입 시도 시 에러로 잡도록)
     return false;

@@ -133,7 +133,7 @@ export class TodoService {
       // 파일 업로드 처리
       if (dto.files && Array.isArray(dto.files) && dto.files.length > 0) {
         // files가 File[] 인지 확인 (Elysia t.Files는 File[])
-        const files = dto.files as File[];
+        const files = dto.files;
 
         const { fileGroupNo } = await this.fileUploadUtil.saveFileInfo(
           files,
@@ -174,35 +174,8 @@ export class TodoService {
 
       // 파일 추가 업로드
       if (dto.files && Array.isArray(dto.files) && dto.files.length > 0) {
-        const files = dto.files as File[];
-        const { savedFiles, fileGroupNo } =
-          await this.fileUploadUtil.saveFileInfo(
-            files,
-            { entity: null, id: String(userSeq), ip, isUpdate: false },
-            manager,
-          );
-
-        if (todo.todoFileGroupNo) {
-          // 기존 그룹에 병합 로직 (fileUploadUtil이 처리해주지 않는 경우 수동 처리 필요)
-          // FileUploadUtil.saveFileInfo는 새 그룹 생성 혹은 Entity 반환
-          // 현재 fileUploadUtil 로직상 그룹에 추가하려면 수동으로 fileInfoRepo 업데이트 필요할 수 있음
-          // 혹은 fileUploadUtil 수정 필요.
-
-          // 기존 로직(todo.service.ts addAttachments)을 참고하면
-          // cloudinary 업로드 후 fileInfoRepository.save 로직을 수행함.
-          // 여기서는 시간 관계상 파일 그룹이 없으면 설정하고, 있으면 추가된 파일들의 그룹번호를 기존번호로 업데이트
-
-          if (fileGroupNo !== todo.todoFileGroupNo) {
-            // 새로 업로드된 파일들의 그룹번호를 기존 투두 그룹번호로 변경
-            const fileRepo = manager.getRepository(FileInfoEntity);
-            for (const f of savedFiles) {
-              f.fileGroupNo = todo.todoFileGroupNo;
-              await fileRepo.save(f);
-            }
-          }
-        } else {
-          todo.todoFileGroupNo = fileGroupNo;
-        }
+        const files = dto.files;
+        await this.processFileUpload(manager, userSeq, ip, files, todo);
       }
 
       setAuditColumn({
@@ -245,7 +218,7 @@ export class TodoService {
     const todo = await this.todoRepository.findOne({
       where: { todoSeq, userSeq, delYn: 'N' },
     });
-    if (!todo || !todo.todoFileGroupNo)
+    if (!todo?.todoFileGroupNo)
       throw new Error('Todo not found or has no files');
 
     const fileInfo = await this.fileInfoRepository.findOne({
@@ -366,5 +339,32 @@ export class TodoService {
     // buffer type conversion for return
     const buffer = await workbook.xlsx.writeBuffer();
     return Buffer.from(buffer);
+  }
+
+
+  private async processFileUpload(
+    manager: any,
+    userSeq: number,
+    ip: string,
+    files: File[],
+    todo: TodoEntity,
+  ) {
+    const { savedFiles, fileGroupNo } = await this.fileUploadUtil.saveFileInfo(
+      files,
+      { entity: null, id: String(userSeq), ip, isUpdate: false },
+      manager,
+    );
+
+    if (todo.todoFileGroupNo) {
+      if (fileGroupNo !== todo.todoFileGroupNo) {
+        const fileRepo = manager.getRepository(FileInfoEntity);
+        for (const f of savedFiles) {
+          f.fileGroupNo = todo.todoFileGroupNo;
+          await fileRepo.save(f);
+        }
+      }
+    } else {
+      todo.todoFileGroupNo = fileGroupNo;
+    }
   }
 }

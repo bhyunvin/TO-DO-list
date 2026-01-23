@@ -8,6 +8,7 @@ import {
   UpdateTodoSchema,
   DeleteTodoSchema,
   SearchTodoSchema,
+  type SearchTodoDto,
 } from './todo.schema';
 
 // 헬퍼 함수: 요청에서 IP 추출
@@ -30,17 +31,14 @@ export const todoRoutes = new Elysia({ prefix: '/todo' })
     '/',
     async ({ user, query, todoService }) => {
       const todoDate = query.date || null;
-      // jwtPlugin user payload has 'sub' not 'id'
-      const todos = await todoService.findAll(
-        Number((user as any)!.sub),
-        todoDate,
-      );
+      const userId = Number(user!.id);
+      const todos = await todoService.findAll(userId, todoDate);
 
       const result = [];
       for (const todo of todos) {
         const attachments = await todoService.getAttachments(
           todo.todoSeq,
-          Number((user as any)!.sub),
+          Number(user!.id),
         );
         result.push({
           todoSeq: todo.todoSeq,
@@ -65,12 +63,15 @@ export const todoRoutes = new Elysia({ prefix: '/todo' })
   .get(
     '/search',
     async ({ user, query, todoService }) => {
-      const todos = await todoService.search(Number((user as any)!.sub), query);
+      const todos = await todoService.search(
+        Number(user!.id),
+        query as SearchTodoDto,
+      );
       const result = [];
       for (const todo of todos) {
         const attachments = await todoService.getAttachments(
           todo.todoSeq,
-          Number((user as any)!.sub),
+          Number(user!.id),
         );
         result.push({
           todoSeq: todo.todoSeq,
@@ -96,7 +97,7 @@ export const todoRoutes = new Elysia({ prefix: '/todo' })
     async ({ user, body, todoService, request, set }) => {
       const clientIp = getClientIp(request);
       const newTodo = await todoService.create(
-        Number((user as any)!.sub),
+        Number(user!.id),
         clientIp,
         body as any,
       );
@@ -104,7 +105,7 @@ export const todoRoutes = new Elysia({ prefix: '/todo' })
       // 응답 생성
       const attachments = await todoService.getAttachments(
         newTodo.todoSeq,
-        Number((user as any)!.sub),
+        Number(user!.id),
       );
       set.status = 201;
       return {
@@ -130,14 +131,14 @@ export const todoRoutes = new Elysia({ prefix: '/todo' })
       const clientIp = getClientIp(request);
       const updatedTodo = await todoService.update(
         Number(id),
-        Number((user as any)!.sub),
+        Number(user!.id),
         clientIp,
         body as any,
       );
 
       const attachments = await todoService.getAttachments(
         updatedTodo.todoSeq,
-        Number((user as any)!.sub),
+        Number(user!.id),
       );
       return {
         todoSeq: updatedTodo.todoSeq,
@@ -164,7 +165,7 @@ export const todoRoutes = new Elysia({ prefix: '/todo' })
       // body.todoIds 접근을 위해 any 캐스팅
       await todoService.delete(
         (body as any).todoIds,
-        Number((user as any)!.sub),
+        Number(user!.id),
         clientIp,
       );
       return { success: true };
@@ -182,7 +183,7 @@ export const todoRoutes = new Elysia({ prefix: '/todo' })
       await todoService.deleteAttachment(
         Number(todoId),
         Number(fileNo),
-        Number((user as any)!.sub),
+        Number(user!.id),
       );
       return { success: true };
     },
@@ -200,7 +201,7 @@ export const todoRoutes = new Elysia({ prefix: '/todo' })
     '/export',
     async ({ user, query, todoService, set }) => {
       const buffer = await todoService.exportToExcel(
-        Number((user as any)!.sub),
+        Number(user!.id),
         query.startDate,
         query.endDate,
       );

@@ -1,5 +1,5 @@
 import { treaty } from '@elysiajs/eden';
-import type { App } from '../../../src/main';
+import type { App } from '../../../src/src/main';
 
 // 백엔드 주소 (Vite Proxy를 타거나 직접 호출)
 // Proxy '/api' -> 'http://localhost:3000' 설정했으므로,

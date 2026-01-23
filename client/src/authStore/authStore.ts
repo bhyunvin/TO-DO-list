@@ -1,11 +1,31 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
-export const useAuthStore = create(
-  persist(
+// User 타입 정의
+interface User {
+  userNo: number;
+  userEmail: string;
+  userName: string;
+  userPhone?: string;
+  aiApiKey?: string;
+  fileGroupNo?: number;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+// AuthStore 인터페이스 정의
+interface AuthStore {
+  user: User | null;
+  accessToken: string | null;
+  login: (userData: User, token?: string) => void;
+  logout: () => void;
+}
+
+export const useAuthStore = create<AuthStore>()(
+  persist<AuthStore>(
     (set) => ({
       user: null,
-      accessToken: null, // JWT 토큰 저장
+      accessToken: null,
 
       login: (userData, token) =>
         set((state) => ({

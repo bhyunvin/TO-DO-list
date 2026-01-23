@@ -64,7 +64,7 @@ const ERROR_MESSAGES: Record<string, string> = {
 };
 
 export const useChatStore = create<ChatStore>()(
-  persist<ChatStore>(
+  persist<ChatStore, [], [], Pick<ChatStore, 'messages' | 'todoRefreshTrigger'>>(
     (set, get) => ({
       // 영구 저장되는 상태
       messages: [],
@@ -212,7 +212,7 @@ export const useChatStore = create<ChatStore>()(
 
         // 메시지가 없는 경우 새 메시지 추가
         const type = hasKey ? 'welcome' : 'warning';
-        set((state) => ({
+        set(() => ({
           messages: [createWelcomeMessage(type)],
         }));
       },
@@ -353,6 +353,7 @@ export const useChatStore = create<ChatStore>()(
       // 로딩 상태나 오류가 아닌 메시지만 영구 저장
       partialize: (state) => ({
         messages: state.messages,
+        todoRefreshTrigger: state.todoRefreshTrigger,
       }),
     },
   ),
