@@ -15,6 +15,10 @@ import { assistanceRoutes } from './features/assistance/assistance.routes';
 import { mailRoutes } from './features/mail/mail.routes';
 import { fileRoutes } from './features/fileUpload/file.routes';
 
+import { Logger } from './utils/logger';
+
+const logger = new Logger('GlobalExceptionHandler');
+
 /**
  * 메인 Elysia 애플리케이션
  *
@@ -29,6 +33,24 @@ const app = new Elysia()
   .use(jwtPlugin)
   .use(dbLoggingPlugin)
   .use(swaggerPlugin)
+  
+  // 전역 에러 핸들링 (HttpExceptionFilter 대체)
+  .onError(({ code, error, set, request }) => {
+    const statusCode = set.status ? Number(set.status) : 500;
+    
+    // 에러 상세 로깅 (Stack Trace 포함)
+    logger.error(`Global Error: ${error.message}`, error.stack);
+   
+    return {
+      success: false,
+      statusCode,
+      message: error.message || 'Internal Server Error',
+      timestamp: new Date().toISOString(),
+      path: request.url,
+      // code가 'VALIDATION' 등인 경우 상세 정보 추가 가능
+      errors: 'all' in error ? error.all : undefined, 
+    };
+  })
 
   // 모듈 라우트 등록
   .use(userRoutes)
