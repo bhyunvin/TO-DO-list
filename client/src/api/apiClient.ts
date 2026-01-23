@@ -17,11 +17,10 @@ const handleStatusErrors = async (response, endpoint) => {
   // 504 Gateway Timeout 처리
   if (response.status === 504) {
     console.error('서버 응답 시간 초과');
-    showErrorAlert({
-      title: '서버 응답 시간 초과',
-      text: '서버와의 연결이 원활하지 않습니다. 잠시 후 다시 시도해주세요.',
-      confirmButtonText: '확인',
-    });
+    showErrorAlert(
+      '서버 응답 시간 초과',
+      '서버와의 연결이 원활하지 않습니다. 잠시 후 다시 시도해주세요.',
+    );
   }
 };
 
@@ -39,7 +38,13 @@ const parseResponseData = async (response, responseType) => {
   }
 };
 
-const request = async (endpoint, options = {}) => {
+interface RequestOptions extends RequestInit {
+  params?: Record<string, any>;
+  responseType?: 'json' | 'text' | 'blob';
+  headers?: Record<string, string>;
+}
+
+const request = async (endpoint: string, options: RequestOptions = {}) => {
   let url = `${API_URL}${endpoint}`;
 
   // params 옵션이 있으면 쿼리 스트링으로 변환하여 URL에 추가
@@ -47,7 +52,7 @@ const request = async (endpoint, options = {}) => {
     const searchParams = new URLSearchParams();
     Object.entries(options.params).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
-        searchParams.append(key, value);
+        searchParams.append(key, String(value));
       }
     });
     const queryString = searchParams.toString();
@@ -66,21 +71,24 @@ const request = async (endpoint, options = {}) => {
   // params는 URL 쿼리 스트링으로 처리되므로 fetch 옵션에서는 제거
   const configOptions = { ...options };
   delete configOptions.params;
-
+  
   const { headers, ...otherOptions } = configOptions;
 
-  const config = {
+  const config: RequestInit = {
     ...otherOptions,
     headers: { ...defaultHeaders, ...headers },
   };
 
   if (accessToken) {
-    config.headers['Authorization'] = `Bearer ${accessToken}`;
+    (config.headers as Record<string, string>)['Authorization'] = `Bearer ${accessToken}`;
   }
 
   // FormData인 경우 Content-Type 헤더 제거 (브라우저가 boundary 자동 설정)
   if (config.body instanceof FormData) {
-    delete config.headers['Content-Type'];
+    // headers가 HeadersInit 타입일 수 있으므로 any로 처리하거나 체크 필요
+    // 여기서는 간단히 Record로 간주
+    const h = config.headers as Record<string, string>;
+    delete h['Content-Type'];
   }
 
   try {
@@ -95,7 +103,7 @@ const request = async (endpoint, options = {}) => {
     // 에러 상태 처리
     if (!response.ok) {
       // Axios 에러 구조를 모방하여 호환성 유지
-      const error = new Error('API Error');
+      const error: any = new Error('API Error');
       error.response = {
         status: response.status,
         data: data,
@@ -109,12 +117,12 @@ const request = async (endpoint, options = {}) => {
       data: data,
       headers: response.headers,
     };
-  } catch (error) {
+  } catch (error: any) {
     // 이미 처리된 에러(response 속성이 있는 경우)는 그대로 던짐
     if (error.response) throw error;
 
     // 네트워크 에러 등 fetch 자체 에러 처리
-    const wrapperError = new Error(error.message);
+    const wrapperError: any = new Error(error.message);
     wrapperError.name = error.name; // TypeError etc.
     // Axios 호환성을 위해 code 속성 추가 시도 (선택적)
     if (error.name === 'AbortError') {

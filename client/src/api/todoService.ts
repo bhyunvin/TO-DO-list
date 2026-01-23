@@ -1,9 +1,11 @@
 import { api } from './client';
 
+const todoApi = api.todo as any;
+
 const todoService = {
   async getTodos(date: string) {
     // .get('/', { query: { date } })
-    const { data, error } = await api.todo.get({
+    const { data, error } = await todoApi.get({
       query: { date },
     });
 
@@ -20,7 +22,7 @@ const todoService = {
 
   async searchTodos(startDate: string, endDate: string, keyword: string) {
     // .get('/search', { query: { startDate, endDate, keyword } })
-    const { data, error } = await api.todo.search.get({
+    const { data, error } = await todoApi.search.get({
       query: { startDate, endDate, keyword },
     });
 
@@ -39,7 +41,8 @@ const todoService = {
     const fileNoStr = String(fileNo);
 
     // Eden Treaty: /todo에서 동적 경로 [todoId]를 문자열 indexing으로 접근
-    const { error } = await api.todo[todoIdStr].file[fileNoStr].delete();
+    // todoApi가 any이므로 indexing 가능
+    const { error } = await todoApi[todoIdStr].file[fileNoStr].delete();
     if (error) {
       throw new Error(
         typeof error.value === 'string'
@@ -60,7 +63,7 @@ const todoService = {
       };
     }
 
-    const { data: result, error } = await api.todo.post(payload);
+    const { data: result, error } = await todoApi.post(payload);
     if (error) {
       throw new Error(
         typeof error.value === 'string'
@@ -85,7 +88,7 @@ const todoService = {
     const idStr = String(todoSeq);
 
     // Eden Treaty: /todo에서 동적 경로 [id]를 문자열 indexing으로 접근
-    const { data: result, error } = await api.todo[idStr].patch(payload);
+    const { data: result, error } = await todoApi[idStr].patch(payload);
     if (error) {
       throw new Error(
         typeof error.value === 'string'
@@ -101,7 +104,7 @@ const todoService = {
     // 기존 todoService는 단건 삭제로 보임 (todoSeq 받음)
     // 백엔드는 다중 삭제만 구현됨 (Step 457)
 
-    const { error } = await api.todo.delete({
+    const { error } = await todoApi.delete({
       todoIds: [Number(todoSeq)],
     });
     if (error) {
@@ -116,7 +119,7 @@ const todoService = {
 
   async downloadExcel(startDate: string, endDate: string) {
     // GET /export
-    const { data, error } = await api.todo.export.get({
+    const { data, error } = await todoApi.export.get({
       query: { startDate, endDate },
     });
 

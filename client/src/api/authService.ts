@@ -1,4 +1,6 @@
 import { api } from './client';
+
+const userApi = api.user as any;
 // import { useAuthStore } from '../authStore/authStore'; // 순환 참조 우려가 있지만 일단 유지?
 // authService 내에서 useAuthStore.getState() 사용함.
 
@@ -15,7 +17,7 @@ const authService = {
    */
   async login(userId: string, userPassword: string) {
     // Eden Treaty 호출 (userId -> userEmail 매핑)
-    const { data, error } = await api.user.login.post({
+    const { data, error } = await userApi.login.post({
       userEmail: userId,
       userPw: userPassword,
     });
@@ -50,7 +52,7 @@ const authService = {
    */
   async logout() {
     // 서버 로그아웃 (Refresh Token 삭제 등)
-    await api.user.logout.post();
+    await userApi.logout.post();
     // 클라이언트 상태 초기화
     useAuthStore.getState().logout();
   },
@@ -72,7 +74,7 @@ const authService = {
       if (payload.userPhone === '') delete payload.userPhone;
     }
 
-    const { data, error } = await api.user.register.post(payload);
+    const { data, error } = await userApi.register.post(payload);
 
     if (error) {
       throw new Error(
@@ -99,7 +101,8 @@ const authService = {
    * 여기서는 에러를 throw해서 기능 미구현임을 알림.
    */
   async checkDuplicateId(_userId: string) {
-    console.warn('checkDuplicateId API is not implemented in backend.');
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    console.warn('checkDuplicateId API is not implemented in backend: ' + _userId);
     // 임시: 중복 아님 처리 (가입 시도 시 에러로 잡도록)
     return false;
   },
