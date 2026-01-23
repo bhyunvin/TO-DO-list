@@ -16,10 +16,10 @@ describe('ThemeToggle', () => {
     mockToggleTheme = vi.fn();
 
     // useThemeStore의 기본 mock 구현
-    useThemeStore.mockReturnValue({
+    vi.mocked(useThemeStore).mockReturnValue({
       theme: 'light',
       toggleTheme: mockToggleTheme,
-    });
+    } as any);
   });
 
   afterEach(() => {
@@ -56,10 +56,10 @@ describe('ThemeToggle', () => {
     });
 
     test('displays moon icon when theme is dark', () => {
-      useThemeStore.mockReturnValue({
+      vi.mocked(useThemeStore).mockReturnValue({
         theme: 'dark',
         toggleTheme: mockToggleTheme,
-      });
+      } as any);
 
       render(<ThemeToggle />);
 
@@ -70,10 +70,10 @@ describe('ThemeToggle', () => {
 
   describe('Theme State Reflection', () => {
     test('switch shows light state when theme is light', () => {
-      useThemeStore.mockReturnValue({
+      vi.mocked(useThemeStore).mockReturnValue({
         theme: 'light',
         toggleTheme: mockToggleTheme,
-      });
+      } as any);
 
       render(<ThemeToggle />);
 
@@ -85,10 +85,10 @@ describe('ThemeToggle', () => {
     });
 
     test('switch shows dark state when theme is dark', () => {
-      useThemeStore.mockReturnValue({
+      vi.mocked(useThemeStore).mockReturnValue({
         theme: 'dark',
         toggleTheme: mockToggleTheme,
-      });
+      } as any);
 
       render(<ThemeToggle />);
 
@@ -139,7 +139,13 @@ describe('ThemeToggle', () => {
       const mockParentClick = vi.fn();
 
       const { container } = render(
-        <div onClick={mockParentClick} className="theme-toggle-wrapper-mock">
+        <div
+          onClick={mockParentClick}
+          className="theme-toggle-wrapper-mock"
+          role="button"
+          tabIndex={0}
+          onKeyDown={vi.fn()}
+        >
           <ThemeToggle />
         </div>,
       );
@@ -157,7 +163,13 @@ describe('ThemeToggle', () => {
       const mockDropdownClick = vi.fn();
 
       const { container } = render(
-        <div className="dropdown-menu" onClick={mockDropdownClick}>
+        <div
+          className="dropdown-menu"
+          onClick={mockDropdownClick}
+          role="button"
+          tabIndex={0}
+          onKeyDown={vi.fn()}
+        >
           <ThemeToggle />
         </div>,
       );
@@ -235,10 +247,10 @@ describe('ThemeToggle', () => {
       expect(slider).toHaveClass('light');
 
       // 테마를 dark로 변경
-      useThemeStore.mockReturnValue({
+      vi.mocked(useThemeStore).mockReturnValue({
         theme: 'dark',
         toggleTheme: mockToggleTheme,
-      });
+      } as any);
 
       rerender(<ThemeToggle />);
 
@@ -271,10 +283,10 @@ describe('ThemeToggle', () => {
       expect(switchElement).toHaveAttribute('aria-label', '다크 모드 전환');
 
       // 테마 변경
-      useThemeStore.mockReturnValue({
+      vi.mocked(useThemeStore).mockReturnValue({
         theme: 'dark',
         toggleTheme: mockToggleTheme,
-      });
+      } as any);
 
       rerender(<ThemeToggle />);
 
