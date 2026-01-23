@@ -2,7 +2,25 @@
  * Bun & ElysiaJS 환경을 위한 표준 Logger 유틸리티
  * NestJS Logger와 유사한 인터페이스를 제공합니다.
  */
+import pino from 'pino';
+
+/**
+ * Bun & ElysiaJS 환경을 위한 표준 Logger 유틸리티
+ * NestJS Logger와 유사한 인터페이스를 제공하지만, 내부는 pino를 사용합니다.
+ */
 export class Logger {
+  // 전역 pino 인스턴스 (싱글톤 패턴 유사)
+  private static readonly pinoLogger = pino({
+    transport: {
+      target: 'pino-pretty',
+      options: {
+        colorize: true,
+        translateTime: 'SYS:standard',
+        ignore: 'pid,hostname',
+      },
+    },
+  });
+
   private context?: string;
 
   constructor(context?: string) {
@@ -13,38 +31,38 @@ export class Logger {
    * 일반 로그 (INFO)
    */
   log(message: string, context?: string) {
-    this.printLog('INFO', message, context || this.context);
+    Logger.pinoLogger.info({ context: context || this.context }, message);
   }
 
   /**
    * 에러 로그 (ERROR)
    */
   error(message: string, trace?: string, context?: string) {
-    this.printLog('ERROR', message, context || this.context);
-    if (trace) {
-      console.error(trace);
-    }
+    Logger.pinoLogger.error(
+      { context: context || this.context, err: trace },
+      message,
+    );
   }
 
   /**
    * 경고 로그 (WARN)
    */
   warn(message: string, context?: string) {
-    this.printLog('WARN', message, context || this.context);
+    Logger.pinoLogger.warn({ context: context || this.context }, message);
   }
 
   /**
    * 디버그 로그 (DEBUG)
    */
   debug(message: string, context?: string) {
-    this.printLog('DEBUG', message, context || this.context);
+    Logger.pinoLogger.debug({ context: context || this.context }, message);
   }
 
   /**
-   * 상세 로그 (VERBOSE)
+   * 상세 로그 (VERBOSE) - pino에서는 trace 레벨에 대응
    */
   verbose(message: string, context?: string) {
-    this.printLog('VERBOSE', message, context || this.context);
+    Logger.pinoLogger.trace({ context: context || this.context }, message);
   }
 
   /**
@@ -53,25 +71,5 @@ export class Logger {
   setContext(context: string) {
     this.context = context;
   }
-
-  private printLog(level: string, message: string, context?: string) {
-    const timestamp = new Date().toISOString();
-    const contextMsg = context ? ` [${context}]` : '';
-    const formattedMessage = `[${timestamp}] ${level}${contextMsg} ${message}`;
-
-    switch (level) {
-      case 'ERROR':
-        console.error(formattedMessage);
-        break;
-      case 'WARN':
-        console.warn(formattedMessage);
-        break;
-      case 'DEBUG':
-        console.debug(formattedMessage);
-        break;
-      default:
-        console.log(formattedMessage);
-        break;
-    }
-  }
 }
+

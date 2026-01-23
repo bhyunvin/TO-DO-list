@@ -2,6 +2,7 @@ import { Elysia } from 'elysia';
 import 'jose';
 
 import { corsPlugin } from './plugins/cors';
+import { loggerPlugin } from './plugins/logger';
 import { configPlugin, env } from './plugins/config';
 import { databasePlugin } from './plugins/database';
 import { jwtPlugin } from './plugins/jwt';
@@ -21,6 +22,7 @@ import { fileRoutes } from './features/fileUpload/file.routes';
 const app = new Elysia()
   // 플러그인 등록
   .use(corsPlugin)
+  .use(loggerPlugin)
   .use(configPlugin)
   .use(databasePlugin)
   .use(jwtPlugin)
