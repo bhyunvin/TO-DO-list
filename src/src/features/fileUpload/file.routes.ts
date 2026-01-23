@@ -29,7 +29,7 @@ export const fileRoutes = new Elysia({ prefix: '/file' })
         throw new Error('파일을 찾을 수 없습니다.');
       }
 
-      const userSeq = Number(user!.id);
+      const userSeq = Number(user.id);
 
       // 권한 체크
       const hasTodoAccess = await todoRepo.count({

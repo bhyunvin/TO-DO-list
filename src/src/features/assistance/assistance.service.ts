@@ -194,7 +194,7 @@ export class AssistanceService {
   ): number {
     const retryAfter = error.response?.headers?.['retry-after'];
     if (retryAfter) {
-      const retryAfterMs = parseInt(retryAfter) * 1000;
+      const retryAfterMs = Number.parseInt(retryAfter) * 1000;
       return Math.min(retryAfterMs, 30000);
     }
     const exponentialDelay = baseDelay * Math.pow(2, attempt - 1);
@@ -237,7 +237,7 @@ export class AssistanceService {
   ): Promise<ChatRequestDto & { response?: string }> {
     // 1. API Key 조회
     const user = await this.userRepository.findOne({ where: { userSeq } });
-    if (!user || !user.aiApiKey) {
+    if (!user?.aiApiKey) {
       throw new Error('AI API Key가 설정되지 않았습니다.');
     }
     const apiKey = await decryptSymmetric(user.aiApiKey);
@@ -291,7 +291,7 @@ export class AssistanceService {
 
         const functionResponses = await Promise.all(
           functionCalls.map(async (part) => {
-            const call = part.functionCall!;
+            const call = part.functionCall;
             const result = await this.executeFunctionCall(
               call,
               userSeq,

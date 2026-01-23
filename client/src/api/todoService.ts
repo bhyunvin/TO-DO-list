@@ -9,7 +9,9 @@ const todoService = {
 
     if (error) {
       throw new Error(
-        typeof error.value === 'string' ? error.value : JSON.stringify(error.value)
+        typeof error.value === 'string'
+          ? error.value
+          : JSON.stringify(error.value),
       );
     }
     return data;
@@ -24,7 +26,9 @@ const todoService = {
 
     if (error) {
       throw new Error(
-        typeof error.value === 'string' ? error.value : JSON.stringify(error.value)
+        typeof error.value === 'string'
+          ? error.value
+          : JSON.stringify(error.value),
       );
     }
     return data;
@@ -33,12 +37,14 @@ const todoService = {
   async deleteAttachment(todoSeq: number | string, fileNo: number | string) {
     const todoIdStr = String(todoSeq);
     const fileNoStr = String(fileNo);
-    
+
     // Eden Treaty: /todo에서 동적 경로 [todoId]를 문자열 indexing으로 접근
     const { error } = await api.todo[todoIdStr].file[fileNoStr].delete();
     if (error) {
       throw new Error(
-        typeof error.value === 'string' ? error.value : JSON.stringify(error.value)
+        typeof error.value === 'string'
+          ? error.value
+          : JSON.stringify(error.value),
       );
     }
   },
@@ -57,7 +63,9 @@ const todoService = {
     const { data: result, error } = await api.todo.post(payload);
     if (error) {
       throw new Error(
-        typeof error.value === 'string' ? error.value : JSON.stringify(error.value)
+        typeof error.value === 'string'
+          ? error.value
+          : JSON.stringify(error.value),
       );
     }
     return result;
@@ -75,12 +83,14 @@ const todoService = {
     }
 
     const idStr = String(todoSeq);
-    
+
     // Eden Treaty: /todo에서 동적 경로 [id]를 문자열 indexing으로 접근
     const { data: result, error } = await api.todo[idStr].patch(payload);
     if (error) {
       throw new Error(
-        typeof error.value === 'string' ? error.value : JSON.stringify(error.value)
+        typeof error.value === 'string'
+          ? error.value
+          : JSON.stringify(error.value),
       );
     }
     return result;
@@ -96,7 +106,9 @@ const todoService = {
     });
     if (error) {
       throw new Error(
-        typeof error.value === 'string' ? error.value : JSON.stringify(error.value)
+        typeof error.value === 'string'
+          ? error.value
+          : JSON.stringify(error.value),
       );
     }
     return { success: true };
@@ -110,7 +122,9 @@ const todoService = {
 
     if (error) {
       throw new Error(
-        typeof error.value === 'string' ? error.value : JSON.stringify(error.value)
+        typeof error.value === 'string'
+          ? error.value
+          : JSON.stringify(error.value),
       );
     }
     return data; // Blob 이어야 함. Eden이 Blob 반환하는지 확인 필요.

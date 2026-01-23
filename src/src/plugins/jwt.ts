@@ -10,11 +10,22 @@ export interface JWTUser {
   email: string;
 }
 
-
-interface JWTPayload {
-  sub: string | number;
+/**
+ * JWT 페이로드 타입 (Access Token)
+ */
+export interface JWTAccessPayload {
+  sub: string;
   name: string;
   email: string;
+  [key: string]: string | number | boolean | undefined;
+}
+
+/**
+ * JWT 페이로드 타입 (Refresh Token)
+ */
+export interface JWTRefreshPayload {
+  sub: string;
+  [key: string]: string | number | boolean | undefined;
 }
 
 export const jwtPlugin = (app: Elysia) =>
@@ -44,19 +55,25 @@ export const jwtPlugin = (app: Elysia) =>
       const token = auth.slice(7);
 
       try {
-        // payload 타입 캐스팅을 통해 타입 안전성 확보
-        const payload = (await jwt.verify(token)) as unknown as JWTPayload;
+        const payload = await jwt.verify(token);
 
-        if (!payload) {
+        if (!payload || typeof payload !== 'object') {
+          return { user: null };
+        }
+
+        // JWT 페이로드 타입 검증
+        const jwtPayload = payload as JWTAccessPayload;
+
+        if (!jwtPayload.sub || !jwtPayload.name || !jwtPayload.email) {
           return { user: null };
         }
 
         // JWT 페이로드에서 사용자 정보 추출
         return {
           user: {
-            id: payload.sub,
-            username: payload.name,
-            email: payload.email,
+            id: jwtPayload.sub,
+            username: jwtPayload.name,
+            email: jwtPayload.email,
           } as JWTUser,
         };
       } catch {
@@ -64,4 +81,3 @@ export const jwtPlugin = (app: Elysia) =>
         return { user: null };
       }
     });
-

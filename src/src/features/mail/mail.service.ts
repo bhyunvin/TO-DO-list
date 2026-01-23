@@ -1,5 +1,4 @@
 import * as nodemailer from 'nodemailer';
-import { env } from '../../plugins/config'; // env 플러그인 또는 process.env
 
 export class MailService {
   private readonly transporter: nodemailer.Transporter;

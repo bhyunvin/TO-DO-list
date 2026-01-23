@@ -64,7 +64,12 @@ const ERROR_MESSAGES: Record<string, string> = {
 };
 
 export const useChatStore = create<ChatStore>()(
-  persist<ChatStore, [], [], Pick<ChatStore, 'messages' | 'todoRefreshTrigger'>>(
+  persist<
+    ChatStore,
+    [],
+    [],
+    Pick<ChatStore, 'messages' | 'todoRefreshTrigger'>
+  >(
     (set, get) => ({
       // 영구 저장되는 상태
       messages: [],

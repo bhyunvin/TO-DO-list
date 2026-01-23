@@ -73,4 +73,3 @@ export const TodoResponseSchema = t.Object({
   attachments: t.Array(FileAttachmentResponseSchema),
   createdAt: t.String(),
 });
-// export type TodoResponseDto = Static<typeof TodoResponseSchema>; // 필요시
