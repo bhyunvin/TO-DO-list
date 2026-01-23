@@ -1,3 +1,4 @@
+/// <reference types="vitest" />
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import purgecss from '@fullhuman/postcss-purgecss';
@@ -42,7 +43,7 @@ export default defineConfig({
     // API 프록시 설정
     proxy: {
       '/api': {
-        target: 'http://127.0.0.1:3001',
+        target: 'http://127.0.0.1:3000', // 백엔드 포트 3000으로 수정
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
@@ -88,7 +89,7 @@ export default defineConfig({
   test: {
     globals: true, // describe, it, expect 등을 전역으로 사용 (Jest와 동일)
     environment: 'jsdom', // 'jsdom' 환경에서 테스트 실행
-    setupFiles: './src/setupTests.js', // 테스트 실행 전 이 파일 로드
+    setupFiles: './src/setupTests.ts', // js -> ts로 변경 예정
     css: true, // CSS 파일 import 시 오류 방지
 
     // 테스트 커버리지 설정
