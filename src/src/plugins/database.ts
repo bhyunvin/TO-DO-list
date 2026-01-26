@@ -7,25 +7,31 @@ import { RefreshTokenEntity } from '../features/user/refresh-token.entity';
 import { LogEntity } from '../features/logging/log.entity';
 import { CustomNamingStrategy } from '../utils/customNamingStrategy';
 import { Logger } from '../utils/logger';
+import { env } from './config';
 
 const logger = new Logger('DatabasePlugin');
 
-// 데이터베이스 연결 인스턴스 생성
+/**
+ * 데이터베이스 연결 인스턴스 생성
+ * 
+ * config.ts에서 검증된 환경 변수(env 객체)를 사용하여
+ * 타입 안전성과 일관성을 보장합니다.
+ */
 export const dataSource = new DataSource({
-  type: 'postgres',
-  host: process.env.DB_DEV_SERVER || 'localhost',
-  port: Number.parseInt(process.env.DB_DEV_PORT || '5432', 10),
-  username: process.env.DB_DEV_USERNAME || '',
-  password: process.env.DB_DEV_PASSWORD || '',
-  database: process.env.DB_DEV_DATABASE || '',
-  ssl: { rejectUnauthorized: false },
-  entities: [
-    TodoEntity,
-    UserEntity,
-    FileInfoEntity,
-    RefreshTokenEntity,
-    LogEntity,
-  ],
+    type: 'postgres',
+    host: env.DB_DEV_SERVER,
+    port: env.DB_DEV_PORT,
+    username: env.DB_DEV_USERNAME,
+    password: env.DB_DEV_PASSWORD,
+    database: env.DB_DEV_DATABASE,
+    ssl: { rejectUnauthorized: false },
+    entities: [
+        TodoEntity,
+        UserEntity,
+        FileInfoEntity,
+        RefreshTokenEntity,
+        LogEntity,
+    ],
   namingStrategy: new CustomNamingStrategy(),
   synchronize: false,
   logging: true,
