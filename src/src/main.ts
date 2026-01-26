@@ -40,12 +40,15 @@ const app = new Elysia()
     const statusCode = set.status ? Number(set.status) : 500;
 
     // 에러 상세 로깅 (Stack Trace 포함)
-    logger.error(`Global Error: ${error.message}`, error.stack);
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    logger.error(`Global Error: ${errorMessage}`, errorStack);
 
     return {
       success: false,
       statusCode,
-      message: error.message || 'Internal Server Error',
+      message: errorMessage || 'Internal Server Error',
       timestamp: new Date().toISOString(),
       path: request.url,
       // code가 'VALIDATION' 등인 경우 상세 정보 추가 가능

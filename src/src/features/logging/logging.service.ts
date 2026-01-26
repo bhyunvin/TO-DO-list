@@ -15,8 +15,21 @@ export class LoggingService {
       const log = this.logRepository.create(data);
       await this.logRepository.save(log);
     } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : String(error);
-      this.logger.error('Failed to save DB log', msg);
+      let errorMessage: string;
+      let errorStack: string | undefined;
+
+      if (error instanceof Error) {
+        errorMessage = error.message;
+        errorStack = error.stack;
+      } else {
+        try {
+          errorMessage = JSON.stringify(error);
+        } catch {
+          errorMessage = String(error);
+        }
+      }
+
+      this.logger.error('Failed to save DB log', errorStack || errorMessage);
       // DB 로깅 실패가 메인 로직에 영향을 주지 않도록 예외 무시
     }
   }
