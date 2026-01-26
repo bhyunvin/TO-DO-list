@@ -25,7 +25,7 @@ export class LoggingService {
         try {
           errorMessage = JSON.stringify(error);
         } catch {
-          errorMessage = String(error);
+          errorMessage = 'Unknown error (JSON stringify failed)';
         }
       }
 
