@@ -13,25 +13,25 @@ const logger = new Logger('DatabasePlugin');
 
 /**
  * 데이터베이스 연결 인스턴스 생성
- * 
+ *
  * config.ts에서 검증된 환경 변수(env 객체)를 사용하여
  * 타입 안전성과 일관성을 보장합니다.
  */
 export const dataSource = new DataSource({
-    type: 'postgres',
-    host: env.DB_DEV_SERVER,
-    port: env.DB_DEV_PORT,
-    username: env.DB_DEV_USERNAME,
-    password: env.DB_DEV_PASSWORD,
-    database: env.DB_DEV_DATABASE,
-    ssl: { rejectUnauthorized: false },
-    entities: [
-        TodoEntity,
-        UserEntity,
-        FileInfoEntity,
-        RefreshTokenEntity,
-        LogEntity,
-    ],
+  type: 'postgres',
+  host: env.DB_DEV_SERVER,
+  port: env.DB_DEV_PORT,
+  username: env.DB_DEV_USERNAME,
+  password: env.DB_DEV_PASSWORD,
+  database: env.DB_DEV_DATABASE,
+  ssl: { rejectUnauthorized: false },
+  entities: [
+    TodoEntity,
+    UserEntity,
+    FileInfoEntity,
+    RefreshTokenEntity,
+    LogEntity,
+  ],
   namingStrategy: new CustomNamingStrategy(),
   synchronize: false,
   logging: true,
