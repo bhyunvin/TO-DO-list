@@ -85,12 +85,12 @@ export const userRoutes = new Elysia({ prefix: '/user' })
         sub: String(user.userSeq),
         email: user.userEmail, // 이미 복호화됨
         name: user.userName,
-      } as any);
+      });
 
       // 리프레시 토큰 생성
       const refreshToken = await refreshJwt.sign({
         sub: String(user.userSeq),
-      } as any);
+      });
 
       // 리프레시 토큰 저장
       await userService.saveRefreshToken(user.userSeq, refreshToken, clientIp);
@@ -106,7 +106,7 @@ export const userRoutes = new Elysia({ prefix: '/user' })
 
       return {
         accessToken,
-        user: await userService.toUserResponse(publicUser as any),
+        user: await userService.toUserResponse(publicUser),
       };
     },
     {
@@ -135,7 +135,7 @@ export const userRoutes = new Elysia({ prefix: '/user' })
       // 민감 정보 제외하고 반환
       const publicUser = userService.getPublicUserInfo(decryptedUser);
 
-      return userService.toUserResponse(publicUser as any);
+      return userService.toUserResponse(publicUser);
     },
     {
       detail: {
@@ -256,7 +256,7 @@ export const userRoutes = new Elysia({ prefix: '/user' })
         sub: String(user.userSeq),
         email: user.userEmail,
         name: user.userName,
-      } as any);
+      });
 
       return {
         accessToken: newAccessToken,

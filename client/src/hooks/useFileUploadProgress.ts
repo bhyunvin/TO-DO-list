@@ -19,7 +19,7 @@ interface UploadError {
 
 interface UploadResponse {
   success: boolean;
-  data?: any;
+  data?: Record<string, unknown>;
   uploadedFiles?: UploadedFile[];
   partialSuccess?: boolean;
   totalFiles?: number;
@@ -117,8 +117,9 @@ export const useFileUploadProgress = () => {
 
         setUploadErrors([]);
         return { isValid: true, errors: [] };
-      } catch (error: any) {
-        const errorMessage = error.message || 'Validation failed';
+      } catch (error: unknown) {
+        const err = error as Error;
+        const errorMessage = err.message || 'Validation failed';
         setUploadErrors([
           {
             fileName: 'Validation',
@@ -164,7 +165,7 @@ export const useFileUploadProgress = () => {
     async (
       files: File[],
       uploadUrl: string,
-      additionalData: Record<string, any> = {},
+      additionalData: Record<string, string | Blob> = {},
     ): Promise<UploadResponse> => {
       if (!files || files.length === 0) {
         throw new Error('No files to upload');
@@ -208,7 +209,9 @@ export const useFileUploadProgress = () => {
           setUploadStatus('error');
         };
 
-        const handleSuccess = (response: any) => {
+        const handleSuccess = (response: {
+          uploadedFiles?: UploadedFile[];
+        }) => {
           const { uploadedFiles: uploadedFilesList = [] } = response;
           handleSuccessState(uploadedFilesList);
 

@@ -159,7 +159,7 @@ export class InputSanitizerService {
       return obj;
     }
 
-    const sanitized = { ...obj } as any;
+    const sanitized = { ...obj };
 
     for (const [key, value] of Object.entries(sanitized)) {
       if (typeof value === 'string') {
@@ -167,17 +167,21 @@ export class InputSanitizerService {
 
         switch (rule) {
           case 'email':
-            sanitized[key] = this.sanitizeEmail(value);
+            (sanitized as Record<string, unknown>)[key] =
+              this.sanitizeEmail(value);
             break;
           case 'name':
-            sanitized[key] = this.sanitizeName(value);
+            (sanitized as Record<string, unknown>)[key] =
+              this.sanitizeName(value);
             break;
           case 'description':
-            sanitized[key] = this.sanitizeDescription(value);
+            (sanitized as Record<string, unknown>)[key] =
+              this.sanitizeDescription(value);
             break;
           case 'string':
           default:
-            sanitized[key] = this.sanitizeString(value);
+            (sanitized as Record<string, unknown>)[key] =
+              this.sanitizeString(value);
             break;
         }
       }

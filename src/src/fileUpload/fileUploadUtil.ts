@@ -2,7 +2,7 @@ import { extname } from 'node:path';
 import { CloudinaryService } from './cloudinary.service';
 import { UploadApiResponse } from 'cloudinary';
 import { FileInfoEntity } from './file.entity';
-import { Repository } from 'typeorm';
+import { Repository, EntityManager } from 'typeorm';
 import { FileValidationService } from './validation/file-validation.service';
 import type { FileCategory } from './validation/file-validation.interfaces';
 import { FILE_UPLOAD_POLICY } from './validation/file-validation.constants';
@@ -29,7 +29,7 @@ export class FileUploadUtil {
   async saveFileInfo(
     files: File[], // Bun/Web Standard File object
     setting: AuditSettings,
-    manager?: any, // EntityManager type can be added if needed, kept as any for compatibility
+    manager?: EntityManager,
   ): Promise<{ savedFiles: FileInfoEntity[]; fileGroupNo: number }> {
     const repository = manager
       ? manager.getRepository(FileInfoEntity)

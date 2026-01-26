@@ -1,4 +1,4 @@
-import { Elysia } from 'elysia';
+import { Elysia, t } from 'elysia';
 import { jwt } from '@elysiajs/jwt';
 
 /**
@@ -35,6 +35,11 @@ export const jwtPlugin = (app: Elysia) =>
         name: 'jwt',
         secret: process.env.JWT_SECRET || 'fallback-secret-key',
         exp: '7d', // 액세스 토큰 유효기간: 7일
+        schema: t.Object({
+          sub: t.String(),
+          name: t.String(),
+          email: t.String(),
+        }),
       }),
     )
     .use(
@@ -42,6 +47,9 @@ export const jwtPlugin = (app: Elysia) =>
         name: 'refreshJwt',
         secret: process.env.JWT_REFRESH_SECRET || 'fallback-refresh-secret-key',
         exp: '30d', // 리프레시 토큰 유효기간: 30일
+        schema: t.Object({
+          sub: t.String(),
+        }),
       }),
     )
     .derive(async ({ jwt, headers }) => {

@@ -9,6 +9,9 @@ import {
   DeleteTodoSchema,
   SearchTodoSchema,
   type SearchTodoDto,
+  type CreateTodoDto,
+  type UpdateTodoDto,
+  type DeleteTodoDto,
 } from './todo.schema';
 
 // 헬퍼 함수: 요청에서 IP 추출
@@ -48,7 +51,7 @@ export const todoRoutes = new Elysia({ prefix: '/todo' })
           completeDtm: todo.completeDtm,
           attachments: attachments,
           // Entity 직접 접근 (auditColumns 가상 프로퍼티 없음)
-          createdAt: todo.regDtm.toISOString(),
+          createdAt: todo.auditColumns.regDtm.toISOString(),
         });
       }
       return result;
@@ -80,7 +83,7 @@ export const todoRoutes = new Elysia({ prefix: '/todo' })
           todoNote: todo.todoNote,
           completeDtm: todo.completeDtm,
           attachments,
-          createdAt: todo.regDtm.toISOString(),
+          createdAt: todo.auditColumns.regDtm.toISOString(),
         });
       }
       return result;
@@ -99,7 +102,7 @@ export const todoRoutes = new Elysia({ prefix: '/todo' })
       const newTodo = await todoService.create(
         Number(user.id),
         clientIp,
-        body as any,
+        body as CreateTodoDto,
       );
 
       // 응답 생성
@@ -115,7 +118,7 @@ export const todoRoutes = new Elysia({ prefix: '/todo' })
         todoNote: newTodo.todoNote,
         completeDtm: newTodo.completeDtm,
         attachments,
-        createdAt: newTodo.regDtm.toISOString(),
+        createdAt: newTodo.auditColumns.regDtm.toISOString(),
       };
     },
     {
@@ -133,7 +136,7 @@ export const todoRoutes = new Elysia({ prefix: '/todo' })
         Number(id),
         Number(user.id),
         clientIp,
-        body as any,
+        body as UpdateTodoDto,
       );
 
       const attachments = await todoService.getAttachments(
@@ -147,7 +150,7 @@ export const todoRoutes = new Elysia({ prefix: '/todo' })
         todoNote: updatedTodo.todoNote,
         completeDtm: updatedTodo.completeDtm,
         attachments,
-        createdAt: updatedTodo.regDtm.toISOString(),
+        createdAt: updatedTodo.auditColumns.regDtm.toISOString(),
       };
     },
     {
@@ -162,12 +165,8 @@ export const todoRoutes = new Elysia({ prefix: '/todo' })
     '/',
     async ({ user, body, todoService, request }) => {
       const clientIp = getClientIp(request);
-      // body.todoIds 접근을 위해 any 캐스팅
-      await todoService.delete(
-        (body as any).todoIds,
-        Number(user.id),
-        clientIp,
-      );
+      const { todoIds } = body as DeleteTodoDto;
+      await todoService.delete(todoIds, Number(user.id), clientIp);
       return { success: true };
     },
     {

@@ -7,13 +7,29 @@ import { DataSource, Repository } from 'typeorm';
 import { TodoService } from '../todo/todo.service';
 import { UserEntity } from '../user/user.entity';
 import { decryptSymmetric } from '../../utils/cryptUtil';
-import { ChatRequestDto, ChatResponseDto } from './assistance.schema';
+import {
+  ChatRequestDto,
+  ChatResponseDto,
+  isHttpError,
+  isError,
+  GetTodosResponse,
+  ErrorResponse,
+} from './assistance.schema';
+// TypeBox Value는 Elysia의 t에서 제공되므로 별도 import 불필요
 
 import { Logger } from '../../utils/logger';
 
 export class AssistanceService {
   private readonly logger = new Logger(AssistanceService.name);
   private readonly userRepository: Repository<UserEntity>;
+
+  // Queue 타입 구체화: any 제거 (제네릭으로 유연성 확보)
+  private readonly queue: Array<{
+    call: () => Promise<unknown>;
+    resolve: (value: unknown) => void;
+    reject: (reason?: Error) => void;
+  }> = [];
+  private processing = false;
 
   // SDK 타입을 사용한 도구 정의
   private readonly tools = [
@@ -139,11 +155,13 @@ export class AssistanceService {
           timestamp: new Date().toISOString(),
           success: true,
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
+        // 타입 가드를 사용하여 안전하게 타입 좁히기
         const isRateLimited = this.isRetryableError(error);
         const isLastAttempt = attempt === maxRetries;
 
-        this.logger.error(`챗 요청 실패 (시도 ${attempt}): ${error.message}`);
+        const errorMessage = isError(error) ? error.message : 'Unknown error';
+        this.logger.error(`챗 요청 실패 (시도 ${attempt}): ${errorMessage}`);
 
         if (isRateLimited && !isLastAttempt) {
           const delay = this.calculateRetryDelay(attempt, baseDelay, error);
@@ -168,38 +186,118 @@ export class AssistanceService {
     };
   }
 
-  private isRetryableError(error: any): boolean {
-    const status = error.response?.status || error.status;
+  private async processQueue() {
+    if (this.queue.length === 0) return;
+
+    const item = this.queue.shift();
+    if (!item) return;
+
+    const { call, resolve, reject } = item;
+    this.processing = true;
+
+    try {
+      const result = await call();
+      resolve(result);
+    } catch (error: unknown) {
+      const errorObj = this.convertToError(error);
+      reject(errorObj);
+    } finally {
+      this.processing = false;
+      if (this.queue.length > 0) {
+        setTimeout(() => this.processQueue(), 100);
+      }
+    }
+  }
+
+  // Error 변환 헬퍼 메서드 - Cognitive Complexity 감소
+  private convertToError(error: unknown): Error {
+    if (isError(error)) {
+      return error;
+    }
+
+    let errorMessage = 'Unknown error';
+    if (error && typeof error === 'object' && 'message' in error) {
+      const msg = (error as { message: unknown }).message;
+      if (typeof msg === 'string') {
+        errorMessage = msg;
+      } else if (msg !== null && msg !== undefined) {
+        try {
+          errorMessage = JSON.stringify(msg);
+        } catch {
+          errorMessage = 'Unknown error';
+        }
+      }
+    }
+    return new Error(errorMessage);
+  }
+
+  private enqueue<T>(call: () => Promise<T>): Promise<T> {
+    return new Promise<T>((resolve, reject) => {
+      this.queue.push({
+        call: call as () => Promise<unknown>,
+        resolve: resolve as (value: unknown) => void,
+        reject,
+      });
+      if (!this.processing) {
+        this.processQueue();
+      }
+    });
+  }
+
+  private isRetryableError(error: unknown): boolean {
+    const err = error as {
+      status?: number;
+      response?: { status: number };
+      message?: string;
+    };
+    const status = err.response?.status || err.status;
     return (
       status === 429 || // Too Many Requests
       status === 503 || // Service Unavailable
-      error.message?.includes('429') ||
-      error.message?.includes('503')
+      err.message?.includes('429') ||
+      err.message?.includes('503') ||
+      false
     );
   }
 
+  // error 파라미터의 any 타입 제거 -> unknown + 타입 가드 사용
   private calculateRetryDelay(
     attempt: number,
     baseDelay: number,
-    error: any,
+    error: unknown,
   ): number {
-    const retryAfter = error.response?.headers?.['retry-after'];
-    if (retryAfter) {
-      const retryAfterMs = Number.parseInt(retryAfter) * 1000;
-      return Math.min(retryAfterMs, 30000);
+    // HttpError 타입 가드 적용
+    if (isHttpError(error)) {
+      const retryAfter = error.response?.headers?.['retry-after'];
+      if (retryAfter) {
+        const retryAfterMs = Number.parseInt(retryAfter) * 1000;
+        return Math.min(retryAfterMs, 30000);
+      }
     }
     const exponentialDelay = baseDelay * Math.pow(2, attempt - 1);
     const jitter = Math.random() * 1000;
     return Math.min(exponentialDelay + jitter, 30000);
   }
 
+  // error 파라미터의 any 타입 제거 -> unknown + 타입 가드 사용
   private getKoreanErrorMessage(
-    error: any,
+    error: unknown,
     attempt?: number,
     maxRetries?: number,
   ): string {
-    const status = error.response?.status || error.status;
-    const msg = error.message || '';
+    // 타입 가드를 사용하여 안전하게 속성 접근
+    let status: number | undefined;
+    let msg = '';
+    let code: string | undefined;
+
+    if (isHttpError(error)) {
+      status = error.response?.status || error.status;
+      msg = error.message || '';
+      code = error.code;
+    } else if (isError(error)) {
+      msg = error.message;
+      code = (error as Error & { code?: string }).code;
+    }
 
     if (status === 401) return '로그인이 필요합니다.';
     if (status === 429 || msg.includes('429')) {
@@ -210,8 +308,9 @@ export class AssistanceService {
     }
     if (status === 403 && msg.includes('quota'))
       return 'AI 서비스 사용량이 한도를 초과했습니다.';
-    if (status >= 500) return 'AI 서비스에 일시적인 문제가 발생했습니다.';
-    if (msg.includes('network') || error.code === 'ECONNREFUSED')
+    if (status && status >= 500)
+      return 'AI 서비스에 일시적인 문제가 발생했습니다.';
+    if (msg.includes('network') || code === 'ECONNREFUSED')
       return '네트워크 연결을 확인해주세요.';
 
     return '문제가 발생했습니다. 다시 시도해주세요.';
@@ -282,7 +381,10 @@ export class AssistanceService {
 
         const functionResponses = await Promise.all(
           functionCalls.map(async (part) => {
-            const call = part.functionCall;
+            const call = {
+              name: part.functionCall?.name || 'unknown',
+              args: part.functionCall?.args || {},
+            };
             const result = await this.executeFunctionCall(
               call,
               userSeq,
@@ -291,7 +393,7 @@ export class AssistanceService {
             );
             return {
               functionResponse: {
-                name: call.name,
+                name: call.name || 'unknown',
                 response: { content: result },
               },
             };
@@ -344,8 +446,10 @@ export class AssistanceService {
       systemPrompt += `\n\n[CURRENT_DATE]\n오늘 날짜: ${currentDate} (YYYY-MM-DD)\n`;
 
       return systemPrompt;
-    } catch (error: any) {
-      this.logger.error('시스템 프롬프트 로드 실패', error.message);
+    } catch (error: unknown) {
+      // 타입 가드를 사용하여 안전하게 에러 처리
+      const errorMessage = isError(error) ? error.message : 'Unknown error';
+      this.logger.error('시스템 프롬프트 로드 실패', errorMessage);
       return '당신은 도움이 되는 비서입니다.';
     }
   }
@@ -357,53 +461,102 @@ export class AssistanceService {
 
   // --- Tools Implementations ---
 
+  // Function call 실행: 런타임에서 타입 체크하여 타입 안정성 확보
   private async executeFunctionCall(
-    call: any,
+    call: { name: string; args: Record<string, unknown> },
     userSeq: number,
     userId: string,
     ip: string,
-  ): Promise<any> {
+  ): Promise<GetTodosResponse | ErrorResponse | Record<string, unknown>> {
     const args = call.args || {};
     const name = call.name;
 
     try {
+      // 각 함수 호출을 별도 메서드로 분리하여 복잡도 감소
       if (name === 'getTodos') {
-        return await this.getTodos(userSeq, args.status, args.days);
+        return await this.executeGetTodos(userSeq, args);
       } else if (name === 'createTodo') {
-        return await this.createTodo(
-          userSeq,
-          userId,
-          ip,
-          args.todoContent,
-          args.todoDate,
-          args.todoNote,
-        );
+        return await this.executeCreateTodo(userSeq, userId, ip, args);
       } else if (name === 'updateTodo') {
-        return await this.updateTodo(
-          userSeq,
-          userId,
-          ip,
-          args.todoSeq,
-          args.todoContentToFind,
-          {
-            todoContent: args.todoContent,
-            isCompleted: args.isCompleted,
-            todoNote: args.todoNote,
-          },
-        );
+        return await this.executeUpdateTodo(userSeq, userId, ip, args);
       }
       return { error: `Unknown function ${name}` };
-    } catch (e: any) {
-      this.logger.error(`Tool execution failed: ${e.message}`);
-      return { error: e.message };
+    } catch (e: unknown) {
+      const errorMessage = isError(e) ? e.message : 'Unknown error';
+      this.logger.error(`Tool execution failed: ${errorMessage}`);
+      return { error: errorMessage };
     }
   }
 
+  // getTodos 실행 헬퍼
+  private async executeGetTodos(
+    userSeq: number,
+    args: Record<string, unknown>,
+  ): Promise<GetTodosResponse> {
+    return await this.getTodos(
+      userSeq,
+      typeof args.status === 'string' ? args.status : undefined,
+      typeof args.days === 'number' ? args.days : undefined,
+    );
+  }
+
+  // createTodo 실행 헬퍼
+  private async executeCreateTodo(
+    userSeq: number,
+    userId: string,
+    ip: string,
+    args: Record<string, unknown>,
+  ): Promise<ErrorResponse | Record<string, unknown>> {
+    if (
+      typeof args.todoContent !== 'string' ||
+      typeof args.todoDate !== 'string'
+    ) {
+      return {
+        error:
+          'Invalid arguments for createTodo: todoContent and todoDate are required',
+      };
+    }
+    return await this.createTodo(
+      userSeq,
+      userId,
+      ip,
+      args.todoContent,
+      args.todoDate,
+      typeof args.todoNote === 'string' ? args.todoNote : undefined,
+    );
+  }
+
+  // updateTodo 실행 헬퍼
+  private async executeUpdateTodo(
+    userSeq: number,
+    userId: string,
+    ip: string,
+    args: Record<string, unknown>,
+  ): Promise<ErrorResponse | Record<string, unknown>> {
+    return await this.updateTodo(
+      userSeq,
+      userId,
+      ip,
+      typeof args.todoSeq === 'number' ? args.todoSeq : undefined,
+      typeof args.todoContentToFind === 'string'
+        ? args.todoContentToFind
+        : undefined,
+      {
+        todoContent:
+          typeof args.todoContent === 'string' ? args.todoContent : undefined,
+        isCompleted:
+          typeof args.isCompleted === 'boolean' ? args.isCompleted : undefined,
+        todoNote: typeof args.todoNote === 'string' ? args.todoNote : undefined,
+      },
+    );
+  }
+
+  // getTodos: Promise<any> -> Promise<GetTodosResponse>로 변경
   private async getTodos(
     userSeq: number,
     status?: string,
     days?: number,
-  ): Promise<any> {
+  ): Promise<GetTodosResponse> {
     let targetDate: string | null = null;
     if (days !== undefined) {
       const d = new Date();
@@ -434,14 +587,14 @@ export class AssistanceService {
     content: string,
     date: string,
     note?: string,
-  ) {
-    // TodoService.create 호출
-    // createTodoDto 형식 맞춰야 함
-    return await this.todoService.create(userSeq, ip, {
+  ): Promise<Record<string, unknown>> {
+    // TodoService.create 호출 - 반환값을 Record<string, unknown>으로 타입 보장
+    const result = await this.todoService.create(userSeq, ip, {
       todoContent: content,
       todoDate: date,
       todoNote: note,
     });
+    return result as unknown as Record<string, unknown>;
   }
 
   private async updateTodo(
@@ -450,8 +603,12 @@ export class AssistanceService {
     ip: string,
     todoSeq?: number,
     contentToFind?: string,
-    updateData?: any,
-  ) {
+    updateData?: {
+      todoContent?: string;
+      todoNote?: string;
+      isCompleted?: boolean;
+    },
+  ): Promise<ErrorResponse | Record<string, unknown>> {
     let targetId = todoSeq;
     if (!targetId && contentToFind) {
       // 검색 로직
@@ -467,15 +624,26 @@ export class AssistanceService {
 
     if (!targetId) return { error: 'Target todo not identified' };
 
-    const updateDto: any = {};
-    if (updateData.todoContent) updateDto.todoContent = updateData.todoContent;
-    if (updateData.todoNote) updateDto.todoNote = updateData.todoNote;
-    if (updateData.isCompleted !== undefined) {
+    // Explicit UpdateTodoDto construction
+    const updateDto: {
+      todoContent?: string;
+      todoNote?: string;
+      completeDtm?: string;
+    } = {};
+    if (updateData?.todoContent) updateDto.todoContent = updateData.todoContent;
+    if (updateData?.todoNote) updateDto.todoNote = updateData.todoNote;
+    if (updateData?.isCompleted !== undefined) {
       updateDto.completeDtm = updateData.isCompleted
         ? new Date().toISOString()
         : '';
     }
 
-    return await this.todoService.update(targetId, userSeq, ip, updateDto);
+    const result = await this.todoService.update(
+      targetId,
+      userSeq,
+      ip,
+      updateDto,
+    );
+    return result as unknown as Record<string, unknown>;
   }
 }

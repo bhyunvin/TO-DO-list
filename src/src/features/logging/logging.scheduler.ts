@@ -1,4 +1,4 @@
-import { DataSource } from 'typeorm';
+import { DataSource, DeepPartial } from 'typeorm';
 import { LogEntity } from './log.entity';
 import { TodoEntity } from '../todo/todo.entity';
 import { UserEntity } from '../user/user.entity';
@@ -57,7 +57,7 @@ export class LoggingScheduler {
         const regResult = await table.repo
           .createQueryBuilder()
           .update()
-          .set({ auditColumns: { regIp: null } } as any) // DeepPartial 타입 이슈 우회
+          .set({ auditColumns: { regIp: null } } as DeepPartial<any>) // DeepPartial 사용
           .where('auditColumns.regDtm < :date', { date: sixMonthsAgo })
           .andWhere('auditColumns.regIp IS NOT NULL')
           .execute();
@@ -66,7 +66,7 @@ export class LoggingScheduler {
         const updResult = await table.repo
           .createQueryBuilder()
           .update()
-          .set({ auditColumns: { updIp: null } } as any)
+          .set({ auditColumns: { updIp: null } } as DeepPartial<any>)
           .where('auditColumns.updDtm < :date', { date: sixMonthsAgo })
           .andWhere('auditColumns.updIp IS NOT NULL')
           .execute();

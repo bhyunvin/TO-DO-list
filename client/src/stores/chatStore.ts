@@ -18,6 +18,17 @@ interface MessageData {
   isHtml?: boolean;
 }
 
+// API 에러 인터페이스
+interface ApiError {
+  name?: string;
+  message?: string;
+  code?: string;
+}
+
+interface ApiResponse {
+  status: number;
+}
+
 // ChatStore 인터페이스 정의
 interface ChatStore {
   messages: ChatMessage[];
@@ -37,8 +48,8 @@ interface ChatStore {
   clearMessages: () => void;
   clearError: () => void;
   handleApiError: (
-    error: any,
-    response?: any,
+    error: ApiError | Error,
+    response?: ApiResponse | null,
   ) => { shouldRetry: boolean; errorType: string };
   canSendRequest: () => boolean;
   setRetryMessage: (message: string | null) => void;
@@ -278,8 +289,12 @@ export const useChatStore = create<ChatStore>()(
             errorType = 'API_ERROR';
           }
         } else if (error) {
-          // 네트워크 또는 기타 오류
-          const { name, message, code } = error;
+          // 네트워크 또는 기타 오류 - 타입 안전하게 처리
+          const errorObj = error as ApiError;
+          const name = errorObj.name || '';
+          const message = errorObj.message || '';
+          const code = errorObj.code || '';
+
           if (
             (name === 'TypeError' && message.includes('fetch')) ||
             message === 'Network Error' ||

@@ -4,7 +4,7 @@ import { useAuthStore } from '../authStore/authStore';
 import { showErrorAlert } from '../utils/alertUtils';
 
 // 헬퍼 함수: 인증 및 서버 상태 에러 처리
-const handleStatusErrors = async (response, endpoint) => {
+const handleStatusErrors = async (response: Response, endpoint: string) => {
   // 401 Unauthorized 처리 (세션 만료 등)
   // 단, 로그인 요청 실패 시의 401은 세션 만료가 아니므로 제외
   if (response.status === 401 && endpoint !== '/user/login') {
@@ -104,7 +104,9 @@ const request = async (endpoint: string, options: RequestOptions = {}) => {
     // 에러 상태 처리
     if (!response.ok) {
       // Axios 에러 구조를 모방하여 호환성 유지
-      const error: any = new Error('API Error');
+      const error = new Error('API Error') as Error & {
+        response: { status: number; data: unknown };
+      };
       error.response = {
         status: response.status,
         data: data,
@@ -118,15 +120,19 @@ const request = async (endpoint: string, options: RequestOptions = {}) => {
       data: data,
       headers: response.headers,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     // 이미 처리된 에러(response 속성이 있는 경우)는 그대로 던짐
-    if (error.response) throw error;
+    if (error && typeof error === 'object' && 'response' in error) throw error;
 
+    const err = error as Error;
     // 네트워크 에러 등 fetch 자체 에러 처리
-    const wrapperError: any = new Error(error.message);
-    wrapperError.name = error.name; // TypeError etc.
+    const wrapperError = new Error(err.message) as Error & {
+      name: string;
+      code?: string;
+    };
+    wrapperError.name = err.name; // TypeError etc.
     // Axios 호환성을 위해 code 속성 추가 시도 (선택적)
-    if (error.name === 'AbortError') {
+    if (err.name === 'AbortError') {
       wrapperError.code = 'ECONNABORTED';
     }
 

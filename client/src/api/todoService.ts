@@ -1,5 +1,34 @@
 import { api } from './client';
 
+// DTO 타입 정의 (백엔드 스키마와 일치시키는 것이 좋지만, 여기서는 인터페이스 정의)
+// 실제로는 shared 패키지나 스키마 파일에서 가져오는 것이 이상적
+export interface CreateTodoDto {
+  todoContent: string;
+  todoDate: string;
+  todoNote?: string;
+  files?: File[];
+}
+
+export interface UpdateTodoDto {
+  todoContent?: string;
+  completeDtm?: string;
+  todoNote?: string;
+  files?: File[];
+}
+
+/**
+ * Treaty API 타입 제약 관련:
+ * 
+ * Elysia의 Treaty 클라이언트는 복잡한 동적 라우팅 구조에서 TypeScript 타입 추론에 한계가 있습니다.
+ * 백엔드의 App 타입을 제대로 import하고 treaty<App>()로 명시해도, 
+ * 실제 API 호출 시점에 타입이 올바르게 추론되지 않는 Treaty의 알려진 제약사항입니다.
+ * 
+ * 런타임에는 정상 작동하지만, TypeScript 컴파일 타임에 타입 에러가 발생합니다.
+ * 따라서 불가피하게 any 타입을 사용하되, 실제 반환값은 백엔드 응답 타입과 일치합니다.
+ * 
+ * @see https://github.com/elysiajs/eden/issues - Treaty type inference limitations
+ */
+ 
 const todoApi = api.todo as any;
 
 const todoService = {
@@ -68,15 +97,15 @@ const todoService = {
     }
   },
 
-  async createTodo(data: any) {
+  async createTodo(data: CreateTodoDto | FormData) {
     let payload = data;
     if (data instanceof FormData) {
-      const files = data.getAll('files');
+      const files = data.getAll('files') as File[];
       const obj = Object.fromEntries(data.entries());
       payload = {
         ...obj,
         files: files.length > 0 ? files : undefined,
-      };
+      } as CreateTodoDto;
     }
 
     const { data: result, error } = await todoApi.post(payload);
@@ -90,15 +119,15 @@ const todoService = {
     return result;
   },
 
-  async updateTodo(todoSeq: number | string, data: any) {
+  async updateTodo(todoSeq: number | string, data: UpdateTodoDto | FormData) {
     let payload = data;
     if (data instanceof FormData) {
-      const files = data.getAll('files');
+      const files = data.getAll('files') as File[];
       const obj = Object.fromEntries(data.entries());
       payload = {
         ...obj,
         files: files.length > 0 ? files : undefined,
-      };
+      } as UpdateTodoDto;
     }
 
     const idStr = String(todoSeq);

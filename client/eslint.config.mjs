@@ -56,6 +56,10 @@ export default [
         rules: {
             ...pluginTestingLibrary.configs.react.rules,
             "@typescript-eslint/no-require-imports": "off",
+            // Testing Library 규칙 비활성화 (테스트 코드의 특성상 DOM 직접 접근이 필요한 경우가 많음)
+            "testing-library/no-node-access": "off",
+            "testing-library/no-container": "off",
+            "testing-library/no-wait-for-multiple-assertions": "off",
         },
     },
 ];

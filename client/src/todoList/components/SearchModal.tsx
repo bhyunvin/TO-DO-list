@@ -21,8 +21,6 @@ const SearchModal = ({ show, onHide, onMoveToDate }) => {
   const [hasSearched, setHasSearched] = useState(false);
   const [isValidRange, setIsValidRange] = useState(true);
 
-  const [debounceTimer, setDebounceTimer] = useState(null);
-
   useEffect(() => {
     if (show) {
       setKeyword('');
@@ -96,15 +94,11 @@ const SearchModal = ({ show, onHide, onMoveToDate }) => {
     const diffYears = differenceInYears(endDate, startDate);
     if (diffYears > 5) return; // 5년 초과시에만 자동검색 제한 (유효성 검사가 막아주겠지만 이중 체크)
 
-    if (debounceTimer) clearTimeout(debounceTimer);
-
     const timer = setTimeout(() => {
       performSearch();
     }, 1000);
 
-    setDebounceTimer(timer);
     return () => clearTimeout(timer);
-    // debounceTimer는 상태이지만 effect 내에서 set하므로 의존성에서 제외 (무한루프 방지)
   }, [keyword, startDate, endDate, performSearch, show, isValidRange]);
 
   const setPreset = (months) => {

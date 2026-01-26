@@ -120,12 +120,13 @@ export class FileValidationService {
       throw new Error(`잘못된 파일 카테고리: ${category}`);
     }
 
+    const config = policyConfig as { blockedTypes?: string[] };
     const validationConfig: ValidationConfig = {
       maxFileSize: policyConfig.maxSize,
       allowedExtensions: policyConfig.allowedTypes,
       blockedExtensions:
         category === 'todo_attachment'
-          ? (policyConfig as any).blockedTypes || BLOCKED_EXTENSIONS
+          ? config.blockedTypes || BLOCKED_EXTENSIONS
           : BLOCKED_EXTENSIONS,
       maxFileCount: policyConfig.maxCount,
     };

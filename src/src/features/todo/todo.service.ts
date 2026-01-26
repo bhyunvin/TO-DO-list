@@ -1,4 +1,10 @@
-import { Repository, DataSource, Brackets, Between } from 'typeorm';
+import {
+  Repository,
+  DataSource,
+  Brackets,
+  Between,
+  EntityManager,
+} from 'typeorm';
 import { TodoEntity } from './todo.entity';
 import { FileInfoEntity } from '../../fileUpload/file.entity';
 import { FileUploadUtil } from '../../fileUpload/fileUploadUtil';
@@ -112,7 +118,7 @@ export class TodoService {
     ip: string,
     dto: CreateTodoDto,
   ): Promise<TodoEntity> {
-    return this.dataSource.transaction(async (manager) => {
+    return this.dataSource.transaction(async (manager: EntityManager) => {
       const newTodo = manager.create(TodoEntity, {
         userSeq,
         todoContent: dto.todoContent,
@@ -157,7 +163,7 @@ export class TodoService {
     ip: string,
     dto: UpdateTodoDto,
   ): Promise<TodoEntity> {
-    return this.dataSource.transaction(async (manager) => {
+    return this.dataSource.transaction(async (manager: EntityManager) => {
       const todo = await manager.findOne(TodoEntity, {
         where: { todoSeq, userSeq, delYn: 'N' },
       });
@@ -246,7 +252,18 @@ export class TodoService {
   }
 
   // 첨부파일 목록 조회
-  async getAttachments(todoSeq: number, userSeq: number): Promise<any[]> {
+  async getAttachments(
+    todoSeq: number,
+    userSeq: number,
+  ): Promise<
+    {
+      fileNo: number;
+      originalFileName: string;
+      fileSize: number;
+      fileExt: string;
+      uploadDate: Date;
+    }[]
+  > {
     const todo = await this.todoRepository.findOne({
       where: { todoSeq, userSeq, delYn: 'N' },
     });
@@ -342,7 +359,7 @@ export class TodoService {
   }
 
   private async processFileUpload(
-    manager: any,
+    manager: EntityManager,
     userSeq: number,
     ip: string,
     files: File[],

@@ -33,7 +33,7 @@ const mockApi = vi.fn();
 globalThis.fetch = mockApi;
 
 vi.mock('../authStore/authStore', () => {
-  const useAuthStore: any = vi.fn(() => ({
+  const mockUseAuthStore = vi.fn(() => ({
     user: {
       userName: 'Test User',
       userEmail: 'test@example.com',
@@ -43,15 +43,20 @@ vi.mock('../authStore/authStore', () => {
     logout: mockLogout,
     api: mockApi,
   }));
-  useAuthStore.getState = vi.fn(() => ({
-    user: {
-      userName: 'Test User',
-      userEmail: 'test@example.com',
-      userDescription: 'Test description',
-    },
-    accessToken: 'test-token',
-    logout: mockLogout,
-  }));
+
+  // getState 메서드를 mock에 추가
+  const useAuthStore = Object.assign(mockUseAuthStore, {
+    getState: vi.fn(() => ({
+      user: {
+        userName: 'Test User',
+        userEmail: 'test@example.com',
+        userDescription: 'Test description',
+      },
+      accessToken: 'test-token',
+      logout: mockLogout,
+    })),
+  });
+
   return { useAuthStore };
 });
 

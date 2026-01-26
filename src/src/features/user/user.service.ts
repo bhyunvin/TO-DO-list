@@ -86,8 +86,8 @@ export class UserService {
     if (!user) return user;
 
     // API Key와 같은 민감 정보 제외
-    const { aiApiKey: _aiApiKey, userPw: _userPw, ...publicInfo } = user as any;
-    return publicInfo;
+    const { aiApiKey: _aiApiKey, userPw: _userPw, ...publicInfo } = user;
+    return publicInfo as Partial<T>;
   }
 
   // --- 인증 로직 ---
@@ -287,7 +287,7 @@ export class UserService {
       if (updateUserDto.aiApiKey !== undefined) {
         if (updateUserDto.aiApiKey === '' || updateUserDto.aiApiKey === null) {
           // 빈 문자열이나 null이면 삭제
-          user.aiApiKey = null as any;
+          user.aiApiKey = null;
         } else {
           // 암호화하여 저장
           user.aiApiKey = await encryptSymmetric(updateUserDto.aiApiKey);
@@ -360,11 +360,14 @@ export class UserService {
 
   // --- 유틸리티 메서드 ---
 
-  async toUserResponse(user: UserEntity): Promise<UserResponseDto> {
+  async toUserResponse(user: Partial<UserEntity>): Promise<UserResponseDto> {
+    if (!user.userSeq) {
+      throw new Error('User sequence is missing');
+    }
     return {
       userNo: user.userSeq,
-      userEmail: user.userEmail,
-      userName: user.userName,
+      userEmail: user.userEmail || '',
+      userName: user.userName || '',
       userPhone: undefined,
       fileGroupNo: user.userProfileImageFileGroupNo || undefined,
       createdAt: user.auditColumns?.regDtm,

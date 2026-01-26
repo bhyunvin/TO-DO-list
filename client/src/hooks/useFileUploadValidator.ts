@@ -24,8 +24,6 @@ const FILE_VALIDATION_ERRORS = {
   TOO_MANY_FILES: 'TOO_MANY_FILES',
 } as const;
 
-type FileValidationErrorKey = keyof typeof FILE_VALIDATION_ERRORS;
-
 const FILE_VALIDATION_MESSAGES: Record<string, string> = {
   [FILE_VALIDATION_ERRORS.FILE_TOO_LARGE]:
     '파일 크기가 최대 제한인 10MB를 초과합니다',
@@ -428,7 +426,11 @@ export const useFileUploadValidator = () => {
    * @returns {Object[]} 유효성 검사 오류 배열
    */
   const parseServerErrors = useCallback(
-    (errorResponse: any): ValidationResult[] => {
+    (errorResponse: {
+      errors?: ValidationResult[];
+      response?: { data?: { errors?: ValidationResult[] } };
+      message?: string;
+    }): ValidationResult[] => {
       if (errorResponse?.errors && Array.isArray(errorResponse.errors)) {
         return errorResponse.errors;
       }

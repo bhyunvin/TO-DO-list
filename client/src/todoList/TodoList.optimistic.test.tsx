@@ -368,8 +368,8 @@ describe('TodoContainer Optimistic UI Pattern', () => {
     // 두 API 호출이 모두 이루어져야 함
     await waitFor(() => {
       expect(mockApi).toHaveBeenCalledWith('/api/todo/1', expect.anything());
-      expect(mockApi).toHaveBeenCalledWith('/api/todo/2', expect.anything());
     });
+    expect(mockApi).toHaveBeenCalledWith('/api/todo/2', expect.anything());
   });
 
   test('displays toast notification on network error', async () => {

@@ -189,7 +189,9 @@ describe('themeStore', () => {
 
     test('should handle invalid theme value by defaulting to dark', () => {
       act(() => {
-        useThemeStore.getState().setTheme('invalid' as any);
+        useThemeStore
+          .getState()
+          .setTheme('invalid' as unknown as 'light' | 'dark');
       });
 
       expect(useThemeStore.getState().theme).toBe('dark');
