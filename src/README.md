@@ -132,263 +132,133 @@ UNLICENSED - 비공개 프로젝트
 
 ---
 
-# Backend (NestJS)
+# Backend (ElysiaJS)
 
-Backend server for the TO-DO List application. Built with NestJS framework and integrated with PostgreSQL database via TypeORM.
+Backend server for the TO-DO List application. Built with **ElysiaJS** framework and **Bun** runtime for high performance, integrated with PostgreSQL database via TypeORM.
 
 ## Key Features
 
 - User authentication and JWT management (with privacy policy consent)
-- Todo CRUD operations and date-based queries
-- AI assistance powered by Google Gemini API
-- File upload and management (Cloudinary cloud storage)
-  - Server-side file validation (size, format, security)
-  - Profile image and todo attachment support
-- Contact Developer (send inquiry email to administrator)
-- Comprehensive audit logging and IP anonymization scheduler
-- Secure credential management via environment variables
-- Data encryption (AES-256-GCM)
+- Todo CRUD operations, search, and Excel download
+- AI assistance powered by Google Gemini API (Chat, Tool calling)
+- File upload and management (Cloudinary)
+- Contact Developer (Inquiry email)
+- Comprehensive audit logging and IP tracking
+- Security configuration via environment variables
+- API documentation via Swagger
 
 ## Technology Stack
 
-- **Framework**: NestJS 11.x with Express
-- **Runtime**: Bun 1.0+ (Node.js compatible)
-- **Language**: TypeScript 5.x
-- **Database**: PostgreSQL with TypeORM 0.3.x
-- **Authentication**: JWT (stateless) with Bun.password
-- **Security**: Web Crypto API (AES-256-GCM encryption)
-- **AI**: Google Gemini API
-- **File Storage**: Cloudinary
-- **File Upload**: Multer
+- **Framework**: ElysiaJS
+- **Runtime**: Bun (Node.js compatible)
+- **Language**: TypeScript
+- **Database**: PostgreSQL with TypeORM
+- **Authentication**: JWT, Bun.password
+- **AI**: Google Gemini SDK (Function Calling support)
+- **Storage**: Cloudinary
 - **Mail**: Nodemailer
-- **Markdown**: marked, sanitize-html
-- **Scheduler**: @nestjs/schedule (Cron jobs)
-- **Testing**: Jest, Supertest
+- **Documentation**: Swagger UI
 
-## Project Structure
+## Project Structure (Elysia Style)
 
 ```
 src/
-├── main.ts                      # Application bootstrap
-├── app.module.ts                # Root module
-├── user/                        # User module
-│   ├── user.controller.ts
-│   ├── user.service.ts
-│   ├── user.entity.ts
-│   ├── user.dto.ts
-│   └── user-validation.pipe.ts
-├── todo/                        # Todo module
-│   ├── todo.controller.ts
-│   ├── todo.service.ts
-│   ├── todo.entity.ts
-│   └── todo.dto.ts
-├── assistance/                  # AI assistance module
-│   ├── assistance.controller.ts
-│   ├── assistance.service.ts
-│   ├── assistance.dto.ts
-│   └── gemini.interface.ts
-├── fileUpload/                  # File upload module
-│   ├── file.controller.ts
-│   ├── cloudinary.service.ts
-│   └── validation/
-├── logging/                     # Logging module
-│   ├── logging.service.ts
-│   └── logging.entity.ts
+├── main.ts                      # Application entry point (App registration)
+├── plugins/                     # Common plugins
+│   ├── config.ts                # Configuration
+│   ├── cors.ts                  # CORS settings
+│   ├── database.ts              # DB connection
+│   ├── jwt.ts                   # JWT authentication
+│   └── swagger.ts               # API documentation
+├── features/                    # Feature modules (Routes, Services, Schemas)
+│   ├── user/                    # User features
+│   │   ├── user.routes.ts
+│   │   ├── user.service.ts
+│   │   ├── user.schema.ts
+│   │   └── user.entity.ts
+│   ├── todo/                    # Todo features
+│   ├── assistance/              # AI assistant features
+│   ├── mail/                    # Mail features
+│   └── fileUpload/              # File upload features
 ├── utils/                       # Utilities
-│   ├── cryptUtil.ts
 │   ├── auditColumns.ts
-│   ├── customNamingStrategy.ts
-│   └── inputSanitizer.ts
-├── filter/                      # Global filters
-│   └── http-exception.filter.ts
-├── interceptor/                 # Global interceptors
-│   └── logging.interceptor.ts
-├── types/                       # Type definitions
-│   ├── express/
-│   │   ├── auth.guard.ts
-│   │   ├── auth.service.ts
-│   │   └── jwt.strategy.ts
-└── test/                        # E2E tests
+│   └── cryptUtil.ts
+└── test/                        # Tests
 ```
 
 ## Prerequisites
 
 - Bun 1.0.0 or higher
-- PostgreSQL (latest version)
+- PostgreSQL
 
-## Installation
+## Installation & Running
 
 ```bash
 # Install dependencies
 bun install
+
+# Run in development mode (hot reload)
+bun dev
+
+# Production build and run
+bun run build
+bun start
 ```
+
+## API Documentation
+
+After starting the server, you can view Swagger UI at `/swagger`.
+Example: `http://localhost:3001/swagger`
 
 ## Environment Configuration
 
 Create a `.env` file and configure the following variables:
 
 ```env
-# Database configuration
+# Database
 DB_HOST=...
 DB_PORT=...
 DB_USERNAME=...
 DB_PASSWORD=...
 DB_DATABASE=...
 
-# Server port
-PORT=...
+# Server
+PORT=3001
 
-# JWT configuration (use strong random string)
+# JWT & Security
 JWT_SECRET=...
-
-# Encryption keys (32 bytes, Hex format recommended)
 ENCRYPTION_KEY=...
 
-
-# Cloudinary configuration
+# Cloudinary
 CLOUDINARY_CLOUD_NAME=...
 CLOUDINARY_API_KEY=...
 CLOUDINARY_API_SECRET=...
 
-# Mail configuration (Gmail)
-MAIL_USER=...
-MAIL_PASS=...
+# Mail (Gmail)
+GMAIL_USER=...
+GMAIL_APP_PASSWORD=...
 
-# Baseline Browser Mapping Warning Suppression
-BASELINE_BROWSER_MAPPING_IGNORE_OLD_DATA=true
-
-# File upload configuration (optional, not needed with Cloudinary)
-UPLOAD_DIR=./upload
-MAX_FILE_SIZE=5242880
+# AI
+GEMINI_API_KEY=... (Optional if using key stored in User DB, but recommended as default)
 ```
-
-**Security Note**: Use strong passwords and secret keys in production, and manage environment variables securely.
-
-## Running the Application
-
-```bash
-# Development mode (hot reload)
-bun run start:dev
-
-# Regular development mode
-bun run start
-
-# Debug mode
-bun run start:debug
-
-# Production build
-bun run build
-
-# Production run
-bun run start:prod
-```
-
-## Testing
-
-```bash
-# Unit tests
-bun test
-
-# Unit tests (watch mode)
-bun run test:watch
-
-# E2E tests
-bun run test:e2e
-
-# Test coverage
-bun run test:cov
-
-# Run specific test file
-bun test -- --testPathPattern=user.service.spec.ts
-
-# Run tests matching pattern
-bun test -- --testNamePattern="should create user"
-```
-
-## Code Quality
-
-```bash
-# Lint check
-bun run lint
-
-# Lint auto-fix
-bun run lint -- --fix
-
-# Code formatting
-bun run format
-```
-
-## API Endpoints
-
-The application provides RESTful APIs with the following main features:
-
-- User authentication and JWT management
-- User profile management
-- Todo item CRUD operations
-- AI chat assistance
-- File upload
-
-For detailed API specifications, please refer to the separate API documentation.
-
-## Database
-
-### Naming Conventions
-
-- **Tables**: Project prefix + snake_case
-- **Columns**: snake_case
-- **Entities**: PascalCase + `Entity` suffix
-- **DTOs**: PascalCase + `Dto` suffix
-
-### Main Features
-
-- User information management
-- Todo item storage
-- Audit log recording
-- Automatic timestamp management
-
-## Security
-
-- Strong encryption algorithm for password hashing (Bun.password) and data encryption (Web Crypto API - AES-256-GCM)
-- JWT-based authentication system
-- Secure credential storage mechanism
-- XSS and CSRF attack prevention
-- Input validation and sanitization
-- Cross-origin request control via CORS configuration
-- Route protection via authentication guards
-
-**Important**: In production environments, always apply additional security measures (HTTPS, firewall, rate limiting, security headers, etc.).
-
-## Architecture Patterns
-
-- **Module-based architecture**: Each feature is a self-contained NestJS module
-- **Repository pattern**: TypeORM entities with service layer abstraction
-- **Guard pattern**: Route protection via authentication guards
-- **Interceptor pattern**: Logging and error handling
-- **Audit pattern**: Standardized audit columns for all entities
-
-## Code Comments Guidelines
-
-- **All code comments should be written in Korean**, except for syntax-required elements (e.g., JSDoc tags)
-- Variable names, function names, and technical terms remain in English
-- Only the descriptive content of comments should be in Korean
 
 ## Troubleshooting
 
 ### Database Connection Error
 
 - Verify PostgreSQL is running
-- Check database credentials in `.env` file
-- Verify `DB_DEV_PASSWORD` environment variable is properly set
+- Check database credentials in `.env`
+- Verify `DB_DEV_PASSWORD` environment variable is set correctly
 
 ### JWT Error
 
-- Verify `JWT_SECRET` is configured
-- Check Authorization header is correct
+- Verify `JWT_SECRET` is set
+- Check if Authorization header is correct
 
 ### Environment Variable Error
 
-- Verify all required environment variables are set in `.env` file
-- Check that `DB_DEV_PASSWORD`, `JWT_SECRET` are properly configured
+- Verify all required variables are set in `.env`
+- Check `DB_DEV_PASSWORD`, `JWT_SECRET` etc.
 
 ## License
 

@@ -1,16 +1,17 @@
 # Technology Stack
 
-## Backend (NestJS)
-- **Framework**: NestJS with Express adapter
+## Backend (ElysiaJS)
+- **Framework**: ElysiaJS
+- **Runtime**: Bun (Node.js compatible)
 - **Language**: TypeScript
 - **Database**: PostgreSQL with TypeORM
 - **Authentication**: JWT (stateless) with Bun.password (bcrypt algorithm)
 - **Security**: Environment variables for secure credential storage, AES-256-GCM for data encryption (including secure deterministic encryption using AES-SIV with Synthetic IVs)
 - **AI Integration**: Google Gemini API with function calling
+- **API Communication**: Elysia Treaty (End-to-End Type Safety)
 - **File Storage**: Cloudinary cloud storage
-- **File Upload**: Multer for multipart form handling
 - **Mail Service**: Nodemailer (Gmail)
-- **Scheduler**: @nestjs/schedule for cron jobs (IP anonymization, token cleanup)
+- **Scheduler**: cron jobs (IP anonymization, token cleanup)
 - **Markdown Processing**: marked for markdown parsing, sanitize-html for XSS protection
 
 ## Frontend (React)
@@ -37,10 +38,10 @@
 # Start both frontend and backend
 bun start
 
-# Start backend only
+# Start backend only (Elysia)
 bun run start:server
 
-# Start frontend only  
+# Start frontend only (React)
 bun run start:client
 
 # Build both applications
@@ -50,10 +51,11 @@ bun run build
 ### Backend Specific (from src/ directory)
 ```bash
 # Development with hot reload
-bun run start:dev
+bun dev
 
-# Production build
+# Production build & run
 bun run build
+bun start
 
 # Run tests
 bun test

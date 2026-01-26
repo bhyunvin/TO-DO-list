@@ -24,18 +24,19 @@
 
 ## 기술 스택
 
-### 백엔드 (NestJS)
-- **프레임워크**: NestJS with Express
+### 백엔드 (ElysiaJS)
+- **프레임워크**: ElysiaJS
+- **런타임**: Bun (Node.js 호환)
 - **언어**: TypeScript
 - **데이터베이스**: PostgreSQL with TypeORM
 - **인증**: JWT (stateless) with Bun.password (bcrypt algorithm)
 - **보안**: AES-256-GCM encryption
 - **AI**: Google Gemini API
+- **API 통신**: Elysia Treaty (엔드투엔드 타입 안전성)
 - **파일 스토리지**: Cloudinary
-- **파일 업로드**: Multer
 - **메일**: Nodemailer
 - **마크다운**: marked, sanitize-html
-- **스케줄러**: @nestjs/schedule (Cron jobs)
+- **스케줄러**: cron jobs
 
 ### 프론트엔드 (React)
 - **프레임워크**: React 19 with Create React App
@@ -71,18 +72,15 @@ myTodoApp/
 │   │   └── hooks/              # 커스텀 React 훅
 │   └── package.json
 │
-├── src/                         # NestJS 백엔드 애플리케이션
-│   ├── main.ts                 # 애플리케이션 부트스트랩
-│   ├── app.module.ts           # 루트 모듈
-│   ├── user/                   # 사용자 인증 및 관리
-│   ├── todo/                   # Todo CRUD 및 날짜 기반 쿼리
-│   ├── assistance/             # AI 지원 통합
-│   ├── fileUpload/             # 파일 업로드 처리
-│   ├── logging/                # 로깅 및 감사 추적
+├── src/                         # ElysiaJS 백엔드 애플리케이션
+│   ├── main.ts                 # 애플리케이션 진입점 및 플러그인 등록
+│   ├── plugins/                # 공통 플러그인 (DB, CORS, JWT, Swagger)
+│   ├── features/               # 기능 모듈 (User, Todo, AI, File, Mail, Log)
+│   │   ├── user/
+│   │   ├── todo/
+│   │   └── ...
 │   ├── utils/                  # 공유 유틸리티
-│   ├── filter/                 # 전역 예외 필터
-│   ├── interceptor/            # 전역 인터셉터
-│   └── types/                  # TypeScript 타입 확장
+│   └── test/                   # 테스트
 │
 ├── upload/                      # 파일 업로드 임시 저장소 (Cloudinary 사용)
 ├── .agent/                      # Agent 설정 및 스티어링 규칙
@@ -184,13 +182,11 @@ bun run build
 cd src
 
 # 개발 모드 (핫 리로드)
-bun run start:dev
+bun dev
 
-# 프로덕션 빌드
+# 프로덕션 빌드 및 실행
 bun run build
-
-# 프로덕션 실행
-bun run start:prod
+bun start
 
 # 테스트 실행
 bun test
@@ -234,10 +230,9 @@ bun test
 ## 아키텍처 패턴
 
 ### 백엔드
-- **모듈 기반 아키텍처**: 각 기능은 독립적인 NestJS 모듈
+- **플러그인 기반 아키텍처**: 각 기능은 독립적인 Elysia 플러그인
 - **리포지토리 패턴**: TypeORM 엔티티와 서비스 레이어 추상화
-- **가드 패턴**: 라우트 보호를 위한 인증 가드
-- **인터셉터 패턴**: 횡단 관심사 (로깅, 에러 처리)
+- **Derive 패턴**: 인증 및 상태를 위한 컨텍스트 확장
 - **감사 패턴**: 모든 엔티티에 대한 표준화된 감사 컬럼
 
 ### 프론트엔드
@@ -296,18 +291,19 @@ A full-stack TO-DO List application built with modern web technologies. Provides
 
 ## Technology Stack
 
-### Backend (NestJS)
-- **Framework**: NestJS with Express
+### Backend (ElysiaJS)
+- **Framework**: ElysiaJS
+- **Runtime**: Bun (Node.js compatible)
 - **Language**: TypeScript
 - **Database**: PostgreSQL with TypeORM
 - **Authentication**: JWT (stateless) with Bun.password (bcrypt algorithm)
 - **Security**: AES-256-GCM encryption
 - **AI**: Google Gemini API
+- **API Communication**: Elysia Treaty (End-to-End Type Safety)
 - **File Storage**: Cloudinary
-- **File Upload**: Multer
 - **Mail**: Nodemailer
 - **Markdown**: marked, sanitize-html
-- **Scheduler**: @nestjs/schedule (Cron jobs)
+- **Scheduler**: cron jobs
 
 ### Frontend (React)
 - **Framework**: React 19 with Create React App
@@ -343,18 +339,15 @@ myTodoApp/
 │   │   └── hooks/              # Custom React hooks
 │   └── package.json
 │
-├── src/                         # NestJS backend application
-│   ├── main.ts                 # Application bootstrap
-│   ├── app.module.ts           # Root module
-│   ├── user/                   # User authentication and management
-│   ├── todo/                   # Todo CRUD and date-based queries
-│   ├── assistance/             # AI assistance integration
-│   ├── fileUpload/             # File upload handling
-│   ├── logging/                # Logging and audit trails
+├── src/                         # ElysiaJS backend application
+│   ├── main.ts                 # Application entry point & plugin registration
+│   ├── plugins/                # Common plugins (DB, CORS, JWT, Swagger)
+│   ├── features/               # Feature modules (User, Todo, AI, File, Mail, Log)
+│   │   ├── user/
+│   │   ├── todo/
+│   │   └── ...
 │   ├── utils/                  # Shared utilities
-│   ├── filter/                 # Global exception filters
-│   ├── interceptor/            # Global interceptors
-│   └── types/                  # TypeScript type extensions
+│   └── test/                   # Tests
 │
 ├── upload/                      # File upload storage
 ├── .kiro/                       # Kiro settings and steering rules
@@ -457,13 +450,11 @@ bun run build
 cd src
 
 # Development mode (hot reload)
-bun run start:dev
+bun dev
 
-# Production build
+# Production build & run
 bun run build
-
-# Production run
-bun run start:prod
+bun start
 
 # Run tests
 bun test
@@ -507,10 +498,9 @@ bun test
 ## Architecture Patterns
 
 ### Backend
-- **Module-based architecture**: Each feature is a self-contained NestJS module
+- **Plugin-based architecture**: Each feature is a self-contained Elysia plugin
 - **Repository pattern**: TypeORM entities with service layer abstraction
-- **Guard pattern**: Authentication guards for route protection
-- **Interceptor pattern**: Cross-cutting concerns (logging, error handling)
+- **Derive pattern**: Context extension for auth and state
 - **Audit pattern**: Standardized audit columns for all entities
 
 ### Frontend

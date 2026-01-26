@@ -13,29 +13,24 @@ myTodoApp/
 
 ## Backend Structure (`src/`)
 
-### Core Application
-- `src/main.ts` - Application bootstrap with CORS configuration
-- `src/app.module.ts` - Root module with database, session, and global providers
+### core Application
+- `src/main.ts` - Application entry point (App configuration, plugin registration)
+- `src/plugins/` - Common plugins (Db, CORS, JWT, Swagger)
 
 ### Feature Modules (Domain-Driven)
-- `src/user/` - User authentication and management (JWT-based)
-- `src/todo/` - Todo CRUD operations and date-based queries
-- `src/assistance/` - AI assistance integration with Gemini
-- `src/fileUpload/` - File upload handling with Cloudinary cloud storage
-  - `validation/` - Server-side file validation module
-- `src/mail/` - Email service for contact developer feature
-- `src/logging/` - Application logging and audit trails with IP anonymization scheduler
+- `src/features/user/` - User authentication and management
+- `src/features/todo/` - Todo CRUD operations
+- `src/features/assistance/` - AI assistance integration
+- `src/features/fileUpload/` - File upload handling
+- `src/features/mail/` - Email service
+- `src/features/logging/` - Logging service
 
 ### Infrastructure
-- `src/utils/` - Shared utilities (crypto, audit columns, naming strategy)
-- `src/filter/` - Global exception filters
-- `src/interceptor/` - Global interceptors (logging)
-- `src/types/express/` - TypeScript type extensions and auth guards
+- `src/utils/` - Shared utilities
+- `src/test/` - Tests
 
 ### Configuration
-- `src/.env` - Environment variables
-- `src/nest-cli.json` - NestJS CLI configuration
-- `src/tsconfig.json` - TypeScript configuration
+- `src/plugins/config.ts` - Environment configuration
 
 ## Frontend Structure (`client/`)
 
@@ -59,8 +54,8 @@ myTodoApp/
 
 ### Backend
 - **Entities**: PascalCase with `Entity` suffix (`UserEntity`)
-- **Controllers**: PascalCase with `Controller` suffix (`TodoController`)
-- **Services**: PascalCase with `Service` suffix (`TodoService`)
+- **Routes**: PascalCase with `Routes` suffix (`UserRoutes`)
+- **Services**: PascalCase with `Service` suffix (`UserService`)
 - **DTOs**: PascalCase with `Dto` suffix (`CreateTodoDto`)
 - **Database Tables**: Snake case with `nj_` prefix (`nj_user_info`)
 - **Database Columns**: Snake case (`user_seq`, `reg_dtm`)
@@ -73,10 +68,9 @@ myTodoApp/
 ## Architecture Patterns
 
 ### Backend Patterns
-- **Module-based architecture** - Each feature is a self-contained NestJS module
+- **Plugin-based architecture** - Each feature is an Elysia plugin
 - **Repository pattern** - TypeORM entities with service layer abstraction
-- **Guard pattern** - Authentication guards for route protection
-- **Interceptor pattern** - Cross-cutting concerns (logging, error handling)
+- **Derive pattern** - Context extension for auth and state
 - **Audit pattern** - Standardized audit columns for all entities
 
 ### Frontend Patterns
