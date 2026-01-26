@@ -1,5 +1,6 @@
 import { Elysia } from 'elysia';
 import 'jose';
+import { staticPlugin } from '@elysiajs/static';
 
 import { corsPlugin } from './plugins/cors';
 import { loggerPlugin } from './plugins/logger';
@@ -21,6 +22,29 @@ import { Logger } from './utils/logger';
 const logger = new Logger('GlobalExceptionHandler');
 
 /**
+ * 검증 에러 정제 헬퍼 함수
+ * 
+ * error.all에서 path와 message만 추출하여 클라이언트 친화적인 형태로 변환합니다.
+ * 
+ * @param error - Elysia 검증 에러 객체
+ * @param message - 에러 메시지
+ * @returns 정제된 에러 배열 또는 undefined
+ */
+function formatValidationErrors(error: any, message: string): any[] | undefined {
+    if ('all' in error && Array.isArray(error.all)) {
+        const errors = error.all.map((err: any) => ({
+            field: err.path?.replace(/^\//, '') || 'unknown', // 필드명 (앞의 / 제거)
+            message: err.message || 'Validation error', // 에러 메시지
+        }));
+        logger.error(`Validation Error: ${message}`, JSON.stringify(errors));
+        return errors;
+    } else {
+        logger.error(`Validation Error: ${message}`, 'No error details available');
+        return undefined;
+    }
+}
+
+/**
  * 메인 Elysia 애플리케이션
  *
  * 모든 플러그인과 라우트를 통합하여 서버를 구성합니다.
@@ -34,12 +58,27 @@ const app = new Elysia()
     .use(jwtPlugin)
     .use(dbLoggingPlugin)
     .use(swaggerPlugin)
+    /**
+     * 정적 파일 서버 플러그인
+     * 
+     * `public` 폴더의 파일을 `/static` 경로로 서빙합니다.
+     * 예: public/image.png -> http://localhost:3001/static/image.png
+     * 
+     * 정적 자산이 필요한 경우 `public` 폴더에 파일을 배치하세요.
+     */
+    .use(
+        staticPlugin({
+            assets: './public',
+            prefix: '/static',
+        }),
+    )
 
     // 전역 에러 핸들링 (HttpExceptionFilter 대체)
     .onError(({ code, error, set, request }) => {
         // Elysia 에러 코드별 분기 처리
         let statusCode: number;
         let message: string;
+        let errors: any = undefined;
 
         switch (code) {
             case 'NOT_FOUND':
@@ -52,8 +91,7 @@ const app = new Elysia()
                 // 400: 입력 데이터 검증 실패
                 statusCode = 400;
                 message = '입력 데이터 검증에 실패했습니다';
-                // VALIDATION 에러 시 error.all 상세 정보 포함
-                logger.error(`Validation Error: ${message}`, JSON.stringify('all' in error ? error.all : {}));
+                errors = formatValidationErrors(error, message);
                 break;
 
             case 'PARSE':
@@ -85,8 +123,8 @@ const app = new Elysia()
             message,
             timestamp: new Date().toISOString(),
             path: request.url,
-            // VALIDATION 에러인 경우 상세 정보 추가
-            errors: code === 'VALIDATION' && 'all' in error ? error.all : undefined,
+            // VALIDATION 에러인 경우 정제된 errors 필드 포함
+            ...(errors && { errors }),
         };
     })
 
