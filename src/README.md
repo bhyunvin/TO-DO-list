@@ -9,7 +9,9 @@ TO-DO List 애플리케이션의 백엔드 서버입니다. **ElysiaJS** 프레�
 - Google Gemini API를 활용한 AI 지원 (채팅, 도구 호출)
 - 파일 업로드 및 관리 (Cloudinary)
 - Contact Developer (문의 메일)
-- 포괄적인 감사 로깅 및 IP 추적
+- 포괄적인 감사 로깅 및 IP 추적 (Pino 기반 통합 로깅)
+- 클라이언트 친화적인 검증 에러 응답
+- 정적 파일 서빙 (`/static` 경로)
 - 환경 변수를 통한 보안 구성
 - Swagger를 통한 API 문서화
 
@@ -20,10 +22,13 @@ TO-DO List 애플리케이션의 백엔드 서버입니다. **ElysiaJS** 프레�
 - **언어**: TypeScript
 - **데이터베이스**: PostgreSQL with TypeORM
 - **인증**: JWT, Bun.password
+- **로깅**: Pino with pino-pretty (통합 로거)
 - **AI**: Google Gemini SDK (Function Calling 지원)
 - **스토리지**: Cloudinary
+- **정적 파일**: @elysiajs/static
 - **메일**: Nodemailer
 - **문서화**: Swagger UI
+- **테스트**: Bun 네이티브 테스트 (Bun.test 및 fetch API)
 
 ## 프로젝트 구조 (Elysia 스타일)
 
@@ -35,6 +40,7 @@ src/
 │   ├── cors.ts                  # CORS 설정
 │   ├── database.ts              # DB 연결
 │   ├── jwt.ts                   # JWT 인증
+│   ├── logger.ts                # HTTP 로깅 (Pino)
 │   └── swagger.ts               # API 문서
 ├── features/                    # 기능 모듈 (라우트, 서비스, 스키마)
 │   ├── user/                    # 사용자 기능
@@ -48,8 +54,10 @@ src/
 │   └── fileUpload/              # 파일 업로드 기능
 ├── utils/                       # 유틸리티
 │   ├── auditColumns.ts
-│   └── cryptUtil.ts
-└── test/                        # 테스트
+│   ├── cryptUtil.ts
+│   ├── logger.ts                # 애플리케이션 로거
+│   └── pino.ts                  # Pino 인스턴스
+└── test/                        # 테스트 (Bun 네이티브)
 ```
 
 ## 사전 요구사항
@@ -143,7 +151,9 @@ Backend server for the TO-DO List application. Built with **ElysiaJS** framework
 - AI assistance powered by Google Gemini API (Chat, Tool calling)
 - File upload and management (Cloudinary)
 - Contact Developer (Inquiry email)
-- Comprehensive audit logging and IP tracking
+- Comprehensive audit logging and IP tracking (Pino-based unified logging)
+- Client-friendly validation error responses
+- Static file serving (`/static` path)
 - Security configuration via environment variables
 - API documentation via Swagger
 
@@ -154,10 +164,13 @@ Backend server for the TO-DO List application. Built with **ElysiaJS** framework
 - **Language**: TypeScript
 - **Database**: PostgreSQL with TypeORM
 - **Authentication**: JWT, Bun.password
+- **Logging**: Pino with pino-pretty (unified logger)
 - **AI**: Google Gemini SDK (Function Calling support)
 - **Storage**: Cloudinary
+- **Static Files**: @elysiajs/static
 - **Mail**: Nodemailer
 - **Documentation**: Swagger UI
+- **Testing**: Bun native testing (Bun.test and fetch API)
 
 ## Project Structure (Elysia Style)
 
@@ -169,6 +182,7 @@ src/
 │   ├── cors.ts                  # CORS settings
 │   ├── database.ts              # DB connection
 │   ├── jwt.ts                   # JWT authentication
+│   ├── logger.ts                # HTTP logging (Pino)
 │   └── swagger.ts               # API documentation
 ├── features/                    # Feature modules (Routes, Services, Schemas)
 │   ├── user/                    # User features
@@ -182,8 +196,10 @@ src/
 │   └── fileUpload/              # File upload features
 ├── utils/                       # Utilities
 │   ├── auditColumns.ts
-│   └── cryptUtil.ts
-└── test/                        # Tests
+│   ├── cryptUtil.ts
+│   ├── logger.ts                # Application logger
+│   └── pino.ts                  # Pino instance
+└── test/                        # Tests (Bun native)
 ```
 
 ## Prerequisites

@@ -18,7 +18,6 @@
     "test:watch": "bun test --watch",
     "test:cov": "bun test --coverage"
   },
-  "_comment": "테스트 시 Bun 네이티브 fetch API를 사용하세요. supertest는 NestJS 환경을 위한 것으로 ElysiaJS에서는 권장되지 않습니다.",
   "dependencies": {
     "@bogeychan/elysia-logger": "^0.1.10",
     "@elysiajs/cors": "^1.4.1",
