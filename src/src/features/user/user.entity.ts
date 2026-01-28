@@ -1,7 +1,9 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, Index } from 'typeorm';
 import { AuditColumns } from '../../utils/auditColumns';
 
 @Entity('nj_user_info')
+@Index('IX_NJ_USER_INFO_USER_ID', ['userId'], { unique: true })
+@Index('IX_NJ_USER_INFO_USER_EMAIL', ['userEmail'], { unique: true })
 export class UserEntity {
   constructor() {
     this.auditColumns = new AuditColumns();
@@ -10,7 +12,7 @@ export class UserEntity {
   @PrimaryGeneratedColumn({ name: 'user_seq' })
   userSeq: number;
 
-  @Column({ name: 'user_id', length: 255, nullable: false })
+  @Column({ name: 'user_id', length: 40, nullable: false })
   userId: string;
 
   @Column({ name: 'user_name', length: 40, nullable: false })

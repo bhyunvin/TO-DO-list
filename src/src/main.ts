@@ -24,190 +24,129 @@ import { Logger } from './utils/logger';
 const logger = new Logger('GlobalExceptionHandler');
 
 /**
- * 검증 에러 정제 헬퍼 함수
- *
- * error.all에서 path와 message만 추출하여 클라이언트 친화적인 형태로 변환합니다.
- *
- * @param error - Elysia 검증 에러 객체
- * @param message - 에러 메시지
- * @returns 정제된 에러 배열 또는 undefined
+ * 검증 에러 응답 형식
  */
-function formatValidationErrors(
-  error: any,
-  message: string,
-): any[] | undefined {
-  if ('all' in error && Array.isArray(error.all)) {
-    const errors = error.all.map((err: any) => ({
-      field: err.path?.replace(/^\//, '') || 'unknown', // 필드명 (앞의 / 제거)
-      message: err.message || 'Validation error', // 에러 메시지
-    }));
-    logger.error(`Validation Error: ${message}`, JSON.stringify(errors));
-    return errors;
-  } else {
-    logger.error(`Validation Error: ${message}`, 'No error details available');
-    return undefined;
-  }
+interface ValidationErrorDetail {
+    path: string;
+    message: string;
 }
 
 /**
- * 메인 Elysia 애플리케이션
- *
- * 모든 플러그인과 라우트를 통합하여 서버를 구성합니다.
+ * 전역 에러 제어 및 검증 에러 포맷팅
+ */
+function formatValidationErrors(
+    error: { all?: ValidationErrorDetail[] },
+    message: string,
+): { field: string; message: string }[] | undefined {
+    if (error && 'all' in error && Array.isArray(error.all)) {
+        const errors = error.all.map((err) => ({
+            field: err.path?.replace(/^\//, '') || 'unknown',
+            message: err.message || 'Validation error',
+        }));
+        logger.error(`Validation Error: ${message}`, JSON.stringify(errors));
+        return errors;
+    }
+    logger.error(`Validation Error: ${message}`, 'No error details available');
+    return undefined;
+}
+
+/**
+ * 메인 Elysia 애플리케이션 서버 구성
  */
 export const app = new Elysia()
-  // 플러그인 등록
-  .use(corsPlugin)
-  .use(loggerPlugin)
-  .use(configPlugin)
-  .use(databasePlugin)
-  .use(jwtPlugin)
-  .use(dbLoggingPlugin)
-  .use(swaggerPlugin)
-  /**
-   * 정적 파일 서버 플러그인
-   *
-   * `public` 폴더의 파일을 `/static` 경로로 서빙합니다.
-   * 예: public/image.png -> http://localhost:3001/static/image.png
-   *
-   * 정적 자산이 필요한 경우 `public` 폴더에 파일을 배치하세요.
-   */
-  .use(
-    staticPlugin({
-      assets: './public',
-      prefix: '/static',
-    }),
-  )
-  .use(
-    env.NODE_ENV === 'production'
-      ? staticPlugin({
-          assets: '../client/dist',
-          prefix: '/',
-        })
-      : (app) => app,
-  ) // 정적 파일 제공을 위한 플러그인 (./public 디렉토리 필요 - 자동 생성됨)
+    .use(corsPlugin)
+    .use(loggerPlugin)
+    .use(configPlugin)
+    .use(databasePlugin)
+    .use(jwtPlugin)
+    .use(dbLoggingPlugin)
+    .use(swaggerPlugin)
+    .use(
+        staticPlugin({
+            assets: './public',
+            prefix: '/static',
+        }),
+    )
+    .use(
+        env.NODE_ENV === 'production'
+            ? staticPlugin({
+                assets: '../client/dist',
+                prefix: '/',
+            })
+            : (app) => app,
+    )
+    .onError(({ code, error, set, request }) => {
+        let statusCode: number;
+        let message: string;
+        let errors: { field: string; message: string }[] | undefined = undefined;
 
-  // 전역 에러 핸들링 (HttpExceptionFilter 대체)
-  .onError(({ code, error, set, request }) => {
-    // Elysia 에러 코드별 분기 처리
-    let statusCode: number;
-    let message: string;
-    let errors: any = undefined;
-
-    switch (code) {
-      case 'NOT_FOUND':
-        // 404: 요청한 리소스를 찾을 수 없음
-        statusCode = 404;
-        message = '요청하신 리소스를 찾을 수 없습니다';
-        break;
-
-      case 'VALIDATION':
-        // 400: 입력 데이터 검증 실패
-        statusCode = 400;
-        message = '입력 데이터 검증에 실패했습니다';
-        errors = formatValidationErrors(error, message);
-        break;
-
-      case 'PARSE':
-        // 400: 요청 본문 파싱 실패
-        statusCode = 400;
-        message = '요청 본문을 파싱할 수 없습니다';
-        break;
-
-      case 'INTERNAL_SERVER_ERROR':
-      default:
-        // 500: 서버 내부 오류 및 기타 에러
-        statusCode = set.status ? Number(set.status) : 500;
-        if (code === 'INTERNAL_SERVER_ERROR') {
-          message = '서버 내부 오류가 발생했습니다';
-        } else {
-          message = error instanceof Error ? error.message : 'Unknown error';
+        switch (code) {
+            case 'NOT_FOUND':
+                statusCode = 404;
+                message = '요청하신 리소스를 찾을 수 없습니다';
+                break;
+            case 'VALIDATION':
+                statusCode = 400;
+                message = '입력 데이터 검증에 실패했습니다';
+                errors = formatValidationErrors(error as { all?: ValidationErrorDetail[] }, message);
+                break;
+            case 'PARSE':
+                statusCode = 400;
+                message = '요청 본문을 파싱할 수 없습니다';
+                break;
+            default:
+                statusCode = (set.status as number) || 500;
+                message = error instanceof Error ? error.message : 'Unknown error';
         }
-    }
 
-    // 에러 상세 로깅 (Stack Trace 포함)
-    const errorMessage =
-      error instanceof Error ? error.message : 'Unknown error';
-    const errorStack = error instanceof Error ? error.stack : undefined;
-    logger.error(`Global Error [${code}]: ${errorMessage}`, errorStack);
+        logger.error(`Global Error [${code}]: ${message}`, error instanceof Error ? error.stack : undefined);
 
-    // 응답 반환
-    return {
-      success: false,
-      statusCode,
-      message,
-      timestamp: new Date().toISOString(),
-      path: request.url,
-      // VALIDATION 에러인 경우 정제된 errors 필드 포함
-      ...(errors && { errors }),
-    };
-  })
-
-  // 모듈 라우트 등록
-  .use(userRoutes)
-  .use(todoRoutes)
-  .use(assistanceRoutes)
-  .use(mailRoutes)
-  .use(fileRoutes)
-
-  // Welcome 엔드포인트
-  .get('/', () => ({ status: 'ok' }), {
-    detail: {
-      tags: ['Welcome'],
-      summary: '서버 상태 확인',
-      description: '서버가 정상적으로 실행 중인지 확인합니다.',
-    },
-  })
-
-  .get(
-    '/favicon.ico',
-    ({ set }) => {
-      set.status = 204;
-    },
-    {
-      detail: {
-        tags: ['Welcome'],
-        summary: 'Favicon 요청 처리',
-        description: 'Favicon 요청에 대해 204 No Content를 반환합니다.',
-      },
-    },
-  )
-
-  // Cron 스케줄러 등록
-  .use(
-    cron({
-      name: 'log-cleanup',
-      pattern: '0 0 * * *', // 매일 자정 실행
-      async run() {
-        // Scheduler 인스턴스 생성 (dataSource 주입)
-        const loggingScheduler = new LoggingScheduler(dataSource);
-        await loggingScheduler.cleanupOldLogsAndAnonymizeIp();
-      },
-    }),
-  )
-
-  // 서버 생명주기 훅
-  .onStart(() => {
-    // 서버 시작 5초 후 한 번 실행 (초기 정리)
-    setTimeout(() => {
-      const loggingScheduler = new LoggingScheduler(dataSource);
-      loggingScheduler.cleanupOldLogsAndAnonymizeIp();
-    }, 5000);
-
-    logger.log('📅 로그 스케줄러가 등록되었습니다. (매일 자정 실행)');
-  })
-
-  // SPA Fallback (React Router용)
-  // API 경로가 아닌 모든 요청에 대해 index.html 반환
-  .get('*', () => {
-    return Bun.file('../client/dist/index.html');
-  });
-
-// 서버 시작
-// .listen(env.PORT || 3001);
+        return {
+            success: false,
+            statusCode,
+            message,
+            timestamp: new Date().toISOString(),
+            path: request.url,
+            ...(errors && { errors }),
+        };
+    })
+    .use(userRoutes)
+    .use(todoRoutes)
+    .use(assistanceRoutes)
+    .use(mailRoutes)
+    .use(fileRoutes)
+    .get('/', () => ({ status: 'ok' }), {
+        detail: {
+            tags: ['Welcome'],
+            summary: '서버 상태 확인',
+        },
+    })
+    .get('/favicon.ico', ({ set }) => { set.status = 204; }, {
+        detail: { tags: ['Welcome'], summary: 'Favicon' },
+    })
+    .use(
+        cron({
+            name: 'log-cleanup',
+            pattern: '0 0 * * *',
+            async run() {
+                const loggingScheduler = new LoggingScheduler(dataSource);
+                await loggingScheduler.cleanupOldLogsAndAnonymizeIp();
+            },
+        }),
+    )
+    .onStart(() => {
+        setTimeout(() => {
+            new LoggingScheduler(dataSource).cleanupOldLogsAndAnonymizeIp();
+        }, 5000);
+        logger.log('📅 로그 스케줄러가 등록되었습니다.');
+    })
+    .get('*', () => {
+        return Bun.file('../client/dist/index.html');
+    });
 
 if (import.meta.main) {
-  app.listen(env.PORT || 3001);
-  logger.log(`
+    app.listen(env.PORT || 3001);
+    logger.log(`
 🦊 Elysia 서버가 실행 중입니다!
 📍 주소: http://${app.server?.hostname}:${app.server?.port}
 📚 Swagger 문서: http://${app.server?.hostname}:${app.server?.port}/swagger
@@ -215,5 +154,4 @@ if (import.meta.main) {
 `);
 }
 
-// 타입 내보내기 (Eden Treaty용)
 export type App = typeof app;

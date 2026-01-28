@@ -47,5 +47,5 @@ const testFetch = async (input: RequestInfo | URL, init?: RequestInit) => {
 };
 
 export const api = treaty<App>(TEST_BASE_URL, {
-  fetcher: testFetch as any,
+  fetcher: testFetch as typeof fetch,
 });

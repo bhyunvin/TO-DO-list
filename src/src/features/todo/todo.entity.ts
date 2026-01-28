@@ -1,7 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, Index } from 'typeorm';
 import { AuditColumns } from '../../utils/auditColumns';
 
 @Entity('nj_todo')
+@Index('IX_NJ_TODO_USER_DATE', ['userSeq', 'todoDate'])
 export class TodoEntity {
   constructor() {
     this.auditColumns = new AuditColumns();

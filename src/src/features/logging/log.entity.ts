@@ -1,7 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, Index } from 'typeorm';
 import { CreateAuditColumns } from '../../utils/auditColumns';
 
 @Entity('nj_user_log')
+@Index('IX_NJ_USER_LOG_REG_DTM', ['auditColumns.regDtm'])
 export class LogEntity {
   constructor() {
     this.auditColumns = new CreateAuditColumns();

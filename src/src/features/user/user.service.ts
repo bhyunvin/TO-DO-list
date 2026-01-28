@@ -102,7 +102,7 @@ export class UserService {
     await queryRunner.startTransaction();
 
     try {
-      const { userEmail, userPw, userName } = registerDto;
+      const { userId, userEmail, userPw, userName, userDescription, privacyAgreed } = registerDto;
 
       // 1. 이메일 암호화 및 중복 확인
       const encryptedEmail = await encryptSymmetricDeterministic(userEmail);
@@ -113,23 +113,34 @@ export class UserService {
         throw new Error('이미 존재하는 이메일입니다.');
       }
 
+      // 아이디 중복 확인
+      const existingId = await queryRunner.manager.findOne(UserEntity, {
+        where: { userId },
+      });
+      if (existingId) {
+        throw new Error('이미 존재하는 아이디입니다.');
+      }
+
       // 2. 비밀번호 해싱
       const hashedPassword = await encrypt(userPw);
 
-      // 3. 사용자 엔티티 생성 (암호화된 이메일 저장)
+      // 3. 사용자 엔티티 생성
       const newUser = queryRunner.manager.create(UserEntity, {
-        userId: encryptedEmail, // userId도 암호화된 이메일로 저장
+        userId,
         userEmail: encryptedEmail, // 암호화된 이메일 저장
         userPw: hashedPassword,
         userName: this.inputSanitizer.sanitizeName(userName),
         adminYn: 'N',
-        userDescription: '',
+        userDescription: userDescription
+          ? this.inputSanitizer.sanitizeDescription(userDescription)
+          : '',
+        privacyAgreedDtm: privacyAgreed ? new Date() : null,
       });
 
       // Audit 설정
       const auditSettings: AuditSettings = {
         entity: newUser,
-        id: 'SYSTEM', // 회원가입 시에는 ID 없음
+        id: userId, // 회원가입 시에는 입력받은 userId 사용
         ip: clientIp,
         isUpdate: false,
       };
@@ -137,13 +148,11 @@ export class UserService {
 
       const savedUser = await queryRunner.manager.save(UserEntity, newUser);
 
-      // 생성 후 ID로 Audit 업데이트 필요할 수 있으나 생략
-
       // 4. 프로필 이미지 업로드 (파일이 있는 경우)
       if (file) {
         const fileAuditSettings: AuditSettings = {
           entity: null, // 내부에서 생성됨
-          id: String(savedUser.userSeq),
+          id: userId,
           ip: clientIp,
           isUpdate: false,
         };
@@ -160,7 +169,7 @@ export class UserService {
           // 업데이트를 위한 Audit 설정
           const updateAuditSettings: AuditSettings = {
             entity: savedUser,
-            id: String(savedUser.userSeq),
+            id: userId,
             ip: clientIp,
             isUpdate: true,
           };
@@ -182,21 +191,20 @@ export class UserService {
   }
 
   async login(loginDto: LoginDto): Promise<UserEntity> {
-    const { userEmail, userPw } = loginDto;
+    const { userId, userPw } = loginDto;
 
-    // 이메일을 암호화하여 조회
-    const encryptedEmail = await encryptSymmetricDeterministic(userEmail);
+    // 아이디로 조회
     const user = await this.userRepository.findOne({
-      where: { userEmail: encryptedEmail },
+      where: { userId },
     });
 
     if (!user) {
-      throw new Error('이메일 또는 비밀번호가 올바르지 않습니다.');
+      throw new Error('아이디 또는 비밀번호가 올바르지 않습니다.');
     }
 
     const isPwValid = await isHashValid(userPw, user.userPw);
     if (!isPwValid) {
-      throw new Error('이메일 또는 비밀번호가 올바르지 않습니다.');
+      throw new Error('아이디 또는 비밀번호가 올바르지 않습니다.');
     }
 
     // 사용자 정보 복호화 후 반환
@@ -365,10 +373,11 @@ export class UserService {
       throw new Error('User sequence is missing');
     }
     return {
-      userNo: user.userSeq,
+      userSeq: user.userSeq,
+      userId: user.userId || '',
       userEmail: user.userEmail || '',
       userName: user.userName || '',
-      userPhone: undefined,
+      userDescription: user.userDescription || '',
       fileGroupNo: user.userProfileImageFileGroupNo || undefined,
       createdAt: user.auditColumns?.regDtm,
       updatedAt: user.auditColumns?.updDtm,

@@ -16,7 +16,7 @@ export interface JWTUser {
 export interface JWTAccessPayload {
   sub: string;
   name: string;
-  email: string;
+  email?: string;
   [key: string]: string | number | boolean | undefined;
 }
 
@@ -38,7 +38,7 @@ export const jwtPlugin = (app: Elysia) =>
         schema: t.Object({
           sub: t.String(),
           name: t.String(),
-          email: t.String(),
+          email: t.Optional(t.String()),
         }),
       }),
     )

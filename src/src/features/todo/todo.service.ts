@@ -171,6 +171,7 @@ export class TodoService {
 
       // 내용 수정
       if (dto.todoContent !== undefined) todo.todoContent = dto.todoContent;
+      if (dto.todoDate !== undefined) todo.todoDate = dto.todoDate;
       if (dto.todoNote !== undefined) todo.todoNote = dto.todoNote;
       if (dto.completeDtm !== undefined) {
         // completeDtm 처리 (DB 타입에 맞춰)

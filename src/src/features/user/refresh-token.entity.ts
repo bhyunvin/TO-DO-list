@@ -1,7 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, Index } from 'typeorm';
 import { AuditColumns } from '../../utils/auditColumns';
 
 @Entity('nj_user_refresh_token')
+@Index('IX_NJ_USER_REFRESH_TOKEN_USER_SEQ', ['userSeq'])
 export class RefreshTokenEntity {
   constructor() {
     this.auditColumns = new AuditColumns();

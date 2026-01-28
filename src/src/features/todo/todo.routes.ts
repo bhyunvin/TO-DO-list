@@ -183,16 +183,16 @@ export const todoRoutes = new Elysia({ prefix: '/todo' })
 
   // 첨부파일 목록 조회
   .get(
-    '/:todoId/file',
-    async ({ user, params: { todoId }, todoService }) => {
+    '/:id/file',
+    async ({ user, params: { id }, todoService }) => {
       const attachments = await todoService.getAttachments(
-        Number(todoId),
+        Number(id),
         Number(user.id),
       );
       return attachments;
     },
     {
-      params: t.Object({ todoId: t.Number() }),
+      params: t.Object({ id: t.Number() }),
       response: t.Array(FileAttachmentResponseSchema),
       detail: { tags: ['Todo'], summary: '첨부파일 목록 조회' },
     },
@@ -200,10 +200,10 @@ export const todoRoutes = new Elysia({ prefix: '/todo' })
 
   // 첨부파일 삭제
   .delete(
-    '/:todoId/file/:fileNo',
-    async ({ user, params: { todoId, fileNo }, todoService }) => {
+    '/:id/file/:fileNo',
+    async ({ user, params: { id, fileNo }, todoService }) => {
       await todoService.deleteAttachment(
-        Number(todoId),
+        Number(id),
         Number(fileNo),
         Number(user.id),
       );
@@ -211,7 +211,7 @@ export const todoRoutes = new Elysia({ prefix: '/todo' })
     },
     {
       params: t.Object({
-        todoId: t.Number(),
+        id: t.Number(),
         fileNo: t.Number(),
       }),
       detail: { tags: ['Todo'], summary: '첨부파일 삭제' },
