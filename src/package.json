@@ -1,5 +1,5 @@
 {
-  "name": "src",
+  "name": "@todo/backend",
   "version": "0.0.1",
   "type": "module",
   "description": "",
@@ -10,6 +10,7 @@
     "build": "bun build src/main.ts --outdir dist --target bun",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "bun --bun src/main.ts",
+    "dev": "bun run start:dev",
     "start:dev": "bun --watch src/main.ts",
     "start:debug": "bun --inspect --watch src/main.ts",
     "start:prod": "bun --bun dist/main.js",

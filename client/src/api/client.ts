@@ -1,5 +1,5 @@
 import { treaty } from '@elysiajs/eden';
-import type { App } from '../../../src/src/main';
+import type { App } from '@todo/backend/src/main';
 
 // 백엔드 API 주소
 

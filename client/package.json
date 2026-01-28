@@ -1,9 +1,10 @@
 {
-  "name": "client",
+  "name": "@todo/client",
   "version": "0.1.0",
   "type": "module",
   "private": true,
   "dependencies": {
+    "@todo/backend": "workspace:*",
     "@elysiajs/eden": "^1.4.6",
     "@react-icons/all-files": "^4.1.0",
     "@vercel/analytics": "^1.6.1",
