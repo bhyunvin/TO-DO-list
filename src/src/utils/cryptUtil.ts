@@ -166,9 +166,15 @@ export const encryptSymmetric = async (text: string): Promise<string> => {
 export const decryptSymmetric = async (text: string): Promise<string> => {
   if (!text) return text;
 
+  // 암호화 포맷(IV:Tag:Ciphertext)이 아닌 경우 평문으로 간주하여 반환
+  if (text.split(':').length !== 3) {
+    return text;
+  }
+
   try {
     const textParts = text.split(':');
     if (textParts.length < 3) {
+      // 위에서 검증했으므로 도달하지 않음
       throw new Error('Invalid ciphertext format');
     }
 
@@ -287,6 +293,11 @@ export const decryptSymmetricDeterministic = async (
 ): Promise<string> => {
   if (!text) return text;
 
+  // 유효한 Hex 문자열이 아닌 경우 평문으로 간주하여 그대로 반환
+  if (!/^[0-9a-fA-F]*$/.test(text) || text.length % 2 !== 0) {
+    return text;
+  }
+
   try {
     const key = await getSivKey();
     const siv = aessiv(key);
@@ -295,6 +306,8 @@ export const decryptSymmetricDeterministic = async (
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
     logger.error(`Deterministic decryption failed: ${errorMsg}`);
-    throw new Error('Failed to decrypt data deterministically');
+    // 복호화 실패 시 원문 반환 (혹은 에러 throw)
+    // 여기서는 데이터 호환성을 위해 에러 로그만 남기고 원문 반환 시도
+    return text;
   }
 };

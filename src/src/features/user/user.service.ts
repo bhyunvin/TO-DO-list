@@ -188,6 +188,11 @@ export class UserService {
 
       await queryRunner.commitTransaction();
 
+      // 응답 생성을 위해 복호화 (메모리 상 객체만)
+      if (savedUser.userEmail) {
+        savedUser.userEmail = await decryptSymmetricDeterministic(savedUser.userEmail);
+      }
+
       return this.toUserResponse(savedUser);
     } catch (error) {
       await queryRunner.rollbackTransaction();
@@ -286,16 +291,22 @@ export class UserService {
     await queryRunner.startTransaction();
 
     try {
+      // 이메일 업데이트 (암호화 및 중복 체크)
+      if (updateUserDto.userEmail) {
+        await this.handleEmailUpdate(user, updateUserDto.userEmail);
+      }
       if (updateUserDto.userName) {
         user.userName = this.inputSanitizer.sanitizeName(
           updateUserDto.userName,
         );
       }
 
-      if (updateUserDto.userDescription) {
-        user.userDescription = this.inputSanitizer.sanitizeDescription(
-          updateUserDto.userDescription,
-        );
+      if (updateUserDto.userDescription !== undefined) {
+        user.userDescription = updateUserDto.userDescription
+          ? this.inputSanitizer.sanitizeDescription(
+              updateUserDto.userDescription,
+            )
+          : null;
       }
 
       // API Key 업데이트 (암호화)
@@ -348,6 +359,31 @@ export class UserService {
     }
   }
 
+  private async handleEmailUpdate(
+    user: UserEntity,
+    newEmail: string,
+  ): Promise<void> {
+    // 1. 이메일 정제
+    const sanitizedEmail = this.inputSanitizer.sanitizeEmail(newEmail);
+
+    // 2. 결정적 암호화 (신규 포맷 표준화)
+    const encryptedEmail = await encryptSymmetricDeterministic(sanitizedEmail);
+
+    // 3. 변경 여부 확인
+    if (user.userEmail !== encryptedEmail) {
+      // 4. 중복 체크
+      const existingUser = await this.userRepository.findOne({
+        where: { userEmail: encryptedEmail },
+      });
+
+      if (existingUser && existingUser.userSeq !== user.userSeq) {
+        throw new Error('이미 존재하는 이메일입니다.');
+      }
+
+      user.userEmail = encryptedEmail;
+    }
+  }
+
   async changePassword(
     userSeq: number,
     dto: ChangePasswordDto,
@@ -384,9 +420,9 @@ export class UserService {
       userId: user.userId || '',
       userEmail: user.userEmail || '',
       userName: user.userName || '',
-      userDescription: user.userDescription || '',
-      profileImage: user.profileImage,
-      fileGroupNo: user.userProfileImageFileGroupNo || undefined,
+      userDescription: user.userDescription || null,
+      profileImage: user.profileImage || null,
+      fileGroupNo: user.userProfileImageFileGroupNo || null,
       createdAt: user.auditColumns?.regDtm,
       updatedAt: user.auditColumns?.updDtm,
       hasAiApiKey: !!user.aiApiKey,

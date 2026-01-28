@@ -33,9 +33,6 @@ export class InputSanitizerService {
       sanitized = sanitized.replaceAll(/<[^>]*>/g, '');
     }
 
-    // SQL 인젝션 방지를 위해 잠재적으로 위험한 문자 제거
-    sanitized = sanitized.replaceAll(/['"\\;]/g, '');
-
     // XSS 방지를 위해 스크립트 관련 콘텐츠 제거
     sanitized = sanitized.replaceAll(/javascript:/gi, '');
     sanitized = sanitized.replaceAll(/on\w+\s*=/gi, '');
@@ -82,8 +79,8 @@ export class InputSanitizerService {
 
     let sanitized = name.trim();
 
-    // 이름에 문자, 숫자, 공백, 하이픈, 아포스트로피, 마침표 허용
-    sanitized = sanitized.replaceAll(/[^a-zA-Z0-9\s\-'.]/g, '');
+    // 이름에 문자(유니코드 포함), 숫자, 공백, 하이픈, 아포스트로피, 마침표 허용
+    sanitized = sanitized.replaceAll(/[^\p{L}\p{N}\s\-'.]/gu, '');
 
     // 연속된 여러 공백 제거
     sanitized = sanitized.replaceAll(/\s+/g, ' ');
@@ -114,9 +111,6 @@ export class InputSanitizerService {
     sanitized = sanitized.replaceAll(/javascript:/gi, '');
     sanitized = sanitized.replaceAll(/on\w+\s*=/gi, '');
 
-    // SQL 인젝션 시도 제거
-    sanitized = sanitized.replaceAll(/['"\\;]/g, '');
-
     // 설명 길이 제한
     if (sanitized.length > 4000) {
       sanitized = sanitized.substring(0, 4000);
@@ -137,7 +131,8 @@ export class InputSanitizerService {
     }
 
     // 기본 패턴은 문자, 숫자, 공백, 일반적인 구두점 허용
-    const defaultPattern = /^[a-zA-Z0-9\s\-_.@]+$/;
+    // 유니코드 지원을 위해 u 플래그 사용
+    const defaultPattern = /^[\p{L}\p{N}\s\-_.@]+$/u;
     const pattern = allowedPattern || defaultPattern;
 
     return pattern.test(input);

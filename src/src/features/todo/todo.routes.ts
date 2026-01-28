@@ -50,7 +50,7 @@ export const todoRoutes = new Elysia({ prefix: '/todo' })
           todoContent: todo.todoContent,
           todoDate: todo.todoDate,
           todoNote: todo.todoNote,
-          completeDtm: todo.completeDtm,
+          completeDtm: todo.completeDtm ? todo.completeDtm.toISOString() : null,
           attachments: attachments,
           // Entity 직접 접근 (auditColumns 가상 프로퍼티 없음)
           createdAt: todo.auditColumns.regDtm.toISOString(),
@@ -84,7 +84,7 @@ export const todoRoutes = new Elysia({ prefix: '/todo' })
           todoContent: todo.todoContent,
           todoDate: todo.todoDate,
           todoNote: todo.todoNote,
-          completeDtm: todo.completeDtm,
+          completeDtm: todo.completeDtm ? todo.completeDtm.toISOString() : null,
           attachments,
           createdAt: todo.auditColumns.regDtm.toISOString(),
         });
@@ -120,7 +120,9 @@ export const todoRoutes = new Elysia({ prefix: '/todo' })
         todoContent: newTodo.todoContent,
         todoDate: newTodo.todoDate,
         todoNote: newTodo.todoNote,
-        completeDtm: newTodo.completeDtm,
+        completeDtm: newTodo.completeDtm
+          ? newTodo.completeDtm.toISOString()
+          : null,
         attachments,
         createdAt: newTodo.auditColumns.regDtm.toISOString(),
       };
@@ -153,7 +155,9 @@ export const todoRoutes = new Elysia({ prefix: '/todo' })
         todoContent: updatedTodo.todoContent,
         todoDate: updatedTodo.todoDate,
         todoNote: updatedTodo.todoNote,
-        completeDtm: updatedTodo.completeDtm,
+        completeDtm: updatedTodo.completeDtm
+          ? updatedTodo.completeDtm.toISOString()
+          : null,
         attachments,
         createdAt: updatedTodo.auditColumns.regDtm.toISOString(),
       };

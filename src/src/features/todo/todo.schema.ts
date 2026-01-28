@@ -20,10 +20,10 @@ export type CreateTodoDto = Static<typeof CreateTodoSchema>;
  * 할 일 수정 스키마
  */
 export const UpdateTodoSchema = t.Object({
-  todoContent: t.Optional(t.String({ description: '할 일 내용' })),
-  todoDate: t.Optional(t.String({ description: '할 일 날짜 (YYYY-MM-DD)' })),
-  completeDtm: t.Optional(t.String({ description: '완료 일시' })), // 완료 처리는 날짜 문자열 전송
-  todoNote: t.Optional(t.String({ description: '비고' })),
+  todoContent: t.Optional(t.Nullable(t.String({ description: '할 일 내용' }))),
+  todoDate: t.Optional(t.Nullable(t.String({ description: '할 일 날짜 (YYYY-MM-DD)' }))),
+  completeDtm: t.Optional(t.Nullable(t.String({ description: '완료 일시' }))), // 완료 처리는 날짜 문자열 전송
+  todoNote: t.Optional(t.Nullable(t.String({ description: '비고' }))),
   files: t.Optional(
     t.Files({
       description: '추가 첨부파일',
@@ -67,10 +67,10 @@ export const FileAttachmentResponseSchema = t.Object({
  */
 export const TodoResponseSchema = t.Object({
   todoSeq: t.Number(),
-  todoContent: t.Optional(t.String()), // DB entity 정의상 nullable
-  todoDate: t.Optional(t.String()),
-  todoNote: t.Optional(t.String()),
-  completeDtm: t.Optional(t.String()),
+  todoContent: t.Nullable(t.String()), // DB entity 정의상 nullable
+  todoDate: t.Nullable(t.String()),
+  todoNote: t.Nullable(t.String()),
+  completeDtm: t.Nullable(t.String()),
   attachments: t.Array(FileAttachmentResponseSchema),
   createdAt: t.String(),
 });

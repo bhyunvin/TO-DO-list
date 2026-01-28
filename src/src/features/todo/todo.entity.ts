@@ -15,20 +15,20 @@ export class TodoEntity {
   userSeq: number;
 
   @Column({ name: 'todo_content', type: 'text', nullable: true })
-  todoContent: string;
+  todoContent: string | null;
 
   @Column({ name: 'todo_date', type: 'date', nullable: true })
-  todoDate: string;
+  todoDate: string | null;
 
   @Column({
     name: 'complete_dtm',
     type: 'timestamptz',
     nullable: true,
   })
-  completeDtm: Date;
+  completeDtm: Date | null;
 
   @Column({ name: 'todo_note', type: 'text', nullable: true })
-  todoNote: string;
+  todoNote: string | null;
 
   @Column({ name: 'todo_file_group_no', type: 'int', nullable: true })
   todoFileGroupNo: number;

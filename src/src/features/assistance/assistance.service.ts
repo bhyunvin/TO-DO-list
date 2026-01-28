@@ -628,14 +628,16 @@ export class AssistanceService {
     const updateDto: {
       todoContent?: string;
       todoNote?: string;
-      completeDtm?: string;
+      completeDtm?: string | null;
     } = {};
-    if (updateData?.todoContent) updateDto.todoContent = updateData.todoContent;
-    if (updateData?.todoNote) updateDto.todoNote = updateData.todoNote;
+    if (updateData?.todoContent !== undefined)
+      updateDto.todoContent = updateData.todoContent;
+    if (updateData?.todoNote !== undefined)
+      updateDto.todoNote = updateData.todoNote;
     if (updateData?.isCompleted !== undefined) {
       updateDto.completeDtm = updateData.isCompleted
         ? new Date().toISOString()
-        : '';
+        : null;
     }
 
     const result = await this.todoService.update(

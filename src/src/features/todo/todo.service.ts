@@ -175,8 +175,7 @@ export class TodoService {
       if (dto.todoNote !== undefined) todo.todoNote = dto.todoNote;
       if (dto.completeDtm !== undefined) {
         // completeDtm 처리 (DB 타입에 맞춰)
-        // 현재 DB 컬럼이 timestamptz (string 처리 가능)
-        todo.completeDtm = dto.completeDtm || null; // 빈 문자열이나 null이면 미완료 처리
+        todo.completeDtm = dto.completeDtm ? new Date(dto.completeDtm) : null;
       }
 
       // 파일 추가 업로드

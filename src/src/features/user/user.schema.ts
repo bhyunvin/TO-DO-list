@@ -32,6 +32,13 @@ export type RegisterDto = Static<typeof RegisterSchema>;
  * 사용자 정보 업데이트 스키마
  */
 export const UpdateUserSchema = t.Object({
+  userEmail: t.Optional(
+    t.String({
+      format: 'email',
+      maxLength: 100,
+      description: '이메일',
+    }),
+  ),
   userName: t.Optional(
     t.String({
       minLength: 1,
@@ -40,18 +47,19 @@ export const UpdateUserSchema = t.Object({
     }),
   ),
   userDescription: t.Optional(
-    t.String({
-      maxLength: 4000,
-      description: '사용자 설명',
-    }),
+    t.Nullable(
+      t.String({
+        maxLength: 4000,
+        description: '사용자 설명',
+      }),
+    ),
   ),
   aiApiKey: t.Optional(
-    t.Union([
+    t.Nullable(
       t.String({
         description: 'AI API Key (빈 문자열이면 삭제)',
-      }),
-      t.Null(),
-    ]),
+      })
+    ),
   ),
 });
 export type UpdateUserDto = Static<typeof UpdateUserSchema>;
@@ -98,12 +106,12 @@ export const UserResponseSchema = t.Object({
   userId: t.String({ description: '사용자 아이디' }),
   userEmail: t.String({ description: '이메일' }),
   userName: t.String({ description: '사용자명' }),
-  userDescription: t.Optional(t.String({ description: '사용자 설명' })),
-  profileImage: t.Optional(t.String({ description: '프로필 이미지 경로' })),
-  fileGroupNo: t.Optional(t.Number({ description: '파일 그룹 번호' })),
+  userDescription: t.Nullable(t.String({ description: '사용자 설명' })),
+  profileImage: t.Nullable(t.String({ description: '프로필 이미지 경로' })),
+  fileGroupNo: t.Nullable(t.Number({ description: '파일 그룹 번호' })),
   createdAt: t.Optional(t.Date({ description: '생성일' })),
   updatedAt: t.Optional(t.Date({ description: '수정일' })),
-  hasAiApiKey: t.Optional(t.Boolean({ description: 'AI API Key 설정 여부' })),
+  hasAiApiKey: t.Boolean({ description: 'AI API Key 설정 여부' }),
 });
 export type UserResponseDto = Static<typeof UserResponseSchema>;
 

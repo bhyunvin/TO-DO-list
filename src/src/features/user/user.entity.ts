@@ -19,33 +19,33 @@ export class UserEntity {
   userName: string;
 
   @Column({ name: 'user_password', type: 'text', nullable: true })
-  userPw: string;
+  userPw: string | null;
 
   @Column({ name: 'user_email', type: 'text', nullable: true })
-  userEmail: string;
+  userEmail: string | null;
 
   @Column({ name: 'user_description', type: 'text', nullable: true })
-  userDescription: string;
+  userDescription: string | null;
 
   @Column({
     name: 'user_profile_image_file_group_no',
     type: 'int',
     nullable: true,
   })
-  userProfileImageFileGroupNo: number;
+  userProfileImageFileGroupNo: number | null;
 
   @Column({ name: 'admin_yn', type: 'char', length: 1, default: 'N' })
   adminYn: string;
 
   @Column({ name: 'ai_api_key', type: 'text', nullable: true })
-  aiApiKey: string;
+  aiApiKey: string | null;
 
   @Column({
     name: 'privacy_agreed_dtm',
     type: 'timestamptz',
     nullable: true,
   })
-  privacyAgreedDtm: Date;
+  privacyAgreedDtm: Date | null;
 
   @Column(() => AuditColumns)
   auditColumns: AuditColumns;
