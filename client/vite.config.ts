@@ -43,7 +43,7 @@ export default defineConfig({
     // API 프록시 설정
     proxy: {
       '/api': {
-        target: 'http://127.0.0.1:3000', // 백엔드 포트 3000으로 수정
+        target: 'http://127.0.0.1:3001', // 백엔드 포트 3001로 수정 (src/.env 설정과 동기화)
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
       },

@@ -10,7 +10,7 @@
     "build": "bun build src/main.ts --outdir dist --target bun",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "bun --bun src/main.ts",
-    "dev": "bun run start:dev",
+    "dev": "bun --watch src/main.ts",
     "start:dev": "bun --watch src/main.ts",
     "start:debug": "bun --inspect --watch src/main.ts",
     "start:prod": "bun --bun dist/main.js",

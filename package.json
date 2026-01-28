@@ -8,9 +8,12 @@
     "client"
   ],
   "scripts": {
-    "start": "bun run nx run-many --target=dev --all",
+    "start": "bun run dev:fast",
     "start:prod": "bun run nx run-many --target=start:prod --all",
-    "watch": "bun run nx run-many --target=dev --all",
+    "watch": "bun run dev:fast",
+    "dev:fast": "concurrently \"bun run dev:server\" \"bun run dev:client\"",
+    "dev:server": "cd src && bun run dev",
+    "dev:client": "cd client && bun run dev",
     "build": "bun run nx run-many --target=build --all",
     "format": "prettier --write \"{src,client}/**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
     "lint": "bun run nx run-many --target=lint --all",
