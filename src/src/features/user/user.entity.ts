@@ -29,7 +29,7 @@ export class UserEntity {
 
   @Column({
     name: 'user_profile_image_file_group_no',
-    type: 'integer',
+    type: 'int',
     nullable: true,
   })
   userProfileImageFileGroupNo: number;
@@ -42,7 +42,7 @@ export class UserEntity {
 
   @Column({
     name: 'privacy_agreed_dtm',
-    type: 'timestamp with time zone',
+    type: 'timestamptz',
     nullable: true,
   })
   privacyAgreedDtm: Date;

@@ -3,6 +3,7 @@ import { CreateAuditColumns } from '../../utils/auditColumns';
 
 @Entity('nj_user_log')
 @Index('IX_NJ_USER_LOG_REG_DTM', ['auditColumns.regDtm'])
+@Index('IX_NJ_USER_LOG_USER_SEQ', ['userSeq'])
 export class LogEntity {
   constructor() {
     this.auditColumns = new CreateAuditColumns();

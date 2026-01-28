@@ -1,14 +1,5 @@
 import { api, ApiError } from './client';
 
-// User 타입 정의
-export interface User {
-  userNo: number;
-  userEmail: string;
-  userName: string;
-  userDescription?: string;
-}
-
-// Eden Treaty 타입 추론
 const userApi = api.user;
 
 import { useAuthStore } from '../authStore/authStore';
@@ -19,7 +10,7 @@ const authService = {
    */
   async login(userId: string, userPassword: string) {
     const { data, error } = await userApi.login.post({
-      userEmail: userId,
+      userId: userId,
       userPw: userPassword,
     });
 
@@ -57,7 +48,6 @@ const authService = {
     let payload = formData;
     if (formData instanceof FormData) {
       payload = Object.fromEntries(formData.entries());
-      if (payload.userPhone === '') delete payload.userPhone;
     }
 
     const { data, error } = await userApi.register.post(payload);

@@ -385,9 +385,11 @@ export class UserService {
       userEmail: user.userEmail || '',
       userName: user.userName || '',
       userDescription: user.userDescription || '',
+      profileImage: user.profileImage,
       fileGroupNo: user.userProfileImageFileGroupNo || undefined,
       createdAt: user.auditColumns?.regDtm,
       updatedAt: user.auditColumns?.updDtm,
+      hasAiApiKey: !!user.aiApiKey,
     };
   }
 }

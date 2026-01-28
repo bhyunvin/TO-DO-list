@@ -97,7 +97,7 @@ export const useChatStore = create<ChatStore>()(
       hasApiKey: () => {
         try {
           const user = useAuthStore.getState().user;
-          return !!user?.aiApiKey;
+          return !!user?.hasAiApiKey;
         } catch (e) {
           console.error('Failed to check auth store', e);
           return false;

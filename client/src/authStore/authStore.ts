@@ -2,17 +2,17 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
 // User 타입 정의
-interface User {
-  userNo: number;
-  userId?: string;
+export interface User {
+  userSeq: number;
+  userId: string;
   userEmail: string;
   userName: string;
-  userPhone?: string;
+  userDescription?: string;
   profileImage?: string;
-  aiApiKey?: string;
+  hasAiApiKey?: boolean;
   fileGroupNo?: number;
-  createdAt?: Date;
-  updatedAt?: Date;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
 }
 
 // AuthStore 인터페이스 정의

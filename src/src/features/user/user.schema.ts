@@ -103,6 +103,7 @@ export const UserResponseSchema = t.Object({
   fileGroupNo: t.Optional(t.Number({ description: '파일 그룹 번호' })),
   createdAt: t.Optional(t.Date({ description: '생성일' })),
   updatedAt: t.Optional(t.Date({ description: '수정일' })),
+  hasAiApiKey: t.Optional(t.Boolean({ description: 'AI API Key 설정 여부' })),
 });
 export type UserResponseDto = Static<typeof UserResponseSchema>;
 
