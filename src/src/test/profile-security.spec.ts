@@ -1,15 +1,10 @@
 import { describe, expect, it } from 'bun:test';
-import { app } from '../main';
-import { TEST_BASE_URL } from './setup-e2e';
+import { api } from './setup-e2e';
 
 describe('Profile Security (E2E)', () => {
   it('GET /user/profile - 인증 없이 접근 차단 (401/400)', async () => {
     // 토큰 없이 요청
-    const response = await app.handle(
-      new Request(`${TEST_BASE_URL}/user/profile`, {
-        method: 'GET',
-      }),
-    );
+    const { response } = await api.user.profile.get();
 
     // Elysia JWT 플러그인은 토큰이 없거나 유효하지 않으면 예외를 발생시키거나
     // 핸들러 내부에서 user 객체 확인 시 에러를 던집니다.

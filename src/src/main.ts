@@ -194,6 +194,12 @@ export const app = new Elysia()
     }, 5000);
 
     logger.log('📅 로그 스케줄러가 등록되었습니다. (매일 자정 실행)');
+  })
+
+  // SPA Fallback (React Router용)
+  // API 경로가 아닌 모든 요청에 대해 index.html 반환
+  .get('*', () => {
+    return Bun.file('../client/dist/index.html');
   });
 
 // 서버 시작

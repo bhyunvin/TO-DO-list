@@ -33,8 +33,19 @@ afterAll(async () => {
  * 테스트용 요청 헬퍼
  *
  * 매번 new Request(...)를 작성하는 번거로움을 줄이기 위함이 목적입니다.
- * 다만, Phase 2 요구사항인 `"supertest 대신 app.handle(new Request(...)) 전면 교체"`를 준수하기 위해
- * 실제 테스트 코드에서는 app.handle(new Request(...)) 패턴을 명시적으로 사용할 예정입니다.
- * 필요 시 공통 헤더(Content-Type 등)를 주입하는 용도로 확장 가능합니다.
+ * Phase 2 요구사항에 따라 app.handle(new Request(...)) 대신 edenTreaty를 사용합니다.
+ * 이를 위해 custom fetcher를 사용하여 app.handle을 호출하도록 설정합니다.
  */
 export const TEST_BASE_URL = 'http://localhost';
+
+import { treaty } from '@elysiajs/eden';
+import { app, type App } from '../main';
+
+const testFetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+  const req = new Request(input, init);
+  return app.handle(req);
+};
+
+export const api = treaty<App>(TEST_BASE_URL, {
+  fetcher: testFetch as any,
+});
