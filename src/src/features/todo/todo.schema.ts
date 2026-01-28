@@ -21,7 +21,9 @@ export type CreateTodoDto = Static<typeof CreateTodoSchema>;
  */
 export const UpdateTodoSchema = t.Object({
   todoContent: t.Optional(t.Nullable(t.String({ description: '할 일 내용' }))),
-  todoDate: t.Optional(t.Nullable(t.String({ description: '할 일 날짜 (YYYY-MM-DD)' }))),
+  todoDate: t.Optional(
+    t.Nullable(t.String({ description: '할 일 날짜 (YYYY-MM-DD)' })),
+  ),
   completeDtm: t.Optional(t.Nullable(t.String({ description: '완료 일시' }))), // 완료 처리는 날짜 문자열 전송
   todoNote: t.Optional(t.Nullable(t.String({ description: '비고' }))),
   files: t.Optional(

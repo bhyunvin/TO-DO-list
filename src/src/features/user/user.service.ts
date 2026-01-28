@@ -190,7 +190,9 @@ export class UserService {
 
       // 응답 생성을 위해 복호화 (메모리 상 객체만)
       if (savedUser.userEmail) {
-        savedUser.userEmail = await decryptSymmetricDeterministic(savedUser.userEmail);
+        savedUser.userEmail = await decryptSymmetricDeterministic(
+          savedUser.userEmail,
+        );
       }
 
       return this.toUserResponse(savedUser);

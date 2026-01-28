@@ -58,7 +58,7 @@ export const UpdateUserSchema = t.Object({
     t.Nullable(
       t.String({
         description: 'AI API Key (빈 문자열이면 삭제)',
-      })
+      }),
     ),
   ),
 });
