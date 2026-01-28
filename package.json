@@ -9,6 +9,7 @@
   ],
   "scripts": {
     "start": "bun run nx run-many --target=dev --all",
+    "start:prod": "bun run nx run-many --target=start:prod --all",
     "watch": "bun run nx run-many --target=dev --all",
     "build": "bun run nx run-many --target=build --all",
     "format": "prettier --write \"{src,client}/**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",

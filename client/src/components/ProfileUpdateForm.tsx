@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { API_URL } from '../api/apiClient';
+import { API_URL } from '../api/client';
 import PropTypes from 'prop-types';
 import 'sweetalert2/dist/sweetalert2.min.css';
 import { useFileUploadValidator } from '../hooks/useFileUploadValidator';

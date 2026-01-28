@@ -25,7 +25,7 @@ import todoService from '../api/todoService';
 import userService from '../api/userService';
 import authService from '../api/authService';
 import aiService from '../api/aiService';
-import { API_URL } from '../api/apiClient';
+import { API_URL } from '../api/client';
 
 // Hooks
 import useDailyDateReset from '../hooks/useDailyDateReset';

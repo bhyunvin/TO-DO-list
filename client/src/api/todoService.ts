@@ -1,4 +1,4 @@
-import { api } from './client';
+import { api, ApiError } from './client';
 
 // DTO 타입 정의 (백엔드 스키마와 일치시키는 것이 좋지만, 여기서는 인터페이스 정의)
 // 실제로는 shared 패키지나 스키마 파일에서 가져오는 것이 이상적
@@ -16,20 +16,7 @@ export interface UpdateTodoDto {
   files?: File[];
 }
 
-/**
- * Treaty API 타입 제약 관련:
- *
- * Elysia의 Treaty 클라이언트는 복잡한 동적 라우팅 구조에서 TypeScript 타입 추론에 한계가 있습니다.
- * 백엔드의 App 타입을 제대로 import하고 treaty<App>()로 명시해도,
- * 실제 API 호출 시점에 타입이 올바르게 추론되지 않는 Treaty의 알려진 제약사항입니다.
- *
- * 런타임에는 정상 작동하지만, TypeScript 컴파일 타임에 타입 에러가 발생합니다.
- * 따라서 불가피하게 any 타입을 사용하되, 실제 반환값은 백엔드 응답 타입과 일치합니다.
- *
- * @see https://github.com/elysiajs/eden/issues - Treaty type inference limitations
- */
-
-const todoApi = api.todo as any;
+const todoApi = api.todo;
 
 const todoService = {
   async getTodos(date: string) {
@@ -39,10 +26,10 @@ const todoService = {
     });
 
     if (error) {
-      throw new Error(
-        typeof error.value === 'string'
-          ? error.value
-          : JSON.stringify(error.value),
+      throw new ApiError(
+        typeof error.value === 'string' ? error.value : '할 일 목록 조회 실패',
+        Number(error.status),
+        error.value,
       );
     }
     return data;
@@ -56,10 +43,10 @@ const todoService = {
     });
 
     if (error) {
-      throw new Error(
-        typeof error.value === 'string'
-          ? error.value
-          : JSON.stringify(error.value),
+      throw new ApiError(
+        typeof error.value === 'string' ? error.value : '검색 실패',
+        Number(error.status),
+        error.value,
       );
     }
     return data;
@@ -72,10 +59,10 @@ const todoService = {
     if (error) {
       // 404 is acceptable if no files exist, but here we likely get an array (empty or not)
       // If backend throws for no files, handle specific status codes if needed.
-      throw new Error(
-        typeof error.value === 'string'
-          ? error.value
-          : JSON.stringify(error.value),
+      throw new ApiError(
+        typeof error.value === 'string' ? error.value : '첨부파일 조회 실패',
+        Number(error.status),
+        error.value,
       );
     }
     return data;
@@ -89,10 +76,10 @@ const todoService = {
     // todoApi가 any이므로 indexing 가능
     const { error } = await todoApi[todoIdStr].file[fileNoStr].delete();
     if (error) {
-      throw new Error(
-        typeof error.value === 'string'
-          ? error.value
-          : JSON.stringify(error.value),
+      throw new ApiError(
+        typeof error.value === 'string' ? error.value : '첨부파일 삭제 실패',
+        Number(error.status),
+        error.value,
       );
     }
   },
@@ -110,10 +97,10 @@ const todoService = {
 
     const { data: result, error } = await todoApi.post(payload);
     if (error) {
-      throw new Error(
-        typeof error.value === 'string'
-          ? error.value
-          : JSON.stringify(error.value),
+      throw new ApiError(
+        typeof error.value === 'string' ? error.value : '할 일 생성 실패',
+        Number(error.status),
+        error.value,
       );
     }
     return result;
@@ -135,10 +122,10 @@ const todoService = {
     // Eden Treaty: /todo에서 동적 경로 [id]를 문자열 indexing으로 접근
     const { data: result, error } = await todoApi[idStr].patch(payload);
     if (error) {
-      throw new Error(
-        typeof error.value === 'string'
-          ? error.value
-          : JSON.stringify(error.value),
+      throw new ApiError(
+        typeof error.value === 'string' ? error.value : '할 일 수정 실패',
+        Number(error.status),
+        error.value,
       );
     }
     return result;
@@ -153,10 +140,10 @@ const todoService = {
       todoIds: [Number(todoSeq)],
     });
     if (error) {
-      throw new Error(
-        typeof error.value === 'string'
-          ? error.value
-          : JSON.stringify(error.value),
+      throw new ApiError(
+        typeof error.value === 'string' ? error.value : '할 일 삭제 실패',
+        Number(error.status),
+        error.value,
       );
     }
     return { success: true };
@@ -169,13 +156,13 @@ const todoService = {
     });
 
     if (error) {
-      throw new Error(
-        typeof error.value === 'string'
-          ? error.value
-          : JSON.stringify(error.value),
+      throw new ApiError(
+        typeof error.value === 'string' ? error.value : '내보내기 실패',
+        Number(error.status),
+        error.value,
       );
     }
-    return data;
+    return data as Blob;
   },
 };
 

@@ -54,7 +54,7 @@ function formatValidationErrors(
  *
  * 모든 플러그인과 라우트를 통합하여 서버를 구성합니다.
  */
-const app = new Elysia()
+export const app = new Elysia()
   // 플러그인 등록
   .use(corsPlugin)
   .use(loggerPlugin)
@@ -76,6 +76,14 @@ const app = new Elysia()
       assets: './public',
       prefix: '/static',
     }),
+  )
+  .use(
+    env.NODE_ENV === 'production'
+      ? staticPlugin({
+          assets: '../client/dist',
+          prefix: '/',
+        })
+      : (app) => app,
   ) // 정적 파일 제공을 위한 플러그인 (./public 디렉토리 필요 - 자동 생성됨)
 
   // 전역 에러 핸들링 (HttpExceptionFilter 대체)
@@ -150,13 +158,19 @@ const app = new Elysia()
     },
   })
 
-  .get('/favicon.ico', () => {}, {
-    detail: {
-      tags: ['Welcome'],
-      summary: 'Favicon 요청 처리',
-      description: 'Favicon 요청에 대해 204 No Content를 반환합니다.',
+  .get(
+    '/favicon.ico',
+    ({ set }) => {
+      set.status = 204;
     },
-  })
+    {
+      detail: {
+        tags: ['Welcome'],
+        summary: 'Favicon 요청 처리',
+        description: 'Favicon 요청에 대해 204 No Content를 반환합니다.',
+      },
+    },
+  )
 
   // Cron 스케줄러 등록
   .use(
@@ -180,17 +194,20 @@ const app = new Elysia()
     }, 5000);
 
     logger.log('📅 로그 스케줄러가 등록되었습니다. (매일 자정 실행)');
-  })
+  });
 
-  // 서버 시작
-  .listen(env.PORT || 3001);
+// 서버 시작
+// .listen(env.PORT || 3001);
 
-logger.log(`
+if (import.meta.main) {
+  app.listen(env.PORT || 3001);
+  logger.log(`
 🦊 Elysia 서버가 실행 중입니다!
 📍 주소: http://${app.server?.hostname}:${app.server?.port}
 📚 Swagger 문서: http://${app.server?.hostname}:${app.server?.port}/swagger
 🌍 환경: ${env.NODE_ENV}
 `);
+}
 
 // 타입 내보내기 (Eden Treaty용)
 export type App = typeof app;

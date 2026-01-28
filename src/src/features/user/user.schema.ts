@@ -98,8 +98,29 @@ export const UserResponseSchema = t.Object({
   userEmail: t.String({ description: '이메일' }),
   userName: t.String({ description: '사용자명' }),
   userPhone: t.Optional(t.String({ description: '전화번호' })),
+  userDescription: t.Optional(t.String({ description: '사용자 설명' })),
+  profileImage: t.Optional(t.String({ description: '프로필 이미지 경로' })),
   fileGroupNo: t.Optional(t.Number({ description: '파일 그룹 번호' })),
   createdAt: t.Optional(t.Date({ description: '생성일' })),
   updatedAt: t.Optional(t.Date({ description: '수정일' })),
 });
 export type UserResponseDto = Static<typeof UserResponseSchema>;
+
+/**
+ * 로그인 응답 스키마
+ */
+export const LoginResponseSchema = t.Object({
+  accessToken: t.String({ description: '액세스 토큰' }),
+  user: UserResponseSchema,
+});
+export type LoginResponseDto = Static<typeof LoginResponseSchema>;
+
+/**
+ * 중복 체크 응답 스키마
+ */
+export const DuplicateCheckResponseSchema = t.Object({
+  isDuplicated: t.Boolean({ description: '중복 여부' }),
+});
+export type DuplicateCheckResponseDto = Static<
+  typeof DuplicateCheckResponseSchema
+>;

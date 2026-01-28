@@ -1,9 +1,14 @@
 {
   "compilerOptions": {
-    "types": ["vitest/globals", "@testing-library/jest-dom", "vite/client"],
-    "target": "ES2020",
+    "types": [
+      "vitest/globals",
+      "@testing-library/jest-dom",
+      "vite/client",
+      "bun-types"
+    ],
+    "target": "ES2021",
     "useDefineForClassFields": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "lib": ["ES2021", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
 
@@ -25,7 +30,8 @@
     /* Workspace */
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@todo/backend/*": ["../src/*"]
     }
   },
   "include": ["src"],

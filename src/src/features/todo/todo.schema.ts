@@ -58,7 +58,7 @@ export const FileAttachmentResponseSchema = t.Object({
   originalFileName: t.String(),
   fileSize: t.Number(),
   fileExt: t.String(),
-  uploadDate: t.String(),
+  uploadDate: t.Date(),
 });
 
 /**

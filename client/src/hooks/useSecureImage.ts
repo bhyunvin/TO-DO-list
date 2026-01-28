@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import apiClient from '../api/apiClient';
+import { useAuthStore } from '../authStore/authStore';
 
 /**
  * JWT 인증을 사용하여 이미지를 안전하게 로드하는 커스텀 훅.
@@ -10,6 +10,7 @@ import apiClient from '../api/apiClient';
 const useSecureImage = (src) => {
   const [blobUrl, setBlobUrl] = useState(null);
   const [prevSrc, setPrevSrc] = useState(src);
+  const { accessToken } = useAuthStore();
 
   // Props 변경 감지: 렌더링 중 blobUrl 즉시 초기화
   if (src !== prevSrc) {
@@ -25,10 +26,18 @@ const useSecureImage = (src) => {
 
       const fetchImage = async () => {
         try {
-          const response = await apiClient.get(src, { responseType: 'blob' });
-          const blob = response.data || response; // axios wraps response, raw fetch might not
+          const headers = {};
+          if (accessToken) {
+            headers['Authorization'] = `Bearer ${accessToken}`;
+          }
+
+          const response = await fetch(src, { headers });
+          if (!response.ok) throw new Error('Network response was not ok');
+
+          const blob = await response.blob();
+
           if (isMounted) {
-            objectUrl = URL.createObjectURL(blob as Blob);
+            objectUrl = URL.createObjectURL(blob);
             setBlobUrl(objectUrl);
           }
         } catch (error) {
@@ -44,7 +53,7 @@ const useSecureImage = (src) => {
         if (objectUrl) URL.revokeObjectURL(objectUrl);
       };
     }
-  }, [src]);
+  }, [src, accessToken]);
 
   return blobUrl || src;
 };

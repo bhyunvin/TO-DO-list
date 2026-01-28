@@ -8,6 +8,8 @@ import {
   UpdateTodoSchema,
   DeleteTodoSchema,
   SearchTodoSchema,
+  TodoResponseSchema,
+  FileAttachmentResponseSchema,
   type SearchTodoDto,
   type CreateTodoDto,
   type UpdateTodoDto,
@@ -58,6 +60,7 @@ export const todoRoutes = new Elysia({ prefix: '/todo' })
     },
     {
       query: t.Object({ date: t.Optional(t.String()) }),
+      response: t.Array(TodoResponseSchema),
       detail: { tags: ['Todo'], summary: '할 일 목록 조회' },
     },
   )
@@ -90,6 +93,7 @@ export const todoRoutes = new Elysia({ prefix: '/todo' })
     },
     {
       query: SearchTodoSchema,
+      response: t.Array(TodoResponseSchema),
       detail: { tags: ['Todo'], summary: '할 일 검색' },
     },
   )
@@ -123,6 +127,7 @@ export const todoRoutes = new Elysia({ prefix: '/todo' })
     },
     {
       body: CreateTodoSchema,
+      response: { 201: TodoResponseSchema },
       detail: { tags: ['Todo'], summary: '할 일 생성' },
     },
   )
@@ -156,6 +161,7 @@ export const todoRoutes = new Elysia({ prefix: '/todo' })
     {
       body: UpdateTodoSchema,
       params: t.Object({ id: t.Number() }),
+      response: TodoResponseSchema,
       detail: { tags: ['Todo'], summary: '할 일 수정' },
     },
   )
@@ -172,6 +178,23 @@ export const todoRoutes = new Elysia({ prefix: '/todo' })
     {
       body: DeleteTodoSchema,
       detail: { tags: ['Todo'], summary: '할 일 삭제' },
+    },
+  )
+
+  // 첨부파일 목록 조회
+  .get(
+    '/:todoId/file',
+    async ({ user, params: { todoId }, todoService }) => {
+      const attachments = await todoService.getAttachments(
+        Number(todoId),
+        Number(user.id),
+      );
+      return attachments;
+    },
+    {
+      params: t.Object({ todoId: t.Number() }),
+      response: t.Array(FileAttachmentResponseSchema),
+      detail: { tags: ['Todo'], summary: '첨부파일 목록 조회' },
     },
   )
 

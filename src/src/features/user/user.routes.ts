@@ -9,6 +9,8 @@ import {
   UpdateUserSchema,
   ChangePasswordSchema,
   ProfileImageUploadSchema,
+  LoginResponseSchema,
+  DuplicateCheckResponseSchema,
   UserResponseSchema,
   LoginDto,
   RegisterDto,
@@ -58,6 +60,7 @@ export const userRoutes = new Elysia({ prefix: '/user' })
       return { isDuplicated };
     },
     {
+      response: DuplicateCheckResponseSchema,
       detail: {
         tags: ['User'],
         summary: '아이디 중복 체크',
@@ -111,6 +114,7 @@ export const userRoutes = new Elysia({ prefix: '/user' })
     },
     {
       body: LoginSchema,
+      response: LoginResponseSchema,
       detail: {
         tags: ['User'],
         summary: '로그인',
@@ -138,6 +142,7 @@ export const userRoutes = new Elysia({ prefix: '/user' })
       return userService.toUserResponse(publicUser);
     },
     {
+      response: UserResponseSchema,
       detail: {
         tags: ['User'],
         summary: '내 프로필 조회',
@@ -161,6 +166,7 @@ export const userRoutes = new Elysia({ prefix: '/user' })
     },
     {
       body: UpdateUserSchema,
+      response: UserResponseSchema,
       detail: {
         tags: ['User'],
         summary: '내 정보 수정',

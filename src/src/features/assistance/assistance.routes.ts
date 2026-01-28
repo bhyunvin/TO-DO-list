@@ -4,7 +4,11 @@ import { databasePlugin } from '../../plugins/database';
 import { AssistanceService } from './assistance.service';
 import { TodoService } from '../todo/todo.service';
 import { CloudinaryService } from '../../fileUpload/cloudinary.service';
-import { ChatRequestSchema, ChatRequestDto } from './assistance.schema';
+import {
+  ChatRequestSchema,
+  ChatRequestDto,
+  ChatResponseSchema,
+} from './assistance.schema';
 
 // 헬퍼 함수: 요청에서 IP 추출
 const getClientIp = (req: Request): string => {
@@ -41,6 +45,7 @@ export const assistanceRoutes = new Elysia({ prefix: '/assistance' })
     },
     {
       body: ChatRequestSchema,
+      response: ChatResponseSchema,
       detail: {
         tags: ['Assistance'],
         summary: 'AI 채팅 요청',

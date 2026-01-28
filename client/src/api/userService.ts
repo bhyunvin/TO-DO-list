@@ -1,50 +1,75 @@
-import apiClient from './apiClient';
+import { api, ApiError } from './client';
+
+// Eden Treaty 타입 추론
+const userApi = api.user;
 
 const userService = {
   /**
    * 사용자 프로필 가져오기
-   * @returns {Promise<object>}
    */
   async getProfile() {
-    const response = await apiClient.get('/user/profile');
-    return response.data;
+    const { data, error } = await userApi.profile.get();
+    if (error) {
+      throw new ApiError(
+        typeof error.value === 'string' ? error.value : '프로필 조회 실패',
+        Number(error.status),
+        error.value,
+      );
+    }
+    return data;
   },
 
   /**
    * 사용자 상세 프로필 가져오기 (암호화 해제된 전체 정보)
-   * @returns {Promise<object>}
    */
   async getUserProfileDetail() {
-    const response = await apiClient.get('/user/profile/detail');
-    return response.data;
+    const { data, error } = await userApi.profile.get();
+    if (error) {
+      throw new ApiError(
+        typeof error.value === 'string' ? error.value : '프로필 상세 조회 실패',
+        Number(error.status),
+        error.value,
+      );
+    }
+    return data;
   },
 
   /**
    * 사용자 프로필 업데이트
-   * @param {FormData} formData
-   * @returns {Promise<object>}
    */
-  async updateProfile(formData) {
-    const response = await apiClient.patch('/user/profile', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+  async updateProfile(formData: FormData) {
+    const payload: Record<string, any> = {};
+    formData.forEach((value, key) => {
+      payload[key] = value;
     });
-    return response.data;
+
+    const { data: result, error: err } = await userApi.update.patch(payload);
+    if (err) {
+      throw new ApiError(
+        typeof err.value === 'string' ? err.value : '프로필 수정 실패',
+        Number(err.status),
+        err.value,
+      );
+    }
+    return result;
   },
 
   /**
    * 비밀번호 변경
-   * @param {string} currentPassword
-   * @param {string} newPassword
-   * @returns {Promise<object>}
    */
   async changePassword(currentPassword, newPassword) {
-    const response = await apiClient.post('/user/change-password', {
+    const { data, error } = await userApi['change-password'].patch({
       currentPassword,
       newPassword,
     });
-    return response.data;
+    if (error) {
+      throw new ApiError(
+        typeof error.value === 'string' ? error.value : '비밀번호 변경 실패',
+        Number(error.status),
+        error.value,
+      );
+    }
+    return data;
   },
 };
 

@@ -4,7 +4,7 @@ import 'sweetalert2/dist/sweetalert2.min.css';
 import { BsPaperclip } from '@react-icons/all-files/bs/BsPaperclip';
 import { BsX } from '@react-icons/all-files/bs/BsX';
 import todoService from '../api/todoService';
-import { API_URL } from '../api/apiClient';
+import { API_URL } from '../api/client';
 import { useFileUploadValidator } from '../hooks/useFileUploadValidator';
 import {
   showConfirmAlert,
