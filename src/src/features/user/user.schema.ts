@@ -13,12 +13,18 @@ export type LoginDto = Static<typeof LoginSchema>;
  * 회원가입 스키마
  */
 export const RegisterSchema = t.Object({
-  userId: t.String({ minLength: 1, maxLength: 40, description: '사용자 아이디' }),
+  userId: t.String({
+    minLength: 1,
+    maxLength: 40,
+    description: '사용자 아이디',
+  }),
   userEmail: t.String({ format: 'email', description: '이메일' }),
   userPw: t.String({ minLength: 8, description: '비밀번호' }),
   userName: t.String({ minLength: 1, maxLength: 40, description: '사용자명' }),
   userDescription: t.Optional(t.String({ description: '사용자 설명' })),
-  privacyAgreed: t.Optional(t.Boolean({ description: '개인정보 수집 이용 동의' })),
+  privacyAgreed: t.Optional(
+    t.Boolean({ description: '개인정보 수집 이용 동의' }),
+  ),
 });
 export type RegisterDto = Static<typeof RegisterSchema>;
 

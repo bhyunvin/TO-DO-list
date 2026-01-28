@@ -1,5 +1,11 @@
 import { AuditColumns } from '../utils/auditColumns';
-import { Entity, Column, PrimaryColumn, PrimaryGeneratedColumn, Index } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryColumn,
+  PrimaryGeneratedColumn,
+  Index,
+} from 'typeorm';
 
 @Entity('nj_file_info')
 @Index('IX_NJ_FILE_INFO_GROUP_NO', ['fileGroupNo'])

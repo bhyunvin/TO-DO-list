@@ -102,7 +102,14 @@ export class UserService {
     await queryRunner.startTransaction();
 
     try {
-      const { userId, userEmail, userPw, userName, userDescription, privacyAgreed } = registerDto;
+      const {
+        userId,
+        userEmail,
+        userPw,
+        userName,
+        userDescription,
+        privacyAgreed,
+      } = registerDto;
 
       // 1. 이메일 암호화 및 중복 확인
       const encryptedEmail = await encryptSymmetricDeterministic(userEmail);

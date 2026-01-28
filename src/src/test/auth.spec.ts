@@ -6,7 +6,6 @@ const TEST_EMAIL = `test_${Date.now()}@example.com`;
 const TEST_PASSWORD = 'password123!';
 const TEST_NAME = '테스트유저';
 
-
 describe('Auth Controller (E2E)', () => {
   it('POST /user/register - 회원가입 성공', async () => {
     registeredUserId = `testuser_${Date.now()}`; // 여기서 사용자 ID 할당
