@@ -1,4 +1,6 @@
 import { Elysia } from 'elysia';
+import { cron } from '@elysiajs/cron';
+import 'croner';
 import 'jose';
 import { staticPlugin } from '@elysiajs/static';
 
@@ -6,7 +8,7 @@ import { corsPlugin } from './plugins/cors';
 import { loggerPlugin } from './plugins/logger';
 import { dbLoggingPlugin } from './plugins/db-logging';
 import { configPlugin, env } from './plugins/config';
-import { databasePlugin } from './plugins/database';
+import { databasePlugin, dataSource } from './plugins/database';
 import { jwtPlugin } from './plugins/jwt';
 import { swaggerPlugin } from './plugins/swagger';
 
@@ -156,26 +158,24 @@ const app = new Elysia()
     },
   })
 
-  // 서버 생명주기 훅: 시작 시 스케줄러 등록
-  .onStart(({ decorator }) => {
-    /**
-     * 로그 스케줄러 초기화 및 등록
-     *
-     * 데이터베이스 플러그인이 실행된 후 스케줄러를 시작하여
-     * DB 연결이 완료된 상태에서 스케줄링 작업을 수행합니다.
-     */
-    const loggingScheduler = new LoggingScheduler(decorator.db);
-
-    // 매일 자정에 실행 (24시간 = 24 * 60 * 60 * 1000ms)
-    setInterval(
-      () => {
-        loggingScheduler.cleanupOldLogsAndAnonymizeIp();
+  // Cron 스케줄러 등록
+  .use(
+    cron({
+      name: 'log-cleanup',
+      pattern: '0 0 * * *', // 매일 자정 실행
+      async run() {
+        // Scheduler 인스턴스 생성 (dataSource 주입)
+        const loggingScheduler = new LoggingScheduler(dataSource);
+        await loggingScheduler.cleanupOldLogsAndAnonymizeIp();
       },
-      24 * 60 * 60 * 1000,
-    );
+    }),
+  )
 
-    // 서버 시작 5초 후 한 번 실행 (백그라운드)
+  // 서버 생명주기 훅
+  .onStart(() => {
+    // 서버 시작 5초 후 한 번 실행 (초기 정리)
     setTimeout(() => {
+      const loggingScheduler = new LoggingScheduler(dataSource);
       loggingScheduler.cleanupOldLogsAndAnonymizeIp();
     }, 5000);
 
