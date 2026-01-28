@@ -27,10 +27,10 @@ TO-DO List 애플리케이션의 프론트엔드 클라이언트입니다. React
 ## 기술 스택
 
 - **프레임워크**: React 19.1.1
-- **빌드 도구**: Create React App 5.0.1
+- **빌드 도구**: Vite
 - **UI 라이브러리**: React Bootstrap 2.10+ with Bootstrap 5.3+
 - **상태 관리**: Zustand 5.0.8
-- **HTTP 클라이언트**: Elysia Treaty (End-to-End Type Safety), Axios (Legacy)
+- **HTTP 클라이언트**: Elysia Treaty (End-to-End Type Safety)
 - **알림**: SweetAlert2 11.22.5
 - **날짜 처리**: date-fns 4.1.0, react-datepicker 8.7.0
 - **보안**: DOMPurify 3.3.0
@@ -46,31 +46,31 @@ client/
 │   ├── index.html
 │   └── favicon.ico
 ├── src/
-│   ├── index.js                # 애플리케이션 진입점
-│   ├── App.js                  # 메인 애플리케이션 컴포넌트
+│   ├── index.tsx               # 애플리케이션 진입점
+│   ├── App.tsx                 # 메인 애플리케이션 컴포넌트
 │   ├── App.css                 # 전역 스타일
 │   ├── loginForm/              # 로그인/회원가입
-│   │   ├── LoginForm.js
-│   │   ├── SignupForm.js
+│   │   ├── LoginForm.tsx
+│   │   ├── SignupForm.tsx
 │   │   └── loginForm.css
 │   ├── todoList/               # Todo 관리
-│   │   ├── TodoList.js
+│   │   ├── TodoList.tsx
 │   │   └── todoList.css
 │   ├── components/             # 재사용 가능한 컴포넌트
-│   │   ├── ChatComponent.js
-│   │   ├── FileUploadComponent.js
-│   │   ├── ProfileComponent.js
-│   │   ├── FloatingActionButton.js
+│   │   ├── ChatComponent.tsx
+│   │   ├── FileUploadComponent.tsx
+│   │   ├── ProfileComponent.tsx
+│   │   ├── FloatingActionButton.tsx
 │   │   └── *.css
 │   ├── authStore/              # Zustand 인증 상태 (JWT 관리)
-│   │   └── authStore.js
+│   │   └── authStore.ts
 │   ├── stores/                 # 추가 Zustand 스토어
-│   │   └── chatStore.js
+│   │   └── chatStore.ts
 │   ├── hooks/                  # 커스텀 React 훅
-│   │   ├── useScrollLock.js
-│   │   ├── useFileUpload.js
-│   │   └── useSecureImage.js   # JWT 기반 보안 이미지 로더
-│   └── setupProxy.js           # 개발 프록시 설정
+│   │   ├── useScrollLock.ts
+│   │   ├── useFileUpload.ts
+│   │   └── useSecureImage.ts   # JWT 기반 보안 이미지 로더
+│   └── vite.config.ts          # Vite 설정
 └── package.json
 ```
 
@@ -108,8 +108,8 @@ bun run dev
 # 프로덕션 빌드
 bun run build
 
-# 빌드된 애플리케이션 테스트 (serve 필요)
-bunx serve -s build
+# 빌드된 애플리케이션 미리보기
+bun run preview
 ```
 
 개발 서버가 시작되면 브라우저에서 애플리케이션을 확인할 수 있습니다.
@@ -124,7 +124,7 @@ bun test
 bun test -- --coverage
 
 # 특정 테스트 파일 실행
-bun test -- LoginForm.test.js
+bun test -- LoginForm.test.tsx
 ```
 
 ## 코드 품질
@@ -139,7 +139,7 @@ bun run lint -- --fix
 
 ## 주요 컴포넌트
 
-### App.js
+### App.tsx
 
 - 메인 애플리케이션 컴포넌트
 - 인증 상태에 따른 라우팅
@@ -200,16 +200,6 @@ bun run lint -- --fix
 
 **Elysia Treaty**를 사용하여 백엔드와 완벽한 타입 안전성을 보장하는 API 통신을 수행합니다.
 
-### Axios & Proxy
-
-기존 코드 호환성을 위해 Axios와 `setupProxy.js`도 유지되고 있습니다.
-
-### Axios 설정
-
-- 요청 인터셉터: `Authorization: Bearer <token>` 헤더 자동 주입
-- 에러 처리 인터셉터 (401 시 자동 로그아웃)
-- 응답 데이터 변환
-
 **보안 참고**: 프로덕션 환경에서는 적절한 CORS 설정과 API 엔드포인트를 구성하세요.
 
 ## 스타일링
@@ -251,7 +241,7 @@ bun run lint -- --fix
 bun run build
 ```
 
-빌드된 파일은 `build/` 디렉토리에 생성됩니다.
+빌드된 파일은 `dist/` 디렉토리에 생성됩니다.
 
 ### 배포
 
@@ -268,7 +258,7 @@ bun run build
 ### 프록시 오류
 
 - 백엔드 서버가 실행 중인지 확인 (포트 3001)
-- `setupProxy.js` 설정 확인
+- `vite.config.ts` 설정 확인
 
 ### 빌드 오류
 
@@ -281,11 +271,7 @@ bun run build
 - Bootstrap CSS가 올바르게 임포트되었는지 확인
 - 브라우저 캐시 정리
 
-## Create React App 정보
 
-이 프로젝트는 [Create React App](https://github.com/facebook/create-react-app)으로 부트스트랩되었습니다.
-
-더 자세한 정보는 [Create React App 문서](https://facebook.github.io/create-react-app/docs/getting-started)를 참조하세요.
 
 ## 라이선스
 
@@ -322,10 +308,10 @@ Frontend client for the TO-DO List application. Built with React 19 and React Bo
 ## Technology Stack
 
 - **Framework**: React 19.1.1
-- **Build Tool**: Create React App 5.0.1
+- **Build Tool**: Vite
 - **UI Library**: React Bootstrap 2.10+ with Bootstrap 5.3+
 - **State Management**: Zustand 5.0.8
-- **HTTP Client**: Elysia Treaty (End-to-End Type Safety), Axios (Legacy)
+- **HTTP Client**: Elysia Treaty (End-to-End Type Safety)
 - **Notifications**: SweetAlert2 11.22.5
 - **Date Handling**: date-fns 4.1.0, react-datepicker 8.7.0
 - **Security**: DOMPurify 3.3.0
@@ -341,31 +327,31 @@ client/
 │   ├── index.html
 │   └── favicon.ico
 ├── src/
-│   ├── index.js                # Application entry point
-│   ├── App.js                  # Main application component
+│   ├── index.tsx               # Application entry point
+│   ├── App.tsx                 # Main application component
 │   ├── App.css                 # Global styles
 │   ├── loginForm/              # Login/signup
-│   │   ├── LoginForm.js
-│   │   ├── SignupForm.js
+│   │   ├── LoginForm.tsx
+│   │   ├── SignupForm.tsx
 │   │   └── loginForm.css
 │   ├── todoList/               # Todo management
-│   │   ├── TodoList.js
+│   │   ├── TodoList.tsx
 │   │   └── todoList.css
 │   ├── components/             # Reusable components
-│   │   ├── ChatComponent.js
-│   │   ├── FileUploadComponent.js
-│   │   ├── ProfileComponent.js
-│   │   ├── FloatingActionButton.js
+│   │   ├── ChatComponent.tsx
+│   │   ├── FileUploadComponent.tsx
+│   │   ├── ProfileComponent.tsx
+│   │   ├── FloatingActionButton.tsx
 │   │   └── *.css
 │   ├── authStore/              # Zustand auth state (JWT management)
-│   │   └── authStore.js
+│   │   └── authStore.ts
 │   ├── stores/                 # Additional Zustand stores
-│   │   └── chatStore.js
+│   │   └── chatStore.ts
 │   ├── hooks/                  # Custom React hooks
-│   │   ├── useScrollLock.js
-│   │   ├── useFileUpload.js
-│   │   └── useSecureImage.js   # JWT-based secure image loader
-│   └── setupProxy.js           # Development proxy configuration
+│   │   ├── useScrollLock.ts
+│   │   ├── useFileUpload.ts
+│   │   └── useSecureImage.ts   # JWT-based secure image loader
+│   └── vite.config.ts          # Vite configuration
 └── package.json
 ```
 
@@ -403,8 +389,8 @@ bun run dev
 # Production build
 bun run build
 
-# Test built application (requires serve)
-bunx serve -s build
+# Test built application
+bun run preview
 ```
 
 Once the development server starts, you can view the application in your browser.
@@ -419,7 +405,7 @@ bun test
 bun test -- --coverage
 
 # Run specific test file
-bun test -- LoginForm.test.js
+bun test -- LoginForm.test.tsx
 ```
 
 ## Code Quality
@@ -434,7 +420,7 @@ bun run lint -- --fix
 
 ## Main Components
 
-### App.js
+### App.tsx
 
 - Main application component
 - Routing based on authentication state
@@ -495,16 +481,6 @@ bun run lint -- --fix
 
 Uses **Elysia Treaty** for end-to-end type-safe API communication with the backend.
 
-### Axios & Proxy
-
-Axios and `setupProxy.js` are maintained for backward compatibility.
-
-### Axios Configuration
-
-- Request Interceptor: Auto-injection of `Authorization: Bearer <token>`
-- Error handling interceptors (Auto-logout on 401)
-- Response data transformation
-
 **Security Note**: Configure appropriate CORS settings and API endpoints in production.
 
 ## Styling
@@ -546,7 +522,7 @@ Axios and `setupProxy.js` are maintained for backward compatibility.
 bun run build
 ```
 
-Built files are generated in the `build/` directory.
+Built files are generated in the `dist/` directory.
 
 ### Deployment
 
@@ -563,7 +539,7 @@ Deploy built files to a static file server:
 ### Proxy Error
 
 - Verify backend server is running (port 3001)
-- Check `setupProxy.js` configuration
+- Check `vite.config.ts` configuration
 
 ### Build Error
 
@@ -576,11 +552,7 @@ Deploy built files to a static file server:
 - Verify Bootstrap CSS is properly imported
 - Clear browser cache
 
-## Create React App Information
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
-
-For more information, refer to the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
 ## License
 

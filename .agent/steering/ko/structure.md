@@ -5,7 +5,7 @@
 ```
 myTodoApp/
 ├── client/              # React 프론트엔드 애플리케이션
-├── src/                 # NestJS 백엔드 애플리케이션
+├── src/                 # ElysiaJS 백엔드 애플리케이션
 ├── node_modules/        # 루트 의존성
 ├── package.json         # 워크스페이스 구성
 └── .nvmrc              # Node 버전 명세
@@ -35,8 +35,8 @@ myTodoApp/
 ## 프론트엔드 구조 (`client/`)
 
 ### 핵심 애플리케이션
-- `src/App.js` - 인증 라우팅을 포함한 메인 애플리케이션 컴포넌트
-- `src/index.js` - React 애플리케이션 진입점
+- `src/App.tsx` - 인증 라우팅을 포함한 메인 애플리케이션 컴포넌트
+- `src/index.tsx` - React 애플리케이션 진입점
 
 ### 기능 컴포넌트
 - `src/loginForm/` - 인증 폼 (로그인/회원가입)
@@ -47,7 +47,7 @@ myTodoApp/
 - `src/hooks/` - 커스텀 React 훅 (스크롤 잠금, 파일 업로드)
 
 ### 구성
-- `src/setupProxy.js` - API 호출을 위한 개발 프록시 구성
+- `vite.config.ts` - Vite 구성
 - `public/` - 정적 자산 및 HTML 템플릿
 
 ## 명명 규칙
@@ -76,7 +76,7 @@ myTodoApp/
 ### 프론트엔드 패턴
 - **컴포넌트 조합** - 작고 집중된 React 컴포넌트
 - **전역 상태 관리** - 인증, 채팅, 테마 상태를 위한 Zustand
-- **프록시 패턴** - setupProxy.js를 통한 개발 API 프록시
+- **타입 안전성** - Elysia Treaty를 통한 엔드투엔드 타입 보장
 - **조건부 렌더링** - 인증 기반 컴포넌트 전환
 - **CSS Custom Properties** - CSS 변수를 사용한 동적 테마 적용
 
@@ -84,7 +84,7 @@ myTodoApp/
 - 관련 파일을 기능 디렉토리에 그룹화
 - 공유 유틸리티를 전용 `utils/` 디렉토리에 보관
 - 적절한 레벨에서 구성 파일 분리
-- 일관된 파일 확장자 사용 (백엔드는 `.ts`, 프론트엔드는 `.js`)
+- 일관된 파일 확장자 사용 (백엔드는 `.ts`, 프론트엔드는 `.tsx`/`.ts`)
 
 ## 코드 주석 작성 가이드라인
 - **모든 코드 주석은 한글로 작성**해야 하며, 문법상 필요한 요소만 예외

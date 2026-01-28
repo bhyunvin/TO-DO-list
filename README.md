@@ -39,10 +39,10 @@
 - **스케줄러**: cron jobs
 
 ### 프론트엔드 (React)
-- **프레임워크**: React 19 with Create React App
+- **프레임워크**: React 19 with Vite
 - **UI 라이브러리**: React Bootstrap 2.10+ with Bootstrap 5.3+
 - **상태 관리**: Zustand
-- **HTTP 클라이언트**: Axios
+- **HTTP 클라이언트**: Elysia Treaty (End-to-End Type Safety)
 - **알림**: SweetAlert2
 - **날짜 처리**: date-fns, react-datepicker
 - **보안**: DOMPurify
@@ -59,14 +59,14 @@
 myTodoApp/
 ├── client/                      # React 프론트엔드 애플리케이션
 │   ├── src/
-│   │   ├── App.js              # 메인 애플리케이션 컴포넌트
+│   │   ├── App.tsx             # 메인 애플리케이션 컴포넌트
 │   │   ├── loginForm/          # 로그인/회원가입 폼
 │   │   ├── todoList/           # Todo 관리 인터페이스
 │   │   ├── components/         # 재사용 가능한 컴포넌트
-│   │   │   ├── ChatComponent.js
-│   │   │   ├── FileUploadComponent.js
-│   │   │   ├── ProfileComponent.js
-│   │   │   └── FloatingActionButton.js
+│   │   │   ├── ChatComponent.tsx
+│   │   │   ├── FileUploadComponent.tsx
+│   │   │   ├── ProfileComponent.tsx
+│   │   │   └── FloatingActionButton.tsx
 │   │   ├── authStore/          # Zustand 인증 상태
 │   │   ├── stores/             # 추가 Zustand 스토어
 │   │   └── hooks/              # 커스텀 React 훅
@@ -238,7 +238,7 @@ bun test
 ### 프론트엔드
 - **컴포넌트 조합**: 작고 집중된 React 컴포넌트
 - **전역 상태 관리**: Zustand를 사용한 인증 및 채팅 상태
-- **프록시 패턴**: setupProxy.js를 통한 개발 API 프록시
+- **타입 안전성**: Elysia Treaty를 통한 End-to-End 타입 보장
 - **조건부 렌더링**: 인증 기반 컴포넌트 전환
 
 ## 코드 주석 작성 가이드라인
@@ -306,10 +306,10 @@ A full-stack TO-DO List application built with modern web technologies. Provides
 - **Scheduler**: cron jobs
 
 ### Frontend (React)
-- **Framework**: React 19 with Create React App
+- **Framework**: React 19 with Vite
 - **UI Library**: React Bootstrap 2.10+ with Bootstrap 5.3+
 - **State Management**: Zustand
-- **HTTP Client**: Axios
+- **HTTP Client**: Elysia Treaty (End-to-End Type Safety)
 - **Notifications**: SweetAlert2
 - **Date Handling**: date-fns, react-datepicker
 - **Security**: DOMPurify
@@ -326,14 +326,14 @@ A full-stack TO-DO List application built with modern web technologies. Provides
 myTodoApp/
 ├── client/                      # React frontend application
 │   ├── src/
-│   │   ├── App.js              # Main application component
+│   │   ├── App.tsx             # Main application component
 │   │   ├── loginForm/          # Login/signup forms
 │   │   ├── todoList/           # Todo management interface
 │   │   ├── components/         # Reusable components
-│   │   │   ├── ChatComponent.js
-│   │   │   ├── FileUploadComponent.js
-│   │   │   ├── ProfileComponent.js
-│   │   │   └── FloatingActionButton.js
+│   │   │   ├── ChatComponent.tsx
+│   │   │   ├── FileUploadComponent.tsx
+│   │   │   ├── ProfileComponent.tsx
+│   │   │   └── FloatingActionButton.tsx
 │   │   ├── authStore/          # Zustand auth state
 │   │   ├── stores/             # Additional Zustand stores
 │   │   └── hooks/              # Custom React hooks
@@ -506,7 +506,7 @@ bun test
 ### Frontend
 - **Component composition**: Small, focused React components
 - **Global state management**: Zustand for authentication and chat state
-- **Proxy pattern**: Development API proxy via setupProxy.js
+- **Type Safety**: End-to-End type safety via Elysia Treaty
 - **Conditional rendering**: Auth-based component switching
 
 ## Code Comments Guidelines

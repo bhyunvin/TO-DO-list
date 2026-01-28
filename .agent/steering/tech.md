@@ -19,10 +19,10 @@
 - **Markdown Processing**: marked for markdown parsing, sanitize-html for XSS protection
 
 ## Frontend (React)
-- **Framework**: React 19 with Create React App
+- **Framework**: React 19 with Vite
 - **UI Library**: React Bootstrap 2.10+ with Bootstrap 5.3+
 - **State Management**: Zustand for global state (auth, chat, and theme)
-- **HTTP Client**: Axios (configured via setupProxy.js)
+- **HTTP Client**: Elysia Treaty (End-to-End Type Safety)
 - **Notifications**: SweetAlert2
 - **Date Handling**: date-fns and react-datepicker
 - **Security**: DOMPurify for HTML sanitization, PropTypes for type checking

@@ -19,10 +19,10 @@
 - **마크다운 처리**: 마크다운 파싱을 위한 marked, XSS 보호를 위한 sanitize-html
 
 ## 프론트엔드 (React)
-- **프레임워크**: Create React App을 사용하는 React 19
+- **프레임워크**: Vite를 사용하는 React 19
 - **UI 라이브러리**: Bootstrap 5.3+를 사용하는 React Bootstrap 2.10+
 - **상태 관리**: 전역 상태를 위한 Zustand (인증, 채팅, 테마)
-- **HTTP 클라이언트**: Axios (setupProxy.js를 통해 구성)
+- **HTTP 클라이언트**: Elysia Treaty (엔드투엔드 타입 안전성)
 - **알림**: SweetAlert2
 - **날짜 처리**: date-fns 및 react-datepicker
 - **보안**: HTML 새니타이제이션을 위한 DOMPurify, 타입 검사를 위한 PropTypes

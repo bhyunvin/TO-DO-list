@@ -5,7 +5,7 @@
 ```
 myTodoApp/
 ├── client/              # React frontend application
-├── src/                 # NestJS backend application  
+├── src/                 # ElysiaJS backend application  
 ├── node_modules/        # Root dependencies
 ├── package.json         # Workspace configuration
 └── .nvmrc              # Node version specification
@@ -35,8 +35,8 @@ myTodoApp/
 ## Frontend Structure (`client/`)
 
 ### Core Application
-- `src/App.js` - Main application component with auth routing
-- `src/index.js` - React application entry point
+- `src/App.tsx` - Main application component with auth routing
+- `src/index.tsx` - React application entry point
 
 ### Feature Components
 - `src/loginForm/` - Authentication forms (login/signup)
@@ -47,7 +47,7 @@ myTodoApp/
 - `src/hooks/` - Custom React hooks (scroll lock, file upload)
 
 ### Configuration
-- `src/setupProxy.js` - Development proxy configuration for API calls
+- `vite.config.ts` - Vite configuration
 - `public/` - Static assets and HTML template
 
 ## Naming Conventions
@@ -76,7 +76,7 @@ myTodoApp/
 ### Frontend Patterns
 - **Component composition** - Small, focused React components
 - **Global state management** - Zustand for authentication, chat, and theme state
-- **Proxy pattern** - Development API proxy via setupProxy.js
+- **Type Safety** - End-to-End type safety via Elysia Treaty
 - **Conditional rendering** - Auth-based component switching
 - **CSS Custom Properties** - Dynamic theming with CSS variables
 
@@ -84,7 +84,7 @@ myTodoApp/
 - Group related files in feature directories
 - Keep shared utilities in dedicated `utils/` directories
 - Separate configuration files at appropriate levels
-- Use consistent file extensions (`.ts` for backend, `.js` for frontend)
+- Use consistent file extensions (`.ts` for backend, `.tsx`/`.ts` for frontend)
 
 ## Code Comments Guidelines
 - **All code comments should be written in Korean**, except for syntax-required elements

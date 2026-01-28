@@ -3,12 +3,17 @@ import { api, ApiError } from './client';
 // Eden Treaty 타입 추론 우회
 const assistantApi = api.assistance;
 
+export interface ChatHistoryItem {
+  role: 'user' | 'model';
+  parts: { text: string }[];
+}
+
 const aiService = {
   /**
    * AI 비서에게 채팅 메시지 전송
    */
   chat: async (
-    data: { prompt: string; history?: any[] },
+    data: { prompt: string; history?: ChatHistoryItem[] },
     signal?: AbortSignal,
   ) => {
     // Treaty의 fetch 옵션을 통해 AbortSignal 전달

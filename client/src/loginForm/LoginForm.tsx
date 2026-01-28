@@ -42,9 +42,14 @@ const LoginForm = () => {
         String(password).trim(),
       );
 
-      // data 구조: { access_token, user }
-      if (!data?.access_token) {
-        showErrorAlert('로그인 실패', data.message || '다시 시도해 주세요.');
+      // data 구조: { accessToken, user }
+      if (!data?.accessToken) {
+        let errorMsg = '다시 시도해 주세요.';
+        if (data && typeof data === 'object' && 'message' in data) {
+          const msg = (data as { message: unknown }).message;
+          if (typeof msg === 'string') errorMsg = msg;
+        }
+        showErrorAlert('로그인 실패', errorMsg);
       }
     } catch (error) {
       console.error('LoginForm Login Error : ', error);

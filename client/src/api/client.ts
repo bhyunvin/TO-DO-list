@@ -47,10 +47,10 @@ export const API_URL = BASE_URL;
 export class ApiError extends Error {
   response: {
     status: number;
-    data: any;
+    data: unknown;
   };
 
-  constructor(message: string, status: number, data: any) {
+  constructor(message: string, status: number, data: unknown) {
     super(message);
     this.name = 'ApiError';
     this.response = { status, data };
