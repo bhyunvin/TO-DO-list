@@ -22,5 +22,8 @@ export const loggerPlugin = logger({
       ignore: 'pid,hostname',
     },
   },
-  autoLogging: true, // HTTP 요청 자동 로깅
+  autoLogging: {
+    ignore: (req) => req.method === 'OPTIONS', // OPTIONS 요청 무시
+  },
+  level: 'debug', // 기본 로그 레벨을 debug로 변경하여 일반 요청 로그 노이즈 감소
 });

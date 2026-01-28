@@ -34,7 +34,7 @@ export const dataSource = new DataSource({
   ],
   namingStrategy: new CustomNamingStrategy(),
   synchronize: false,
-  logging: true,
+  logging: env.NODE_ENV === 'production' ? ['error', 'warn'] : true,
 });
 
 /**
