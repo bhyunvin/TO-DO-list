@@ -9,6 +9,7 @@ import {
   FILE_VALIDATION_MESSAGES,
 } from './file-validation.constants';
 import { Logger } from '../../utils/logger';
+import { getClientIp } from '../../utils/ip.util';
 
 export interface MulterFile {
   fieldname: string;
@@ -272,7 +273,7 @@ export class FileUploadErrorService {
     const url = new URL(request.url);
 
     return {
-      clientIp: headers.get('x-forwarded-for') || 'unknown',
+      clientIp: getClientIp(request),
       userAgent: headers.get('user-agent') || 'unknown',
       userId,
       category,

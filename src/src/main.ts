@@ -2,8 +2,6 @@ import { Elysia } from 'elysia';
 import { cron } from '@elysiajs/cron';
 import 'croner';
 import 'jose';
-import { staticPlugin } from '@elysiajs/static';
-
 import { corsPlugin } from './plugins/cors';
 import { loggerPlugin } from './plugins/logger';
 import { dbLoggingPlugin } from './plugins/db-logging';
@@ -61,20 +59,6 @@ export const app = new Elysia()
   .use(jwtPlugin)
   .use(dbLoggingPlugin)
   .use(swaggerPlugin)
-  .use(
-    staticPlugin({
-      assets: './public',
-      prefix: '/static',
-    }),
-  )
-  .use(
-    env.NODE_ENV === 'production'
-      ? staticPlugin({
-          assets: '../client/dist',
-          prefix: '/',
-        })
-      : (app) => app,
-  )
   .onError(({ code, error, set, request }) => {
     let statusCode: number;
     let message: string;
@@ -152,9 +136,7 @@ export const app = new Elysia()
     }, 5000);
     logger.log('📅 로그 스케줄러가 등록되었습니다.');
   })
-  .get('*', () => {
-    return Bun.file('../client/dist/index.html');
-  });
+
 
 if (import.meta.main) {
   app.listen(env.PORT || 3001);

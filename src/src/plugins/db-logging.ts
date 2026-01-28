@@ -2,6 +2,7 @@ import { Elysia } from 'elysia';
 import { dataSource } from './database';
 import { LogEntity } from '../features/logging/log.entity';
 import { LoggingService } from '../features/logging/logging.service';
+import { getClientIp } from '../utils/ip.util';
 
 const loggingService = new LoggingService(dataSource.getRepository(LogEntity));
 
@@ -16,7 +17,7 @@ export const dbLoggingPlugin = new Elysia({
   const url = new URL(request.url);
   const path = url.pathname;
   const method = request.method;
-  const clientIp = request.headers.get('x-forwarded-for') || '127.0.0.1';
+  const clientIp = getClientIp(request);
 
   // 2. Status Code
   const statusCode = set.status ? Number(set.status) : 200;

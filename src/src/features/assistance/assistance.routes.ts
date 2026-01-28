@@ -10,10 +10,7 @@ import {
   ChatResponseSchema,
 } from './assistance.schema';
 
-// 헬퍼 함수: 요청에서 IP 추출
-const getClientIp = (req: Request): string => {
-  return req.headers.get('x-forwarded-for') || '127.0.0.1';
-};
+import { getClientIp } from '../../utils/ip.util';
 
 export const assistanceRoutes = new Elysia({ prefix: '/assistance' })
   .use(databasePlugin)
