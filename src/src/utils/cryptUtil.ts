@@ -1,5 +1,7 @@
-import { Logger } from '@nestjs/common';
 import { aessiv } from '@noble/ciphers/aes.js';
+import { Logger } from './logger';
+
+const logger = new Logger('CryptUtil');
 
 // Web Crypto API 전역 객체 타입 선언 (Bun/Node 19+)
 declare const crypto: Crypto;
@@ -89,7 +91,7 @@ export const encrypt = async (rawText: string): Promise<string> => {
     });
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
-    Logger.error(`Password hashing failed: ${errorMsg}`, 'CryptUtil');
+    logger.error(`Password hashing failed: ${errorMsg}`);
     throw new Error('Failed to hash password');
   }
 };
@@ -105,7 +107,7 @@ export const isHashValid = async (
     return await Bun.password.verify(rawText, hashedText, 'bcrypt');
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
-    Logger.error(`Password verification failed: ${errorMsg}`, 'CryptUtil');
+    logger.error(`Password verification failed: ${errorMsg}`);
     throw new Error('Failed to verify password');
   }
 };
@@ -152,7 +154,7 @@ export const encryptSymmetric = async (text: string): Promise<string> => {
     );
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
-    Logger.error(`Symmetric encryption failed: ${errorMsg}`, 'CryptUtil');
+    logger.error(`Symmetric encryption failed: ${errorMsg}`);
     throw new Error('Failed to encrypt data');
   }
 };
@@ -164,9 +166,15 @@ export const encryptSymmetric = async (text: string): Promise<string> => {
 export const decryptSymmetric = async (text: string): Promise<string> => {
   if (!text) return text;
 
+  // 암호화 포맷(IV:Tag:Ciphertext)이 아닌 경우 평문으로 간주하여 반환
+  if (text.split(':').length !== 3) {
+    return text;
+  }
+
   try {
     const textParts = text.split(':');
     if (textParts.length < 3) {
+      // 위에서 검증했으므로 도달하지 않음
       throw new Error('Invalid ciphertext format');
     }
 
@@ -201,7 +209,7 @@ export const decryptSymmetric = async (text: string): Promise<string> => {
     return new TextDecoder().decode(decrypted);
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
-    Logger.error(`Symmetric decryption failed: ${errorMsg}`, 'CryptUtil');
+    logger.error(`Symmetric decryption failed: ${errorMsg}`);
     throw new Error('Failed to decrypt data');
   }
 };
@@ -241,7 +249,7 @@ const getSivKey = (): Promise<Uint8Array> => {
     } catch (error) {
       _sivKeyPromise = null; // Reset promise on failure to allow retry
       const errorMsg = error instanceof Error ? error.message : String(error);
-      Logger.error(`SIV key derivation failed: ${errorMsg}`, 'CryptUtil');
+      logger.error(`SIV key derivation failed: ${errorMsg}`);
       throw new Error('Failed to derive SIV key');
     }
   })();
@@ -271,7 +279,7 @@ export const encryptSymmetricDeterministic = async (
     return bytesToHex(encrypted);
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
-    Logger.error(`Deterministic encryption failed: ${errorMsg}`, 'CryptUtil');
+    logger.error(`Deterministic encryption failed: ${errorMsg}`);
     throw new Error('Failed to encrypt data deterministically');
   }
 };
@@ -285,6 +293,11 @@ export const decryptSymmetricDeterministic = async (
 ): Promise<string> => {
   if (!text) return text;
 
+  // 유효한 Hex 문자열이 아닌 경우 평문으로 간주하여 그대로 반환
+  if (!/^[0-9a-fA-F]*$/.test(text) || text.length % 2 !== 0) {
+    return text;
+  }
+
   try {
     const key = await getSivKey();
     const siv = aessiv(key);
@@ -292,7 +305,9 @@ export const decryptSymmetricDeterministic = async (
     return new TextDecoder().decode(decrypted);
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
-    Logger.error(`Deterministic decryption failed: ${errorMsg}`, 'CryptUtil');
-    throw new Error('Failed to decrypt data deterministically');
+    logger.error(`Deterministic decryption failed: ${errorMsg}`);
+    // 복호화 실패 시 원문 반환 (혹은 에러 throw)
+    // 여기서는 데이터 호환성을 위해 에러 로그만 남기고 원문 반환 시도
+    return text;
   }
 };

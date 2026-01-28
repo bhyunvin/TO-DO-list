@@ -1,16 +1,21 @@
 # 기술 스택
 
-## 백엔드 (NestJS)
-- **프레임워크**: Express 어댑터를 사용하는 NestJS
+## 백엔드 (ElysiaJS)
+- **프레임워크**: ElysiaJS
+- **런타임**: Bun (Node.js 호환)
 - **언어**: TypeScript
 - **데이터베이스**: TypeORM을 사용하는 PostgreSQL
 - **인증**: Bun.password (bcrypt 알고리즘)를 사용하는 JWT (stateless)
+- **로깅**: HTTP 및 애플리케이션 로그를 위한 통합 로거 Pino with pino-pretty
+- **에러 처리**: 필드별 에러 메시지를 제공하는 클라이언트 친화적인 검증 에러 응답
 - **보안**: 안전한 자격 증명 저장을 위한 환경 변수, 데이터 암호화를 위한 AES-256-GCM (Synthetic IV를 사용하는 AES-SIV 결정적 암호화 포함)
 - **AI 통합**: 함수 호출 기능을 갖춘 Google Gemini API
+- **API 통신**: Elysia Treaty (엔드투엔드 타입 안전성)
 - **파일 스토리지**: Cloudinary 클라우드 스토리지
-- **파일 업로드**: multipart form 처리를 위한 Multer
+- **정적 파일**: 정적 자산 서빙을 위한 @elysiajs/static
 - **메일 서비스**: Nodemailer (Gmail)
-- **스케줄러**: cron jobs를 위한 @nestjs/schedule (IP 익명화, 토큰 정리)
+- **스케줄러**: cron jobs (IP 익명화, 토큰 정리)
+- **테스트**: Bun 네이티브 테스트 (Bun.test 및 fetch API)
 - **마크다운 처리**: 마크다운 파싱을 위한 marked, XSS 보호를 위한 sanitize-html
 
 ## 프론트엔드 (React)
@@ -37,10 +42,10 @@
 # 프론트엔드와 백엔드 모두 시작
 bun start
 
-# 백엔드만 시작
+# 백엔드만 시작 (Elysia)
 bun run start:server
 
-# 프론트엔드만 시작
+# 프론트엔드만 시작 (React)
 bun run start:client
 
 # 두 애플리케이션 모두 빌드
@@ -50,10 +55,11 @@ bun run build
 ### 백엔드 전용 (src/ 디렉토리에서)
 ```bash
 # 핫 리로드를 사용한 개발
-bun run start:dev
+bun dev
 
-# 프로덕션 빌드
+# 프로덕션 빌드 및 실행
 bun run build
+bun start
 
 # 테스트 실행
 bun test

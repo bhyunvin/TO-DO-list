@@ -1,5 +1,3 @@
-import { Injectable, Logger } from '@nestjs/common';
-import type { Request } from 'express';
 import { extname } from 'node:path';
 import {
   FileValidationError,
@@ -10,33 +8,37 @@ import {
   FILE_VALIDATION_ERRORS,
   FILE_VALIDATION_MESSAGES,
 } from './file-validation.constants';
+import { Logger } from '../../utils/logger';
 
-/**
- * 파일 업로드를 위한 표준화된 에러 응답 형식
- */
+export interface MulterFile {
+  fieldname: string;
+  originalname: string;
+  encoding: string;
+  mimetype: string;
+  size: number;
+  destination: string;
+  filename: string;
+  path: string;
+  buffer: Buffer;
+}
+
 export interface FileUploadErrorResponse {
   success: false;
   message: string;
   errors: FileValidationError[];
-  uploadedFiles?: any[];
+  uploadedFiles?: MulterFile[];
   timestamp: string;
   requestId?: string;
 }
 
-/**
- * 파일 업로드를 위한 성공 응답 형식
- */
 export interface FileUploadSuccessResponse {
   success: true;
   message: string;
-  uploadedFiles: any[];
+  uploadedFiles: MulterFile[];
   timestamp: string;
   requestId?: string;
 }
 
-/**
- * 보안 및 디버깅을 위한 에러 로깅 컨텍스트
- */
 export interface ErrorLogContext {
   clientIp: string;
   userAgent: string;
@@ -46,10 +48,6 @@ export interface ErrorLogContext {
   endpoint: string;
 }
 
-/**
- * 표준화된 응답 및 로깅으로 파일 업로드 에러를 처리하는 서비스
- */
-@Injectable()
 export class FileUploadErrorService {
   private readonly logger = new Logger(FileUploadErrorService.name);
 
@@ -59,7 +57,7 @@ export class FileUploadErrorService {
   createErrorResponse(
     errors: FileValidationError[],
     message?: string,
-    uploadedFiles?: any[],
+    uploadedFiles?: MulterFile[],
     requestId?: string,
   ): FileUploadErrorResponse {
     return {
@@ -76,7 +74,7 @@ export class FileUploadErrorService {
    * 파일 업로드를 위한 표준화된 성공 응답 생성
    */
   createSuccessResponse(
-    uploadedFiles: any[],
+    uploadedFiles: MulterFile[],
     message?: string,
     requestId?: string,
   ): FileUploadSuccessResponse {
@@ -177,7 +175,7 @@ export class FileUploadErrorService {
    * 차단된 파일 시도에 대한 보안 이벤트 로깅
    */
   logSecurityEvent(
-    files: Express.Multer.File[],
+    files: File[],
     errors: FileValidationError[],
     context: ErrorLogContext,
   ): void {
@@ -190,26 +188,25 @@ export class FileUploadErrorService {
     }
 
     securityErrors.forEach(({ fileName, fileType, fileSize }) => {
-      this.logger.warn(`보안 경고: 차단된 파일 형식 업로드 시도`, {
-        fileName,
-        fileType,
-        fileSize,
-        clientIp: context.clientIp,
-        userAgent: context.userAgent,
-        userId: context.userId,
-        category: context.category,
-        endpoint: context.endpoint,
-        requestId: context.requestId,
-        timestamp: new Date().toISOString(),
-      });
+      this.logger.warn(
+        `보안 경고: 차단된 파일 형식 업로드 시도`,
+        JSON.stringify({
+          fileName,
+          fileType,
+          fileSize,
+          clientIp: context.clientIp,
+          userAgent: context.userAgent,
+          userId: context.userId,
+          category: context.category,
+          endpoint: context.endpoint,
+          requestId: context.requestId,
+        }),
+      );
     });
   }
 
-  /**
-   * 디버깅을 위한 검증 에러 로깅
-   */
   logValidationErrors(
-    files: Express.Multer.File[],
+    files: File[],
     errors: FileValidationError[],
     context: ErrorLogContext,
   ): void {
@@ -221,44 +218,45 @@ export class FileUploadErrorService {
       return;
     }
 
-    this.logger.warn(`${nonSecurityErrors.length}개 파일 검증 실패`, {
-      errors: nonSecurityErrors.map(
-        ({ fileName, errorCode, fileSize, fileType }) => ({
-          fileName,
-          errorCode,
-          fileSize,
-          fileType,
-        }),
-      ),
-      clientIp: context.clientIp,
-      userAgent: context.userAgent,
-      userId: context.userId,
-      category: context.category,
-      endpoint: context.endpoint,
-      requestId: context.requestId,
-      timestamp: new Date().toISOString(),
-    });
+    this.logger.warn(
+      `${nonSecurityErrors.length}개 파일 검증 실패`,
+      JSON.stringify({
+        errors: nonSecurityErrors.map(
+          ({ fileName, errorCode, fileSize, fileType }) => ({
+            fileName,
+            errorCode,
+            fileSize,
+            fileType,
+          }),
+        ),
+        clientIp: context.clientIp,
+        userAgent: context.userAgent,
+        userId: context.userId,
+        category: context.category,
+        endpoint: context.endpoint,
+        requestId: context.requestId,
+      }),
+    );
   }
 
-  /**
-   * 성공적인 파일 업로드 로깅
-   */
-  logSuccessfulUpload(uploadedFiles: any[], context: ErrorLogContext): void {
+  logSuccessfulUpload(
+    uploadedFiles: MulterFile[],
+    context: ErrorLogContext,
+  ): void {
     this.logger.log(
       `${uploadedFiles.length}개 파일이 성공적으로 업로드되었습니다`,
-      {
+      JSON.stringify({
         fileCount: uploadedFiles.length,
         files: uploadedFiles.map((file) => ({
-          fileName: file.originalFileName || file.fileName,
-          fileSize: file.fileSize,
+          fileName: file.originalname || file.filename,
+          fileSize: file.size,
           category: context.category,
         })),
         userId: context.userId,
         category: context.category,
         endpoint: context.endpoint,
         requestId: context.requestId,
-        timestamp: new Date().toISOString(),
-      },
+      }),
     );
   }
 
@@ -270,13 +268,16 @@ export class FileUploadErrorService {
     category: FileCategory,
     userId?: number,
   ): ErrorLogContext {
+    const headers = request.headers;
+    const url = new URL(request.url);
+
     return {
-      clientIp: request.ip || request.socket?.remoteAddress || 'unknown',
-      userAgent: request.get('User-Agent') || 'unknown',
+      clientIp: headers.get('x-forwarded-for') || 'unknown',
+      userAgent: headers.get('user-agent') || 'unknown',
       userId,
       category,
-      requestId: request.headers['x-request-id'] as string,
-      endpoint: `${request.method} ${request.path}`,
+      requestId: headers.get('x-request-id') || undefined,
+      endpoint: `${request.method} ${url.pathname}`,
     };
   }
 
@@ -299,7 +300,7 @@ export class FileUploadErrorService {
    * 검증 결과를 파일 검증 에러로 매핑
    */
   mapValidationResultsToErrors(
-    files: Express.Multer.File[],
+    files: File[],
     validationResults: ValidationResult[],
   ): FileValidationError[] {
     return files.reduce((errors, file, i) => {
@@ -307,11 +308,11 @@ export class FileUploadErrorService {
 
       if (!result.isValid) {
         errors.push({
-          fileName: file.originalname,
+          fileName: file.name, // Web Standard File api uses 'name'
           errorCode: result.errorCode || 'UNKNOWN_ERROR',
           errorMessage: result.errorMessage || 'Unknown validation error',
           fileSize: file.size,
-          fileType: extname(file.originalname).toLowerCase(),
+          fileType: extname(file.name).toLowerCase(),
         });
       }
 
@@ -323,7 +324,7 @@ export class FileUploadErrorService {
    * 혼합 업로드 결과에 대한 부분 성공 응답 생성
    */
   createPartialSuccessResponse(
-    uploadedFiles: any[],
+    uploadedFiles: MulterFile[],
     errors: FileValidationError[],
     requestId?: string,
   ): FileUploadErrorResponse {

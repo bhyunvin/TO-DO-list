@@ -1,24 +1,23 @@
 {
   "name": "my-todo-app",
   "version": "1.0.0",
+  "type": "module",
   "private": true,
   "workspaces": [
     "src",
     "client"
   ],
   "scripts": {
-    "start": "concurrently \"bun run start:server\" \"bun run start:client\"",
-    "watch": "concurrently \"bun run start:server\" \"bun run start:client\"",
-    "start:server": "cd src && bun run start:dev",
-    "start:client": "cd client && bun run dev",
+    "start": "bun run dev:fast",
+    "start:prod": "bun run nx run-many --target=start:prod --all",
+    "watch": "bun run dev:fast",
+    "dev:fast": "concurrently \"bun run dev:server\" \"bun run dev:client\"",
+    "dev:server": "cd src && bun run dev",
+    "dev:client": "cd client && bun run dev",
     "build": "bun run nx run-many --target=build --all",
     "format": "prettier --write \"{src,client}/**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
     "lint": "bun run nx run-many --target=lint --all",
-    "lint:server": "cd src && bun run lint",
-    "lint:client": "cd client && bun run lint",
-    "lint:fix": "bun run concurrently \"bun run lint:server:fix\" \"bun run lint:client:fix\"",
-    "lint:server:fix": "cd src && bun run lint -- --fix",
-    "lint:client:fix": "cd client && bun run lint -- --fix"
+    "lint:fix": "bun run nx run-many --target=lint --all -- --fix"
   },
   "engines": {
     "bun": ">=1.0.0"

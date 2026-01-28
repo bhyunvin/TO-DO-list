@@ -1,4 +1,3 @@
-import { Injectable } from '@nestjs/common';
 import { extname } from 'node:path';
 import {
   ValidationResult,
@@ -16,15 +15,12 @@ import {
 /**
  * 크기 및 유형 제한으로 파일 업로드를 검증하는 서비스
  */
-@Injectable()
+
 export class FileValidationService {
   /**
    * 단일 파일의 크기를 최대 허용 크기와 비교하여 검증합니다
    */
-  validateFileSize(
-    file: File | Express.Multer.File,
-    maxSize: number,
-  ): ValidationResult {
+  validateFileSize(file: File, maxSize: number): ValidationResult {
     const { size: fileSize } = file;
 
     if (fileSize > maxSize) {
@@ -43,11 +39,11 @@ export class FileValidationService {
    * 허용 및 차단된 확장자와 비교하여 단일 파일의 유형을 검증합니다
    */
   validateFileType(
-    file: File | Express.Multer.File,
+    file: File,
     allowedTypes: string[],
     blockedTypes: string[] = [],
   ): ValidationResult {
-    const fileName = 'originalname' in file ? file.originalname : file.name;
+    const fileName: string = file.name;
     const fileExtension = extname(fileName).toLowerCase();
 
     // 파일 유형이 명시적으로 차단되었는지 확인
@@ -81,7 +77,7 @@ export class FileValidationService {
    * 제공된 구성에 따라 여러 파일을 검증합니다
    */
   validateMultipleFiles(
-    files: File[] | Express.Multer.File[],
+    files: File[],
     config: ValidationConfig,
   ): ValidationResult[] {
     const { maxFileCount, maxFileSize, allowedExtensions, blockedExtensions } =
@@ -112,7 +108,7 @@ export class FileValidationService {
    * 카테고리(profileImage 또는 todoAttachment)에 따라 파일을 검증합니다
    */
   validateFilesByCategory(
-    files: File[] | Express.Multer.File[],
+    files: File[],
     category: FileCategory,
   ): ValidationResult[] {
     // snake_case 카테고리를 camelCase 정책 키로 매핑
@@ -124,12 +120,13 @@ export class FileValidationService {
       throw new Error(`잘못된 파일 카테고리: ${category}`);
     }
 
+    const config = policyConfig as { blockedTypes?: string[] };
     const validationConfig: ValidationConfig = {
       maxFileSize: policyConfig.maxSize,
       allowedExtensions: policyConfig.allowedTypes,
       blockedExtensions:
         category === 'todo_attachment'
-          ? (policyConfig as any).blockedTypes || BLOCKED_EXTENSIONS
+          ? config.blockedTypes || BLOCKED_EXTENSIONS
           : BLOCKED_EXTENSIONS,
       maxFileCount: policyConfig.maxCount,
     };
@@ -141,14 +138,14 @@ export class FileValidationService {
    * 검증에 실패한 파일에 대한 검증 오류를 가져옵니다
    */
   getValidationErrors(
-    files: File[] | Express.Multer.File[],
+    files: File[],
     validationResults: ValidationResult[],
   ): FileValidationError[] {
     return files.reduce((errors, file, i) => {
       const result = validationResults[i];
 
       if (!result.isValid) {
-        const fileName = 'originalname' in file ? file.originalname : file.name;
+        const fileName = file.name;
         const { size: fileSize } = file;
         const fileType = extname(fileName).toLowerCase();
 
@@ -168,10 +165,7 @@ export class FileValidationService {
   /**
    * 유효하지 않은 파일을 필터링하고 유효한 파일만 반환합니다
    */
-  getValidFiles(
-    files: File[] | Express.Multer.File[],
-    validationResults: ValidationResult[],
-  ): (File | Express.Multer.File)[] {
+  getValidFiles(files: File[], validationResults: ValidationResult[]): File[] {
     return files.filter((_, i) => validationResults[i].isValid);
   }
 

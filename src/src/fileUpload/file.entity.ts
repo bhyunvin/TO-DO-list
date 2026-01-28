@@ -1,7 +1,14 @@
 import { AuditColumns } from '../utils/auditColumns';
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryColumn,
+  PrimaryGeneratedColumn,
+  Index,
+} from 'typeorm';
 
 @Entity('nj_file_info')
+@Index('IX_NJ_FILE_INFO_GROUP_NO', ['fileGroupNo'])
 export class FileInfoEntity {
   constructor() {
     this.auditColumns = new AuditColumns(); // auditColumns을 초기화
@@ -10,7 +17,7 @@ export class FileInfoEntity {
   @PrimaryGeneratedColumn({ name: 'file_no' })
   fileNo: number;
 
-  @Column({ name: 'file_group_no', type: 'int' })
+  @PrimaryColumn({ name: 'file_group_no', type: 'int' })
   fileGroupNo: number;
 
   @Column({ name: 'file_path', type: 'text' })

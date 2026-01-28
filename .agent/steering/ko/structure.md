@@ -14,28 +14,23 @@ myTodoApp/
 ## 백엔드 구조 (`src/`)
 
 ### 핵심 애플리케이션
-- `src/main.ts` - CORS 구성을 포함한 애플리케이션 부트스트랩
-- `src/app.module.ts` - 데이터베이스, 세션 및 전역 프로바이더를 포함한 루트 모듈
+- `src/main.ts` - 애플리케이션 진입점 (App 설정, 플러그인 등록)
+- `src/plugins/` - 공통 플러그인 (Db, CORS, JWT, Swagger)
 
 ### 기능 모듈 (도메인 주도)
-- `src/user/` - 사용자 인증 및 관리 (JWT 기반)
-- `src/todo/` - Todo CRUD 작업 및 날짜 기반 쿼리
-- `src/assistance/` - Gemini를 사용한 AI 지원 통합
-- `src/fileUpload/` - Cloudinary 클라우드 스토리지를 사용한 파일 업로드 처리
-  - `validation/` - 서버 사이드 파일 검증 모듈
-- `src/mail/` - Contact Developer 기능을 위한 이메일 서비스
-- `src/logging/` - IP 익명화 스케줄러를 포함한 애플리케이션 로깅 및 감사 추적
+- `src/features/user/` - 사용자 인증 및 관리
+- `src/features/todo/` - Todo CRUD 작업
+- `src/features/assistance/` - AI 지원 통합
+- `src/features/fileUpload/` - 파일 업로드 처리
+- `src/features/mail/` - 이메일 서비스
+- `src/features/logging/` - 로깅 서비스
 
 ### 인프라
-- `src/utils/` - 공유 유틸리티 (crypto, audit columns, naming strategy)
-- `src/filter/` - 전역 예외 필터
-- `src/interceptor/` - 전역 인터셉터 (로깅)
-- `src/types/express/` - TypeScript 타입 확장 및 인증 가드
+- `src/utils/` - 공유 유틸리티
+- `src/test/` - 테스트
 
 ### 구성
-- `src/.env` - 환경 변수
-- `src/nest-cli.json` - NestJS CLI 구성
-- `src/tsconfig.json` - TypeScript 구성
+- `src/plugins/config.ts` - 환경 설정
 
 ## 프론트엔드 구조 (`client/`)
 
@@ -59,8 +54,8 @@ myTodoApp/
 
 ### 백엔드
 - **엔티티**: `Entity` 접미사를 가진 PascalCase (`UserEntity`)
-- **컨트롤러**: `Controller` 접미사를 가진 PascalCase (`TodoController`)
-- **서비스**: `Service` 접미사를 가진 PascalCase (`TodoService`)
+- **라우트**: `Routes` 접미사를 가진 PascalCase (`UserRoutes`)
+- **서비스**: `Service` 접미사를 가진 PascalCase (`UserService`)
 - **DTO**: `Dto` 접미사를 가진 PascalCase (`CreateTodoDto`)
 - **데이터베이스 테이블**: `nj_` 접두사를 가진 Snake case (`nj_user_info`)
 - **데이터베이스 컬럼**: Snake case (`user_seq`, `reg_dtm`)
@@ -73,10 +68,9 @@ myTodoApp/
 ## 아키텍처 패턴
 
 ### 백엔드 패턴
-- **모듈 기반 아키텍처** - 각 기능은 독립적인 NestJS 모듈
+- **플러그인 기반 아키텍처** - 각 기능은 독립적인 Elysia 플러그인
 - **리포지토리 패턴** - 서비스 레이어 추상화를 가진 TypeORM 엔티티
-- **가드 패턴** - 라우트 보호를 위한 인증 가드
-- **인터셉터 패턴** - 횡단 관심사 (로깅, 에러 처리)
+- **Derive 패턴** - 인증 및 상태를 위한 컨텍스트 확장
 - **감사 패턴** - 모든 엔티티에 대한 표준화된 감사 컬럼
 
 ### 프론트엔드 패턴

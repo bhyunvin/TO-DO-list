@@ -1,4 +1,3 @@
-import { Injectable, Logger } from '@nestjs/common';
 import {
   UploadApiErrorResponse,
   UploadApiResponse,
@@ -6,27 +5,38 @@ import {
 } from 'cloudinary';
 import toStream from 'buffer-to-stream';
 
-@Injectable()
-export class CloudinaryService {
-  private readonly logger = new Logger(CloudinaryService.name);
+// Cloudinary 설정 초기화 (한 번만 실행되도록 전역 범위에서 설정하거나 생성자에서 확인)
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
+import { Logger } from '../utils/logger';
+
+export class CloudinaryService {
+  private readonly logger = new Logger('CloudinaryService');
   /**
    * 파일을 Cloudinary에 업로드
-   * @param file 업로드할 파일
+   * @param file 업로드할 파일 (Standard File object)
    * @returns 업로드 결과
    */
   async uploadFile(
-    file: Express.Multer.File,
+    file: File,
   ): Promise<UploadApiResponse | UploadApiErrorResponse> {
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
     return new Promise((resolve, reject) => {
       const upload = cloudinary.uploader.upload_stream(
         { resource_type: 'auto' }, // 이미지, 문서 등 자동 감지
         (error, result) => {
           if (error) return reject(new Error(error.message));
+          if (!result) return reject(new Error('Upload failed'));
           resolve(result);
         },
       );
-      toStream(file.buffer).pipe(upload);
+      toStream(buffer).pipe(upload);
     });
   }
 
@@ -59,7 +69,7 @@ export class CloudinaryService {
       const match = regex.exec(pathname);
       return match ? match[1] : '';
     } catch (error) {
-      this.logger.error('public_id 추출 실패:', error);
+      this.logger.error('public_id 추출 실패', String(error));
       return '';
     }
   }

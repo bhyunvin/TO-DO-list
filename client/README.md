@@ -30,7 +30,7 @@ TO-DO List 애플리케이션의 프론트엔드 클라이언트입니다. React
 - **빌드 도구**: Create React App 5.0.1
 - **UI 라이브러리**: React Bootstrap 2.10+ with Bootstrap 5.3+
 - **상태 관리**: Zustand 5.0.8
-- **HTTP 클라이언트**: Axios (setupProxy.js를 통한 프록시)
+- **HTTP 클라이언트**: Elysia Treaty (End-to-End Type Safety), Axios (Legacy)
 - **알림**: SweetAlert2 11.22.5
 - **날짜 처리**: date-fns 4.1.0, react-datepicker 8.7.0
 - **보안**: DOMPurify 3.3.0
@@ -196,9 +196,13 @@ bun run lint -- --fix
 
 ## API 통신
 
-### setupProxy.js
+### Elysia Treaty
 
-개발 환경에서 백엔드 API로의 프록시를 설정합니다.
+**Elysia Treaty**를 사용하여 백엔드와 완벽한 타입 안전성을 보장하는 API 통신을 수행합니다.
+
+### Axios & Proxy
+
+기존 코드 호환성을 위해 Axios와 `setupProxy.js`도 유지되고 있습니다.
 
 ### Axios 설정
 
@@ -321,7 +325,7 @@ Frontend client for the TO-DO List application. Built with React 19 and React Bo
 - **Build Tool**: Create React App 5.0.1
 - **UI Library**: React Bootstrap 2.10+ with Bootstrap 5.3+
 - **State Management**: Zustand 5.0.8
-- **HTTP Client**: Axios (proxied via setupProxy.js)
+- **HTTP Client**: Elysia Treaty (End-to-End Type Safety), Axios (Legacy)
 - **Notifications**: SweetAlert2 11.22.5
 - **Date Handling**: date-fns 4.1.0, react-datepicker 8.7.0
 - **Security**: DOMPurify 3.3.0
@@ -487,9 +491,13 @@ bun run lint -- --fix
 
 ## API Communication
 
-### setupProxy.js
+### Elysia Treaty
 
-Configures proxy for backend API in development environment.
+Uses **Elysia Treaty** for end-to-end type-safe API communication with the backend.
+
+### Axios & Proxy
+
+Axios and `setupProxy.js` are maintained for backward compatibility.
 
 ### Axios Configuration
 

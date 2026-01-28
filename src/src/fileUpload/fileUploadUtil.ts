@@ -1,29 +1,33 @@
-import { memoryStorage } from 'multer';
 import { extname } from 'node:path';
-
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, EntityManager } from 'typeorm';
+import { CloudinaryService } from './cloudinary.service';
+import { UploadApiResponse } from 'cloudinary';
 import { FileInfoEntity } from './file.entity';
+import { Repository, EntityManager } from 'typeorm';
 import { FileValidationService } from './validation/file-validation.service';
 import type { FileCategory } from './validation/file-validation.interfaces';
 import { FILE_UPLOAD_POLICY } from './validation/file-validation.constants';
-import { CloudinaryService } from './cloudinary.service';
-import { UploadApiResponse } from 'cloudinary';
-
 import { AuditSettings, setAuditColumn } from '../utils/auditColumns';
 
-@Injectable()
+/**
+ * ElysiaJS 환경에 맞춘 파일 업로드 유틸리티
+ */
 export class FileUploadUtil {
+  private readonly fileInfoRepository: Repository<FileInfoEntity>;
+  private readonly cloudinaryService: CloudinaryService;
+  private readonly fileValidationService: FileValidationService;
+
   constructor(
-    @InjectRepository(FileInfoEntity)
-    private readonly fileInfoRepository: Repository<FileInfoEntity>,
-    private readonly cloudinaryService: CloudinaryService,
-  ) {}
+    repository: Repository<FileInfoEntity>,
+    cloudinaryService: CloudinaryService,
+  ) {
+    this.fileInfoRepository = repository;
+    this.cloudinaryService = cloudinaryService;
+    this.fileValidationService = new FileValidationService();
+  }
 
   // 파일 정보를 Cloudinary에 업로드하고 DB에 저장하는 함수
   async saveFileInfo(
-    files: Express.Multer.File[],
+    files: File[], // Bun/Web Standard File object
     setting: AuditSettings,
     manager?: EntityManager,
   ): Promise<{ savedFiles: FileInfoEntity[]; fileGroupNo: number }> {
@@ -35,21 +39,21 @@ export class FileUploadUtil {
 
     if (files.length > 0) {
       // 0. Cloudinary 업로드 및 Entity 생성 헬퍼
-      const processFile = async (
-        file: Express.Multer.File,
-        groupNo: number,
-      ) => {
+      const processFile = async (file: File, groupNo: number) => {
+        // Cloudinary 업로드
         const uploadResult = (await this.cloudinaryService.uploadFile(
           file,
         )) as UploadApiResponse;
 
+        const originalName = file.name; // Web File API 'name' property
         const uploadedFileExt =
-          uploadResult.format || extname(file.originalname).substring(1);
+          uploadResult.format || extname(originalName).substring(1);
+
         const newFile = repository.create({
           fileGroupNo: groupNo,
           filePath: uploadResult.secure_url, // 로컬 경로 대신 Cloudinary URL 저장
           saveFileName: `${uploadResult.public_id}.${uploadedFileExt}`,
-          originalFileName: file.originalname,
+          originalFileName: originalName,
           fileExt: uploadedFileExt,
           fileSize: uploadResult.bytes,
         });
@@ -81,50 +85,23 @@ export class FileUploadUtil {
       }
     }
 
-    return { savedFiles, fileGroupNo };
+    return { savedFiles, fileGroupNo: fileGroupNo || 0 };
+  }
+
+  // 파일 검증 메서드 직접 노출 (Elysia Handler 내부에서 사용)
+  validateFiles(files: File[], category: FileCategory) {
+    return this.fileValidationService.validateFilesByCategory(files, category);
   }
 }
 
-// 검증 기능이 향상된 파일 필터 함수
-export const createFileFilter =
-  (category: FileCategory) =>
-  (
-    req: any,
-    file: Express.Multer.File,
-    callback: (error: Error | null, acceptFile?: boolean) => void,
-  ) => {
-    const fileValidationService = new FileValidationService();
-    const validationResults = fileValidationService.validateFilesByCategory(
-      [file],
-      category,
-    );
-    const [result] = validationResults;
-
-    if (!result.isValid) {
-      const error = new Error(result.errorMessage);
-      (error as any).code = result.errorCode;
-      return callback(error, false);
-    }
-
-    callback(null, true);
-  };
-
-// 프로필 이미지를 위한 향상된 multer 설정
-export const profileImageMulterOptions = {
-  storage: memoryStorage(),
-  fileFilter: createFileFilter('profile_image'),
-  limits: {
-    fileSize: FILE_UPLOAD_POLICY.profileImage.maxSize,
-    files: FILE_UPLOAD_POLICY.profileImage.maxCount,
+// Elysia용 파일 업로드 설정 상수
+export const FILE_UPLOAD_OPTIONS = {
+  profileImage: {
+    maxSize: FILE_UPLOAD_POLICY.profileImage.maxSize,
+    maxCount: FILE_UPLOAD_POLICY.profileImage.maxCount,
   },
-};
-
-// 첨부 파일을 위한 향상된 multer 설정
-export const todoAttachmentMulterOptions = {
-  storage: memoryStorage(),
-  fileFilter: createFileFilter('todo_attachment'),
-  limits: {
-    fileSize: FILE_UPLOAD_POLICY.todoAttachment.maxSize,
-    files: FILE_UPLOAD_POLICY.todoAttachment.maxCount,
+  todoAttachment: {
+    maxSize: FILE_UPLOAD_POLICY.todoAttachment.maxSize,
+    maxCount: FILE_UPLOAD_POLICY.todoAttachment.maxCount,
   },
 };

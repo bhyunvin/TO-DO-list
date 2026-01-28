@@ -22,15 +22,21 @@ export class AuditColumns extends CreateAuditColumns {
   updDtm: Date;
 }
 
-export interface AuditSettings {
-  entity: any;
+export interface AuditSettings<T = any> {
+  entity: T;
   id: string;
   ip: string;
   isUpdate?: boolean;
 }
 
-export const setAuditColumn = (setting: AuditSettings) => {
+export const setAuditColumn = <T extends { auditColumns: AuditColumns }>(
+  setting: AuditSettings<T>,
+): T => {
   const { entity, id, ip, isUpdate = false } = setting;
+
+  if (!entity.auditColumns) {
+    entity.auditColumns = new AuditColumns();
+  }
 
   entity.auditColumns.updDtm = new Date();
 

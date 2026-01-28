@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'bun:test';
 import {
   encrypt,
   isHashValid,
@@ -6,13 +7,6 @@ import {
   encryptSymmetricDeterministic,
   decryptSymmetricDeterministic,
 } from './cryptUtil';
-
-// Mock Logger to suppress error logs during tests
-jest.mock('@nestjs/common', () => ({
-  Logger: {
-    error: jest.fn(),
-  },
-}));
 
 describe('CryptUtil', () => {
   const TEST_PLAINTEXT = 'Hello, World!';
@@ -61,20 +55,21 @@ describe('CryptUtil', () => {
     });
 
     it('should return original text if input is empty', async () => {
-      expect(await encryptSymmetric('')).toBe('');
-      expect(await decryptSymmetric('')).toBe('');
+      const emptyEncrypted = await encryptSymmetric('');
+      expect(emptyEncrypted).toBe('');
+
+      const emptyDecrypted = await decryptSymmetric('');
+      expect(emptyDecrypted).toBe('');
     });
 
-    it('should throw error for invalid ciphertext format during decryption', async () => {
-      await expect(decryptSymmetric('invalid-format')).rejects.toThrow(
-        'Failed to decrypt data',
-      );
+    it('should throw error for invalid ciphertext format during decryption', () => {
+      const promise = decryptSymmetric('invalid-format');
+      return expect(promise).rejects.toThrow('Failed to decrypt data');
     });
 
-    it('should throw error for valid format but invalid hex', async () => {
-      await expect(decryptSymmetric('zz:yy:xx')).rejects.toThrow(
-        'Failed to decrypt data',
-      );
+    it('should throw error for valid format but invalid hex', () => {
+      const promise = decryptSymmetric('zz:yy:xx');
+      return expect(promise).rejects.toThrow('Failed to decrypt data');
     });
   });
 
