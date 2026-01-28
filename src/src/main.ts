@@ -74,7 +74,7 @@ const app = new Elysia()
       assets: './public',
       prefix: '/static',
     }),
-  )
+  ) // 정적 파일 제공을 위한 플러그인 (./public 디렉토리 필요 - 자동 생성됨)
 
   // 전역 에러 핸들링 (HttpExceptionFilter 대체)
   .onError(({ code, error, set, request }) => {
