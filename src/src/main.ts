@@ -135,8 +135,7 @@ export const app = new Elysia()
       new LoggingScheduler(dataSource).cleanupOldLogsAndAnonymizeIp();
     }, 5000);
     logger.log('📅 로그 스케줄러가 등록되었습니다.');
-  })
-
+  });
 
 if (import.meta.main) {
   app.listen(env.PORT || 3001);

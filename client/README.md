@@ -271,8 +271,6 @@ bun run build
 - Bootstrap CSS가 올바르게 임포트되었는지 확인
 - 브라우저 캐시 정리
 
-
-
 ## 라이선스
 
 UNLICENSED - 비공개 프로젝트
@@ -551,8 +549,6 @@ Deploy built files to a static file server:
 
 - Verify Bootstrap CSS is properly imported
 - Clear browser cache
-
-
 
 ## License
 

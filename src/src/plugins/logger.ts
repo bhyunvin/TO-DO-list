@@ -1,4 +1,5 @@
 import { logger } from '@bogeychan/elysia-logger';
+import { env } from './config';
 
 /**
  * Elysia Logger Plugin
@@ -23,7 +24,14 @@ export const loggerPlugin = logger({
     },
   },
   autoLogging: {
-    ignore: (req) => req.method === 'OPTIONS', // OPTIONS 요청 무시
+    ignore: (req) => {
+      const url = new URL(req.url as string);
+      return (
+        req.method === 'OPTIONS' ||
+        url.pathname === '/' ||
+        url.pathname === '/favicon.ico'
+      );
+    },
   },
-  level: 'debug', // 기본 로그 레벨을 debug로 변경하여 일반 요청 로그 노이즈 감소
+  level: env.NODE_ENV === 'production' ? 'info' : 'debug',
 });
