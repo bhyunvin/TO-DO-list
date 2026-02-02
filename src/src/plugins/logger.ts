@@ -33,5 +33,5 @@ export const loggerPlugin = logger({
       );
     },
   },
-  level: env.NODE_ENV === 'production' ? 'info' : 'debug',
+  level: env.NODE_ENV === 'production' ? 'warn' : 'debug',
 });
