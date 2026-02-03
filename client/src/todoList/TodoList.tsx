@@ -45,6 +45,7 @@ import {
 import ProfileUpdateForm from '../components/ProfileUpdateForm';
 import PasswordChangeForm from '../components/PasswordChangeForm';
 import ContactDeveloperModal from '../components/ContactDeveloperModal';
+import WaterTrackerModal from '../components/WaterTrackerModal';
 import FloatingActionButton from '../components/FloatingActionButton';
 import ChatModal from '../components/ChatModal';
 import ThemeToggle from '../components/ThemeToggle';
@@ -102,6 +103,8 @@ const TodoContainer = () => {
   const [isDatePickerLoaded, setIsDatePickerLoaded] = useState(false);
   const [showContactModal, setShowContactModal] = useState(false);
   const [showSearchModal, setShowSearchModal] = useState(false);
+  const [showWaterTrackerModal, setShowWaterTrackerModal] = useState(false);
+  const [waterTrackerModalKey, setWaterTrackerModalKey] = useState(0);
 
   const userMenuRef = useRef(null);
 
@@ -988,6 +991,16 @@ const TodoContainer = () => {
                 개발자에게 문의하기
               </button>
               <div className="dropdown-divider"></div>
+              <button
+                className="dropdown-item"
+                onClick={() => {
+                  setShowWaterTrackerModal(true);
+                  setIsUserMenuOpen(false);
+                }}
+              >
+                💧 수분 섭취 기록
+              </button>
+              <div className="dropdown-divider"></div>
               <ThemeToggle />
               <div className="dropdown-divider"></div>
               <button className="dropdown-item" onClick={handleLogout}>
@@ -1089,6 +1102,17 @@ const TodoContainer = () => {
       <ContactDeveloperModal
         show={showContactModal}
         onHide={() => setShowContactModal(false)}
+      />
+
+      {/* 수분 섭취 트래커 모달 */}
+      <WaterTrackerModal
+        key={waterTrackerModalKey}
+        show={showWaterTrackerModal}
+        onHide={() => {
+          setShowWaterTrackerModal(false);
+          // 모달이 닫힐 때 key를 변경하여 다음번 열릴 때 컴포넌트 리마운트
+          setWaterTrackerModalKey((prev) => prev + 1);
+        }}
       />
 
       <SearchModal
