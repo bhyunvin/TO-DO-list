@@ -88,7 +88,7 @@ export default defineConfig({
   },
   test: {
     globals: true, // describe, it, expect 등을 전역으로 사용 (Jest와 동일)
-    environment: 'jsdom', // 'jsdom' 환경에서 테스트 실행
+    environment: 'happy-dom', // 'jsdom' 환경에서 테스트 실행
     setupFiles: './src/setupTests.ts', // js -> ts로 변경 예정
     css: true, // CSS 파일 import 시 오류 방지
 

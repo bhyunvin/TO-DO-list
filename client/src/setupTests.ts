@@ -1,7 +1,6 @@
 // Testing Library를 위한 DOM 환경 설정
 import '@testing-library/jest-dom';
 import { GlobalRegistrator } from '@happy-dom/global-registrator';
-
 // Manually register happy-dom environment
 GlobalRegistrator.register();
 
@@ -20,20 +19,20 @@ declare global {
 
 // sessionStorage Mock (GlobalRegistrator should provide it, but ensuring it exists)
 if (!globalThis.sessionStorage) {
-    const storageMock = (() => {
-        let store: { [key: string]: string } = {};
-        return {
-            getItem: (key: string) => store[key] || null,
-            setItem: (key: string, value: string) => {
-                store[key] = value.toString();
-            },
-            removeItem: (key: string) => {
-                delete store[key];
-            },
-            clear: () => {
-                store = {};
-            },
-        };
-    })();
-    Object.defineProperty(globalThis, 'sessionStorage', { value: storageMock });
+  const storageMock = (() => {
+    let store: { [key: string]: string } = {};
+    return {
+      getItem: (key: string) => store[key] || null,
+      setItem: (key: string, value: string) => {
+        store[key] = value.toString();
+      },
+      removeItem: (key: string) => {
+        delete store[key];
+      },
+      clear: () => {
+        store = {};
+      },
+    };
+  })();
+  Object.defineProperty(globalThis, 'sessionStorage', { value: storageMock });
 }

@@ -3,7 +3,9 @@
     "types": [
       "vitest/globals",
       "vite/client",
-      "bun"
+      "bun",
+      "@types/jest",
+      "@testing-library/jest-dom"
     ],
     "target": "ES2021",
     "useDefineForClassFields": true,
