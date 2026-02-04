@@ -1,24 +1,23 @@
 import { renderHook } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import useDailyDateReset from './useDailyDateReset';
 import * as alertUtils from '../utils/alertUtils';
 
-vi.mock('../utils/alertUtils', () => ({
-  showToast: vi.fn(),
+jest.mock('../utils/alertUtils', () => ({
+  showToast: jest.fn(),
 }));
 
 describe('useDailyDateReset', () => {
-  const handleTodayForTest = vi.fn();
-  let dateNowSpy: ReturnType<typeof vi.spyOn>;
+  const handleTodayForTest = jest.fn();
+  let dateNowSpy: ReturnType<typeof jest.spyOn>;
 
   // Date.now()를 mocking하는 helper 함수
   const mockDateNow = (dateString: string) => {
     const mockTime = new Date(dateString).getTime();
-    dateNowSpy = vi.spyOn(Date, 'now').mockReturnValue(mockTime);
+    dateNowSpy = jest.spyOn(Date, 'now').mockReturnValue(mockTime);
   };
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
     localStorage.clear();
   });
 

@@ -5,15 +5,15 @@ import TodoContainer from './TodoList';
 
 // SweetAlert2 모의 객체
 // SweetAlert2 모의 객체
-vi.mock('sweetalert2', () => {
+jest.mock('sweetalert2', () => {
   const Swal = {
-    fire: vi.fn(() =>
+    fire: jest.fn(() =>
       Promise.resolve({ isConfirmed: true }).then(() => ({
         isConfirmed: true,
       })),
     ),
-    mixin: vi.fn(() => ({
-      fire: vi.fn(() =>
+    mixin: jest.fn(() => ({
+      fire: jest.fn(() =>
         Promise.resolve({ isConfirmed: true }).then(() => ({
           isConfirmed: true,
         })),
@@ -27,13 +27,13 @@ vi.mock('sweetalert2', () => {
 });
 
 // 인증 스토어 모의 객체
-const mockLogin = vi.fn();
-const mockLogout = vi.fn();
-const mockApi = vi.fn();
-globalThis.fetch = mockApi;
+const mockLogin = jest.fn();
+const mockLogout = jest.fn();
+const mockApi = jest.fn();
+globalThis.fetch = mockApi as unknown as typeof fetch;
 
-vi.mock('../authStore/authStore', () => {
-  const mockUseAuthStore = vi.fn(() => ({
+jest.mock('../authStore/authStore', () => {
+  const mockUseAuthStore = jest.fn(() => ({
     user: {
       userName: 'Test User',
       userEmail: 'test@example.com',
@@ -46,7 +46,7 @@ vi.mock('../authStore/authStore', () => {
 
   // getState 메서드를 mock에 추가
   const useAuthStore = Object.assign(mockUseAuthStore, {
-    getState: vi.fn(() => ({
+    getState: jest.fn(() => ({
       user: {
         userName: 'Test User',
         userEmail: 'test@example.com',
@@ -61,35 +61,35 @@ vi.mock('../authStore/authStore', () => {
 });
 
 // 파일 업로드 훅 모의 객체
-vi.mock('../hooks/useFileUploadValidator', () => ({
+jest.mock('../hooks/useFileUploadValidator', () => ({
   useFileUploadValidator: () => ({
-    validateFiles: vi.fn(() => [
+    validateFiles: jest.fn(() => [
       { isValid: true, file: {}, fileName: 'test.jpg', fileSize: 1000 },
     ]),
-    formatFileSize: vi.fn((size) => `${size} bytes`),
-    getUploadPolicy: vi.fn(() => ({ maxSize: 10485760, maxCount: 5 })),
+    formatFileSize: jest.fn((size) => `${size} bytes`),
+    getUploadPolicy: jest.fn(() => ({ maxSize: 10485760, maxCount: 5 })),
     FILE_VALIDATION_ERRORS: {},
   }),
 }));
 
-vi.mock('../hooks/useFileUploadProgress', () => ({
+jest.mock('../hooks/useFileUploadProgress', () => ({
   useFileUploadProgress: () => ({
     uploadStatus: 'idle',
     uploadProgress: {},
     uploadErrors: [],
     validationResults: [],
-    resetUploadState: vi.fn(),
+    resetUploadState: jest.fn(),
   }),
 }));
 
 // 컴포넌트 모의 객체
-vi.mock('../components/FileUploadProgress', () => ({
+jest.mock('../components/FileUploadProgress', () => ({
   default: () => (
     <div data-testid="file-upload-progress">File Upload Progress</div>
   ),
 }));
 
-vi.mock('../components/ProfileUpdateForm', () => {
+jest.mock('../components/ProfileUpdateForm', () => {
   const MockProfileUpdateForm = ({ user, onSave, onCancel }) => (
     <div data-testid="profile-update-form">
       <h3>프로필 수정</h3>
@@ -97,16 +97,16 @@ vi.mock('../components/ProfileUpdateForm', () => {
       <button
         onClick={() => {
           const mockFormData = {
-            append: vi.fn(),
-            get: vi.fn(),
-            getAll: vi.fn(),
-            has: vi.fn(),
-            set: vi.fn(),
-            delete: vi.fn(),
-            keys: vi.fn(),
-            values: vi.fn(),
-            entries: vi.fn(),
-            forEach: vi.fn(),
+            append: jest.fn(),
+            get: jest.fn(),
+            getAll: jest.fn(),
+            has: jest.fn(),
+            set: jest.fn(),
+            delete: jest.fn(),
+            keys: jest.fn(),
+            values: jest.fn(),
+            entries: jest.fn(),
+            forEach: jest.fn(),
           };
           onSave({
             userName: 'Updated Name',
@@ -133,7 +133,7 @@ vi.mock('../components/ProfileUpdateForm', () => {
   return { default: MockProfileUpdateForm };
 });
 
-vi.mock('../components/PasswordChangeForm', () => {
+jest.mock('../components/PasswordChangeForm', () => {
   const MockPasswordChangeForm = ({ onSave, onCancel }) => (
     <div data-testid="password-change-form">
       <h3>비밀번호 변경</h3>
@@ -161,7 +161,7 @@ vi.mock('../components/PasswordChangeForm', () => {
 });
 
 // DatePicker 모의 객체
-vi.mock('react-datepicker', () => {
+jest.mock('react-datepicker', () => {
   const MockDatePicker = ({ selected, onChange }) => (
     <input
       data-testid="date-picker"
@@ -183,7 +183,7 @@ vi.mock('react-datepicker', () => {
 
 describe('TodoContainer Profile Update Integration', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
     // 성공적인 API 응답 모의
     mockApi.mockResolvedValue({
       ok: true,
@@ -577,7 +577,7 @@ describe('TodoContainer Profile Update Integration', () => {
 
 describe('TodoContainer Excel Export Button Rendering', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
     mockApi.mockResolvedValue({
       ok: true,
       json: () => Promise.resolve([]),
@@ -725,7 +725,7 @@ describe('TodoContainer Excel Export Button Rendering', () => {
 
 describe('TodoContainer Date Range Modal Functionality', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
     mockApi.mockResolvedValue({
       ok: true,
       json: () => Promise.resolve([]),
@@ -788,13 +788,13 @@ describe('TodoContainer Date Range Modal Functionality', () => {
     const mockEndDateInput = { value: '2024-01-31' };
 
     const originalGetElementById = document.getElementById;
-    document.getElementById = vi.fn((id) => {
+    document.getElementById = jest.fn((id) => {
       if (id === 'startDate') return mockStartDateInput;
       if (id === 'endDate') return mockEndDateInput;
       return originalGetElementById.call(document, id);
     });
 
-    Swal.showValidationMessage = vi.fn();
+    Swal.showValidationMessage = jest.fn();
 
     render(<TodoContainer />);
 
@@ -826,13 +826,13 @@ describe('TodoContainer Date Range Modal Functionality', () => {
     const mockEndDateInput = { value: '2024-01-31' };
 
     const originalGetElementById = document.getElementById;
-    document.getElementById = vi.fn((id) => {
+    document.getElementById = jest.fn((id) => {
       if (id === 'startDate') return mockStartDateInput;
       if (id === 'endDate') return mockEndDateInput;
       return originalGetElementById.call(document, id);
     });
 
-    Swal.showValidationMessage = vi.fn();
+    Swal.showValidationMessage = jest.fn();
 
     render(<TodoContainer />);
 
@@ -864,7 +864,7 @@ describe('TodoContainer Date Range Modal Functionality', () => {
     const mockEndDateInput = { value: '2024-01-31' };
 
     const originalGetElementById = document.getElementById;
-    document.getElementById = vi.fn((id) => {
+    document.getElementById = jest.fn((id) => {
       if (id === 'startDate') return mockStartDateInput;
       if (id === 'endDate') return mockEndDateInput;
       return originalGetElementById.call(document, id);
@@ -933,7 +933,7 @@ describe('TodoContainer File Download Handler', () => {
   });
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
     // 이전 렌더링 정리
 
     mockApi.mockResolvedValue({
@@ -943,8 +943,8 @@ describe('TodoContainer File Download Handler', () => {
     });
 
     // 파일 다운로드를 위한 URL 메서드 모의
-    globalThis.URL.createObjectURL = vi.fn(() => 'blob:mock-url');
-    globalThis.URL.revokeObjectURL = vi.fn();
+    globalThis.URL.createObjectURL = jest.fn(() => 'blob:mock-url');
+    globalThis.URL.revokeObjectURL = jest.fn();
 
     // SweetAlert가 기본적으로 취소를 반환하도록 모의
     const Swal = require('sweetalert2');
@@ -1024,12 +1024,12 @@ describe('TodoContainer File Download Handler', () => {
     const mockAnchor = {
       href: '',
       download: '',
-      click: vi.fn(),
-      remove: vi.fn(),
+      click: jest.fn(),
+      remove: jest.fn(),
     };
 
     const originalCreateElementFn = document.createElement;
-    document.createElement = vi.fn((tag) => {
+    document.createElement = jest.fn((tag) => {
       if (tag === 'a') return mockAnchor;
       return originalCreateElementFn.call(document, tag);
     });
@@ -1301,7 +1301,7 @@ describe('TodoContainer File Download Handler', () => {
 
 describe('TodoContainer Password Change Integration', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
 
     // 성공적인 API 응답 모의
     mockApi.mockResolvedValue({

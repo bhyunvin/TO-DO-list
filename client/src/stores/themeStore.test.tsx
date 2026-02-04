@@ -24,11 +24,11 @@ const createMatchMediaMock = (matches) => () => ({
   matches,
   media: '(prefers-color-scheme: dark)',
   onchange: null,
-  addListener: vi.fn(),
-  removeListener: vi.fn(),
-  addEventListener: vi.fn(),
-  removeEventListener: vi.fn(),
-  dispatchEvent: vi.fn(),
+  addListener: jest.fn(),
+  removeListener: jest.fn(),
+  addEventListener: jest.fn(),
+  removeEventListener: jest.fn(),
+  dispatchEvent: jest.fn(),
 });
 
 describe('themeStore', () => {
@@ -64,7 +64,7 @@ describe('themeStore', () => {
     if (originalMatchMedia) {
       globalThis.matchMedia = originalMatchMedia;
     }
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   describe('Initial State', () => {

@@ -3,42 +3,42 @@ import userEvent from '@testing-library/user-event';
 import ProfileUpdateForm from './ProfileUpdateForm';
 
 // alertUtils 모킹
-vi.mock('../utils/alertUtils', () => ({
-  showErrorAlert: vi.fn(),
-  showConfirmAlert: vi.fn(),
+jest.mock('../utils/alertUtils', () => ({
+  showErrorAlert: jest.fn(),
+  showConfirmAlert: jest.fn(),
 }));
 
 // userService 모킹
-vi.mock('../api/userService', () => ({
+jest.mock('../api/userService', () => ({
   default: {
-    getUserProfileDetail: vi.fn().mockResolvedValue(null),
+    getUserProfileDetail: jest.fn().mockResolvedValue(null),
   },
 }));
 
 // 파일 업로드 훅 모킹
-vi.mock('../hooks/useFileUploadValidator', () => ({
+jest.mock('../hooks/useFileUploadValidator', () => ({
   useFileUploadValidator: () => ({
-    validateFiles: vi.fn(() => [
+    validateFiles: jest.fn(() => [
       { isValid: true, file: {}, fileName: 'test.jpg', fileSize: 1000 },
     ]),
-    formatFileSize: vi.fn((size) => `${size} bytes`),
-    getUploadPolicy: vi.fn(() => ({ maxSize: 10485760 })),
+    formatFileSize: jest.fn((size) => `${size} bytes`),
+    getUploadPolicy: jest.fn(() => ({ maxSize: 10485760 })),
     FILE_VALIDATION_ERRORS: {},
   }),
 }));
 
-vi.mock('../hooks/useFileUploadProgress', () => ({
+jest.mock('../hooks/useFileUploadProgress', () => ({
   useFileUploadProgress: () => ({
     uploadStatus: 'idle',
     uploadProgress: {},
     uploadErrors: [],
     validationResults: [],
-    resetUploadState: vi.fn(),
+    resetUploadState: jest.fn(),
   }),
 }));
 
 // FileUploadProgress 컴포넌트 모킹
-vi.mock('./FileUploadProgress', () => {
+jest.mock('./FileUploadProgress', () => {
   const MockFileUploadProgress = () => (
     <div data-testid="file-upload-progress">File Upload Progress</div>
   );
@@ -52,11 +52,11 @@ describe('ProfileUpdateForm', () => {
     userDescription: 'Test description',
   };
 
-  const mockOnSave = vi.fn();
-  const mockOnCancel = vi.fn();
+  const mockOnSave = jest.fn();
+  const mockOnCancel = jest.fn();
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   test('renders profile update form with user data', async () => {
@@ -65,7 +65,7 @@ describe('ProfileUpdateForm', () => {
         user={mockUser}
         onSave={mockOnSave}
         onCancel={mockOnCancel}
-        onDirtyChange={vi.fn()}
+        onDirtyChange={jest.fn()}
       />,
     );
 
@@ -82,7 +82,7 @@ describe('ProfileUpdateForm', () => {
         user={mockUser}
         onSave={mockOnSave}
         onCancel={mockOnCancel}
-        onDirtyChange={vi.fn()}
+        onDirtyChange={jest.fn()}
       />,
     );
 
@@ -105,14 +105,14 @@ describe('ProfileUpdateForm', () => {
         user={mockUser}
         onSave={mockOnSave}
         onCancel={mockOnCancel}
-        onDirtyChange={vi.fn()}
+        onDirtyChange={jest.fn()}
       />,
     );
 
     const emailInput = await screen.findByLabelText(/이메일/);
-    await user.clear(emailInput);
-    await user.type(emailInput, 'invalid-email');
-    fireEvent.blur(emailInput);
+
+    await user.type(emailInput, '{selectall}invalid-email');
+    await user.tab();
 
     await waitFor(
       () => {
@@ -131,28 +131,23 @@ describe('ProfileUpdateForm', () => {
         user={mockUser}
         onSave={mockOnSave}
         onCancel={mockOnCancel}
-        onDirtyChange={vi.fn()}
+        onDirtyChange={jest.fn()}
       />,
     );
 
     const nameInput = await screen.findByLabelText(/이름/);
     const submitButton = await screen.findByRole('button', { name: /저장/ });
 
-    // maxLength를 초과하는 매우 긴 이름을 지우고 추가
-    await user.clear(nameInput);
-    // maxLength가 200자 이상 입력을 방지하므로, 긴 값을 수동으로 설정하고
-    // 검증을 트리거하여 검증 로직을 테스트합니다
-    fireEvent.change(nameInput, { target: { value: 'a'.repeat(201) } });
-    fireEvent.blur(nameInput);
+    // user-event respects maxLength, so it truncates the input.
+    // We expect the value to be truncated to 200 chars and no error to be shown for "too long"
+    // (since it's physically impossible to type more)
+    await user.type(nameInput, 'a'.repeat(201));
+    await user.tab();
 
-    await waitFor(
-      () => {
-        expect(
-          screen.getByText('이름은 200자 이내로 입력해주세요.'),
-        ).toBeInTheDocument();
-      },
-      { timeout: 3000 },
-    );
+    expect(nameInput).toHaveValue('a'.repeat(200));
+    expect(
+      screen.queryByText('이름은 200자 이내로 입력해주세요.'),
+    ).not.toBeInTheDocument();
     expect(submitButton).toBeDisabled();
   });
 
@@ -163,30 +158,25 @@ describe('ProfileUpdateForm', () => {
         user={mockUser}
         onSave={mockOnSave}
         onCancel={mockOnCancel}
-        onDirtyChange={vi.fn()}
+        onDirtyChange={jest.fn()}
       />,
     );
 
     const emailInput = await screen.findByLabelText(/이메일/);
     const submitButton = await screen.findByRole('button', { name: /저장/ });
 
-    // maxLength를 초과하는 매우 긴 이메일을 지우고 추가
-    await user.clear(emailInput);
-    // maxLength가 100자 이상 입력을 방지하므로, 긴 값을 수동으로 설정하고
-    // 검증을 트리거하여 검증 로직을 테스트합니다
-    fireEvent.change(emailInput, {
-      target: { value: 'a'.repeat(95) + '@test.com' },
-    });
-    fireEvent.blur(emailInput);
+    // user-event respects maxLength
+    await user.type(emailInput, 'a'.repeat(95) + '@test.com');
+    await user.tab();
 
-    await waitFor(
-      () => {
-        expect(
-          screen.getByText('이메일은 100자 이내로 입력해주세요.'),
-        ).toBeInTheDocument();
-      },
-      { timeout: 3000 },
-    );
+    // Max length is 100. 'a'*95 (95 chars) + '@test.com' (9 chars) = 104 chars.
+    // It should truncate to 100 chars.
+    const expectedValue = ('a'.repeat(95) + '@test.com').slice(0, 100);
+    expect(emailInput).toHaveValue(expectedValue);
+
+    expect(
+      screen.queryByText('이메일은 100자 이내로 입력해주세요.'),
+    ).not.toBeInTheDocument();
     expect(submitButton).toBeDisabled();
   });
 
@@ -197,7 +187,7 @@ describe('ProfileUpdateForm', () => {
         user={mockUser}
         onSave={mockOnSave}
         onCancel={mockOnCancel}
-        onDirtyChange={vi.fn()}
+        onDirtyChange={jest.fn()}
       />,
     );
 
@@ -217,7 +207,7 @@ describe('ProfileUpdateForm', () => {
         user={mockUser}
         onSave={mockOnSave}
         onCancel={mockOnCancel}
-        onDirtyChange={vi.fn()}
+        onDirtyChange={jest.fn()}
       />,
     );
 
@@ -231,13 +221,12 @@ describe('ProfileUpdateForm', () => {
         user={mockUser}
         onSave={mockOnSave}
         onCancel={mockOnCancel}
-        onDirtyChange={vi.fn()}
+        onDirtyChange={jest.fn()}
       />,
     );
 
     const descriptionInput = await screen.findByLabelText(/추가 설명/);
-    await user.clear(descriptionInput);
-    await user.type(descriptionInput, 'New description');
+    await user.type(descriptionInput, '{selectall}New description');
 
     expect(screen.getByText('15/4000 자')).toBeInTheDocument();
   });
@@ -249,7 +238,7 @@ describe('ProfileUpdateForm', () => {
         user={mockUser}
         onSave={mockOnSave}
         onCancel={mockOnCancel}
-        onDirtyChange={vi.fn()}
+        onDirtyChange={jest.fn()}
       />,
     );
 
@@ -287,7 +276,7 @@ describe('ProfileUpdateForm', () => {
         user={mockUser}
         onSave={mockOnSave}
         onCancel={mockOnCancel}
-        onDirtyChange={vi.fn()}
+        onDirtyChange={jest.fn()}
       />,
     );
 
@@ -308,21 +297,20 @@ describe('ProfileUpdateForm', () => {
   });
 
   test('disables submit button when there are validation errors', async () => {
-    const user = userEvent.setup();
     render(
       <ProfileUpdateForm
         user={mockUser}
         onSave={mockOnSave}
         onCancel={mockOnCancel}
-        onDirtyChange={vi.fn()}
+        onDirtyChange={jest.fn()}
       />,
     );
 
     const nameInput = await screen.findByLabelText(/이름/);
     const submitButton = await screen.findByRole('button', { name: /저장/ });
 
-    await user.clear(nameInput);
-    await user.tab();
+    fireEvent.change(nameInput, { target: { value: '' } });
+    fireEvent.blur(nameInput);
 
     await waitFor(() => {
       expect(submitButton).toBeDisabled();
@@ -336,7 +324,7 @@ describe('ProfileUpdateForm', () => {
         user={mockUser}
         onSave={mockOnSave}
         onCancel={mockOnCancel}
-        onDirtyChange={vi.fn()}
+        onDirtyChange={jest.fn()}
       />,
     );
 
@@ -352,7 +340,7 @@ describe('ProfileUpdateForm', () => {
         user={mockUser}
         onSave={mockOnSave}
         onCancel={mockOnCancel}
-        onDirtyChange={vi.fn()}
+        onDirtyChange={jest.fn()}
         isSubmitting={true}
       />,
     );
@@ -372,7 +360,7 @@ describe('ProfileUpdateForm', () => {
         user={mockUser}
         onSave={mockOnSave}
         onCancel={mockOnCancel}
-        onDirtyChange={vi.fn()}
+        onDirtyChange={jest.fn()}
       />,
     );
 

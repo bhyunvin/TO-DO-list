@@ -4,26 +4,26 @@ import ThemeToggle from './ThemeToggle';
 import { useThemeStore } from '../stores/themeStore';
 
 // Zustand 스토어 모킹
-vi.mock('../stores/themeStore');
+jest.mock('../stores/themeStore');
 
 describe('ThemeToggle', () => {
   let mockToggleTheme;
 
   beforeEach(() => {
     // 각 테스트 전에 mock 함수 초기화
-    mockToggleTheme = vi.fn();
+    mockToggleTheme = jest.fn();
 
     // useThemeStore의 기본 mock 구현
-    vi.mocked(useThemeStore).mockReturnValue({
+    jest.mocked(useThemeStore).mockReturnValue({
       theme: 'light',
       toggleTheme: mockToggleTheme,
-      initializeTheme: vi.fn(),
-      setTheme: vi.fn(),
+      initializeTheme: jest.fn(),
+      setTheme: jest.fn(),
     });
   });
 
   afterEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   describe('Component Rendering', () => {
@@ -56,11 +56,11 @@ describe('ThemeToggle', () => {
     });
 
     test('displays moon icon when theme is dark', () => {
-      vi.mocked(useThemeStore).mockReturnValue({
+      jest.mocked(useThemeStore).mockReturnValue({
         theme: 'dark',
         toggleTheme: mockToggleTheme,
-        initializeTheme: vi.fn(),
-        setTheme: vi.fn(),
+        initializeTheme: jest.fn(),
+        setTheme: jest.fn(),
       });
 
       render(<ThemeToggle />);
@@ -72,11 +72,11 @@ describe('ThemeToggle', () => {
 
   describe('Theme State Reflection', () => {
     test('switch shows light state when theme is light', () => {
-      vi.mocked(useThemeStore).mockReturnValue({
+      jest.mocked(useThemeStore).mockReturnValue({
         theme: 'light',
         toggleTheme: mockToggleTheme,
-        initializeTheme: vi.fn(),
-        setTheme: vi.fn(),
+        initializeTheme: jest.fn(),
+        setTheme: jest.fn(),
       });
 
       render(<ThemeToggle />);
@@ -89,11 +89,11 @@ describe('ThemeToggle', () => {
     });
 
     test('switch shows dark state when theme is dark', () => {
-      vi.mocked(useThemeStore).mockReturnValue({
+      jest.mocked(useThemeStore).mockReturnValue({
         theme: 'dark',
         toggleTheme: mockToggleTheme,
-        initializeTheme: vi.fn(),
-        setTheme: vi.fn(),
+        initializeTheme: jest.fn(),
+        setTheme: jest.fn(),
       });
 
       render(<ThemeToggle />);
@@ -142,7 +142,7 @@ describe('ThemeToggle', () => {
 
   describe('Event Propagation', () => {
     test('stops event propagation when wrapper is clicked', () => {
-      const mockParentClick = vi.fn();
+      const mockParentClick = jest.fn();
 
       const { container } = render(
         <button onClick={mockParentClick} className="theme-toggle-wrapper-mock">
@@ -160,7 +160,7 @@ describe('ThemeToggle', () => {
     });
 
     test('prevents dropdown from closing when toggle is clicked', () => {
-      const mockDropdownClick = vi.fn();
+      const mockDropdownClick = jest.fn();
 
       const { container } = render(
         <button className="dropdown-menu" onClick={mockDropdownClick}>
@@ -241,11 +241,11 @@ describe('ThemeToggle', () => {
       expect(slider).toHaveClass('light');
 
       // 테마를 dark로 변경
-      vi.mocked(useThemeStore).mockReturnValue({
+      jest.mocked(useThemeStore).mockReturnValue({
         theme: 'dark',
         toggleTheme: mockToggleTheme,
-        initializeTheme: vi.fn(),
-        setTheme: vi.fn(),
+        initializeTheme: jest.fn(),
+        setTheme: jest.fn(),
       });
 
       rerender(<ThemeToggle />);
@@ -279,11 +279,11 @@ describe('ThemeToggle', () => {
       expect(switchElement).toHaveAttribute('aria-label', '다크 모드 전환');
 
       // 테마 변경
-      vi.mocked(useThemeStore).mockReturnValue({
+      jest.mocked(useThemeStore).mockReturnValue({
         theme: 'dark',
         toggleTheme: mockToggleTheme,
-        initializeTheme: vi.fn(),
-        setTheme: vi.fn(),
+        initializeTheme: jest.fn(),
+        setTheme: jest.fn(),
       });
 
       rerender(<ThemeToggle />);
