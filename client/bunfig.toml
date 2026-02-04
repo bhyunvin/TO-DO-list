@@ -1,8 +1,8 @@
 [test]
 # Preloads입니다. 테스트 실행 전에 실행될 파일들
 preload = ["./src/setupTests.ts"]
-
 # happy-dom을 사용하여 DOM 환경 제공
-# jsdom도 가능하지만 happy-dom이 더 빠릅니다
+dom = "happy-dom"
+
 [test.env]
 # 테스트 환경 변수

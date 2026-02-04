@@ -25,8 +25,8 @@
     "dev": "bun x --bun vite",
     "build": "bun x --bun vite build",
     "preview": "bun x --bun vite preview",
-    "test": "vitest",
-    "coverage": "vitest run --coverage",
+    "test": "bun test --env-file=../.env.test --preload ./src/setupTests.ts",
+    "coverage": "bun test --coverage --env-file=../.env.test --preload ./src/setupTests.ts",
     "lint": "bun run eslint src"
   },
   "devDependencies": {

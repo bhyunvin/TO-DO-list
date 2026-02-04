@@ -1,11 +1,11 @@
 // Testing Library를 위한 DOM 환경 설정
-import { Window as HappyWindow } from 'happy-dom';
+import '@testing-library/jest-dom';
+import { GlobalRegistrator } from '@happy-dom/global-registrator';
 
-// Happy-DOM을 사용하여 DOM 환경 생성
-const happyWindow = new HappyWindow();
-const happyDocument = happyWindow.document;
+// Manually register happy-dom environment
+GlobalRegistrator.register();
 
-// TypeScript global 타입 확장 - 타입 안전하게 처리
+// TypeScript global 타입 확장
 declare global {
   var window: Window & typeof globalThis;
   var document: Document;
@@ -16,49 +16,24 @@ declare global {
   var HTMLSelectElement: typeof HTMLSelectElement;
   var HTMLButtonElement: typeof HTMLButtonElement;
   var Element: typeof Element;
-  var localStorage: Storage;
 }
 
-// 전역 객체에 DOM 인터페이스를 추가 - 타입 확장으로 안전하게 처리
-Object.assign(globalThis, {
-  window: happyWindow,
-  document: happyDocument,
-  navigator: happyWindow.navigator,
-  HTMLElement: happyWindow.HTMLElement,
-  HTMLInputElement: happyWindow.HTMLInputElement,
-  HTMLTextAreaElement: happyWindow.HTMLTextAreaElement,
-  HTMLSelectElement: happyWindow.HTMLSelectElement,
-  HTMLButtonElement: happyWindow.HTMLButtonElement,
-  Element: happyWindow.Element,
-});
-
-// localStorage mock - 타입 안정성을 위한 별도 저장소
-interface LocalStorageData {
-  [key: string]: string;
+// sessionStorage Mock (GlobalRegistrator should provide it, but ensuring it exists)
+if (!globalThis.sessionStorage) {
+    const storageMock = (() => {
+        let store: { [key: string]: string } = {};
+        return {
+            getItem: (key: string) => store[key] || null,
+            setItem: (key: string, value: string) => {
+                store[key] = value.toString();
+            },
+            removeItem: (key: string) => {
+                delete store[key];
+            },
+            clear: () => {
+                store = {};
+            },
+        };
+    })();
+    Object.defineProperty(globalThis, 'sessionStorage', { value: storageMock });
 }
-
-const storageData: LocalStorageData = {};
-
-const localStorageMock: Storage = {
-  getItem: (key: string) => {
-    return storageData[key] || null;
-  },
-  setItem: (key: string, value: string) => {
-    storageData[key] = value;
-  },
-  removeItem: (key: string) => {
-    delete storageData[key];
-  },
-  clear: () => {
-    Object.keys(storageData).forEach((key) => {
-      delete storageData[key];
-    });
-  },
-  length: 0,
-  key: () => null,
-};
-
-globalThis.localStorage = localStorageMock;
-
-// jest-dom의 커스텀 매처 추가
-import '@testing-library/jest-dom';
