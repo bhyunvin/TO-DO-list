@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'bun:test';
-import { api } from './setup-e2e';
+import { getApi } from './setup-e2e';
+const api = getApi();
 
 let registeredUserId: string; // 가입된 사용자 ID를 저장학 위한 변수
 const TEST_EMAIL = `test_${Date.now()}@example.com`;

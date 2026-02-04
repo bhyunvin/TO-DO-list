@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'bun:test';
-import { api } from './setup-e2e';
+import { getApi } from './setup-e2e';
+const api = getApi();
 
 describe('Profile Security (E2E)', () => {
   it('GET /user/profile - 인증 없이 접근 차단 (401/400)', async () => {

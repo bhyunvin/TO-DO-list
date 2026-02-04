@@ -168,7 +168,7 @@ export const decryptSymmetric = async (text: string): Promise<string> => {
 
   // 암호화 포맷(IV:Tag:Ciphertext)이 아닌 경우 평문으로 간주하여 반환
   if (text.split(':').length !== 3) {
-    return text;
+    throw new Error('Invalid ciphertext format');
   }
 
   try {
@@ -209,6 +209,10 @@ export const decryptSymmetric = async (text: string): Promise<string> => {
     return new TextDecoder().decode(decrypted);
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
+    // If it's our custom error, rethrow it
+    if (errorMsg === 'Invalid ciphertext format') {
+      throw error;
+    }
     logger.error(`Symmetric decryption failed: ${errorMsg}`);
     throw new Error('Failed to decrypt data');
   }

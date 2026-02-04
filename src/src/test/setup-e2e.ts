@@ -24,9 +24,9 @@ beforeAll(async () => {
 
 afterAll(async () => {
   // 테스트 종료 후 연결 정리
-  if (dataSource.isInitialized) {
-    await dataSource.destroy();
-  }
+  // if (dataSource.isInitialized) {
+  //   await dataSource.destroy();
+  // }
 });
 
 /**
@@ -46,6 +46,8 @@ const testFetch = async (input: RequestInfo | URL, init?: RequestInit) => {
   return app.handle(req);
 };
 
-export const api = treaty<App>(TEST_BASE_URL, {
-  fetcher: testFetch as typeof fetch,
-});
+// Export as function to avoid Temporal Dead Zone (TDZ) initialization issues during tests
+export const getApi = () =>
+  treaty<App>(TEST_BASE_URL, {
+    fetcher: testFetch as typeof fetch,
+  });

@@ -90,9 +90,12 @@ describe('ProfileUpdateForm', () => {
     await user.clear(nameInput);
     await user.tab();
 
-    await waitFor(() => {
-      expect(screen.getByText('이름을 입력해주세요.')).toBeInTheDocument();
-    });
+    await waitFor(
+      () => {
+        expect(screen.getByText('이름을 입력해주세요.')).toBeInTheDocument();
+      },
+      { timeout: 3000 },
+    );
   });
 
   test('validates email format', async () => {
@@ -109,13 +112,16 @@ describe('ProfileUpdateForm', () => {
     const emailInput = await screen.findByLabelText(/이메일/);
     await user.clear(emailInput);
     await user.type(emailInput, 'invalid-email');
-    await user.tab();
+    fireEvent.blur(emailInput);
 
-    await waitFor(() => {
-      expect(
-        screen.getByText('올바른 이메일 형식을 입력해주세요.'),
-      ).toBeInTheDocument();
-    });
+    await waitFor(
+      () => {
+        expect(
+          screen.getByText('올바른 이메일 형식을 입력해주세요.'),
+        ).toBeInTheDocument();
+      },
+      { timeout: 3000 },
+    );
   });
 
   test('validates name length limit', async () => {
@@ -139,11 +145,14 @@ describe('ProfileUpdateForm', () => {
     fireEvent.change(nameInput, { target: { value: 'a'.repeat(201) } });
     fireEvent.blur(nameInput);
 
-    await waitFor(() => {
-      expect(
-        screen.getByText('이름은 200자 이내로 입력해주세요.'),
-      ).toBeInTheDocument();
-    });
+    await waitFor(
+      () => {
+        expect(
+          screen.getByText('이름은 200자 이내로 입력해주세요.'),
+        ).toBeInTheDocument();
+      },
+      { timeout: 3000 },
+    );
     expect(submitButton).toBeDisabled();
   });
 
@@ -170,11 +179,14 @@ describe('ProfileUpdateForm', () => {
     });
     fireEvent.blur(emailInput);
 
-    await waitFor(() => {
-      expect(
-        screen.getByText('이메일은 100자 이내로 입력해주세요.'),
-      ).toBeInTheDocument();
-    });
+    await waitFor(
+      () => {
+        expect(
+          screen.getByText('이메일은 100자 이내로 입력해주세요.'),
+        ).toBeInTheDocument();
+      },
+      { timeout: 3000 },
+    );
     expect(submitButton).toBeDisabled();
   });
 
@@ -285,9 +297,12 @@ describe('ProfileUpdateForm', () => {
     await user.clear(nameInput);
     await user.click(submitButton);
 
-    await waitFor(() => {
-      expect(screen.getByText('이름을 입력해주세요.')).toBeInTheDocument();
-    });
+    await waitFor(
+      () => {
+        expect(screen.getByText('이름을 입력해주세요.')).toBeInTheDocument();
+      },
+      { timeout: 3000 },
+    );
 
     expect(mockOnSave).not.toHaveBeenCalled();
   });

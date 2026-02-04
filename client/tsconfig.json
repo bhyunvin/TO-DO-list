@@ -2,9 +2,8 @@
   "compilerOptions": {
     "types": [
       "vitest/globals",
-      "@testing-library/jest-dom",
       "vite/client",
-      "bun-types"
+      "bun"
     ],
     "target": "ES2021",
     "useDefineForClassFields": true,

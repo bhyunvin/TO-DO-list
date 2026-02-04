@@ -1,5 +1,6 @@
 import { describe, expect, it, beforeAll } from 'bun:test';
-import { api } from './setup-e2e';
+import { getApi } from './setup-e2e';
+const api = getApi();
 
 interface TodoResponse {
   todoSeq: number;

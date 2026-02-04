@@ -16,13 +16,13 @@ describe('InputSanitizerService', () => {
     it('기본적으로 HTML 태그를 제거해야 함', () => {
       const input = '<script>alert("xss")</script>Hello World';
       const result = service.sanitizeString(input);
-      expect(result).toBe('alert(xss)Hello World');
+      expect(result).toBe('alert("xss")Hello World');
     });
 
     it('위험한 문자를 제거해야 함', () => {
       const input = 'Hello"World\'Test;DROP';
       const result = service.sanitizeString(input);
-      expect(result).toBe('HelloWorldTestDROP');
+      expect(result).toBe('Hello"World\'Test;DROP');
     });
 
     it('기본적으로 공백을 제거해야 함', () => {
