@@ -1,15 +1,19 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import TodoList from './TodoList';
 
-// mock API 함수 생성
-const mockApi = jest.fn();
+jest.mock('../api/todoService', () => ({
+  getTodos: jest.fn(),
+}));
 
-// 의존성 모킹
+import todoService from '../api/todoService';
+
 jest.mock('../authStore/authStore', () => ({
   useAuthStore: () => ({
     user: { userId: 'testuser', userName: 'Test User', userSeq: 1 },
     logout: jest.fn(),
-    api: mockApi,
+    api: {
+      get: todoService.getTodos,
+    },
     login: jest.fn(),
   }),
 }));
@@ -52,20 +56,19 @@ jest.mock('sweetalert2', () => ({
   fire: jest.fn(() => Promise.resolve({ isConfirmed: true })),
 }));
 
+// todoService import removed (moved to top)
+
 const createDelayedResponse = (data, delay = 100) => {
   return new Promise((resolve) => {
     setTimeout(() => {
-      resolve({
-        ok: true,
-        json: async () => data,
-      });
+      resolve(data);
     }, delay);
   });
 };
 
 describe('TodoContainer Loading State', () => {
   beforeEach(() => {
-    mockApi.mockClear();
+    (todoService.getTodos as jest.Mock).mockClear();
   });
 
   afterEach(() => {
@@ -74,8 +77,9 @@ describe('TodoContainer Loading State', () => {
 
   test('displays loading message while fetching todos', async () => {
     // 지연된 API 응답 모킹
-    // 지연된 API 응답 모킹
-    mockApi.mockImplementation(() => createDelayedResponse([], 100));
+    (todoService.getTodos as jest.Mock).mockImplementation(() =>
+      createDelayedResponse([], 100),
+    );
 
     render(<TodoList />);
 
@@ -91,10 +95,7 @@ describe('TodoContainer Loading State', () => {
 
   test('displays empty message after loading when no todos exist', async () => {
     // 빈 배열로 API 응답 모킹
-    mockApi.mockResolvedValueOnce({
-      ok: true,
-      json: async () => [],
-    });
+    (todoService.getTodos as jest.Mock).mockResolvedValue([]);
 
     render(<TodoList />);
 
@@ -120,10 +121,7 @@ describe('TodoContainer Loading State', () => {
     ];
 
     // todos와 함께 API 응답 모킹
-    mockApi.mockResolvedValueOnce({
-      ok: true,
-      json: async () => mockTodos,
-    });
+    (todoService.getTodos as jest.Mock).mockResolvedValue(mockTodos);
 
     render(<TodoList />);
 
@@ -140,8 +138,9 @@ describe('TodoContainer Loading State', () => {
 
   test('loading indicator has spinner', async () => {
     // 지연된 API 응답 모킹
-    // 지연된 API 응답 모킹
-    mockApi.mockImplementation(() => createDelayedResponse([], 100));
+    (todoService.getTodos as jest.Mock).mockImplementation(() =>
+      createDelayedResponse([], 100),
+    );
 
     render(<TodoList />);
 
@@ -158,18 +157,15 @@ describe('TodoContainer Loading State', () => {
 
   test('loading state is properly managed', async () => {
     // API 응답 모킹
-    mockApi.mockResolvedValueOnce({
-      ok: true,
-      json: async () => [
-        {
-          todoSeq: 1,
-          todoContent: 'Todo 1',
-          completeDtm: null,
-          todoNote: '',
-          todoDate: '2025-11-13',
-        },
-      ],
-    });
+    (todoService.getTodos as jest.Mock).mockResolvedValue([
+      {
+        todoSeq: 1,
+        todoContent: 'Todo 1',
+        completeDtm: null,
+        todoNote: '',
+        todoDate: '2025-11-13',
+      },
+    ]);
 
     render(<TodoList />);
 

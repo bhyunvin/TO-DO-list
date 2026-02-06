@@ -1,5 +1,4 @@
-/// <reference types="vitest" />
-import { defineConfig } from 'vitest/config';
+import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { purgeCSSPlugin as purgecss } from '@fullhuman/postcss-purgecss';
 
@@ -86,17 +85,5 @@ export default defineConfig({
       },
     },
   },
-  test: {
-    globals: true, // describe, it, expect 등을 전역으로 사용 (Jest와 동일)
-    environment: 'happy-dom', // 'jsdom' 환경에서 테스트 실행
-    setupFiles: './src/setupTests.ts', // js -> ts로 변경 예정
-    css: true, // CSS 파일 import 시 오류 방지
-
-    // 테스트 커버리지 설정
-    coverage: {
-      provider: 'v8', // v8 엔진 사용
-      reporter: ['text', 'json', 'html'], // 리포트 형식
-      enabled: true, // 'npm run coverage' 실행 시 활성화
-    },
-  },
+  // test config removed - using native bun test
 });

@@ -2,15 +2,20 @@ import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import TodoList from './TodoList';
 
-const mockApi = jest.fn();
-
 jest.mock('../authStore/authStore', () => ({
   useAuthStore: () => ({
     user: { userId: 'testuser', userName: 'Test User', userSeq: 1 },
     logout: jest.fn(),
-    api: mockApi,
     login: jest.fn(),
   }),
+}));
+
+import todoService from '../api/todoService';
+jest.mock('../api/todoService', () => ({
+  default: {
+    getTodos: jest.fn(),
+    updateTodo: jest.fn(),
+  },
 }));
 
 jest.mock('../stores/chatStore', () => ({
@@ -53,7 +58,7 @@ jest.mock('sweetalert2', () => ({
 
 describe('TodoContainer Sorting Behavior', () => {
   beforeEach(() => {
-    mockApi.mockClear();
+    // mockApi.mockClear() 대신 전체 모크 클리어
   });
 
   afterEach(() => {
@@ -89,10 +94,7 @@ describe('TodoContainer Sorting Behavior', () => {
     ];
 
     // 초기 fetch 모킹
-    mockApi.mockResolvedValueOnce({
-      ok: true,
-      json: async () => initialTodos,
-    });
+    (todoService.getTodos as jest.Mock).mockResolvedValue(initialTodos);
 
     render(<TodoList />);
 
@@ -108,10 +110,7 @@ describe('TodoContainer Sorting Behavior', () => {
     expect(rows[3]).toHaveTextContent('Todo 1');
 
     // 성공적인 토글 응답 모킹
-    mockApi.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({}),
-    });
+    (todoService.updateTodo as jest.Mock).mockResolvedValue({ success: true });
 
     // Item 3 (첫 번째 항목)을 완료로 토글 - 체크박스가 아닌 셀 클릭
     const todo3Row = screen.getByRole('row', { name: /Todo 3/ });
@@ -164,10 +163,7 @@ describe('TodoContainer Sorting Behavior', () => {
     ];
 
     // 초기 fetch 모킹
-    mockApi.mockResolvedValueOnce({
-      ok: true,
-      json: async () => initialTodos,
-    });
+    (todoService.getTodos as jest.Mock).mockResolvedValue(initialTodos);
 
     render(<TodoList />);
 
@@ -183,10 +179,7 @@ describe('TodoContainer Sorting Behavior', () => {
     expect(rows[3]).toHaveTextContent('Todo 1'); // 완료됨 (하단에)
 
     // 성공적인 토글 응답 모킹
-    mockApi.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({}),
-    });
+    (todoService.updateTodo as jest.Mock).mockResolvedValue({ success: true });
 
     // Item 1 (마지막 항목)을 미완료로 토글 - 셀 클릭
     const todo1Row = screen.getByRole('row', { name: /Todo 1/ });
@@ -231,10 +224,7 @@ describe('TodoContainer Sorting Behavior', () => {
     ];
 
     // 초기 fetch 모킹
-    mockApi.mockResolvedValueOnce({
-      ok: true,
-      json: async () => initialTodos,
-    });
+    (todoService.getTodos as jest.Mock).mockResolvedValue(initialTodos);
 
     render(<TodoList />);
 
@@ -248,11 +238,9 @@ describe('TodoContainer Sorting Behavior', () => {
     expect(rows[2]).toHaveTextContent('Todo 1');
 
     // 실패한 토글 응답 모킹
-    mockApi.mockResolvedValueOnce({
-      ok: false,
-      status: 500,
-      json: async () => ({ message: 'Server error' }),
-    });
+    (todoService.updateTodo as jest.Mock).mockRejectedValue(
+      new Error('Server error'),
+    );
 
     // Item 2 토글 시도 - 셀 클릭
     const checkboxCell = screen

@@ -1,16 +1,17 @@
+import { jest, describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { act } from '@testing-library/react';
-import { useThemeStore } from './themeStore';
+import { useThemeStore } from './themeStore.real';
 
 // localStorage mock
 const localStorageMock = (() => {
-  let store = {};
+  let store: Record<string, string> = {};
 
   return {
-    getItem: (key) => store[key] || null,
-    setItem: (key, value) => {
+    getItem: (key: string) => store[key] || null,
+    setItem: (key: string, value: string) => {
       store[key] = value.toString();
     },
-    removeItem: (key) => {
+    removeItem: (key: string) => {
       delete store[key];
     },
     clear: () => {
@@ -20,16 +21,17 @@ const localStorageMock = (() => {
 })();
 
 // window.matchMedia mock
-const createMatchMediaMock = (matches) => () => ({
-  matches,
-  media: '(prefers-color-scheme: dark)',
-  onchange: null,
-  addListener: jest.fn(),
-  removeListener: jest.fn(),
-  addEventListener: jest.fn(),
-  removeEventListener: jest.fn(),
-  dispatchEvent: jest.fn(),
-});
+const createMatchMediaMock = (matches: boolean) => () =>
+  ({
+    matches,
+    media: '(prefers-color-scheme: dark)',
+    onchange: null,
+    addListener: jest.fn(),
+    removeListener: jest.fn(),
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn(),
+    dispatchEvent: jest.fn(),
+  }) as any;
 
 describe('themeStore', () => {
   let originalMatchMedia;
@@ -364,11 +366,11 @@ describe('themeStore', () => {
 
     test('should handle matchMedia errors gracefully', () => {
       // matchMedia가 에러를 던지도록 설정
-      globalThis.matchMedia = vi.fn(() => {
+      globalThis.matchMedia = jest.fn(() => {
         throw new Error('matchMedia error');
       });
 
-      const consoleWarnSpy = vi
+      const consoleWarnSpy = jest
         .spyOn(console, 'warn')
         .mockImplementation(() => {});
 

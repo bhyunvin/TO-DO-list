@@ -1,38 +1,82 @@
-// Testing Library를 위한 DOM 환경 설정
-import '@testing-library/jest-dom';
 import { GlobalRegistrator } from '@happy-dom/global-registrator';
-// Manually register happy-dom environment
 GlobalRegistrator.register();
+
+import '@testing-library/jest-dom';
+import { cleanup } from '@testing-library/react';
+
+import { afterEach, jest } from 'bun:test';
+
+console.log('!!! SETUP TESTS LOADING !!!');
+console.log('Global document available:', !!globalThis.document);
+
+// Load Mocks
+import './mocks';
+
+// Run cleanup after each test
+afterEach(() => {
+  cleanup();
+  // Restore mocks
+  jest.clearAllMocks();
+});
+
+// Add jest.mocked compatibility for Bun
+if (!(jest as any).mocked) {
+  (jest as any).mocked = (v: any) => v;
+}
+
+// Setup global fetch mock for Eden Treaty compatibility
+const constantMock = {
+  ok: true,
+  status: 200,
+  statusText: 'OK',
+  headers: new Headers({ 'content-type': 'application/json' }),
+  json: async () => ({}),
+  text: async () => '',
+  blob: async () => new Blob([]),
+  clone: function () {
+    return this;
+  },
+} as unknown as Response;
+
+const mockFetch = (async (url: string | URL | Request) => {
+  const urlStr =
+    typeof url === 'object' && 'url' in url ? url.url : String(url);
+  console.log(`[MockFetch] Request to: ${urlStr}`);
+  return constantMock;
+}) as unknown as typeof fetch;
+
+globalThis.fetch = mockFetch;
+if (globalThis.window !== undefined) {
+  globalThis.window.fetch = mockFetch;
+}
 
 // TypeScript global 타입 확장
 declare global {
   var window: Window & typeof globalThis;
-  var document: Document;
-  var navigator: Navigator;
-  var HTMLElement: typeof HTMLElement;
-  var HTMLInputElement: typeof HTMLInputElement;
-  var HTMLTextAreaElement: typeof HTMLTextAreaElement;
-  var HTMLSelectElement: typeof HTMLSelectElement;
-  var HTMLButtonElement: typeof HTMLButtonElement;
-  var Element: typeof Element;
 }
 
-// sessionStorage Mock (GlobalRegistrator should provide it, but ensuring it exists)
+// sessionStorage Mock
 if (!globalThis.sessionStorage) {
-  const storageMock = (() => {
-    let store: { [key: string]: string } = {};
-    return {
-      getItem: (key: string) => store[key] || null,
-      setItem: (key: string, value: string) => {
-        store[key] = value.toString();
-      },
-      removeItem: (key: string) => {
-        delete store[key];
-      },
-      clear: () => {
-        store = {};
-      },
-    };
-  })();
-  Object.defineProperty(globalThis, 'sessionStorage', { value: storageMock });
+  globalThis.sessionStorage = {
+    getItem: () => null,
+    setItem: () => {},
+    removeItem: () => {},
+    clear: () => {},
+    length: 0,
+    key: () => null,
+  } as Storage;
 }
+
+// localStorage Mock
+if (!globalThis.localStorage) {
+  globalThis.localStorage = {
+    getItem: () => null,
+    setItem: () => {},
+    removeItem: () => {},
+    clear: () => {},
+    length: 0,
+    key: () => null,
+  } as Storage;
+}
+
+// Mocks handled in ./mocks.ts

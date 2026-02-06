@@ -975,10 +975,18 @@ const TodoContainer = () => {
           </button>
           {isUserMenuOpen && (
             <div className="user-dropdown-menu">
-              <button className="dropdown-item" onClick={handleUpdateProfile}>
+              <button
+                className="dropdown-item"
+                onClick={handleUpdateProfile}
+                disabled={isUpdatingProfile || isChangingPassword}
+              >
                 프로필 수정
               </button>
-              <button className="dropdown-item" onClick={handleChangePassword}>
+              <button
+                className="dropdown-item"
+                onClick={handleChangePassword}
+                disabled={isUpdatingProfile || isChangingPassword}
+              >
                 비밀번호 변경
               </button>
               <button

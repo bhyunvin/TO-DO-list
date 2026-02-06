@@ -1,0 +1,9 @@
+[test]
+# Preloads for root-level execution (pointing to client check works)
+# If user runs `bun test` from root, we need to load the environment.
+# Assuming typical monorepo structure where client tests need dom.
+preload = ["./client/src/setupTests.ts"]
+# dom = "happy-dom"
+
+[test.env]
+# Shared test environment variables can go here

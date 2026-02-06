@@ -1,5 +1,4 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import ProfileUpdateForm from './ProfileUpdateForm';
 
 // alertUtils 모킹
@@ -11,7 +10,11 @@ jest.mock('../utils/alertUtils', () => ({
 // userService 모킹
 jest.mock('../api/userService', () => ({
   default: {
-    getUserProfileDetail: jest.fn().mockResolvedValue(null),
+    getUserProfileDetail: jest.fn().mockResolvedValue({
+      userName: 'Test User',
+      userEmail: 'test@example.com',
+      userDescription: 'Test description',
+    }),
   },
 }));
 
@@ -35,6 +38,12 @@ jest.mock('../hooks/useFileUploadProgress', () => ({
     validationResults: [],
     resetUploadState: jest.fn(),
   }),
+}));
+
+// useSecureImage 모킹
+jest.mock('../hooks/useSecureImage', () => ({
+  __esModule: true,
+  default: jest.fn((src) => src),
 }));
 
 // FileUploadProgress 컴포넌트 모킹
@@ -76,7 +85,6 @@ describe('ProfileUpdateForm', () => {
   });
 
   test('validates required name field', async () => {
-    const user = userEvent.setup();
     render(
       <ProfileUpdateForm
         user={mockUser}
@@ -87,19 +95,13 @@ describe('ProfileUpdateForm', () => {
     );
 
     const nameInput = await screen.findByLabelText(/이름/);
-    await user.clear(nameInput);
-    await user.tab();
+    fireEvent.change(nameInput, { target: { value: '' } });
+    fireEvent.blur(nameInput);
 
-    await waitFor(
-      () => {
-        expect(screen.getByText('이름을 입력해주세요.')).toBeInTheDocument();
-      },
-      { timeout: 3000 },
-    );
+    await screen.findByText('이름을 입력해주세요.');
   });
 
   test('validates email format', async () => {
-    const user = userEvent.setup();
     render(
       <ProfileUpdateForm
         user={mockUser}
@@ -111,21 +113,13 @@ describe('ProfileUpdateForm', () => {
 
     const emailInput = await screen.findByLabelText(/이메일/);
 
-    await user.type(emailInput, '{selectall}invalid-email');
-    await user.tab();
+    fireEvent.change(emailInput, { target: { value: 'invalid-email' } });
+    fireEvent.blur(emailInput);
 
-    await waitFor(
-      () => {
-        expect(
-          screen.getByText('올바른 이메일 형식을 입력해주세요.'),
-        ).toBeInTheDocument();
-      },
-      { timeout: 3000 },
-    );
+    await screen.findByText('올바른 이메일 형식을 입력해주세요.');
   });
 
   test('validates name length limit', async () => {
-    const user = userEvent.setup();
     render(
       <ProfileUpdateForm
         user={mockUser}
@@ -135,24 +129,27 @@ describe('ProfileUpdateForm', () => {
       />,
     );
 
-    const nameInput = await screen.findByLabelText(/이름/);
-    const submitButton = await screen.findByRole('button', { name: /저장/ });
+    const nameInput = (await screen.findByLabelText(
+      /이름/,
+    )) as HTMLInputElement;
+    const submitButton = (await screen.findByRole('button', {
+      name: /저장/,
+    })) as HTMLButtonElement;
 
-    // user-event respects maxLength, so it truncates the input.
-    // We expect the value to be truncated to 200 chars and no error to be shown for "too long"
-    // (since it's physically impossible to type more)
-    await user.type(nameInput, 'a'.repeat(201));
-    await user.tab();
+    // FAST-PATH: 직접 입력 시뮬레이션 (205자)
+    fireEvent.input(nameInput, { target: { value: 'a'.repeat(205) } });
 
-    expect(nameInput).toHaveValue('a'.repeat(200));
-    expect(
-      screen.queryByText('이름은 200자 이내로 입력해주세요.'),
-    ).not.toBeInTheDocument();
-    expect(submitButton).toBeDisabled();
+    // truncation 검증 (200자 제한)
+    await waitFor(() => {
+      expect(nameInput.value.length).toBe(200);
+    });
+
+    // 200자는 유효 범위 내이므로 에러가 없어야 하며, dirty 하므로 버튼은 활성화되어야 함
+    expect(nameInput.className).not.toContain('is-invalid');
+    expect(submitButton.disabled).toBe(false);
   });
 
   test('validates email length limit', async () => {
-    const user = userEvent.setup();
     render(
       <ProfileUpdateForm
         user={mockUser}
@@ -162,26 +159,28 @@ describe('ProfileUpdateForm', () => {
       />,
     );
 
-    const emailInput = await screen.findByLabelText(/이메일/);
-    const submitButton = await screen.findByRole('button', { name: /저장/ });
+    const emailInput = (await screen.findByLabelText(
+      /이메일/,
+    )) as HTMLInputElement;
+    const submitButton = (await screen.findByRole('button', {
+      name: /저장/,
+    })) as HTMLButtonElement;
 
-    // user-event respects maxLength
-    await user.type(emailInput, 'a'.repeat(95) + '@test.com');
-    await user.tab();
+    // FAST-PATH: 이메일은 100자 제한. 104자 입력 시 잘리면서 형식이 깨지게 구성.
+    fireEvent.input(emailInput, {
+      target: { value: 'a'.repeat(94) + '@test.com' },
+    });
 
-    // Max length is 100. 'a'*95 (95 chars) + '@test.com' (9 chars) = 104 chars.
-    // It should truncate to 100 chars.
-    const expectedValue = ('a'.repeat(95) + '@test.com').slice(0, 100);
-    expect(emailInput).toHaveValue(expectedValue);
+    await waitFor(() => {
+      expect(emailInput.value.length).toBe(100);
+    });
 
-    expect(
-      screen.queryByText('이메일은 100자 이내로 입력해주세요.'),
-    ).not.toBeInTheDocument();
-    expect(submitButton).toBeDisabled();
+    // '@test.co' 등으로 형식이 깨지면 에러 클래스가 붙어야 함
+    expect(emailInput.className).toContain('is-invalid');
+    expect(submitButton.disabled).toBe(true);
   });
 
   test('handles profile image file selection', async () => {
-    const user = userEvent.setup();
     render(
       <ProfileUpdateForm
         user={mockUser}
@@ -195,7 +194,7 @@ describe('ProfileUpdateForm', () => {
       await screen.findByLabelText<HTMLInputElement>(/프로필 이미지/);
     const file = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
 
-    await user.upload(fileInput, file);
+    fireEvent.change(fileInput, { target: { files: [file] } });
 
     expect(fileInput.files[0]).toBe(file);
     expect(fileInput.files).toHaveLength(1);
@@ -215,7 +214,6 @@ describe('ProfileUpdateForm', () => {
   });
 
   test('updates character count when typing in description', async () => {
-    const user = userEvent.setup();
     render(
       <ProfileUpdateForm
         user={mockUser}
@@ -226,13 +224,14 @@ describe('ProfileUpdateForm', () => {
     );
 
     const descriptionInput = await screen.findByLabelText(/추가 설명/);
-    await user.type(descriptionInput, '{selectall}New description');
+    fireEvent.change(descriptionInput, {
+      target: { value: 'New description' },
+    });
 
     expect(screen.getByText('15/4000 자')).toBeInTheDocument();
   });
 
   test('calls onSave with correct data when form is submitted', async () => {
-    const user = userEvent.setup();
     render(
       <ProfileUpdateForm
         user={mockUser}
@@ -247,14 +246,13 @@ describe('ProfileUpdateForm', () => {
     const descriptionInput = await screen.findByLabelText(/추가 설명/);
     const submitButton = await screen.findByRole('button', { name: /저장/ });
 
-    await user.clear(nameInput);
-    await user.type(nameInput, 'Updated Name');
-    await user.clear(emailInput);
-    await user.type(emailInput, 'updated@example.com');
-    await user.clear(descriptionInput);
-    await user.type(descriptionInput, 'Updated description');
+    fireEvent.change(nameInput, { target: { value: 'Updated Name' } });
+    fireEvent.change(emailInput, { target: { value: 'updated@example.com' } });
+    fireEvent.change(descriptionInput, {
+      target: { value: 'Updated description' },
+    });
 
-    await user.click(submitButton);
+    fireEvent.click(submitButton);
 
     await waitFor(() => {
       expect(mockOnSave).toHaveBeenCalledWith(
@@ -270,7 +268,6 @@ describe('ProfileUpdateForm', () => {
   });
 
   test('prevents submission when validation errors exist', async () => {
-    const user = userEvent.setup();
     render(
       <ProfileUpdateForm
         user={mockUser}
@@ -283,16 +280,10 @@ describe('ProfileUpdateForm', () => {
     const nameInput = await screen.findByLabelText(/이름/);
     const submitButton = await screen.findByRole('button', { name: /저장/ });
 
-    await user.clear(nameInput);
-    await user.click(submitButton);
+    fireEvent.change(nameInput, { target: { value: '' } });
+    fireEvent.click(submitButton);
 
-    await waitFor(
-      () => {
-        expect(screen.getByText('이름을 입력해주세요.')).toBeInTheDocument();
-      },
-      { timeout: 3000 },
-    );
-
+    await screen.findByText('이름을 입력해주세요.');
     expect(mockOnSave).not.toHaveBeenCalled();
   });
 
@@ -318,7 +309,6 @@ describe('ProfileUpdateForm', () => {
   });
 
   test('calls onCancel when cancel button is clicked without changes', async () => {
-    const user = userEvent.setup();
     render(
       <ProfileUpdateForm
         user={mockUser}
@@ -329,7 +319,7 @@ describe('ProfileUpdateForm', () => {
     );
 
     const cancelButton = await screen.findByRole('button', { name: /취소/ });
-    await user.click(cancelButton);
+    fireEvent.click(cancelButton);
 
     expect(mockOnCancel).toHaveBeenCalled();
   });
@@ -354,7 +344,6 @@ describe('ProfileUpdateForm', () => {
   });
 
   test('trims whitespace from form inputs', async () => {
-    const user = userEvent.setup();
     render(
       <ProfileUpdateForm
         user={mockUser}
@@ -369,23 +358,105 @@ describe('ProfileUpdateForm', () => {
     const descriptionInput = await screen.findByLabelText(/추가 설명/);
     const submitButton = await screen.findByRole('button', { name: /저장/ });
 
-    await user.clear(nameInput);
-    await user.type(nameInput, '  Trimmed Name  ');
-    await user.clear(emailInput);
-    await user.type(emailInput, '  trimmed@example.com  ');
-    await user.clear(descriptionInput);
-    await user.type(descriptionInput, '  Trimmed description  ');
+    fireEvent.change(nameInput, { target: { value: '  Trimmed Name  ' } });
+    fireEvent.change(emailInput, {
+      target: { value: '  trimmed@example.com  ' },
+    });
+    fireEvent.change(descriptionInput, {
+      target: { value: '  Trimmed description  ' },
+    });
 
-    await user.click(submitButton);
+    fireEvent.click(submitButton);
+
+    await waitFor(
+      () => {
+        expect(mockOnSave).toHaveBeenCalledWith(
+          expect.objectContaining({
+            userName: 'Trimmed Name',
+            userEmail: 'trimmed@example.com',
+            userDescription: 'Trimmed description',
+          }),
+        );
+      },
+      { timeout: 3000 },
+    );
+  });
+
+  test('handles API error during save', async () => {
+    const mockOnSaveError = jest
+      .fn()
+      .mockRejectedValue(new Error('API Failure'));
+
+    render(
+      <ProfileUpdateForm
+        user={mockUser}
+        onSave={mockOnSaveError}
+        onCancel={mockOnCancel}
+        onDirtyChange={jest.fn()}
+      />,
+    );
+
+    const nameInput = await screen.findByLabelText(/이름/);
+    const submitButton = await screen.findByRole('button', { name: /저장/ });
+
+    fireEvent.change(nameInput, { target: { value: 'Valid Name' } });
+    fireEvent.click(submitButton);
+
+    await waitFor(
+      () => {
+        expect(mockOnSaveError).toHaveBeenCalled();
+      },
+      { timeout: 4000 },
+    );
+  }, 10000);
+
+  test('shows confirmation alert when cancelling with dirty state', async () => {
+    const { showConfirmAlert } = require('../utils/alertUtils');
+    showConfirmAlert.mockResolvedValue({ isConfirmed: true });
+
+    render(
+      <ProfileUpdateForm
+        user={mockUser}
+        onSave={mockOnSave}
+        onCancel={mockOnCancel}
+        onDirtyChange={jest.fn()}
+      />,
+    );
+
+    const nameInput = await screen.findByLabelText(/이름/);
+    const cancelButton = await screen.findByRole('button', { name: /취소/ });
+
+    // Make it dirty
+    fireEvent.change(nameInput, { target: { value: 'Dirty Name' } });
+    fireEvent.click(cancelButton);
 
     await waitFor(() => {
-      expect(mockOnSave).toHaveBeenCalledWith(
+      expect(showConfirmAlert).toHaveBeenCalledWith(
         expect.objectContaining({
-          userName: 'Trimmed Name',
-          userEmail: 'trimmed@example.com',
-          userDescription: 'Trimmed description',
+          title: '정말 취소하시겠습니까?',
         }),
       );
     });
+
+    await waitFor(() => {
+      expect(mockOnCancel).toHaveBeenCalled();
+    });
+  }, 5000);
+
+  test('validates accessibility (aria-label) for critical inputs', async () => {
+    render(
+      <ProfileUpdateForm
+        user={mockUser}
+        onSave={mockOnSave}
+        onCancel={mockOnCancel}
+        onDirtyChange={jest.fn()}
+      />,
+    );
+
+    const nameInput = await screen.findByLabelText(/이름/);
+    expect(nameInput).toBeRequired();
+
+    const emailInput = await screen.findByLabelText(/이메일/);
+    expect(emailInput).toBeRequired();
   });
 });

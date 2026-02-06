@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { BsEye } from '@react-icons/all-files/bs/BsEye';
 import { BsEyeSlash } from '@react-icons/all-files/bs/BsEyeSlash';
@@ -29,6 +29,14 @@ const PasswordChangeForm = ({
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [localSubmitting, setLocalSubmitting] = useState(false);
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   // 유효성 검사 오류 상태
   const [currentPasswordError, setCurrentPasswordError] = useState('');
@@ -189,10 +197,15 @@ const PasswordChangeForm = ({
     };
 
     try {
+      setLocalSubmitting(true);
       await onSave(passwordData);
     } catch (error) {
       console.error('Password change error:', error);
       // 오류 처리는 부모 컴포넌트에서 수행됨
+    } finally {
+      if (isMounted.current) {
+        setLocalSubmitting(false);
+      }
     }
   };
 
@@ -374,7 +387,7 @@ const PasswordChangeForm = ({
               type="button"
               className="btn btn-outline-secondary w-100"
               onClick={handleCancel}
-              disabled={isSubmitting}
+              disabled={isSubmitting || localSubmitting}
             >
               취소
             </button>
@@ -386,6 +399,7 @@ const PasswordChangeForm = ({
               disabled={
                 !!(
                   isSubmitting ||
+                  localSubmitting ||
                   currentPasswordError ||
                   newPasswordError ||
                   confirmPasswordError ||
@@ -395,7 +409,7 @@ const PasswordChangeForm = ({
                 )
               }
             >
-              {isSubmitting ? (
+              {isSubmitting || localSubmitting ? (
                 <>
                   <output
                     className="spinner-border spinner-border-sm me-2"

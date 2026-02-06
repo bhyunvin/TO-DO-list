@@ -9,7 +9,6 @@ jest.mock('sweetalert2', () => ({
 }));
 
 // Mock auth store
-const mockApi = jest.fn();
 jest.mock('../authStore/authStore', () => ({
   useAuthStore: () => ({
     user: {
@@ -19,8 +18,16 @@ jest.mock('../authStore/authStore', () => ({
     },
     login: jest.fn(),
     logout: jest.fn(),
-    api: mockApi,
   }),
+}));
+
+// Mock services
+import todoService from '../api/todoService';
+jest.mock('../api/todoService', () => ({
+  default: {
+    getTodos: jest.fn(),
+    updateTodo: jest.fn(),
+  },
 }));
 
 // Mock file upload hooks
@@ -108,42 +115,31 @@ describe('TodoContainer Checkbox Cell Click Functionality', () => {
     Swal.fire.mockResolvedValue({ isConfirmed: true });
 
     // 초기 todos fetch 모킹
-    mockApi.mockResolvedValue({
-      ok: true,
-      json: () =>
-        Promise.resolve([
-          {
-            todoSeq: 1,
-            todoContent: 'Test todo 1',
-            todoNote: 'Note 1',
-            completeDtm: null,
-            todoDate: '2024-01-01',
-          },
-        ]),
-    });
+    (todoService.getTodos as jest.Mock).mockResolvedValue([
+      {
+        todoSeq: 1,
+        todoContent: 'Test todo 1',
+        todoNote: 'Note 1',
+        completeDtm: null,
+        todoDate: '2024-01-01',
+      },
+    ]);
   });
 
   test('clicking the checkbox cell toggles the todo completion', async () => {
     const user = userEvent.setup();
 
-    mockApi
-      .mockResolvedValueOnce({
-        ok: true,
-        json: () =>
-          Promise.resolve([
-            {
-              todoSeq: 1,
-              todoContent: 'Test todo 1',
-              todoNote: 'Note 1',
-              completeDtm: null,
-              todoDate: '2024-01-01',
-            },
-          ]),
-      })
-      .mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve({}),
-      });
+    (todoService.getTodos as jest.Mock).mockResolvedValueOnce([
+      {
+        todoSeq: 1,
+        todoContent: 'Test todo 1',
+        todoNote: 'Note 1',
+        completeDtm: null,
+        todoDate: '2024-01-01',
+      },
+    ]);
+
+    (todoService.updateTodo as jest.Mock).mockResolvedValue({ success: true });
 
     render(<TodoContainer />);
 
@@ -167,10 +163,10 @@ describe('TodoContainer Checkbox Cell Click Functionality', () => {
     });
 
     // API가 호출되어야 함
-    expect(mockApi).toHaveBeenCalledWith(
-      '/api/todo/1',
+    expect(todoService.updateTodo).toHaveBeenCalledWith(
+      1,
       expect.objectContaining({
-        method: 'PATCH',
+        completeDtm: expect.any(String),
       }),
     );
   });
@@ -198,21 +194,16 @@ describe('TodoContainer Checkbox Cell Click Functionality', () => {
       resolveApiCall = resolve;
     });
 
-    mockApi
-      .mockResolvedValueOnce({
-        ok: true,
-        json: () =>
-          Promise.resolve([
-            {
-              todoSeq: 1,
-              todoContent: 'Test todo 1',
-              todoNote: 'Note 1',
-              completeDtm: null,
-              todoDate: '2024-01-01',
-            },
-          ]),
-      })
-      .mockReturnValueOnce(apiPromise);
+    (todoService.getTodos as jest.Mock).mockResolvedValue([
+      {
+        todoSeq: 1,
+        todoContent: 'Test todo 1',
+        todoNote: 'Note 1',
+        completeDtm: null,
+        todoDate: '2024-01-01',
+      },
+    ]);
+    (todoService.updateTodo as jest.Mock).mockReturnValue(apiPromise);
 
     render(<TodoContainer />);
 
@@ -230,10 +221,7 @@ describe('TodoContainer Checkbox Cell Click Functionality', () => {
     expect(checkboxCell).toHaveStyle({ cursor: 'not-allowed' });
 
     // API 호출 해결
-    resolveApiCall({
-      ok: true,
-      json: () => Promise.resolve({}),
-    });
+    resolveApiCall({ success: true });
 
     // 셀은 다시 pointer 커서를 가져야 함
     await waitFor(() => {
@@ -263,21 +251,16 @@ describe('TodoContainer Checkbox Cell Click Functionality', () => {
       resolveApiCall = resolve;
     });
 
-    mockApi
-      .mockResolvedValueOnce({
-        ok: true,
-        json: () =>
-          Promise.resolve([
-            {
-              todoSeq: 1,
-              todoContent: 'Test todo 1',
-              todoNote: 'Note 1',
-              completeDtm: null,
-              todoDate: '2024-01-01',
-            },
-          ]),
-      })
-      .mockReturnValueOnce(apiPromise);
+    (todoService.getTodos as jest.Mock).mockResolvedValue([
+      {
+        todoSeq: 1,
+        todoContent: 'Test todo 1',
+        todoNote: 'Note 1',
+        completeDtm: null,
+        todoDate: '2024-01-01',
+      },
+    ]);
+    (todoService.updateTodo as jest.Mock).mockReturnValue(apiPromise);
 
     render(<TodoContainer />);
 
@@ -295,13 +278,10 @@ describe('TodoContainer Checkbox Cell Click Functionality', () => {
     await user.click(checkboxCell);
     await user.click(checkboxCell);
 
-    // API는 한 번만 호출되어야 함 (초기 fetch + 한 번의 토글)
-    expect(mockApi).toHaveBeenCalledTimes(2);
+    // API는 한 번만 호출되어야 함 (초기 fetch는 beforeEach에서, 토글은 여기서 한 번)
+    expect(todoService.updateTodo).toHaveBeenCalledTimes(1);
 
     // API 호출 해결
-    resolveApiCall({
-      ok: true,
-      json: () => Promise.resolve({}),
-    });
+    resolveApiCall({ success: true });
   });
 });

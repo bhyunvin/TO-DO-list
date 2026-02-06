@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { API_URL } from '../api/client';
 import PropTypes from 'prop-types';
 import 'sweetalert2/dist/sweetalert2.min.css';
@@ -45,6 +45,13 @@ const ProfileUpdateForm = ({
   isSubmitting = false,
   onDirtyChange,
 }) => {
+  const isMounted = useRef(true);
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
   const { validateFiles, formatFileSize, getUploadPolicy } =
     useFileUploadValidator();
 
@@ -72,6 +79,7 @@ const ProfileUpdateForm = ({
   const [emailError, setEmailError] = useState('');
   const [profileImageError, setProfileImageError] = useState('');
   const [isLoadingDetail, setIsLoadingDetail] = useState(true);
+  const [localSubmitting, setLocalSubmitting] = useState(false);
 
   // 변경 감지를 위한 원본 데이터 (복호화된 상태)
   const [originalUser, setOriginalUser] = useState(null);
@@ -196,16 +204,18 @@ const ProfileUpdateForm = ({
    * 유효성 검사와 함께 이름 입력 변경 처리
    */
   const handleNameChange = (e) => {
-    const nameValue = e.target.value;
+    let nameValue = e.target.value;
+    // Defensive check for maxLength
+    if (nameValue.length > 200) {
+      nameValue = nameValue.slice(0, 200);
+    }
     setUserName(nameValue);
 
     // 실시간 유효성 검사
-    if (!nameValue.trim()) {
-      setNameError('이름을 입력해주세요.');
-    } else if (nameValue.length > 200) {
-      setNameError('이름은 200자 이내로 입력해주세요.');
-    } else {
+    if (nameValue.trim()) {
       setNameError('');
+    } else {
+      setNameError('이름을 입력해주세요.');
     }
   };
 
@@ -213,14 +223,16 @@ const ProfileUpdateForm = ({
    * 유효성 검사와 함께 이메일 입력 변경 처리
    */
   const handleEmailChange = (e) => {
-    const emailValue = e.target.value;
+    let emailValue = e.target.value;
+    // Defensive check for maxLength
+    if (emailValue.length > 100) {
+      emailValue = emailValue.slice(0, 100);
+    }
     setUserEmail(emailValue);
 
     // 실시간 유효성 검사
     if (emailValue.trim()) {
-      if (emailValue.length > 100) {
-        setEmailError('이메일은 100자 이내로 입력해주세요.');
-      } else if (isValidEmail(emailValue)) {
+      if (isValidEmail(emailValue)) {
         setEmailError('');
       } else {
         setEmailError('올바른 이메일 형식을 입력해주세요.');
@@ -327,10 +339,15 @@ const ProfileUpdateForm = ({
     };
 
     try {
+      setLocalSubmitting(true);
       await onSave(profileData);
     } catch (error) {
       console.error('Profile update error:', error);
       // 오류 처리는 부모 컴포넌트에서 수행됨
+    } finally {
+      if (isMounted.current) {
+        setLocalSubmitting(false);
+      }
     }
   };
 
@@ -621,6 +638,7 @@ const ProfileUpdateForm = ({
                 className="btn btn-outline-secondary w-100"
                 onClick={handleCancel}
                 disabled={
+                  localSubmitting ||
                   isSubmitting ||
                   uploadStatus === 'uploading' ||
                   uploadStatus === 'validating'
@@ -634,6 +652,7 @@ const ProfileUpdateForm = ({
                 type="submit"
                 className="btn btn-outline-primary w-100"
                 disabled={
+                  localSubmitting ||
                   isSubmitting ||
                   uploadStatus === 'uploading' ||
                   uploadStatus === 'validating' ||
@@ -642,7 +661,8 @@ const ProfileUpdateForm = ({
                   !!profileImageError
                 }
               >
-                {isSubmitting ||
+                {localSubmitting ||
+                isSubmitting ||
                 uploadStatus === 'uploading' ||
                 uploadStatus === 'validating' ? (
                   <>

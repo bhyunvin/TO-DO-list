@@ -1,12 +1,6 @@
 {
   "compilerOptions": {
-    "types": [
-      "vitest/globals",
-      "vite/client",
-      "bun",
-      "@types/jest",
-      "@testing-library/jest-dom"
-    ],
+    "types": ["vite/client", "bun", "@types/jest", "@testing-library/jest-dom"],
     "target": "ES2021",
     "useDefineForClassFields": true,
     "lib": ["ES2021", "DOM", "DOM.Iterable"],

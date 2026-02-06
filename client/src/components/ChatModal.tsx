@@ -13,7 +13,6 @@ import './ChatModal.css';
 const ChatModal = ({
   isOpen,
   onClose,
-  user,
   messages,
   onSendMessage,
   isLoading,
