@@ -239,7 +239,7 @@ export class UserService {
 
     if (tokenEntity) {
       tokenEntity.refreshToken = hashedToken;
-      // Audit Update
+      // 감사 정보 업데이트 (Audit Update)
       setAuditColumn({
         entity: tokenEntity,
         id: String(userSeq),
@@ -252,7 +252,7 @@ export class UserService {
         refreshToken: hashedToken,
         expDtm: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14일 후 만료 예시
       });
-      // Audit Insert
+      // 감사 정보 삽입 (Audit Insert)
       setAuditColumn({
         entity: tokenEntity,
         id: String(userSeq),
@@ -278,7 +278,6 @@ export class UserService {
   }
 
   // --- 사용자 정보 수정 ---
-
   async updateProfile(
     userSeq: number,
     updateUserDto: UpdateUserDto,

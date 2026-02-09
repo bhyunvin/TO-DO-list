@@ -252,8 +252,8 @@ export class AssistanceService {
     };
     const status = err.response?.status || err.status;
     return (
-      status === 429 || // Too Many Requests
-      status === 503 || // Service Unavailable
+      status === 429 || // 너무 많은 요청 (Too Many Requests)
+      status === 503 || // 서비스 일시 중단 (Service Unavailable)
       err.message?.includes('429') ||
       err.message?.includes('503') ||
       false
@@ -316,7 +316,7 @@ export class AssistanceService {
     return '문제가 발생했습니다. 다시 시도해주세요.';
   }
 
-  // --- Gemini Logic ---
+  // --- Gemini 로직 ---
 
   private async getGeminiResponse(
     dto: ChatRequestDto,
@@ -459,7 +459,7 @@ export class AssistanceService {
     return sanitizeHtml.default(unsafeHtml);
   }
 
-  // --- Tools Implementations ---
+  // --- 도구 구현부 (Tools Implementations) ---
 
   // Function call 실행: 런타임에서 타입 체크하여 타입 안정성 확보
   private async executeFunctionCall(

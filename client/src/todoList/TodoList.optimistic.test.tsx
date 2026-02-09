@@ -1,7 +1,17 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import PropTypes from 'prop-types';
 import TodoContainer from './TodoList';
+
+// HappyDOM에서 "global document" 에러를 해결하기 위한 로컬 screen 프록시
+const screen = new Proxy({} as typeof import('@testing-library/react').screen, {
+  get: (_, prop) => {
+    if (typeof document !== 'undefined' && document.body) {
+      return within(document.body)[prop as keyof ReturnType<typeof within>];
+    }
+    return undefined;
+  },
+});
 
 // SweetAlert2 모킹
 // SweetAlert2 모킹
@@ -244,6 +254,11 @@ describe('TodoContainer Optimistic UI Pattern', () => {
 
     // 체크박스 셀 클릭
     const checkboxCell = checkbox.closest('td');
+
+    const consoleSpy = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
+
     await user.click(checkboxCell);
 
     // API 실패 및 롤백 대기 - 체크박스가 체크 해제되어야 함
@@ -267,6 +282,8 @@ describe('TodoContainer Optimistic UI Pattern', () => {
         }),
       );
     });
+
+    consoleSpy.mockRestore();
   });
 
   test('prevents duplicate clicks on same todo while request is pending', async () => {
@@ -301,6 +318,7 @@ describe('TodoContainer Optimistic UI Pattern', () => {
     const checkboxCell = checkbox.closest('td');
 
     // 첫 번째 체크박스 셀 클릭
+    // 첫 번째 체크박스 셀 클릭
     await user.click(checkboxCell);
 
     // 즉시 다시 클릭 시도
@@ -308,10 +326,8 @@ describe('TodoContainer Optimistic UI Pattern', () => {
     await user.click(checkboxCell);
 
     // API는 한 번만 호출되어야 함
-    // API는 한 번만 호출되어야 함
     expect(todoService.updateTodo as jest.Mock).toHaveBeenCalledTimes(1);
 
-    // API 호출 해결
     // API 호출 해결
     resolveApiCall({ success: true });
   });
@@ -350,6 +366,7 @@ describe('TodoContainer Optimistic UI Pattern', () => {
     const checkboxCell1 = checkboxes[0].closest('td');
     const checkboxCell2 = checkboxes[1].closest('td');
 
+    // 두 체크박스 셀을 빠르게 클릭
     // 두 체크박스 셀을 빠르게 클릭
     await user.click(checkboxCell1);
     await user.click(checkboxCell2);
@@ -399,6 +416,12 @@ describe('TodoContainer Optimistic UI Pattern', () => {
     const checkboxCell = checkbox.closest('td');
 
     // 체크박스 셀 클릭
+    // 체크박스 셀 클릭
+    // 체크박스 셀 클릭
+    const consoleSpy = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
+
     await user.click(checkboxCell);
 
     // 오류 토스트 대기
@@ -419,6 +442,8 @@ describe('TodoContainer Optimistic UI Pattern', () => {
     await waitFor(() => {
       expect(checkbox).not.toBeChecked();
     });
+
+    consoleSpy.mockRestore();
   });
 
   test('handles timeout error with AbortController', async () => {
@@ -451,9 +476,14 @@ describe('TodoContainer Optimistic UI Pattern', () => {
     const checkboxCell = checkbox.closest('td');
 
     // 체크박스 셀 클릭
+    // 체크박스 셀 클릭
+    // 체크박스 셀 클릭
+    const consoleSpy = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
+
     await user.click(checkboxCell);
 
-    // 타임아웃 오류 대기
     // 타임아웃 오류 대기
     await waitFor(
       () => {
@@ -471,6 +501,8 @@ describe('TodoContainer Optimistic UI Pattern', () => {
 
     // 체크박스가 롤백되어야 함
     expect(checkbox).not.toBeChecked();
+
+    consoleSpy.mockRestore();
   });
 
   test('maintains correct state when multiple todos fail independently', async () => {
@@ -509,6 +541,10 @@ describe('TodoContainer Optimistic UI Pattern', () => {
     const checkboxCell1 = checkboxes[0].closest('td');
     const checkboxCell2 = checkboxes[1].closest('td');
 
+    const consoleSpy = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
+
     // 두 체크박스 셀 클릭
     await user.click(checkboxCell1);
     await user.click(checkboxCell2);
@@ -520,6 +556,8 @@ describe('TodoContainer Optimistic UI Pattern', () => {
       // Item 2는 체크 해제되어야 함 (롤백)
       expect(checkboxes[1]).not.toBeChecked();
     });
+
+    consoleSpy.mockRestore();
   });
 
   test('checkbox is disabled during pending request', async () => {
@@ -553,6 +591,7 @@ describe('TodoContainer Optimistic UI Pattern', () => {
     const checkbox = screen.getAllByRole('checkbox')[0];
     const checkboxCell = checkbox.closest('td');
 
+    // 체크박스 셀 클릭
     // 체크박스 셀 클릭
     await user.click(checkboxCell);
 

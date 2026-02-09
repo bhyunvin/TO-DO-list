@@ -138,8 +138,7 @@ const ChatModal = ({
     >
       <Modal.Header closeButton className="chat-modal-header">
         <Modal.Title id="chat-modal-title">
-          <FaRobot className="me-2" aria-hidden="true" /> Use AI Assistant AI
-          어시스턴트
+          <FaRobot className="me-2" aria-hidden="true" /> AI 어시스턴트
         </Modal.Title>
       </Modal.Header>
 

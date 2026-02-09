@@ -5,7 +5,7 @@ import { DefaultNamingStrategy, NamingStrategyInterface } from 'typeorm';
 function snakeCase(str: string): string {
   return str
     .replaceAll(/([a-z])([A-Z])/g, '$1_$2') // camelCase 경계
-    .replaceAll(/([A-Z])([A-Z][a-z])/g, '$1_$2') // XMLParser → XML_Parser
+    .replaceAll(/([A-Z])([A-Z][a-z])/g, '$1_$2') // 변환 예시: XMLParser → XML_Parser
     .toLowerCase();
 }
 

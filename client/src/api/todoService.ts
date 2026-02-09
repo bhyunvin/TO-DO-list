@@ -20,7 +20,7 @@ const todoApi = api.todo;
 
 const todoService = {
   async getTodos(date: string) {
-    // .get('/', { query: { date } })
+    // 할 일 목록 조회 (GET /)
     const { data, error } = await todoApi.get({
       query: { date },
     });
@@ -37,7 +37,7 @@ const todoService = {
   },
 
   async searchTodos(startDate: string, endDate: string, keyword: string) {
-    // .get('/search', { query: { startDate, endDate, keyword } })
+    // 할 일 검색 (GET /search)
     const { data, error } = await todoApi.search.get({
       query: { startDate, endDate, keyword },
     });
@@ -57,8 +57,8 @@ const todoService = {
     const { data, error } = await todoApi[idStr].file.get();
 
     if (error) {
-      // 404 is acceptable if no files exist, but here we likely get an array (empty or not)
-      // If backend throws for no files, handle specific status codes if needed.
+      // 파일이 하나도 없는 경우 404가 발생할 수 있음.
+      // 필요에 따라 백엔드에서 파일 없음 에러를 던지는 로직을 처리.
       throw new ApiError(
         typeof error.value === 'string' ? error.value : '첨부파일 조회 실패',
         Number(error.status),
@@ -150,7 +150,7 @@ const todoService = {
   },
 
   async downloadExcel(startDate: string, endDate: string) {
-    // GET /export
+    // 엑셀 내보내기 (GET /export)
     const { data, error } = await todoApi.export.get({
       query: { startDate, endDate },
     });

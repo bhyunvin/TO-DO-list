@@ -5,7 +5,7 @@ import './CreateTodoForm.css'; // 필요 시 특정 스타일 재정의를 위�
 
 const CreateTodoForm = ({ onAddTodo, onCancel }) => {
   const handleAddTodo = async (formData) => {
-    // formData: { todoContent, todoNote, todoFiles }
+    // 폼 데이터 구조: { todoContent, todoNote, todoFiles }
     const result = await onAddTodo(formData);
 
     if (result?.success) {

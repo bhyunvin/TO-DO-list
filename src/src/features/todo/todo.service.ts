@@ -126,7 +126,7 @@ export class TodoService {
         todoNote: dto.todoNote,
       });
 
-      // Audit
+      // 감사 정보 설정 (Audit)
       setAuditColumn({
         entity: newTodo,
         id: String(userSeq),
@@ -353,7 +353,7 @@ export class TodoService {
       dataRow.getCell('E').value = todo.todoNote || '';
     });
 
-    // buffer type conversion for return
+    // 반환을 위해 버퍼 타입 변환
     const buffer = await workbook.xlsx.writeBuffer();
     return Buffer.from(buffer);
   }

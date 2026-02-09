@@ -14,8 +14,8 @@ export const loadSwal = async () => {
 
   if (theme === 'dark') {
     return Swal.mixin({
-      background: '#2b3035', // Bootstrap dark modal background
-      color: '#dee2e6', // Bootstrap dark text color
+      background: '#2b3035', // Bootstrap 다크 모달 배경색
+      color: '#dee2e6', // Bootstrap 다크 텍스트 색상
     });
   }
 
@@ -136,5 +136,82 @@ export const showNavigationConfirmAlert = () => {
     text: '정말 이동하시겠습니까? 변경사항이 저장되지 않습니다.',
     confirmButtonText: '이동',
     cancelButtonText: '취소',
+  });
+};
+
+/**
+ * 엑셀 내보내기를 위한 날짜 범위 선택 모달을 표시합니다.
+ * @returns {Promise<import('sweetalert2').SweetAlertResult>}
+ */
+export const showDateRangePrompt = async () => {
+  const formatDate = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const now = new Date();
+  const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+  const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+  const Swal = await loadSwal();
+  return Swal.fire({
+    title: 'Excel 내보내기',
+    html: `
+      <div style="display: flex; flex-direction: column; gap: 15px; text-align: left;">
+        <div>
+          <label for="startDate" style="display: block; margin-bottom: 5px; font-weight: 500;">시작일</label>
+          <input 
+            type="date" 
+            id="startDate" 
+            class="swal2-input" 
+            value="${formatDate(firstDay)}"
+            style="width: 100%; margin: 0; padding: 10px;"
+          />
+        </div>
+        <div>
+          <label for="endDate" style="display: block; margin-bottom: 5px; font-weight: 500;">종료일</label>
+          <input 
+            type="date" 
+            id="endDate" 
+            class="swal2-input" 
+            value="${formatDate(lastDay)}"
+            style="width: 100%; margin: 0; padding: 10px;"
+          />
+        </div>
+      </div>
+    `,
+    showCancelButton: true,
+    reverseButtons: true,
+    confirmButtonText: '확인',
+    cancelButtonText: '취소',
+    confirmButtonColor: 'transparent',
+    cancelButtonColor: 'transparent',
+    customClass: {
+      confirmButton: 'btn btn-outline-primary',
+      cancelButton: 'btn btn-outline-secondary me-2',
+    },
+    buttonsStyling: false,
+    focusConfirm: false,
+    preConfirm: () => {
+      const startDate = (
+        document.getElementById('startDate') as HTMLInputElement
+      ).value;
+      const endDate = (document.getElementById('endDate') as HTMLInputElement)
+        .value;
+
+      if (!startDate || !endDate) {
+        Swal.showValidationMessage('날짜를 선택해주세요');
+        return false;
+      }
+
+      if (startDate > endDate) {
+        Swal.showValidationMessage('시작일은 종료일보다 이전이어야 합니다');
+        return false;
+      }
+
+      return { startDate, endDate };
+    },
   });
 };

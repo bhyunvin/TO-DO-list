@@ -46,11 +46,10 @@ const mockAiService = {
   })),
 };
 
-// Mock absolute paths (safest)
+// 절대 경로 모킹 (가장 안전함)
 const ROOT = '/Users/bhyunvin/workspace/todoList/TO-DO-list/client/src';
 
-// Mock ThemeStore (Zustand)
-// Mock ThemeStore (Zustand)
+// ThemeStore 모킹 (Zustand)
 const initialThemeState = {
   theme: 'light',
   toggleTheme: jest.fn(),
@@ -62,11 +61,11 @@ const mockThemeStore = jest.fn((selector) => {
   return selector ? selector(initialThemeState) : initialThemeState;
 });
 
-// Add Zustand static methods
+// Zustand 정적 메서드 추가
 Object.assign(mockThemeStore, {
   getState: jest.fn(() => initialThemeState),
   setState: jest.fn(),
-  subscribe: jest.fn(() => jest.fn()), // return unsubscribe function
+  subscribe: jest.fn(() => jest.fn()), // 구독 해제 함수 반환
 });
 
 mock.module(`${ROOT}/stores/themeStore.ts`, () => ({
@@ -84,7 +83,7 @@ mock.module(`${ROOT}/api/userService.ts`, () => ({ default: mockUserService }));
 mock.module(`${ROOT}/api/authService.ts`, () => ({ default: mockAuthService }));
 mock.module(`${ROOT}/api/aiService.ts`, () => ({ default: mockAiService }));
 
-// Mock Vercel libraries
+// Vercel 라이브러리 모킹
 mock.module('@vercel/analytics/react', () => ({
   Analytics: () => null,
 }));

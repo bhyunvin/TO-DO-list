@@ -1,5 +1,15 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, waitFor, within } from '@testing-library/react';
 import TodoList from './TodoList';
+
+// HappyDOM에서 "global document" 오류를 수정하기 위한 로컬 screen 프록시
+const screen = new Proxy({} as typeof import('@testing-library/react').screen, {
+  get: (_, prop) => {
+    if (typeof document !== 'undefined' && document.body) {
+      return within(document.body)[prop as keyof ReturnType<typeof within>];
+    }
+    return undefined;
+  },
+});
 
 jest.mock('../api/todoService', () => ({
   getTodos: jest.fn(),
@@ -56,7 +66,7 @@ jest.mock('sweetalert2', () => ({
   fire: jest.fn(() => Promise.resolve({ isConfirmed: true })),
 }));
 
-// todoService import removed (moved to top)
+// todoService 임포트 제거됨 (상단으로 이동)
 
 const createDelayedResponse = (data, delay = 100) => {
   return new Promise((resolve) => {

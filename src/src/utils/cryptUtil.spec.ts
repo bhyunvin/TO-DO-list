@@ -39,7 +39,7 @@ describe('CryptUtil', () => {
     it('should encrypt and decrypt correctly', async () => {
       const encrypted = await encryptSymmetric(TEST_PLAINTEXT);
       expect(encrypted).not.toBe(TEST_PLAINTEXT);
-      expect(encrypted).toContain(':'); // Should have IV:Tag:Ciphertext format
+      expect(encrypted).toContain(':'); // IV:Tag:Ciphertext 형식을 가져야 함
 
       const decrypted = await decryptSymmetric(encrypted);
       expect(decrypted).toBe(TEST_PLAINTEXT);

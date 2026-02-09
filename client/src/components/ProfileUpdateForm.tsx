@@ -205,7 +205,7 @@ const ProfileUpdateForm = ({
    */
   const handleNameChange = (e) => {
     let nameValue = e.target.value;
-    // Defensive check for maxLength
+    // maxLength에 대한 방어적 확인
     if (nameValue.length > 200) {
       nameValue = nameValue.slice(0, 200);
     }
@@ -224,7 +224,7 @@ const ProfileUpdateForm = ({
    */
   const handleEmailChange = (e) => {
     let emailValue = e.target.value;
-    // Defensive check for maxLength
+    // maxLength에 대한 방어적 확인
     if (emailValue.length > 100) {
       emailValue = emailValue.slice(0, 100);
     }
@@ -232,7 +232,7 @@ const ProfileUpdateForm = ({
 
     // 실시간 유효성 검사
     if (emailValue.trim()) {
-      if (isValidEmail(emailValue)) {
+      if (isValidEmail(emailValue.trim())) {
         setEmailError('');
       } else {
         setEmailError('올바른 이메일 형식을 입력해주세요.');
@@ -274,7 +274,7 @@ const ProfileUpdateForm = ({
       if (userEmail.length > 100) {
         setEmailError('이메일은 100자 이내로 입력해주세요.');
         isValid = false;
-      } else if (isValidEmail(userEmail)) {
+      } else if (isValidEmail(userEmail.trim())) {
         setEmailError('');
       } else {
         setEmailError('올바른 이메일 형식을 입력해주세요.');

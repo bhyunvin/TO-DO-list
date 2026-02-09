@@ -19,10 +19,10 @@ export const dbLoggingPlugin = new Elysia({
   const method = request.method;
   const clientIp = getClientIp(request);
 
-  // 2. Status Code
+  // 2. 상태 코드 (Status Code)
   const statusCode = set.status ? Number(set.status) : 200;
 
-  // 3. Error Message
+  // 3. 에러 메시지 (Error Message)
   const errorMsg = statusCode >= 400 ? 'Client/Server Error' : undefined;
 
   // 4. User ID는 context에서 가져올 수 없으므로 null로 설정

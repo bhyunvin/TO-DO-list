@@ -21,9 +21,9 @@ describe('Auth Controller (E2E)', () => {
     const { data, response, error } = await api.user.register.post(payload);
 
     if (error) {
-      console.error('Register Error:', error.status, error.value);
+      console.error('회원가입 에러:', error.status, error.value);
     }
-    console.log('Register Status:', response.status);
+    console.log('회원가입 상태:', response.status);
 
     expect(response.status).toBe(201);
     expect(data.userEmail).toBe(TEST_EMAIL);
@@ -67,9 +67,9 @@ describe('Auth Controller (E2E)', () => {
 
     const { response, error } = await api.user.login.post(payload);
 
-    // 401 Unauthorized or 400 Bad Request depending on implementation
+    // 구현에 따라 401 Unauthorized 또는 400 Bad Request 반환
     expect(response.status).not.toBe(200);
-    // When error occurs, data is null. Check error.value
+    // 에러 발생 시 데이터는 null임. error.value를 확인
     expect(error?.value).toMatchObject({ success: false });
   });
 

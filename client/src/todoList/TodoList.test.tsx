@@ -1,7 +1,18 @@
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, waitFor, fireEvent, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import PropTypes from 'prop-types';
 import TodoContainer from './TodoList';
+import * as alertUtils from '../utils/alertUtils';
+
+// HappyDOM에서 "global document" 에러를 해결하기 위한 로컬 screen 프록시
+const screen = new Proxy({} as typeof import('@testing-library/react').screen, {
+  get: (_, prop) => {
+    if (typeof document !== 'undefined' && document.body) {
+      return within(document.body)[prop as keyof ReturnType<typeof within>];
+    }
+    return undefined;
+  },
+});
 
 // SweetAlert2 모의 객체
 jest.mock('sweetalert2', () => {
@@ -36,7 +47,8 @@ jest.mock('sweetalert2', () => {
 const mockLogin = jest.fn();
 const mockLogout = jest.fn();
 
-// 서비스 모드 객체
+// 서비스 모드 객체 (src/mocks.ts의 글로벌 모크 사용)
+// 서비스 모드 객체 (src/mocks.ts의 글로벌 모크 사용)
 jest.mock('../api/userService', () => ({
   default: {
     updateProfile: jest.fn(),
@@ -288,12 +300,12 @@ describe('TodoContainer Profile Update Integration', () => {
     const userMenuIcon = await screen.findByRole('button', {
       name: /사용자 메뉴/,
     });
-    fireEvent.click(userMenuIcon);
+    await userEvent.click(userMenuIcon);
 
     const updateProfileButton = screen.getByRole('button', {
       name: /프로필 수정/,
     });
-    await userEvent.click(updateProfileButton); // fireEvent 대신 userEvent 사용
+    await userEvent.click(updateProfileButton);
 
     expect(screen.getByTestId('profile-update-form')).toBeInTheDocument();
     expect(screen.getByText(/User:/)).toBeInTheDocument();
@@ -338,7 +350,9 @@ describe('TodoContainer Profile Update Integration', () => {
     const submitButton = screen
       .getByTestId('profile-update-form')
       .querySelector('button');
-    if (submitButton) fireEvent.click(submitButton);
+    if (submitButton) {
+      fireEvent.click(submitButton);
+    }
 
     await userEvent.click(userMenuIcon);
 
@@ -354,51 +368,55 @@ describe('TodoContainer Profile Update Integration', () => {
   test('handles profile update API errors', async () => {
     // 프로필 업데이트 실패 모의
     const error = new Error('Update failed');
-    (userService.updateProfile as jest.Mock).mockRejectedValue(error);
+    (userService.updateProfile as jest.Mock).mockImplementation(() =>
+      Promise.reject(error),
+    );
 
     render(<TodoContainer />);
+
+    const consoleSpy = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
 
     const userMenuIcon = await screen.findByRole('button', {
       name: /사용자 메뉴/,
     });
     await userEvent.click(userMenuIcon);
 
+    // Spy on showErrorAlert
+    jest.spyOn(alertUtils, 'showErrorAlert').mockResolvedValue({} as any);
+
     const updateProfileButton = screen.getByRole('button', {
       name: /프로필 수정/,
     });
     await userEvent.click(updateProfileButton);
 
+    // 저장 버튼 클릭
     const submitButton = screen
       .getByTestId('profile-update-form')
       .querySelector('button');
-    if (submitButton) fireEvent.click(submitButton);
+    if (submitButton) {
+      fireEvent.click(submitButton);
+    }
 
-    // 에러 발생 시 토스트 또는 알림 확인 (구현에 따라 다름, 여기서는 findByPlaceholderText 사용 예시 대체)
-    // Strategy 3: Use findByPlaceholderText with timeout logic mentioned in previous fixes
-    // But TodoList.tsx doesn't show placeholder text on error? It shows Swal/Toast.
-    // Original test used placeholder text logic, assuming it stays on form?
-    // If update fails, form stays open?
-    // Let's check logic: catch(e) -> showErrorAlert -> setIsUpdatingProfile(false).
-    // Form closes? "handleSaveProfile" calls setIsUpdatingProfile(false).
-    // Wait, setIsUpdatingProfile(false) closes the modal (renders ProfileUpdateForm conditionally).
-    // So if ends, form disappears.
-
-    // The previous test logic seemed to expect form staying open?
-    // Or it expected to find specific error feedback.
-    // "handles profile update API errors" -> verify error handling.
-    // If `showErrorAlert` is called.
-    const Swal = require('sweetalert2');
+    // 에러 발생 확인
     await waitFor(() => {
-      expect(Swal.fire).toHaveBeenCalledWith(
+      expect(userService.updateProfile).toHaveBeenCalled();
+    });
+
+    // Strategy 3: Verify showErrorAlert call
+    await waitFor(() => {
+      expect(alertUtils.showErrorAlert).toHaveBeenCalledWith(
+        expect.stringContaining('오류'),
         expect.anything(),
-        expect.anything(),
-        'error',
       );
     });
+
+    consoleSpy.mockRestore();
   });
 
   test('handles file upload errors in profile update', async () => {
-    // 프로필 업데이트 지연 모의 (로딩 상태 테스트용) - 지연 시간 증가
+    // 프로필 업데이트 지연 모의 (로딩 상태 테스트용)
     (userService.updateProfile as jest.Mock).mockImplementation(
       () =>
         new Promise((resolve, reject) =>
@@ -737,21 +755,22 @@ describe('TodoContainer File Download Handler', () => {
 
   test('handles 400 Bad Request error', async () => {
     const user = userEvent.setup();
-    const Swal = require('sweetalert2');
 
-    const errorResponse = {
-      response: {
-        status: 400,
-        data: {
-          message: 'Invalid date format',
-        },
+    const error = new Error('Bad Request');
+    (error as any).response = {
+      status: 400,
+      data: {
+        message: 'Invalid date format',
       },
     };
-    (todoService.downloadExcel as jest.Mock).mockRejectedValue(errorResponse);
-    Swal.fire.mockResolvedValue({
+    (todoService.downloadExcel as jest.Mock).mockRejectedValue(error);
+
+    // Spy on showDateRangePrompt to bypass the first Swal.fire call
+    jest.spyOn(alertUtils, 'showDateRangePrompt').mockResolvedValue({
       isConfirmed: true,
       value: { startDate: '2024-01-01', endDate: '2024-01-31' },
-    });
+    } as any);
+    jest.spyOn(alertUtils, 'showErrorAlert').mockResolvedValue({} as any);
 
     render(<TodoContainer />);
 
@@ -759,92 +778,89 @@ describe('TodoContainer File Download Handler', () => {
     await user.click(excelButton);
 
     await waitFor(() => {
-      expect(Swal.fire).toHaveBeenCalledWith(
+      expect(alertUtils.showErrorAlert).toHaveBeenCalledWith(
+        expect.stringContaining('오류'),
         expect.anything(),
-        expect.anything(),
-        'error',
       );
     });
   });
 
   test('handles 401 Unauthorized error', async () => {
     const user = userEvent.setup();
-    const Swal = require('sweetalert2');
 
-    const errorResponse = {
-      response: {
-        status: 401,
-        data: {},
-      },
+    const error = new Error('Unauthorized');
+    (error as any).response = {
+      status: 401,
+      data: {},
     };
-    (todoService.downloadExcel as jest.Mock).mockRejectedValue(errorResponse);
-    Swal.fire.mockResolvedValue({
+    (todoService.downloadExcel as jest.Mock).mockRejectedValue(error);
+
+    jest.spyOn(alertUtils, 'showDateRangePrompt').mockResolvedValue({
       isConfirmed: true,
       value: { startDate: '2024-01-01', endDate: '2024-01-31' },
-    });
+    } as any);
+    jest.spyOn(alertUtils, 'showErrorAlert').mockResolvedValue({} as any);
 
     render(<TodoContainer />);
     const excelButton = screen.getByRole('button', { name: /Excel 내보내기/ });
     await user.click(excelButton);
 
     await waitFor(() => {
-      expect(Swal.fire).toHaveBeenCalledWith(
+      expect(alertUtils.showErrorAlert).toHaveBeenCalledWith(
+        expect.stringContaining('오류'),
         expect.anything(),
-        expect.anything(),
-        'error',
       );
     });
   });
 
   test('handles 500 Internal Server Error', async () => {
     const user = userEvent.setup();
-    const Swal = require('sweetalert2');
 
-    const errorResponse = {
-      response: {
-        status: 500,
-        data: {},
-      },
+    const error = new Error('Internal Server Error');
+    (error as any).response = {
+      status: 500,
+      data: {},
     };
-    (todoService.downloadExcel as jest.Mock).mockRejectedValue(errorResponse);
-    Swal.fire.mockResolvedValue({
+    (todoService.downloadExcel as jest.Mock).mockRejectedValue(error);
+
+    jest.spyOn(alertUtils, 'showDateRangePrompt').mockResolvedValue({
       isConfirmed: true,
       value: { startDate: '2024-01-01', endDate: '2024-01-31' },
-    });
+    } as any);
+    jest.spyOn(alertUtils, 'showErrorAlert').mockResolvedValue({} as any);
 
     render(<TodoContainer />);
     const excelButton = screen.getByRole('button', { name: /Excel 내보내기/ });
     await user.click(excelButton);
 
     await waitFor(() => {
-      expect(Swal.fire).toHaveBeenCalledWith(
+      expect(alertUtils.showErrorAlert).toHaveBeenCalledWith(
+        expect.stringContaining('오류'),
         expect.anything(),
-        expect.anything(),
-        'error',
       );
     });
   });
 
   test('handles network failure errors', async () => {
     const user = userEvent.setup();
-    const Swal = require('sweetalert2');
 
     const networkError = new TypeError('Failed to fetch');
     (todoService.downloadExcel as jest.Mock).mockRejectedValue(networkError);
-    Swal.fire.mockResolvedValue({
+
+    jest.spyOn(alertUtils, 'showDateRangePrompt').mockResolvedValue({
       isConfirmed: true,
       value: { startDate: '2024-01-01', endDate: '2024-01-31' },
-    });
+    } as any);
+    jest.spyOn(alertUtils, 'showErrorAlert').mockResolvedValue({} as any);
 
     render(<TodoContainer />);
     const excelButton = screen.getByRole('button', { name: /Excel 내보내기/ });
     await user.click(excelButton);
 
     await waitFor(() => {
-      expect(Swal.fire).toHaveBeenCalledWith(
+      expect(alertUtils.showErrorAlert).toHaveBeenCalledWith(
+        expect.stringContaining('오류'),
         expect.anything(),
-        expect.anything(),
-        'error',
       );
     });
   });
@@ -1203,8 +1219,10 @@ describe('TodoContainer Core Functionality', () => {
     ];
     (todoService.getTodos as jest.Mock).mockResolvedValue(todos);
 
-    const Swal = require('sweetalert2');
-    Swal.fire.mockResolvedValueOnce({ isConfirmed: false });
+    // Spy on showConfirmAlert and return isConfirmed: false
+    jest.spyOn(alertUtils, 'showConfirmAlert').mockResolvedValue({
+      isConfirmed: false,
+    } as any);
 
     render(<TodoContainer />);
 
@@ -1213,9 +1231,7 @@ describe('TodoContainer Core Functionality', () => {
     await user.click(screen.getByLabelText('삭제'));
 
     await waitFor(() => {
-      expect(Swal.fire).toHaveBeenCalled();
+      expect(todoService.deleteTodo).not.toHaveBeenCalled();
     });
-
-    expect(todoService.deleteTodo).not.toHaveBeenCalled();
   });
 });

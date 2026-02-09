@@ -2,7 +2,7 @@ import { jest, describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { act } from '@testing-library/react';
 import { useThemeStore } from './themeStore.real';
 
-// localStorage mock
+// localStorage 모킹
 const localStorageMock = (() => {
   let store: Record<string, string> = {};
 
@@ -20,7 +20,7 @@ const localStorageMock = (() => {
   };
 })();
 
-// window.matchMedia mock
+// window.matchMedia 모킹
 const createMatchMediaMock = (matches: boolean) => () =>
   ({
     matches,
@@ -329,7 +329,7 @@ describe('themeStore', () => {
         useThemeStore.getState().initializeTheme();
       });
 
-      // implementation defaults to dark regardless of system light preference
+      // 시스템 라이트 모드 설정과 관계없이 기본적으로 다크 모드로 설정됨
       expect(useThemeStore.getState().theme).toBe('dark');
       expect(document.documentElement.dataset.theme).toBe('dark');
     });

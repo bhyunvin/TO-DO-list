@@ -66,17 +66,17 @@ describe('useDailyDateReset', () => {
     jest.setSystemTime(new Date('2025-01-01T10:00:00'));
     const todayInitial = new Date('2025-01-01T10:00:00');
 
-    // Need to simulate "already visited today" so initial render DOES NOT trigger.
+    // "이미 오늘 방문함" 상태를 시뮬레이션하여 초기 렌더링 시 트리거되지 않도록 함
     localStorage.setItem('lastDailyReset', '2025-01-01');
 
     renderHook(() => useDailyDateReset(todayInitial, handleTodayForTest));
 
     expect(handleTodayForTest).not.toHaveBeenCalled();
 
-    // Now time travel to tomorrow
+    // 이제 내일로 시간 이동
     jest.setSystemTime(new Date('2025-01-02T10:00:00'));
 
-    // Visibility change
+    // 화면 표시 상태 변경 (Visibility change)
     Object.defineProperty(document, 'visibilityState', {
       value: 'visible',
       writable: true,

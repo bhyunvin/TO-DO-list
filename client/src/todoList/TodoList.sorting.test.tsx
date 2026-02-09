@@ -1,6 +1,16 @@
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { render, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import TodoList from './TodoList';
+
+// HappyDOM에서 "global document" 에러를 해결하기 위한 로컬 screen 프록시
+const screen = new Proxy({} as typeof import('@testing-library/react').screen, {
+  get: (_, prop) => {
+    if (typeof document !== 'undefined' && document.body) {
+      return within(document.body)[prop as keyof ReturnType<typeof within>];
+    }
+    return undefined;
+  },
+});
 
 jest.mock('../authStore/authStore', () => ({
   useAuthStore: () => ({
@@ -114,7 +124,7 @@ describe('TodoContainer Sorting Behavior', () => {
 
     // Item 3 (첫 번째 항목)을 완료로 토글 - 체크박스가 아닌 셀 클릭
     const todo3Row = screen.getByRole('row', { name: /Todo 3/ });
-    // Find the cell with checkbox-cell class within the row
+    // 행(row) 내에서 checkbox-cell 클래스를 가진 셀 찾기
     const checkboxCell = within(todo3Row)
       .getAllByRole('cell')
       .find((cell) => cell.classList.contains('checkbox-cell'));

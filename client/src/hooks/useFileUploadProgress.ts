@@ -138,7 +138,7 @@ export const useFileUploadProgress = () => {
   /**
    * 진행 상황 추적과 함께 파일 업로드
    */
-  /* Helper to process failed files */
+  /* 업로드에 실패한 파일들을 처리하기 위한 헬퍼 함수 */
   const getFailedFilesErrors = (
     files: File[],
     uploadedFilesList: UploadedFile[],
@@ -343,10 +343,10 @@ export const useFileUploadProgress = () => {
    */
   const cancelUpload = useCallback(() => {
     if (xhrRef.current) {
-      xhrRef.current.abort(); // xhr.abort() triggers onabort
+      xhrRef.current.abort(); // xhr.abort() 호출 시 onabort 이벤트가 트리거됨
       xhrRef.current = null;
     }
-    // onabort will handle state reset or we ensure it here if onabort logic is specific
+    // onabort가 상태 초기화를 처리하거나, 여기서 직접 초기화 로직을 보장함
     setUploadStatus('idle');
     setUploadProgress({});
   }, []);

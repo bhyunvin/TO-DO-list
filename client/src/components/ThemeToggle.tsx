@@ -21,13 +21,18 @@ const ThemeToggle = () => {
   };
 
   return (
-    <button
-      type="button"
+    <div
       className="theme-toggle-wrapper"
       onClick={handleToggle}
       role="switch"
       aria-checked={theme === 'dark'}
       aria-label="다크 모드 전환"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          handleToggle(e as any);
+        }
+      }}
     >
       <span className="theme-toggle-label">다크 모드</span>
       <div className="theme-toggle-switch">
@@ -39,7 +44,7 @@ const ThemeToggle = () => {
           </div>
         </div>
       </div>
-    </button>
+    </div>
   );
 };
 

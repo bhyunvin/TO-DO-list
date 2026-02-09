@@ -33,7 +33,7 @@ const FileUploadProgress = ({
   files = [],
   validationResults = [],
   uploadProgress = {},
-  uploadStatus = 'idle', // 'idle', 'validating', 'uploading', 'success', 'error', 'partial_success'
+  uploadStatus = 'idle', // 가능한 상태: 'idle', 'validating', 'uploading', 'success', 'error', 'partial_success'
   uploadErrors = [],
   uploadedFiles = [],
   onRemoveFile = null,
@@ -105,7 +105,7 @@ const FileUploadProgress = ({
 
     return {
       isValid: result.isValid,
-      message: result.isValid ? 'Valid' : getUserFriendlyMessage(result),
+      message: result.isValid ? '유효함' : getUserFriendlyMessage(result),
     };
   };
 
@@ -799,7 +799,11 @@ const FileUploadProgress = ({
   const renderFileList = () => {
     if (files.length === 0) return null;
 
-    return <ListGroup className="mb-3">{files.map(renderFileItem)}</ListGroup>;
+    return (
+      <ListGroup className="mb-3">
+        {files.map((file, index) => renderFileItem(file, index))}
+      </ListGroup>
+    );
   };
 
   /**

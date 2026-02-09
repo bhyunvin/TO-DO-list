@@ -209,7 +209,7 @@ export const decryptSymmetric = async (text: string): Promise<string> => {
     return new TextDecoder().decode(decrypted);
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
-    // If it's our custom error, rethrow it
+    // 커스텀 에러인 경우 다시 던짐
     if (errorMsg === 'Invalid ciphertext format') {
       throw error;
     }
@@ -246,12 +246,12 @@ const getSivKey = (): Promise<Uint8Array> => {
           info: new TextEncoder().encode('AES-SIV-DERIVED-KEY'),
         },
         masterKey,
-        512, // 64 bytes * 8 bits
+        512, // 64 바이트 * 8 비트
       );
 
       return new Uint8Array(derivedBits);
     } catch (error) {
-      _sivKeyPromise = null; // Reset promise on failure to allow retry
+      _sivKeyPromise = null; // 실패 시 재시도를 허용하기 위해 promise 초기화
       const errorMsg = error instanceof Error ? error.message : String(error);
       logger.error(`SIV key derivation failed: ${errorMsg}`);
       throw new Error('Failed to derive SIV key');

@@ -20,7 +20,7 @@ export class MailService {
     userEmail: string,
     title: string,
     content: string,
-    file?: File, // Web Standard File
+    file?: File, // 웹 표준 File 객체
   ): Promise<void> {
     const developerEmail = process.env.GMAIL_USER;
     if (!developerEmail) throw new Error('GMAIL_USER config missing');

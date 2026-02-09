@@ -309,7 +309,7 @@ export class FileUploadErrorService {
 
       if (!result.isValid) {
         errors.push({
-          fileName: file.name, // Web Standard File api uses 'name'
+          fileName: file.name, // 웹 표준 File API는 'name' 속성을 사용함
           errorCode: result.errorCode || 'UNKNOWN_ERROR',
           errorMessage: result.errorMessage || 'Unknown validation error',
           fileSize: file.size,

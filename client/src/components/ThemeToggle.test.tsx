@@ -1,12 +1,7 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent } from '../test-utils';
 import userEvent from '@testing-library/user-event';
 import ThemeToggle from './ThemeToggle';
 import { useThemeStore } from '../stores/themeStore';
-
-// Zustand 스토어 모킹 - Global mock in setupTests/mocks.ts handled this.
-// jest.mock('../stores/themeStore', () => ({
-//   useThemeStore: jest.fn(),
-// }));
 
 describe('ThemeToggle', () => {
   let mockToggleTheme;

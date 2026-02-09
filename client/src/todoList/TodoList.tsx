@@ -38,7 +38,7 @@ import {
   showAlert,
   showConfirmAlert,
   showSuccessAlert,
-  loadSwal,
+  showDateRangePrompt,
 } from '../utils/alertUtils';
 
 // Components
@@ -773,76 +773,8 @@ const TodoContainer = () => {
     resetRetryState();
   };
 
-  const showDateRangeModal = async () => {
-    const now = new Date();
-    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
-    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-
-    const Swal = await loadSwal();
-    const result = await Swal.fire({
-      title: 'Excel 내보내기',
-      html: `
-        <div style="display: flex; flex-direction: column; gap: 15px; text-align: left;">
-          <div>
-            <label for="startDate" style="display: block; margin-bottom: 5px; font-weight: 500;">시작일</label>
-            <input 
-              type="date" 
-              id="startDate" 
-              class="swal2-input" 
-              value="${formatDate(firstDay)}"
-              style="width: 100%; margin: 0; padding: 10px;"
-            />
-          </div>
-          <div>
-            <label for="endDate" style="display: block; margin-bottom: 5px; font-weight: 500;">종료일</label>
-            <input 
-              type="date" 
-              id="endDate" 
-              class="swal2-input" 
-              value="${formatDate(lastDay)}"
-              style="width: 100%; margin: 0; padding: 10px;"
-            />
-          </div>
-        </div>
-      `,
-      showCancelButton: true,
-      reverseButtons: true,
-      confirmButtonText: '확인',
-      cancelButtonText: '취소',
-      confirmButtonColor: 'transparent',
-      cancelButtonColor: 'transparent',
-      customClass: {
-        confirmButton: 'btn btn-outline-primary',
-        cancelButton: 'btn btn-outline-secondary me-2',
-      },
-      buttonsStyling: false,
-      focusConfirm: false,
-      preConfirm: () => {
-        const startDate = (
-          document.getElementById('startDate') as HTMLInputElement
-        ).value;
-        const endDate = (document.getElementById('endDate') as HTMLInputElement)
-          .value;
-
-        if (!startDate || !endDate) {
-          Swal.showValidationMessage('날짜를 선택해주세요');
-          return false;
-        }
-
-        if (startDate > endDate) {
-          Swal.showValidationMessage('시작일은 종료일보다 이전이어야 합니다');
-          return false;
-        }
-
-        return { startDate, endDate };
-      },
-    });
-
-    return result;
-  };
-
   const handleExcelExport = async () => {
-    const result = await showDateRangeModal();
+    const result = await showDateRangePrompt();
 
     if (!result.isConfirmed) {
       return;
@@ -1145,7 +1077,6 @@ const TodoContainer = () => {
       <ChatModal
         isOpen={isChatOpen}
         onClose={handleChatToggle}
-        user={user}
         messages={messages}
         onSendMessage={handleSendMessage}
         isLoading={isLoading}

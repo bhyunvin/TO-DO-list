@@ -1,7 +1,17 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import PropTypes from 'prop-types';
 import TodoContainer from './TodoList';
+
+// HappyDOM에서 "global document" 에러를 해결하기 위한 로컬 screen 프록시
+const screen = new Proxy({} as typeof import('@testing-library/react').screen, {
+  get: (_, prop) => {
+    if (typeof document !== 'undefined' && document.body) {
+      return within(document.body)[prop as keyof ReturnType<typeof within>];
+    }
+    return undefined;
+  },
+});
 
 // Mock SweetAlert2
 jest.mock('sweetalert2', () => ({
@@ -155,6 +165,7 @@ describe('TodoContainer Checkbox Cell Click Functionality', () => {
     expect(checkboxCell).toHaveClass('checkbox-cell');
 
     // 셀 클릭 (체크박스가 아님)
+    // 셀 클릭 (체크박스가 아님)
     await user.click(checkboxCell);
 
     // 체크박스가 체크되어야 함
@@ -215,6 +226,7 @@ describe('TodoContainer Checkbox Cell Click Functionality', () => {
     const checkboxCell = checkbox.closest('td');
 
     // 셀 클릭
+    // 셀 클릭
     await user.click(checkboxCell);
 
     // 대기 중인 요청 동안 셀은 not-allowed 커서를 가져야 함
@@ -271,6 +283,7 @@ describe('TodoContainer Checkbox Cell Click Functionality', () => {
     const checkbox = screen.getAllByRole('checkbox')[0];
     const checkboxCell = checkbox.closest('td');
 
+    // 첫 번째 셀 클릭
     // 첫 번째 셀 클릭
     await user.click(checkboxCell);
 

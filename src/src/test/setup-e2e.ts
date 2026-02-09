@@ -1,4 +1,4 @@
-import { afterAll, beforeAll } from 'bun:test';
+import { beforeAll } from 'bun:test';
 import { config } from 'dotenv';
 import path from 'node:path';
 
@@ -22,12 +22,7 @@ beforeAll(async () => {
   }
 });
 
-afterAll(async () => {
-  // 테스트 종료 후 연결 정리
-  // if (dataSource.isInitialized) {
-  //   await dataSource.destroy();
-  // }
-});
+// 테스트 종료 후 연결 정리 (데이터소스 정리 로직은 필요한 경우 추가)
 
 /**
  * 테스트용 요청 헬퍼
@@ -46,7 +41,7 @@ const testFetch = async (input: RequestInfo | URL, init?: RequestInit) => {
   return app.handle(req);
 };
 
-// Export as function to avoid Temporal Dead Zone (TDZ) initialization issues during tests
+// 테스트 기간 중 Temporal Dead Zone (TDZ) 초기화 문제를 피하기 위해 함수로 내보냄
 export const getApi = () =>
   treaty<App>(TEST_BASE_URL, {
     fetcher: testFetch as typeof fetch,
