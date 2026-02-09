@@ -22,7 +22,7 @@ const TEST_EMAIL = `todo_test_${Date.now()}@example.com`;
 const TEST_PASSWORD = 'password123!';
 const TEST_NAME = '할일테스트';
 
-describe('Todo Controller (E2E)', () => {
+describe('Todo 컨트롤러 (E2E 테스트)', () => {
   let accessToken: string;
   let createdTodoId: number;
 
@@ -42,7 +42,7 @@ describe('Todo Controller (E2E)', () => {
     });
 
     if (error || !data) {
-      throw new Error(`Login failed: ${JSON.stringify(error)}`);
+      throw new Error(`로그인 실패: ${JSON.stringify(error)}`);
     }
 
     accessToken = data.accessToken;

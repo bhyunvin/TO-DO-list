@@ -3,12 +3,12 @@ import { Logger } from './logger';
 
 const logger = new Logger('CryptUtil');
 
-// Web Crypto API 전역 객체 타입 선언 (Bun/Node 19+)
+// Web Crypto API 전역 객체 타입 선언 (Bun/Node 19 이상)
 declare const crypto: Crypto;
 
 /**
  * 환경 변수 값을 버퍼로 변환하는 헬퍼 함수
- * 1. Hex String 감지: 길이가 expectedByteLength * 2라면 Hex로 디코딩
+ * 1. 16진수 문자열(Hex String) 감지: 길이가 expectedByteLength * 2라면 16진수로 디코딩
  * 2. 일반 문자열: UTF-8 버퍼로 변환
  * 3. 길이 검증: 변환된 버퍼가 expectedByteLength와 다르면 Fallback 혹은 Error
  */
@@ -17,7 +17,7 @@ const getBufferFromEnv = (
   expectedByteLength: number,
   fallbackVal?: string,
 ): Uint8Array => {
-  // 값이 없으면 fallback 사용
+  // 값이 없으면 대체값(fallback) 사용
   if (!val && fallbackVal) {
     val = fallbackVal;
   }
@@ -27,7 +27,7 @@ const getBufferFromEnv = (
     return new Uint8Array(0);
   }
 
-  // Hex String 감지 (길이가 2배이면 Hex일 확률이 높음)
+  // 16진수 문자열 감지 (길이가 2배이면 16진수일 확률이 높음)
   if (val.length === expectedByteLength * 2) {
     // Hex 디코딩 시도
     const hexBuffer = hexToBytes(val);
@@ -46,10 +46,12 @@ const getBufferFromEnv = (
  */
 const hexToBytes = (hex: string): Uint8Array => {
   if (hex.length % 2 !== 0) {
-    throw new Error('Invalid hex string: length must be even');
+    throw new Error('유효하지 않은 16진수 문자열: 길이는 짝수여야 합니다');
   }
   if (!/^[0-9a-fA-F]*$/.test(hex)) {
-    throw new Error('Invalid hex string: contains non-hex characters');
+    throw new Error(
+      '유효하지 않은 16진수 문자열: 16진수가 아닌 문자가 포함되어 있습니다',
+    );
   }
   const bytes = new Uint8Array(hex.length / 2);
   for (let i = 0; i < hex.length; i += 2) {
@@ -77,7 +79,7 @@ const ENCRYPTION_KEY_BUF = getBufferFromEnv(
 const IV_LENGTH = 16;
 
 if (ENCRYPTION_KEY_BUF.length !== 32) {
-  throw new Error('ENCRYPTION_KEY must be 32 bytes long for AES-256');
+  throw new Error('ENCRYPTION_KEY는 AES-256을 위해 32바이트 길이여야 합니다');
 }
 
 /**
@@ -92,7 +94,7 @@ export const encrypt = async (rawText: string): Promise<string> => {
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
     logger.error(`Password hashing failed: ${errorMsg}`);
-    throw new Error('Failed to hash password');
+    throw new Error('비밀번호 해싱에 실패했습니다');
   }
 };
 
@@ -108,7 +110,7 @@ export const isHashValid = async (
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
     logger.error(`Password verification failed: ${errorMsg}`);
-    throw new Error('Failed to verify password');
+    throw new Error('비밀번호 검증에 실패했습니다');
   }
 };
 
@@ -123,7 +125,7 @@ export const encryptSymmetric = async (text: string): Promise<string> => {
     // 랜덤 IV 생성
     const iv = crypto.getRandomValues(new Uint8Array(IV_LENGTH));
 
-    // CryptoKey 가져오기
+    // 크립토 키(CryptoKey) 가져오기
     const key = await crypto.subtle.importKey(
       'raw',
       ENCRYPTION_KEY_BUF as BufferSource,
@@ -155,7 +157,7 @@ export const encryptSymmetric = async (text: string): Promise<string> => {
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
     logger.error(`Symmetric encryption failed: ${errorMsg}`);
-    throw new Error('Failed to encrypt data');
+    throw new Error('데이터 암호화에 실패했습니다');
   }
 };
 
@@ -168,7 +170,7 @@ export const decryptSymmetric = async (text: string): Promise<string> => {
 
   // 암호화 포맷(IV:Tag:Ciphertext)이 아닌 경우 평문으로 간주하여 반환
   if (text.split(':').length !== 3) {
-    throw new Error('Invalid ciphertext format');
+    throw new Error('유효하지 않은 암호문 형식입니다');
   }
 
   try {
@@ -187,7 +189,7 @@ export const decryptSymmetric = async (text: string): Promise<string> => {
     encryptedData.set(ciphertext);
     encryptedData.set(authTag, ciphertext.length);
 
-    // CryptoKey 가져오기
+    // 크립토 키(CryptoKey) 가져오기
     const key = await crypto.subtle.importKey(
       'raw',
       ENCRYPTION_KEY_BUF as BufferSource,
@@ -214,7 +216,7 @@ export const decryptSymmetric = async (text: string): Promise<string> => {
       throw error;
     }
     logger.error(`Symmetric decryption failed: ${errorMsg}`);
-    throw new Error('Failed to decrypt data');
+    throw new Error('데이터 복호화에 실패했습니다');
   }
 };
 
@@ -223,7 +225,7 @@ let _sivKeyPromise: Promise<Uint8Array> | null = null;
 
 /**
  * HKDF를 사용하여 32바이트 마스터 키에서 64바이트 SIV 키 파생
- * (AES-256-SIV는 64바이트 키 필요: 32B enc + 32B mac)
+ * (AES-256-SIV는 64바이트 키 필요: 암호화용 32B + 인증코드(MAC)용 32B)
  */
 const getSivKey = (): Promise<Uint8Array> => {
   if (_sivKeyPromise !== null) return _sivKeyPromise;
@@ -254,7 +256,7 @@ const getSivKey = (): Promise<Uint8Array> => {
       _sivKeyPromise = null; // 실패 시 재시도를 허용하기 위해 promise 초기화
       const errorMsg = error instanceof Error ? error.message : String(error);
       logger.error(`SIV key derivation failed: ${errorMsg}`);
-      throw new Error('Failed to derive SIV key');
+      throw new Error('SIV 키 파생에 실패했습니다');
     }
   })();
 
@@ -284,7 +286,7 @@ export const encryptSymmetricDeterministic = async (
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
     logger.error(`Deterministic encryption failed: ${errorMsg}`);
-    throw new Error('Failed to encrypt data deterministically');
+    throw new Error('결정적 암호화에 실패했습니다');
   }
 };
 

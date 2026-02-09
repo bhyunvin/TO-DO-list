@@ -459,7 +459,7 @@ export class AssistanceService {
     return sanitizeHtml.default(unsafeHtml);
   }
 
-  // --- 도구 구현부 (Tools Implementations) ---
+  // --- 도구 구현부 (Tools 구현) ---
 
   // Function call 실행: 런타임에서 타입 체크하여 타입 안정성 확보
   private async executeFunctionCall(
@@ -480,10 +480,10 @@ export class AssistanceService {
       } else if (name === 'updateTodo') {
         return await this.executeUpdateTodo(userSeq, userId, ip, args);
       }
-      return { error: `Unknown function ${name}` };
+      return { error: `알 수 없는 기능입니다: ${name}` };
     } catch (e: unknown) {
       const errorMessage = isError(e) ? e.message : 'Unknown error';
-      this.logger.error(`Tool execution failed: ${errorMessage}`);
+      this.logger.error(`도구 실행 실패: ${errorMessage}`);
       return { error: errorMessage };
     }
   }
@@ -513,7 +513,7 @@ export class AssistanceService {
     ) {
       return {
         error:
-          'Invalid arguments for createTodo: todoContent and todoDate are required',
+          'createTodo에 대한 인자가 유효하지 않습니다: todoContent와 todoDate는 필수입니다.',
       };
     }
     return await this.createTodo(
@@ -618,13 +618,14 @@ export class AssistanceService {
         keyword: contentToFind,
       });
       if (todos.length === 1) targetId = todos[0].todoSeq;
-      else if (todos.length === 0) return { error: 'No todo found' };
-      else return { error: 'Multiple todos found' };
+      else if (todos.length === 0)
+        return { error: '일치하는 할 일을 찾지 못했습니다.' };
+      else return { error: '여러 개의 할 일이 발견되었습니다.' };
     }
 
-    if (!targetId) return { error: 'Target todo not identified' };
+    if (!targetId) return { error: '수정할 대상을 특정하지 못했습니다.' };
 
-    // Explicit UpdateTodoDto construction
+    // UpdateTodoDto 명시적 생성
     const updateDto: {
       todoContent?: string;
       todoNote?: string;

@@ -91,4 +91,4 @@ mock.module('@vercel/speed-insights/react', () => ({
   SpeedInsights: () => null,
 }));
 
-console.log('!!! MANUAL MOCKS LOADED !!!');
+console.log('!!! 수동 모의 객체(Mocks) 로드됨 !!!');

@@ -4,7 +4,7 @@ import { DefaultNamingStrategy, NamingStrategyInterface } from 'typeorm';
 // (Bun 런타임에서 'typeorm/util/StringUtils' import 불가 문제 해결)
 function snakeCase(str: string): string {
   return str
-    .replaceAll(/([a-z])([A-Z])/g, '$1_$2') // camelCase 경계
+    .replaceAll(/([a-z])([A-Z])/g, '$1_$2') // 카멜케이스(camelCase) 경계 처리
     .replaceAll(/([A-Z])([A-Z][a-z])/g, '$1_$2') // 변환 예시: XMLParser → XML_Parser
     .toLowerCase();
 }

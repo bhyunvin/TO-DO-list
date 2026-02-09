@@ -13,12 +13,12 @@ const screen = new Proxy({} as typeof import('@testing-library/react').screen, {
   },
 });
 
-// Mock SweetAlert2
+// SweetAlert2 모의 객체(Mock)
 jest.mock('sweetalert2', () => ({
   fire: jest.fn(() => Promise.resolve({ isConfirmed: true })),
 }));
 
-// Mock auth store
+// 인증 스토어 모의 객체(Mock)
 jest.mock('../authStore/authStore', () => ({
   useAuthStore: () => ({
     user: {
@@ -31,7 +31,7 @@ jest.mock('../authStore/authStore', () => ({
   }),
 }));
 
-// Mock services
+// 서비스 모의 객체(Mock)
 import todoService from '../api/todoService';
 jest.mock('../api/todoService', () => ({
   default: {
@@ -40,7 +40,7 @@ jest.mock('../api/todoService', () => ({
   },
 }));
 
-// Mock file upload hooks
+// 파일 업로드 훅 모의 객체(Mock)
 jest.mock('../hooks/useFileUploadValidator', () => ({
   useFileUploadValidator: () => ({
     validateFiles: jest.fn(() => [
@@ -62,7 +62,7 @@ jest.mock('../hooks/useFileUploadProgress', () => ({
   }),
 }));
 
-// Mock components
+// 컴포넌트 모의 객체(Mock)
 jest.mock('../components/FileUploadProgress', () => {
   const MockFileUploadProgress = () => (
     <div data-testid="file-upload-progress">File Upload Progress</div>
@@ -118,7 +118,7 @@ jest.mock('react-datepicker', () => {
   return MockDatePicker;
 });
 
-describe('TodoContainer Checkbox Cell Click Functionality', () => {
+describe('TodoContainer 체크박스 셀 클릭 기능', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     const Swal = require('sweetalert2');
@@ -136,7 +136,7 @@ describe('TodoContainer Checkbox Cell Click Functionality', () => {
     ]);
   });
 
-  test('clicking the checkbox cell toggles the todo completion', async () => {
+  test('체크박스 셀을 클릭하면 할 일 완료 상태가 토글되어야 함', async () => {
     const user = userEvent.setup();
 
     (todoService.getTodos as jest.Mock).mockResolvedValueOnce([
@@ -165,7 +165,6 @@ describe('TodoContainer Checkbox Cell Click Functionality', () => {
     expect(checkboxCell).toHaveClass('checkbox-cell');
 
     // 셀 클릭 (체크박스가 아님)
-    // 셀 클릭 (체크박스가 아님)
     await user.click(checkboxCell);
 
     // 체크박스가 체크되어야 함
@@ -182,7 +181,7 @@ describe('TodoContainer Checkbox Cell Click Functionality', () => {
     );
   });
 
-  test('checkbox cell has pointer cursor when not disabled', async () => {
+  test('비활성화되지 않은 경우 체크박스 셀에 포인터 커서가 표시되어야 함', async () => {
     render(<TodoContainer />);
 
     await waitFor(() => {
@@ -196,7 +195,7 @@ describe('TodoContainer Checkbox Cell Click Functionality', () => {
     expect(checkboxCell).toHaveStyle({ cursor: 'pointer' });
   });
 
-  test('checkbox cell has not-allowed cursor when disabled', async () => {
+  test('비활성화된 경우 체크박스 셀에 not-allowed 커서가 표시되어야 함', async () => {
     const user = userEvent.setup();
 
     // 느린 API 응답 모킹
@@ -225,7 +224,6 @@ describe('TodoContainer Checkbox Cell Click Functionality', () => {
     const checkbox = screen.getAllByRole('checkbox')[0];
     const checkboxCell = checkbox.closest('td');
 
-    // 셀 클릭
     // 셀 클릭
     await user.click(checkboxCell);
 
@@ -241,7 +239,7 @@ describe('TodoContainer Checkbox Cell Click Functionality', () => {
     });
   });
 
-  test('checkbox has pointer-events: none to prevent direct clicks', async () => {
+  test('직접 클릭을 방지하기 위해 체크박스에 pointer-events: none이 설정되어 있어여 함', async () => {
     render(<TodoContainer />);
 
     await waitFor(() => {
@@ -250,11 +248,11 @@ describe('TodoContainer Checkbox Cell Click Functionality', () => {
 
     const checkbox = screen.getAllByRole('checkbox')[0];
 
-    // Checkbox should have pointer-events: none
+    // 체크박스에 pointer-events: none이 설정되어 있어야 함
     expect(checkbox).toHaveStyle({ pointerEvents: 'none' });
   });
 
-  test('cell click does not trigger when todo is being toggled', async () => {
+  test('할 일이 토글 중일 때는 셀 클릭이 트리거되지 않아야 함', async () => {
     const user = userEvent.setup();
 
     // 느린 API 응답 모킹
@@ -283,7 +281,6 @@ describe('TodoContainer Checkbox Cell Click Functionality', () => {
     const checkbox = screen.getAllByRole('checkbox')[0];
     const checkboxCell = checkbox.closest('td');
 
-    // 첫 번째 셀 클릭
     // 첫 번째 셀 클릭
     await user.click(checkboxCell);
 

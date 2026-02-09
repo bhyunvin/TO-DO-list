@@ -2,7 +2,7 @@ import { describe, expect, it } from 'bun:test';
 import { app } from '../main';
 import './setup-e2e'; // setup hooks 등록
 
-describe('App Controller (E2E)', () => {
+describe('App 컨트롤러 (E2E 테스트)', () => {
   it('GET / (Welcome) - 서버 상태 확인', async () => {
     const response = await app.handle(new Request('http://localhost/'));
 
@@ -15,6 +15,6 @@ describe('App Controller (E2E)', () => {
     const response = await app.handle(
       new Request('http://localhost/favicon.ico'),
     );
-    expect(response.status).toBe(204); // No Content
+    expect(response.status).toBe(204); // 내용 없음 (No Content)
   });
 });

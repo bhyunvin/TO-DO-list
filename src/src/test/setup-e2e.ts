@@ -29,7 +29,7 @@ beforeAll(async () => {
  * 테스트용 요청 헬퍼
  *
  * 매번 new Request(...)를 작성하는 번거로움을 줄이기 위함이 목적입니다.
- * Phase 2 요구사항에 따라 app.handle(new Request(...)) 대신 edenTreaty를 사용합니다.
+ * app.handle(new Request(...)) 대신 edenTreaty를 사용합니다.
  * 이를 위해 custom fetcher를 사용하여 app.handle을 호출하도록 설정합니다.
  */
 export const TEST_BASE_URL = 'http://localhost';

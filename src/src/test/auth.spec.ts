@@ -45,13 +45,13 @@ async function tryLoginWithRetry(payload: any, maxRetries = 5, delayMs = 500) {
   return await api.user.login.post(payload);
 }
 
-describe('Auth Controller (E2E)', () => {
+describe('인증 컨트롤러 (E2E 테스트)', () => {
   it('POST /user/register - 회원가입 성공', async () => {
     // 충돌 방지 및 길이 제한(40자) 준수를 위해 짧은 랜덤 문자열 사용
-    // testuser_ (9) + timestamp_hex (variable) + random (8)
+    // testuser_ (9) + timestamp_hex (가변) + random (8) 조합으로 길이 제한(40자) 준수
     const timestamp = Date.now().toString(36);
     const random = randomBytes(4).toString('hex');
-    registeredUserId = `user_${timestamp}_${random}`; // e.g., user_lz3x7s1b_a1b2c3d4 (approx 20-25 chars)
+    registeredUserId = `user_${timestamp}_${random}`; // 예: user_lz3x7s1b_a1b2c3d4 (약 20-25자)
 
     const payload = {
       userId: registeredUserId,
@@ -89,7 +89,7 @@ describe('Auth Controller (E2E)', () => {
     expect(data.user.userEmail).toBe(TEST_EMAIL);
 
     /*
-     * NOTE: 테스트 환경(Bun + Elysia Treaty)에서 Set-Cookie 헤더가
+     * 테스트 환경(Bun + Elysia Treaty)에서 Set-Cookie 헤더가
      * 응답 객체에 올바르게 전달되지 않는 현상이 있어,
      * DB에 리프레시 토큰이 실제로 저장되었는지 검증하는 것으로 대체합니다.
      * 이는 쿠키 전달 메커니즘보다 더 확실한 로직 검증 방법입니다.

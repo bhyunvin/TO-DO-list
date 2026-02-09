@@ -45,7 +45,7 @@ export class FileUploadUtil {
           file,
         )) as UploadApiResponse;
 
-        const originalName = file.name; // Web File API 'name' property
+        const originalName = file.name; // Web File API의 'name' 속성 사용
         const uploadedFileExt =
           uploadResult.format || extname(originalName).substring(1);
 

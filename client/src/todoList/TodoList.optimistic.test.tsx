@@ -14,7 +14,6 @@ const screen = new Proxy({} as typeof import('@testing-library/react').screen, {
 });
 
 // SweetAlert2 모킹
-// SweetAlert2 모킹
 jest.mock('sweetalert2', () => {
   const Swal = {
     fire: jest.fn(() => Promise.resolve({ isConfirmed: true })),
@@ -142,7 +141,7 @@ const createDelayedRejection = (delay) => {
   });
 };
 
-describe('TodoContainer Optimistic UI Pattern', () => {
+describe('TodoContainer 낙관적 업데이트 UI 패턴', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     const Swal = require('sweetalert2');
@@ -167,7 +166,7 @@ describe('TodoContainer Optimistic UI Pattern', () => {
     ]);
   });
 
-  test('checkbox updates immediately when clicked (optimistic update)', async () => {
+  test('클릭 시 체크박스가 즉시 업데이트되어야 함 (낙관적 업데이트)', async () => {
     const user = userEvent.setup();
 
     // 느린 API 응답 모킹
@@ -206,7 +205,6 @@ describe('TodoContainer Optimistic UI Pattern', () => {
     expect(checkbox).toBeChecked();
 
     // API 호출이 진행 중이어야 함
-    // API 호출이 진행 중이어야 함
     expect(todoService.updateTodo as jest.Mock).toHaveBeenCalledWith(
       1,
       expect.objectContaining({
@@ -214,7 +212,6 @@ describe('TodoContainer Optimistic UI Pattern', () => {
       }),
     );
 
-    // API 호출 해결
     // API 호출 해결
     resolveApiCall({ success: true });
 
@@ -224,7 +221,7 @@ describe('TodoContainer Optimistic UI Pattern', () => {
     });
   });
 
-  test('checkbox reverts to original state on API failure (rollback)', async () => {
+  test('API 실패 시 체크박스가 원래 상태로 되돌아와야 함 (롤백)', async () => {
     const user = userEvent.setup();
 
     (todoService.getTodos as jest.Mock).mockResolvedValue([
@@ -286,7 +283,7 @@ describe('TodoContainer Optimistic UI Pattern', () => {
     consoleSpy.mockRestore();
   });
 
-  test('prevents duplicate clicks on same todo while request is pending', async () => {
+  test('요청이 대기 중일 때 동일한 할 일에 대한 중복 클릭을 방지해야 함', async () => {
     const user = userEvent.setup();
 
     // 느린 API 응답 모킹
@@ -318,7 +315,6 @@ describe('TodoContainer Optimistic UI Pattern', () => {
     const checkboxCell = checkbox.closest('td');
 
     // 첫 번째 체크박스 셀 클릭
-    // 첫 번째 체크박스 셀 클릭
     await user.click(checkboxCell);
 
     // 즉시 다시 클릭 시도
@@ -332,7 +328,7 @@ describe('TodoContainer Optimistic UI Pattern', () => {
     resolveApiCall({ success: true });
   });
 
-  test('allows toggling different todos independently', async () => {
+  test('서로 다른 할 일을 독립적으로 토글할 수 있어야 함', async () => {
     const user = userEvent.setup();
 
     (todoService.getTodos as jest.Mock).mockResolvedValue([
@@ -367,7 +363,6 @@ describe('TodoContainer Optimistic UI Pattern', () => {
     const checkboxCell2 = checkboxes[1].closest('td');
 
     // 두 체크박스 셀을 빠르게 클릭
-    // 두 체크박스 셀을 빠르게 클릭
     await user.click(checkboxCell1);
     await user.click(checkboxCell2);
 
@@ -388,7 +383,7 @@ describe('TodoContainer Optimistic UI Pattern', () => {
     );
   });
 
-  test('displays toast notification on network error', async () => {
+  test('네트워크 에러 시 토스트 알림을 표시해야 함', async () => {
     const user = userEvent.setup();
 
     (todoService.getTodos as jest.Mock).mockResolvedValue([
@@ -415,8 +410,6 @@ describe('TodoContainer Optimistic UI Pattern', () => {
     const checkbox = screen.getAllByRole('checkbox')[0];
     const checkboxCell = checkbox.closest('td');
 
-    // 체크박스 셀 클릭
-    // 체크박스 셀 클릭
     // 체크박스 셀 클릭
     const consoleSpy = jest
       .spyOn(console, 'error')
@@ -446,10 +439,9 @@ describe('TodoContainer Optimistic UI Pattern', () => {
     consoleSpy.mockRestore();
   });
 
-  test('handles timeout error with AbortController', async () => {
+  test('AbortController를 이용한 타임아웃 에러를 처리해야 함', async () => {
     const user = userEvent.setup();
 
-    // 해결되지 않는 API 모킹 (타임아웃 시뮬레이션)
     // 해결되지 않는 API 모킹 (타임아웃 시뮬레이션)
     (todoService.getTodos as jest.Mock).mockResolvedValue([
       {
@@ -475,8 +467,6 @@ describe('TodoContainer Optimistic UI Pattern', () => {
     const checkbox = screen.getAllByRole('checkbox')[0];
     const checkboxCell = checkbox.closest('td');
 
-    // 체크박스 셀 클릭
-    // 체크박스 셀 클릭
     // 체크박스 셀 클릭
     const consoleSpy = jest
       .spyOn(console, 'error')
@@ -505,7 +495,7 @@ describe('TodoContainer Optimistic UI Pattern', () => {
     consoleSpy.mockRestore();
   });
 
-  test('maintains correct state when multiple todos fail independently', async () => {
+  test('여러 할 일이 독립적으로 실패할 때 정확한 상태를 유지해야 함', async () => {
     const user = userEvent.setup();
 
     (todoService.getTodos as jest.Mock).mockResolvedValue([
@@ -560,7 +550,7 @@ describe('TodoContainer Optimistic UI Pattern', () => {
     consoleSpy.mockRestore();
   });
 
-  test('checkbox is disabled during pending request', async () => {
+  test('요청 대기 중에는 체크박스가 비활성화되어야 함', async () => {
     const user = userEvent.setup();
 
     // 느린 API 응답 모킹
@@ -592,13 +582,11 @@ describe('TodoContainer Optimistic UI Pattern', () => {
     const checkboxCell = checkbox.closest('td');
 
     // 체크박스 셀 클릭
-    // 체크박스 셀 클릭
     await user.click(checkboxCell);
 
     // 요청 중에는 체크박스가 비활성화되어야 함
     expect(checkbox).toBeDisabled();
 
-    // API 호출 해결
     // API 호출 해결
     resolveApiCall({ success: true });
 

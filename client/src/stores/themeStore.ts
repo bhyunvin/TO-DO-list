@@ -64,7 +64,7 @@ export const useThemeStore = create<ThemeStore>()(
             // 이미 'dark'로 초기화되어 있으므로 추가 작업 필요 없음
           }
         } catch (error) {
-          console.warn('System theme detection failed:', error);
+          console.warn('시스템 테마 감지에 실패했습니다:', error);
           // 오류 발생 시 기본값인 'dark' 사용
         }
 

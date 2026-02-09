@@ -76,7 +76,7 @@ const createDelayedResponse = (data, delay = 100) => {
   });
 };
 
-describe('TodoContainer Loading State', () => {
+describe('TodoContainer 로딩 상태 테스트', () => {
   beforeEach(() => {
     (todoService.getTodos as jest.Mock).mockClear();
   });
@@ -85,7 +85,7 @@ describe('TodoContainer Loading State', () => {
     jest.clearAllMocks();
   });
 
-  test('displays loading message while fetching todos', async () => {
+  test('할 일을 불러오는 동안 로딩 메시지를 표시해야 함', async () => {
     // 지연된 API 응답 모킹
     (todoService.getTodos as jest.Mock).mockImplementation(() =>
       createDelayedResponse([], 100),
@@ -103,7 +103,7 @@ describe('TodoContainer Loading State', () => {
     });
   });
 
-  test('displays empty message after loading when no todos exist', async () => {
+  test('할 일이 없을 때 로딩 후 빈 메시지를 표시해야 함', async () => {
     // 빈 배열로 API 응답 모킹
     (todoService.getTodos as jest.Mock).mockResolvedValue([]);
 
@@ -119,7 +119,7 @@ describe('TodoContainer Loading State', () => {
     });
   });
 
-  test('displays todos after loading when todos exist', async () => {
+  test('할 일이 존재할 때 로딩 후 할 일 목록을 표시해야 함', async () => {
     const mockTodos = [
       {
         todoSeq: 1,
@@ -146,7 +146,7 @@ describe('TodoContainer Loading State', () => {
     });
   });
 
-  test('loading indicator has spinner', async () => {
+  test('로딩 인디케이터에 스피너가 포함되어야 함', async () => {
     // 지연된 API 응답 모킹
     (todoService.getTodos as jest.Mock).mockImplementation(() =>
       createDelayedResponse([], 100),
@@ -165,7 +165,7 @@ describe('TodoContainer Loading State', () => {
     });
   });
 
-  test('loading state is properly managed', async () => {
+  test('로딩 상태가 올바르게 관리되어야 함', async () => {
     // API 응답 모킹
     (todoService.getTodos as jest.Mock).mockResolvedValue([
       {

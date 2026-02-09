@@ -7,7 +7,7 @@ import {
   lazy,
 } from 'react';
 
-// Libraries
+// 라이브러리
 import { ko } from 'date-fns/locale';
 import 'react-datepicker/dist/react-datepicker.css';
 import { BsFileEarmarkSpreadsheet } from '@react-icons/all-files/bs/BsFileEarmarkSpreadsheet';
@@ -16,21 +16,21 @@ import { BsChevronLeft } from '@react-icons/all-files/bs/BsChevronLeft';
 import { BsChevronRight } from '@react-icons/all-files/bs/BsChevronRight';
 import { BsSearch } from '@react-icons/all-files/bs/BsSearch';
 
-// Stores
+// 스토어
 import { useAuthStore } from '../authStore/authStore';
 import { useChatStore } from '../stores/chatStore';
 
-// APIs & Services
+// API 및 서비스
 import todoService from '../api/todoService';
 import userService from '../api/userService';
 import authService from '../api/authService';
 import aiService from '../api/aiService';
 import { API_URL } from '../api/client';
 
-// Hooks
+// 훅
 import useDailyDateReset from '../hooks/useDailyDateReset';
 
-// Utils
+// 유틸리티
 import {
   showNavigationConfirmAlert,
   showErrorAlert,
@@ -41,7 +41,7 @@ import {
   showDateRangePrompt,
 } from '../utils/alertUtils';
 
-// Components
+// 컴포넌트
 import ProfileUpdateForm from '../components/ProfileUpdateForm';
 import PasswordChangeForm from '../components/PasswordChangeForm';
 import ContactDeveloperModal from '../components/ContactDeveloperModal';
@@ -54,10 +54,10 @@ import EditTodoForm from './components/EditTodoForm';
 import TodoTable from './components/TodoTable';
 import SearchModal from './components/SearchModal';
 
-// Styles
+// 스타일
 import './todoList.css';
 
-// Lazy Loading
+// 지연 로딩
 const DatePicker = lazy(() => import('react-datepicker'));
 
 const formatDate = (date) => {

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'bun:test';
 import { InputSanitizerService } from './inputSanitizer';
 
-describe('InputSanitizerService', () => {
+describe('InputSanitizerService (입력 정제 서비스)', () => {
   let service: InputSanitizerService;
 
   beforeEach(() => {
@@ -12,7 +12,7 @@ describe('InputSanitizerService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('sanitizeString', () => {
+  describe('sanitizeString (문자열 정제)', () => {
     it('기본적으로 HTML 태그를 제거해야 함', () => {
       const input = '<script>alert("xss")</script>Hello World';
       const result = service.sanitizeString(input);
@@ -32,7 +32,7 @@ describe('InputSanitizerService', () => {
     });
   });
 
-  describe('sanitizeEmail', () => {
+  describe('sanitizeEmail (이메일 정제)', () => {
     it('소문자로 변환해야 함', () => {
       const input = 'TEST@EXAMPLE.COM';
       const result = service.sanitizeEmail(input);
@@ -46,7 +46,7 @@ describe('InputSanitizerService', () => {
     });
   });
 
-  describe('sanitizeName', () => {
+  describe('sanitizeName (이름 정제)', () => {
     it('유효한 이름 문자를 허용해야 함', () => {
       const input = "John O'Connor-Smith Jr.";
       const result = service.sanitizeName(input);

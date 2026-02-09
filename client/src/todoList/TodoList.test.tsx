@@ -47,8 +47,7 @@ jest.mock('sweetalert2', () => {
 const mockLogin = jest.fn();
 const mockLogout = jest.fn();
 
-// 서비스 모드 객체 (src/mocks.ts의 글로벌 모크 사용)
-// 서비스 모드 객체 (src/mocks.ts의 글로벌 모크 사용)
+// 서비스 모의 객체 (src/mocks.ts의 글로벌 모크 사용)
 jest.mock('../api/userService', () => ({
   default: {
     updateProfile: jest.fn(),
@@ -74,7 +73,7 @@ jest.mock('../api/todoService', () => ({
 import userService from '../api/userService';
 import todoService from '../api/todoService';
 
-// ThemeStore Mock handled in global mocks.ts
+// ThemeStore 모킹은 글로벌 mocks.ts에서 처리됨
 
 jest.mock('../authStore/authStore', () => {
   const mockUseAuthStore = jest.fn(() => ({
@@ -248,7 +247,7 @@ jest.mock('react-datepicker', () => {
   return { default: MockDatePicker };
 });
 
-describe('TodoContainer Profile Update Integration', () => {
+describe('TodoContainer 프로필 업데이트 통합 테스트', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     // 성공적인 API 응답 모의
@@ -264,7 +263,7 @@ describe('TodoContainer Profile Update Integration', () => {
     });
   });
 
-  test('displays user menu icon in header', async () => {
+  test('헤더에 사용자 메뉴 아이콘이 표시되어야 함', async () => {
     render(<TodoContainer />);
 
     const userMenuIcon = await screen.findByRole('button', {
@@ -273,7 +272,7 @@ describe('TodoContainer Profile Update Integration', () => {
     expect(userMenuIcon).toBeInTheDocument();
   });
 
-  test('displays dropdown menu with profile and password options when user menu is clicked', async () => {
+  test('사용자 메뉴 클릭 시 프로필 및 비밀번호 옵션이 포함된 드롭다운 메뉴가 표시되어야 함', async () => {
     render(<TodoContainer />);
 
     // 로딩 완료 대기
@@ -295,7 +294,7 @@ describe('TodoContainer Profile Update Integration', () => {
     ).toBeInTheDocument();
   });
 
-  test('shows ProfileUpdateForm when Update Profile button is clicked', async () => {
+  test('프로필 수정 버튼 클릭 시 ProfileUpdateForm이 표시되어야 함', async () => {
     render(<TodoContainer />);
     const userMenuIcon = await screen.findByRole('button', {
       name: /사용자 메뉴/,
@@ -311,8 +310,8 @@ describe('TodoContainer Profile Update Integration', () => {
     expect(screen.getByText(/User:/)).toBeInTheDocument();
   });
 
-  test('disables Update Profile button when profile update is active', async () => {
-    // Strategy 2: Add artificial delay to detect disabled state
+  test('프로필 업데이트가 진행 중일 때 프로필 수정 버튼이 비활성화되어야 함', async () => {
+    // 전략 2: 비활성 상태 감지를 위해 인위적인 지연 추가
     (userService.updateProfile as jest.Mock).mockImplementation(
       () =>
         new Promise((resolve) =>
@@ -365,7 +364,7 @@ describe('TodoContainer Profile Update Integration', () => {
     });
   });
 
-  test('handles profile update API errors', async () => {
+  test('프로필 업데이트 API 에러를 처리해야 함', async () => {
     // 프로필 업데이트 실패 모의
     const error = new Error('Update failed');
     (userService.updateProfile as jest.Mock).mockImplementation(() =>
@@ -383,7 +382,7 @@ describe('TodoContainer Profile Update Integration', () => {
     });
     await userEvent.click(userMenuIcon);
 
-    // Spy on showErrorAlert
+    // showErrorAlert를 모킹하여 에러 발생 여부 감시
     jest.spyOn(alertUtils, 'showErrorAlert').mockResolvedValue({} as any);
 
     const updateProfileButton = screen.getByRole('button', {
@@ -404,7 +403,7 @@ describe('TodoContainer Profile Update Integration', () => {
       expect(userService.updateProfile).toHaveBeenCalled();
     });
 
-    // Strategy 3: Verify showErrorAlert call
+    // 전략 3: showErrorAlert 호출 확인
     await waitFor(() => {
       expect(alertUtils.showErrorAlert).toHaveBeenCalledWith(
         expect.stringContaining('오류'),
@@ -415,7 +414,7 @@ describe('TodoContainer Profile Update Integration', () => {
     consoleSpy.mockRestore();
   });
 
-  test('handles file upload errors in profile update', async () => {
+  test('프로필 업데이트 중 파일 업로드 에러를 처리해야 함', async () => {
     // 프로필 업데이트 지연 모의 (로딩 상태 테스트용)
     (userService.updateProfile as jest.Mock).mockImplementation(
       () =>
@@ -430,7 +429,7 @@ describe('TodoContainer Profile Update Integration', () => {
     );
   });
 
-  test('user menu icon is visible and accessible', async () => {
+  test('사용자 메뉴 아이콘이 표시되고 접근 가능해야 함', async () => {
     render(<TodoContainer />);
     const userMenuIcon = screen.getByRole('button', { name: /사용자 메뉴/ });
     expect(userMenuIcon).toBeVisible();
@@ -438,14 +437,14 @@ describe('TodoContainer Profile Update Integration', () => {
     expect(screen.getByRole('button', { name: /로그아웃/ })).toBeVisible();
   });
 
-  test('profile update does not interfere with todo creation flow', async () => {
-    // Basic interference check - passed before
+  test('프로필 업데이트가 할 일 생성 흐름을 방해하지 않아야 함', async () => {
+    // 기본적인 간섭 확인 - 이전 테스트 통과됨
     render(<TodoContainer />);
     // ...
   });
 });
 
-describe('TodoContainer Date Range Modal Functionality', () => {
+describe('TodoContainer 날짜 범위 모달 기능', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (todoService.getTodos as jest.Mock).mockResolvedValue([]);
@@ -458,7 +457,7 @@ describe('TodoContainer Date Range Modal Functionality', () => {
     });
   });
 
-  test('displays date range modal when Excel export button is clicked', async () => {
+  test('Excel 내보내기 버튼 클릭 시 날짜 범위 모달이 표시되어야 함', async () => {
     const user = userEvent.setup();
     const Swal = require('sweetalert2');
 
@@ -469,7 +468,7 @@ describe('TodoContainer Date Range Modal Functionality', () => {
 
     // 모달이 호출될 때까지 대기
     await waitFor(() => {
-      // Strategy 1: Verify Swal.fire call instead of DOM
+      // 전략 1: DOM 대신 Swal.fire 호출 확인
       expect(Swal.fire).toHaveBeenCalledWith(
         expect.objectContaining({
           title: 'Excel 내보내기',
@@ -479,7 +478,7 @@ describe('TodoContainer Date Range Modal Functionality', () => {
     });
   });
 
-  test('modal displays with date pickers for start and end dates', async () => {
+  test('모달에 시작일 및 종료일 날짜 선택기가 표시되어야 함', async () => {
     const user = userEvent.setup();
     const Swal = require('sweetalert2');
 
@@ -491,13 +490,13 @@ describe('TodoContainer Date Range Modal Functionality', () => {
     // 모달이 호출될 때까지 기다리고 모달 HTML에 날짜 입력이 포함되어 있는지 확인
     await waitFor(() => {
       const callArgs = Swal.fire.mock.calls[0][0];
-      // Object containing doesn't check html string detail deeply, so manual check
+      // Object containing은 HTML 문자열의 세부 사항을 깊게 체크하지 않으므로 수동으로 확인
       expect(callArgs.html).toContain('id="startDate"');
       expect(callArgs.html).toContain('id="endDate"');
     });
   });
 
-  test('date validation prevents empty date fields', async () => {
+  test('날짜 필드가 비어있을 경우 유효성 검사가 작동해야 함', async () => {
     const user = userEvent.setup();
     const Swal = require('sweetalert2');
 
@@ -533,7 +532,7 @@ describe('TodoContainer Date Range Modal Functionality', () => {
     document.getElementById = originalGetElementById;
   });
 
-  test('date validation prevents startDate after endDate', async () => {
+  test('시작일이 종료일보다 늦을 경우 유효성 검사가 작동해야 함', async () => {
     const user = userEvent.setup();
     const Swal = require('sweetalert2');
 
@@ -569,7 +568,7 @@ describe('TodoContainer Date Range Modal Functionality', () => {
     document.getElementById = originalGetElementById;
   });
 
-  test('modal confirms with valid dates', async () => {
+  test('유효한 날짜를 입력하면 모달이 확인되어야 함', async () => {
     const user = userEvent.setup();
     const Swal = require('sweetalert2');
 
@@ -605,7 +604,7 @@ describe('TodoContainer Date Range Modal Functionality', () => {
     document.getElementById = originalGetElementById;
   });
 
-  test('cancel button closes modal without triggering export', async () => {
+  test('취소 버튼 클릭 시 내보내기를 트리거하지 않고 모달이 닫혀야 함', async () => {
     const user = userEvent.setup();
     const Swal = require('sweetalert2');
 
@@ -637,7 +636,7 @@ describe('TodoContainer Date Range Modal Functionality', () => {
   });
 });
 
-describe('TodoContainer File Download Handler', () => {
+describe('TodoContainer 파일 다운로드 핸들러', () => {
   beforeAll(() => {});
 
   beforeEach(() => {
@@ -663,7 +662,7 @@ describe('TodoContainer File Download Handler', () => {
     jest.restoreAllMocks();
   });
 
-  test('successful download flow with correct API call', async () => {
+  test('정확한 API 호출과 함께 다운로드 흐름이 성공해야 함', async () => {
     const user = userEvent.setup();
     const Swal = require('sweetalert2');
 
@@ -686,7 +685,7 @@ describe('TodoContainer File Download Handler', () => {
 
     // 성공 메시지가 뜰 때까지 대기 (다운로드 완료 의미)
     await waitFor(() => {
-      // Strategy 1: Verify Swal.fire success call (Positional arguments)
+      // 전략 1: Swal.fire 성공 호출 확인 (위치 인자 방식)
       expect(Swal.fire).toHaveBeenCalledWith(
         '성공',
         expect.stringContaining('다운로드'),
@@ -698,7 +697,7 @@ describe('TodoContainer File Download Handler', () => {
     expect(todoService.downloadExcel).toHaveBeenCalled();
   });
 
-  test('file naming convention follows pattern todos_YYYY-MM-DD_to_YYYY-MM-DD.xlsx', async () => {
+  test('파일 이름 명명 규칙이 todos_YYYY-MM-DD_to_YYYY-MM-DD.xlsx 패턴을 따라야 함', async () => {
     const user = userEvent.setup();
     const Swal = require('sweetalert2');
 
@@ -727,7 +726,7 @@ describe('TodoContainer File Download Handler', () => {
     // 다운로드 속성 확인 logic skipped for brevity, focused on flow
   });
 
-  test('displays success message after successful download', async () => {
+  test('성공적인 다운로드 후 성공 메시지를 표시해야 함', async () => {
     const user = userEvent.setup();
     const Swal = require('sweetalert2');
 
@@ -753,7 +752,7 @@ describe('TodoContainer File Download Handler', () => {
     });
   });
 
-  test('handles 400 Bad Request error', async () => {
+  test('400 Bad Request 에러를 처리해야 함', async () => {
     const user = userEvent.setup();
 
     const error = new Error('Bad Request');
@@ -765,7 +764,7 @@ describe('TodoContainer File Download Handler', () => {
     };
     (todoService.downloadExcel as jest.Mock).mockRejectedValue(error);
 
-    // Spy on showDateRangePrompt to bypass the first Swal.fire call
+    // 첫 번째 Swal.fire 호출을 우회하기 위해 showDateRangePrompt를 모킹/감시
     jest.spyOn(alertUtils, 'showDateRangePrompt').mockResolvedValue({
       isConfirmed: true,
       value: { startDate: '2024-01-01', endDate: '2024-01-31' },
@@ -785,7 +784,7 @@ describe('TodoContainer File Download Handler', () => {
     });
   });
 
-  test('handles 401 Unauthorized error', async () => {
+  test('401 Unauthorized 에러를 처리해야 함', async () => {
     const user = userEvent.setup();
 
     const error = new Error('Unauthorized');
@@ -813,7 +812,7 @@ describe('TodoContainer File Download Handler', () => {
     });
   });
 
-  test('handles 500 Internal Server Error', async () => {
+  test('500 Internal Server Error 에러를 처리해야 함', async () => {
     const user = userEvent.setup();
 
     const error = new Error('Internal Server Error');
@@ -841,7 +840,7 @@ describe('TodoContainer File Download Handler', () => {
     });
   });
 
-  test('handles network failure errors', async () => {
+  test('네트워크 실패 에러를 처리해야 함', async () => {
     const user = userEvent.setup();
 
     const networkError = new TypeError('Failed to fetch');
@@ -865,7 +864,7 @@ describe('TodoContainer File Download Handler', () => {
     });
   });
 
-  test('cleans up resources after download', async () => {
+  test('다운로드 후 리소스를 정리해야 함', async () => {
     const user = userEvent.setup();
     const Swal = require('sweetalert2');
 
@@ -888,13 +887,13 @@ describe('TodoContainer File Download Handler', () => {
   });
 });
 
-describe('TodoContainer Password Change Integration', () => {
+describe('TodoContainer 비밀번호 변경 통합 테스트', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (todoService.getTodos as jest.Mock).mockResolvedValue([]);
   });
 
-  test('shows PasswordChangeForm when Change Password button is clicked', async () => {
+  test('비밀번호 변경 버튼 클릭 시 PasswordChangeForm이 표시되어야 함', async () => {
     render(<TodoContainer />);
     const userMenuIcon = await screen.findByRole('button', {
       name: /사용자 메뉴/,
@@ -909,7 +908,7 @@ describe('TodoContainer Password Change Integration', () => {
     expect(screen.getByTestId('password-change-form')).toBeInTheDocument();
   });
 
-  test('hides todo list elements when password change form is active', async () => {
+  test('비밀번호 변경 양식이 활성화되면 할 일 목록 요소가 숨겨져야 함', async () => {
     render(<TodoContainer />);
     const userMenuIcon = await screen.findByRole('button', {
       name: /사용자 메뉴/,
@@ -926,8 +925,8 @@ describe('TodoContainer Password Change Integration', () => {
     ).not.toBeInTheDocument();
   });
 
-  test('disables both profile and password buttons when password change is active', async () => {
-    // Strategy 2: Add artificial delay to detect disabled state
+  test('비밀번호 변경이 진행 중일 때 프로필 및 비밀번호 버튼이 모두 비활성화되어야 함', async () => {
+    // 전략 2: 비활성 상태 감지를 위해 인위적인 지연 추가
     (userService.changePassword as jest.Mock).mockImplementation(
       () =>
         new Promise((resolve) =>
@@ -977,7 +976,7 @@ describe('TodoContainer Password Change Integration', () => {
     });
   });
 
-  test('returns to todo list view when password change is cancelled', async () => {
+  test('비밀번호 변경이 취소되면 할 일 목록 보기로 돌아가야 함', async () => {
     render(<TodoContainer />);
     const userMenuIcon = await screen.findByRole('button', {
       name: /사용자 메뉴/,
@@ -996,7 +995,7 @@ describe('TodoContainer Password Change Integration', () => {
     expect(excelButton).toBeInTheDocument();
   });
 
-  test('password change form can be submitted', async () => {
+  test('비밀번호 변경 양식을 제출할 수 있어야 함', async () => {
     render(<TodoContainer />);
     const userMenuIcon = await screen.findByRole('button', {
       name: /사용자 메뉴/,
@@ -1017,7 +1016,7 @@ describe('TodoContainer Password Change Integration', () => {
   });
 });
 
-describe('TodoContainer Core Functionality', () => {
+describe('TodoContainer 핵심 기능 테스트', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (todoService.getTodos as jest.Mock).mockResolvedValue([]);
@@ -1026,12 +1025,12 @@ describe('TodoContainer Core Functionality', () => {
     Swal.fire.mockResolvedValue({ isConfirmed: true });
   });
 
-  test('renders empty state initially', async () => {
+  test('초기에 빈 상태가 렌더링되어야 함', async () => {
     render(<TodoContainer />);
     expect(await screen.findByText('할 일이 없습니다.')).toBeInTheDocument();
   });
 
-  test('renders todo list', async () => {
+  test('할 일 목록을 렌더링해야 함', async () => {
     const todos = [
       {
         todoSeq: 1,
@@ -1056,20 +1055,20 @@ describe('TodoContainer Core Functionality', () => {
     expect(await screen.findByText('Test Todo 2')).toBeInTheDocument();
   });
 
-  test('adds a new todo', async () => {
+  test('새로운 할 일을 추가해야 함', async () => {
     const user = userEvent.setup();
     (todoService.createTodo as jest.Mock).mockResolvedValue({ success: true });
 
     render(<TodoContainer />);
 
-    // Open Create Form
+    // 생성 양식 열기
     await user.click(screen.getByRole('button', { name: '신규' }));
 
-    // Fill form
+    // 양식 입력
     const contentInput = screen.getByLabelText('할 일');
     await user.type(contentInput, 'New Task');
 
-    // Submit
+    // 제출
     await user.click(screen.getByRole('button', { name: '추가' }));
 
     await waitFor(() => {
@@ -1077,7 +1076,7 @@ describe('TodoContainer Core Functionality', () => {
     });
   });
 
-  test('toggles todo completion', async () => {
+  test('할 일 완료 상태를 토글해야 함', async () => {
     const todos = [
       {
         todoSeq: 1,
@@ -1093,7 +1092,7 @@ describe('TodoContainer Core Functionality', () => {
     await screen.findByText('Toggle Me');
     const checkbox = screen.getByLabelText('할 일 완료 토글');
 
-    // Checkbox has pointer-events: none, so use fireEvent
+    // 체크박스에 pointer-events: none이 설정되어 있으므로 fireEvent 사용
     fireEvent.click(checkbox);
 
     await waitFor(() => {
@@ -1104,7 +1103,7 @@ describe('TodoContainer Core Functionality', () => {
     });
   });
 
-  test('deletes a todo', async () => {
+  test('할 일을 삭제해야 함', async () => {
     const user = userEvent.setup();
     const todos = [
       {
@@ -1123,10 +1122,10 @@ describe('TodoContainer Core Functionality', () => {
 
     await screen.findByText('Delete Me');
 
-    // Open action menu
+    // 옵션 메뉴 열기
     await user.click(screen.getByLabelText('추가 옵션'));
 
-    // Click delete
+    // 삭제 클릭
     const deleteButton = screen.getByLabelText('삭제');
     await user.click(deleteButton);
 
@@ -1135,18 +1134,18 @@ describe('TodoContainer Core Functionality', () => {
     });
   });
 
-  test('prevents adding empty todo', async () => {
+  test('빈 할 일 추가를 방지해야 함', async () => {
     const Swal = require('sweetalert2');
     render(<TodoContainer />);
 
-    // Open Create Form
+    // 생성 양식 열기
     fireEvent.click(screen.getByRole('button', { name: '신규' }));
 
-    // Set a space to satisfy 'required' but trigger .trim() empty check
+    // 'required'를 충족하면서 .trim() 빈 값 체크를 트리거하기 위해 공백 설정
     const contentInput = screen.getByLabelText('할 일');
     fireEvent.change(contentInput, { target: { value: ' ' } });
 
-    // Submit
+    // 제출
     const submitBtn = screen.getByRole('button', { name: '추가' });
     fireEvent.click(submitBtn);
 
@@ -1159,7 +1158,7 @@ describe('TodoContainer Core Functionality', () => {
     });
   });
 
-  test('cancels adding a new todo', async () => {
+  test('새로운 할 일 추가를 취소해야 함', async () => {
     const user = userEvent.setup();
     render(<TodoContainer />);
 
@@ -1171,7 +1170,7 @@ describe('TodoContainer Core Functionality', () => {
     expect(screen.getByRole('button', { name: '신규' })).toBeInTheDocument();
   });
 
-  test('edits a todo', async () => {
+  test('할 일을 수정해야 함', async () => {
     const user = userEvent.setup();
     const todos = [
       {
@@ -1208,7 +1207,7 @@ describe('TodoContainer Core Functionality', () => {
     });
   });
 
-  test('cancels deleting a todo', async () => {
+  test('할 일 삭제를 취소해야 함', async () => {
     const user = userEvent.setup();
     const todos = [
       {
@@ -1219,7 +1218,7 @@ describe('TodoContainer Core Functionality', () => {
     ];
     (todoService.getTodos as jest.Mock).mockResolvedValue(todos);
 
-    // Spy on showConfirmAlert and return isConfirmed: false
+    // showConfirmAlert를 모킹하고 isConfirmed: false를 반환하도록 설정
     jest.spyOn(alertUtils, 'showConfirmAlert').mockResolvedValue({
       isConfirmed: false,
     } as any);

@@ -132,9 +132,9 @@ const todoService = {
   },
 
   async deleteTodo(todoSeq: number | string) {
-    // DELETE / (Batch delete) - expects body: { todoIds: number[] }
+    // 대량 삭제 - 본문(body)에 { todoIds: number[] } 형식을 기대합니다.
     // 기존 todoService는 단건 삭제로 보임 (todoSeq 받음)
-    // 백엔드는 다중 삭제만 구현됨 (Step 457)
+    // 백엔드는 현재 다중 삭제로 구현되어 있습니다.
 
     const { error } = await todoApi.delete({
       todoIds: [Number(todoSeq)],

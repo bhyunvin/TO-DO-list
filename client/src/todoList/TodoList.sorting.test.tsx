@@ -66,7 +66,7 @@ jest.mock('sweetalert2', () => ({
   fire: jest.fn(() => Promise.resolve({ isConfirmed: true })),
 }));
 
-describe('TodoContainer Sorting Behavior', () => {
+describe('TodoContainer 정렬 동작 테스트', () => {
   beforeEach(() => {
     // mockApi.mockClear() 대신 전체 모크 클리어
   });
@@ -75,7 +75,7 @@ describe('TodoContainer Sorting Behavior', () => {
     jest.clearAllMocks();
   });
 
-  test('completed todo moves to bottom after toggle', async () => {
+  test('토글 후 완료된 할 일이 하단으로 이동해야 함', async () => {
     const user = userEvent.setup();
 
     // 초기 todos: 모두 미완료
@@ -144,7 +144,7 @@ describe('TodoContainer Sorting Behavior', () => {
     expect(updatedCheckboxes[2]).toBeChecked(); // Item 3은 이제 인덱스 2에 있음
   });
 
-  test('uncompleted todo moves to top after toggle', async () => {
+  test('토글 후 미완료된 할 일이 상단으로 이동해야 함', async () => {
     const user = userEvent.setup();
 
     // 초기 todos: 하나는 완료, 두 개는 미완료
@@ -212,7 +212,7 @@ describe('TodoContainer Sorting Behavior', () => {
     expect(updatedCheckboxes[2]).not.toBeChecked();
   });
 
-  test('sorting maintains order on rollback', async () => {
+  test('롤백 시에도 정렬 순서가 유지되어야 함', async () => {
     const user = userEvent.setup();
 
     // 초기 todos

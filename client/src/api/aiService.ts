@@ -17,7 +17,7 @@ const aiService = {
     signal?: AbortSignal,
   ) => {
     // Treaty의 fetch 옵션을 통해 AbortSignal 전달
-    // Eden Treaty 문서 참조: treaty(url).route.get({ ...query }, { fetch: { signal } })
+    // Eden Treaty 문서 참조: treaty(url).route.post({ ...데이터 }, { fetch: { signal } })
 
     const { data: response, error } = await assistantApi.chat.post(data, {
       fetch: {

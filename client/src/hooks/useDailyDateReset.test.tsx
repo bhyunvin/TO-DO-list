@@ -6,7 +6,7 @@ jest.mock('../utils/alertUtils', () => ({
   showToast: jest.fn(),
 }));
 
-describe('useDailyDateReset', () => {
+describe('useDailyDateReset 훅', () => {
   const handleTodayForTest = jest.fn();
 
   beforeEach(() => {
@@ -19,7 +19,7 @@ describe('useDailyDateReset', () => {
     jest.useRealTimers();
   });
 
-  it('should reset date to today and show toast if accessing for the first time today', () => {
+  it('오늘 처음 접속하는 경우 날짜를 오늘로 리셋하고 토스트 메시지를 표시함', () => {
     // 현재 시간을 2025-01-01로 설정
     jest.setSystemTime(new Date('2025-01-01T10:00:00'));
 
@@ -32,7 +32,7 @@ describe('useDailyDateReset', () => {
     expect(localStorage.getItem('lastDailyReset')).toBe('2025-01-01');
   });
 
-  it('should not reset date if already accessing today', () => {
+  it('이미 오늘 접속한 경우 날짜를 리셋하지 않음', () => {
     // 현재 시간을 2025-01-01로 설정
     jest.setSystemTime(new Date('2025-01-01T10:00:00'));
 
@@ -47,7 +47,7 @@ describe('useDailyDateReset', () => {
     expect(alertUtils.showToast).not.toHaveBeenCalled();
   });
 
-  it('should trigger reset on visibility change if new day comes', () => {
+  it('새로운 날이 밝았을 때 화면 가시성(visibility)이 변경되면 리셋이 트리거됨', () => {
     // 초기 시간을 2025-01-01로 설정
     jest.setSystemTime(new Date('2025-01-01T10:00:00'));
 
@@ -61,8 +61,8 @@ describe('useDailyDateReset', () => {
     expect(handleTodayForTest).not.toHaveBeenCalled();
   });
 
-  // Re-writing the 3rd test fully to ensure logic consistency
-  it('should trigger reset on visibility change if new day comes (corrected)', () => {
+  // 로직 일관성을 보장하기 위해 세 번째 테스트를 완전히 재작성함
+  it('새로운 날이 밝았을 때 화면 가시성(visibility)이 변경되면 리셋이 트리거됨 (수정됨)', () => {
     jest.setSystemTime(new Date('2025-01-01T10:00:00'));
     const todayInitial = new Date('2025-01-01T10:00:00');
 
@@ -76,7 +76,7 @@ describe('useDailyDateReset', () => {
     // 이제 내일로 시간 이동
     jest.setSystemTime(new Date('2025-01-02T10:00:00'));
 
-    // 화면 표시 상태 변경 (Visibility change)
+    // 화면 표시 상태 변경 (Visibility change) 트리거
     Object.defineProperty(document, 'visibilityState', {
       value: 'visible',
       writable: true,

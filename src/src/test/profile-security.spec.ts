@@ -7,7 +7,7 @@ beforeAll(() => {
   api = getApi();
 });
 
-describe('Profile Security (E2E)', () => {
+describe('프로필 보안 (E2E 테스트)', () => {
   it('GET /user/profile - 인증 없이 접근 차단 (401/400)', async () => {
     // 토큰 없이 요청
     const { response } = await api.user.profile.get();
