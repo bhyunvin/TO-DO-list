@@ -106,7 +106,7 @@ const WaterTrackerModal = ({ show, onHide }: WaterTrackerModalProps) => {
           <div className="water-tracker-total">
             총{' '}
             <span className="water-tracker-total-value">
-              {totalIntake.toFixed(1)}L
+              {totalIntake.toFixed(2)}L
             </span>{' '}
             섭취
           </div>
