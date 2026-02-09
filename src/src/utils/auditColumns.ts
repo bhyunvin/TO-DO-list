@@ -1,10 +1,10 @@
 import { Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 export class CreateAuditColumns {
-  @Column({ name: 'reg_id', length: 40, nullable: true })
+  @Column({ name: 'reg_id', type: 'varchar', length: 40, nullable: true })
   regId: string;
 
-  @Column({ name: 'reg_ip', length: 40, nullable: true })
+  @Column({ name: 'reg_ip', type: 'varchar', length: 40, nullable: true })
   regIp: string;
 
   @CreateDateColumn({ name: 'reg_dtm', type: 'timestamptz' })
@@ -12,10 +12,10 @@ export class CreateAuditColumns {
 }
 
 export class AuditColumns extends CreateAuditColumns {
-  @Column({ name: 'upd_id', length: 40, nullable: true })
+  @Column({ name: 'upd_id', type: 'varchar', length: 40, nullable: true })
   updId: string;
 
-  @Column({ name: 'upd_ip', length: 40, nullable: true })
+  @Column({ name: 'upd_ip', type: 'varchar', length: 40, nullable: true })
   updIp: string;
 
   @UpdateDateColumn({ name: 'upd_dtm', type: 'timestamptz' })

@@ -4,8 +4,6 @@ import { LogEntity } from '../features/logging/log.entity';
 import { LoggingService } from '../features/logging/logging.service';
 import { getClientIp } from '../utils/ip.util';
 
-const loggingService = new LoggingService(dataSource.getRepository(LogEntity));
-
 /**
  * DB Logging Plugin
  * 모든 요청에 대해 nj_user_log 테이블에 로그를 남깁니다.
@@ -29,15 +27,20 @@ export const dbLoggingPlugin = new Elysia({
   const userSeq = null;
   const userId = null;
 
-  await loggingService.log({
-    userSeq: userSeq ? Number(userSeq) : undefined,
-    connectUrl: path,
-    method,
-    errorContent: errorMsg,
-    auditColumns: {
-      regIp: clientIp,
-      regId: userId || 'ANONYMOUS',
-      regDtm: new Date(),
-    },
-  });
+  if (dataSource.isInitialized) {
+    const loggingService = new LoggingService(
+      dataSource.getRepository(LogEntity),
+    );
+    await loggingService.log({
+      userSeq: userSeq ? Number(userSeq) : undefined,
+      connectUrl: path,
+      method,
+      errorContent: errorMsg,
+      auditColumns: {
+        regIp: clientIp,
+        regId: userId || 'ANONYMOUS',
+        regDtm: new Date(),
+      },
+    });
+  }
 });

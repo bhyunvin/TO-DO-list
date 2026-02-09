@@ -12,10 +12,10 @@ export class UserEntity {
   @PrimaryGeneratedColumn({ name: 'user_seq' })
   userSeq: number;
 
-  @Column({ name: 'user_id', length: 40, nullable: false })
+  @Column({ name: 'user_id', type: 'varchar', length: 40, nullable: false })
   userId: string;
 
-  @Column({ name: 'user_name', length: 40, nullable: false })
+  @Column({ name: 'user_name', type: 'varchar', length: 40, nullable: false })
   userName: string;
 
   @Column({ name: 'user_password', type: 'text', nullable: true })

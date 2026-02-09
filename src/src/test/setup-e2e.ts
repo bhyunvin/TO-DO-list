@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { beforeAll } from 'bun:test';
 import { config } from 'dotenv';
 import path from 'node:path';

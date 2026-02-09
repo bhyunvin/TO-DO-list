@@ -99,7 +99,7 @@ export const userRoutes = new Elysia({ prefix: '/user' })
       refresh_token.value = refreshToken;
       refresh_token.httpOnly = true;
       refresh_token.path = '/';
-      refresh_token.secure = true; // HTTPS 환경에서
+      refresh_token.secure = process.env.NODE_ENV === 'production'; // HTTPS 환경에서만 true
 
       // 민감 정보 제외하고 반환
       const publicUser = userService.getPublicUserInfo(user);
