@@ -69,7 +69,7 @@ const WaterTrackerModal = ({ show, onHide }: WaterTrackerModalProps) => {
   return (
     <Modal show={show} onHide={onHide} centered>
       <Modal.Header closeButton>
-        <Modal.Title id="water-tracker-title" className="text-center">
+        <Modal.Title id="water-tracker-title" className="w-100 text-center">
           오늘의 수분 섭취
         </Modal.Title>
       </Modal.Header>
