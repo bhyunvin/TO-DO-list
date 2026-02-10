@@ -1,9 +1,9 @@
 [test]
-# Preloads for root-level execution (pointing to client check works)
-# If user runs `bun test` from root, we need to load the environment.
-# Assuming typical monorepo structure where client tests need dom.
+# 루트 레벨 실행을 위한 프리로드 (클라이언트 체크 포인트 지정)
+# 사용자가 루트에서 `bun test`를 실행할 경우 환경을 로드해야 함
+# 클라이언트 테스트에 DOM이 필요한 일반적인 모노레포 구조를 가정함
 preload = ["./client/src/setupTests.ts"]
-# dom = "happy-dom"
+dom = "happy-dom"
 
 [test.env]
-# Shared test environment variables can go here
+# 공유 테스트 환경 변수를 여기에 정의 가능

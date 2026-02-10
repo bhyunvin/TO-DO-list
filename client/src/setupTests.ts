@@ -1,146 +1,89 @@
-import { GlobalRegistrator } from '@happy-dom/global-registrator';
-GlobalRegistrator.register();
-
+import { Window } from 'happy-dom';
 import '@testing-library/jest-dom';
 import { cleanup } from '@testing-library/react';
-
 import { afterEach, jest } from 'bun:test';
 
-console.log('!!! SETUP TESTS LOADING !!!');
-console.log('Global document available:', !!globalThis.document);
+// Happy DOM Window 생성
+const window = new Window();
 
-// 모킹 로드
-import './mocks';
+// 전역 객체 설정 (명시적으로 globalThis에 주입)
+globalThis.window = window as any;
+globalThis.document = window.document as any;
+globalThis.navigator = window.navigator as any;
+globalThis.HTMLElement = window.HTMLElement as any;
+globalThis.HTMLInputElement = window.HTMLInputElement as any;
+globalThis.HTMLTextAreaElement = window.HTMLTextAreaElement as any;
+globalThis.MouseEvent = window.MouseEvent as any;
+globalThis.KeyboardEvent = window.KeyboardEvent as any;
+globalThis.FocusEvent = window.FocusEvent as any;
+globalThis.Event = window.Event as any;
+globalThis.CustomEvent = window.CustomEvent as any;
+globalThis.Node = window.Node as any;
+globalThis.Element = window.Element as any;
+globalThis.CharacterData = window.CharacterData as any;
+globalThis.DocumentFragment = window.DocumentFragment as any;
+globalThis.Text = window.Text as any;
 
-// 각 테스트 후 정리 작업 실행
-afterEach(() => {
-  cleanup();
-  // 모킹 복원
-  jest.clearAllMocks();
+// Storage API 주입
+globalThis.localStorage = window.localStorage as any;
+globalThis.sessionStorage = window.sessionStorage as any;
+
+// ResizeObserver 모드
+globalThis.ResizeObserver = class ResizeObserver {
+  observe() {
+    /* 의도적 빈 함수 */
+  }
+  unobserve() {
+    /* 의도적 빈 함수 */
+  }
+  disconnect() {
+    /* 의도적 빈 함수 */
+  }
+};
+
+// matchMedia 모의 객체
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: jest.fn().mockImplementation((query) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: jest.fn(),
+    removeListener: jest.fn(),
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn(),
+    dispatchEvent: jest.fn(),
+  })),
 });
 
-// Bun을 위한 jest.mocked 호환성 추가
-if (!(jest as any).mocked) {
-  (jest as any).mocked = (v: any) => v;
-}
-
-// Eden Treaty 호환성을 위한 전역 fetch 모킹 설정
-const constantMock = {
-  ok: true,
-  status: 200,
-  statusText: 'OK',
-  headers: new Headers({ 'content-type': 'application/json' }),
-  json: async () => ({}),
-  text: async () => '',
-  blob: async () => new Blob([]),
-  clone: function () {
-    return this;
-  },
-} as unknown as Response;
-
-const mockFetch = (async (url: string | URL | Request) => {
-  const urlStr =
-    typeof url === 'object' && 'url' in url ? url.url : String(url);
-  console.log(`[MockFetch] Request to: ${urlStr}`);
-  return constantMock;
-}) as unknown as typeof fetch;
-
-globalThis.fetch = mockFetch;
-if (globalThis.window !== undefined) {
-  globalThis.window.fetch = mockFetch;
-}
-
-// URL.createObjectURL 폴리필 (Excel/Blob 테스트용)
-if (globalThis.URL.createObjectURL === undefined) {
-  globalThis.URL.createObjectURL = jest.fn(() => 'blob:mock-url');
-  globalThis.URL.revokeObjectURL = jest.fn();
-}
-
-// TypeScript global 타입 확장
-declare global {
-  var window: Window & typeof globalThis;
-}
-
-// sessionStorage 모킹
-if (!globalThis.sessionStorage) {
-  globalThis.sessionStorage = {
-    getItem: () => null,
-    setItem: () => {},
-    removeItem: () => {},
-    clear: () => {},
-    length: 0,
-    key: () => null,
-    // Storage 인터페이스를 충족하기 위해 누락된 속성 추가
-    [Symbol.iterator]: function* () {},
-  } as unknown as Storage;
-}
-
-// localStorage 모킹
-if (!globalThis.localStorage) {
-  globalThis.localStorage = {
-    getItem: () => null,
-    setItem: () => {},
-    removeItem: () => {},
-    clear: () => {},
-    length: 0,
-    key: () => null,
-    // Storage 인터페이스를 충족하기 위해 누락된 속성 추가
-    [Symbol.iterator]: function* () {},
-  } as unknown as Storage;
-}
-
-// matchMedia 모킹
-if (!globalThis.matchMedia) {
-  Object.defineProperty(globalThis, 'matchMedia', {
-    writable: true,
-    value: jest.fn().mockImplementation((query) => ({
-      matches: false,
-      media: query,
-      onchange: null,
-      addListener: jest.fn(), // 권장되지 않음(deprecated)
-      removeListener: jest.fn(), // 권장되지 않음(deprecated)
-      addEventListener: jest.fn(),
-      removeEventListener: jest.fn(),
-      dispatchEvent: jest.fn(),
-    })),
-  });
-}
-
-// ResizeObserver 모킹
-if (!globalThis.ResizeObserver) {
-  globalThis.ResizeObserver = class ResizeObserver {
-    observe() {
-      // 아무 작업도 하지 않음
-    }
-    unobserve() {
-      // 아무 작업도 하지 않음
-    }
-    disconnect() {
-      // 아무 작업도 하지 않음
-    }
-  };
-}
-
 // IntersectionObserver 모킹
-if (!globalThis.IntersectionObserver) {
-  globalThis.IntersectionObserver = class IntersectionObserver {
-    readonly root: Element | Document | null = null;
-    readonly rootMargin: string = '';
-    readonly thresholds: ReadonlyArray<number> = [];
+globalThis.IntersectionObserver = class {
+  observe() {
+    /* 의도적 빈 함수 */
+  }
+  unobserve() {
+    /* 의도적 빈 함수 */
+  }
+  disconnect() {
+    /* 의도적 빈 함수 */
+  }
+} as any;
 
-    observe() {
-      // 아무 작업도 하지 않음
-    }
-    unobserve() {
-      // 아무 작업도 하지 않음
-    }
-    disconnect() {
-      // 아무 작업도 하지 않음
-    }
-    takeRecords() {
-      return [];
-    }
-  };
+// FileReader Mock (이미지 업로드 테스트용)
+class MockFileReader {
+  onload: ((ev: any) => any) | null = null;
+  readAsDataURL() {
+    setTimeout(() => {
+      this.onload?.({ target: { result: 'data:image/png;base64,mock' } });
+    }, 0);
+  }
 }
+globalThis.FileReader = MockFileReader as any;
 
-// 모킹은 ./mocks.ts에서 처리됨
+afterEach(() => {
+  cleanup();
+  jest.clearAllMocks();
+  // Zustand persistence 등에서 사용하는 저장소 초기화
+  globalThis.sessionStorage?.clear();
+  globalThis.localStorage?.clear();
+});
