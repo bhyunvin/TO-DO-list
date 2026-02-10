@@ -461,12 +461,10 @@ describe('TodoContainer 통합 테스트 스위트', () => {
       const consoleSpy = jest
         .spyOn(console, 'error')
         .mockImplementation(() => {});
-      jest
-        .spyOn(alertUtils, 'showDateRangePrompt')
-        .mockResolvedValue({
-          isConfirmed: true,
-          value: { startDate: '2024-01-01', endDate: '2024-01-31' },
-        } as any);
+      jest.spyOn(alertUtils, 'showDateRangePrompt').mockResolvedValue({
+        isConfirmed: true,
+        value: { startDate: '2024-01-01', endDate: '2024-01-31' },
+      } as any);
       jest.spyOn(alertUtils, 'showErrorAlert').mockResolvedValue({} as any);
 
       render(<TodoContainer />);
