@@ -13,8 +13,6 @@ afterEach(() => {
 
 describe('WaterTrackerModal', () => {
   test('물 마시기 모달이 렌더링되어야 함', () => {
-    console.log('Diagnostic - document:', !!globalThis.document);
-    console.log('Diagnostic - document.body:', !!globalThis.document?.body);
     render(<WaterTrackerModal show={true} onHide={() => {}} />);
     expect(screen.getByText(/오늘의 수분 섭취/i)).toBeDefined();
   });
