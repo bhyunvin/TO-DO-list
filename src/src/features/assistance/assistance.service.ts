@@ -354,14 +354,11 @@ export class AssistanceService {
 
     while (turn < maxTurns) {
       const response = await ai.models.generateContent({
-        model: 'gemini-2.0-flash-exp', // 모델명 수정 (최신 or 기존 사용) -> 기존: gemini-3-flash-preview (존재여부 불확실, 1.5-flash or 2.0-flash 권장)
-        // 기존 코드에 'gemini-3-flash-preview'로 되어 있었으나 오타 가능성. 'gemini-1.5-flash' 혹은 'gemini-2.0-flash-exp' 사용.
-        // 일단 'gemini-2.0-flash-exp' 사용.
+        model: 'gemini-3.1-flash-lite-preview',
         contents: contents,
         config: {
           systemInstruction: { parts: [{ text: systemPrompt }] },
           tools: this.tools,
-          // thinkingConfig는 2.0 모델 일부에서 지원하나, 여기선 제외하거나 필요시 추가
         },
       });
 
