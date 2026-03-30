@@ -4,7 +4,6 @@ import 'sweetalert2/dist/sweetalert2.min.css';
 import { BsPaperclip } from '@react-icons/all-files/bs/BsPaperclip';
 import { BsX } from '@react-icons/all-files/bs/BsX';
 import todoService from '../api/todoService';
-import { API_URL } from '../api/client';
 import { useFileUploadValidator } from '../hooks/useFileUploadValidator';
 import {
   showConfirmAlert,
@@ -52,6 +51,34 @@ const ExistingAttachments = ({ todoSeq }) => {
     }
   };
 
+  const handleDownload = async (e, file) => {
+    e.preventDefault();
+    try {
+      const blob = await todoService.getFile(file.fileNo);
+      const url = globalThis.URL.createObjectURL(blob);
+
+      // 새 창에서 파일 열기 (브라우저가 지원하는 경우 미리보기, 아니면 다운로드)
+      const link = document.createElement('a');
+      link.href = url;
+      // originalFileName을 설정하여 다운로드 시 파일명 유지
+      link.setAttribute('download', file.originalFileName);
+      document.body.appendChild(link);
+      link.click();
+
+      // 리소스 해제
+      setTimeout(() => {
+        globalThis.URL.revokeObjectURL(url);
+        link.remove();
+      }, 100);
+    } catch (error) {
+      console.error('File download error:', error);
+      showErrorAlert(
+        '오류 발생',
+        '파일을 열 수 없습니다. 권한이 없거나 서버 오류입니다.',
+      );
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="text-center my-2">
@@ -75,19 +102,18 @@ const ExistingAttachments = ({ todoSeq }) => {
           >
             <div className="d-flex align-items-center overflow-hidden">
               <BsPaperclip className="me-2 text-secondary" />
-              <a
-                href={`${API_URL}/file/${file.fileNo}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-decoration-none text-truncate d-block"
+              <button
+                type="button"
+                className="btn btn-link p-0 text-decoration-none text-truncate d-block text-start"
                 style={{ maxWidth: '200px' }}
+                onClick={(e) => handleDownload(e, file)}
                 title={file.originalFileName}
               >
                 {file.originalFileName}{' '}
                 <small className="text-muted">
                   ({formatFileSize(file.fileSize)})
                 </small>
-              </a>
+              </button>
             </div>
             <button
               type="button"

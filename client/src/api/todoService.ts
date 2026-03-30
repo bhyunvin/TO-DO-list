@@ -164,6 +164,20 @@ const todoService = {
     }
     return data as Blob;
   },
+
+  async getFile(fileNo: number | string) {
+    // 개별 파일 조회 (GET /file/:fileNo)
+    const { data, error } = await api.file[String(fileNo)].get();
+
+    if (error) {
+      throw new ApiError(
+        typeof error.value === 'string' ? error.value : '파일 조회 실패',
+        Number(error.status),
+        error.value,
+      );
+    }
+    return data as Blob;
+  },
 };
 
 export default todoService;
