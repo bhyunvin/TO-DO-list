@@ -53,9 +53,20 @@ export const fileRoutes = new Elysia({ prefix: '/file' })
 
       const filePath = fileInfo.filePath;
 
-      // Cloudinary 리다이렉트
+      // 외부 URL (Cloudinary 등) 프록시
+      // 리다이렉트 시 클라이언트 fetch에서 CORS 문제가 발생하므로 직접 데이터를 읽어 반환합니다.
       if (filePath?.startsWith('http')) {
-        return Response.redirect(filePath);
+        const response = await fetch(filePath);
+        return new Response(response.body, {
+          headers: {
+            'Content-Type':
+              response.headers.get('Content-Type') ||
+              'application/octet-stream',
+            'Content-Disposition': `attachment; filename="${encodeURIComponent(
+              fileInfo.originalFileName,
+            )}"`,
+          },
+        });
       }
 
       // 로컬 파일
