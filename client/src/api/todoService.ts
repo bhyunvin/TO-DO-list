@@ -1,4 +1,5 @@
-import { api, ApiError } from './client';
+import { api, ApiError, API_URL } from './client';
+import { useAuthStore } from '../authStore/authStore';
 
 // DTO 타입 정의 (백엔드 스키마와 일치시키는 것이 좋지만, 여기서는 인터페이스 정의)
 // 실제로는 shared 패키지나 스키마 파일에서 가져오는 것이 이상적
@@ -167,16 +168,23 @@ const todoService = {
 
   async getFile(fileNo: number | string) {
     // 개별 파일 조회 (GET /file/:fileNo)
-    const { data, error } = await api.file[String(fileNo)].get();
-
-    if (error) {
-      throw new ApiError(
-        typeof error.value === 'string' ? error.value : '파일 조회 실패',
-        Number(error.status),
-        error.value,
-      );
+    // Eden Treaty 대신 기본 fetch를 사용하여 Blob 응답을 안정적으로 처리합니다.
+    const { accessToken } = useAuthStore.getState();
+    const headers = new Headers();
+    if (accessToken) {
+      headers.set('Authorization', `Bearer ${accessToken}`);
     }
-    return data as Blob;
+
+    const response = await fetch(`${API_URL}/file/${fileNo}`, {
+      method: 'GET',
+      headers,
+    });
+
+    if (!response.ok) {
+      throw new ApiError('파일 조회 실패', response.status, null);
+    }
+
+    return await response.blob();
   },
 };
 
