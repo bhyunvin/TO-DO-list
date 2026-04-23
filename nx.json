@@ -38,5 +38,6 @@
   "namedInputs": {
     "default": ["{projectRoot}/src/**/*", "{projectRoot}/package.json"],
     "sharedGlobals": []
-  }
+  },
+  "analytics": false
 }
