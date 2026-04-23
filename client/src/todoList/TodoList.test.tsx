@@ -241,7 +241,11 @@ jest.mock('./components/CreateTodoForm', () => ({
     onAddTodo,
     onCancel,
   }: {
-    onAddTodo: (data: any) => void;
+    onAddTodo: (data: {
+      todoContent: string;
+      todoNote?: string;
+      todoFiles?: File[];
+    }) => void;
     onCancel: () => void;
   }) => (
     <div data-testid="create-todo-form">
@@ -263,8 +267,11 @@ jest.mock('./components/EditTodoForm', () => ({
     onSave,
     onCancel,
   }: {
-    todo: any;
-    onSave: (seq: number, data: any) => void;
+    todo: { todoSeq: number; todoContent: string; [key: string]: unknown };
+    onSave: (
+      seq: number,
+      data: { todoContent?: string; todoNote?: string; todoFiles?: File[] },
+    ) => void;
     onCancel: () => void;
   }) => (
     <div data-testid="edit-todo-form">
@@ -289,6 +296,8 @@ import userService from '../api/userService';
 import todoService from '../api/todoService';
 import TodoContainer from './TodoList';
 import * as alertUtils from '../utils/alertUtils';
+import { ApiError } from '../api/client';
+import type { SweetAlertResult } from 'sweetalert2';
 
 // 헬퍼 함수
 const createDelayedResponse = <T,>(data: T, delay = 100): Promise<T> =>
@@ -299,9 +308,19 @@ const createDelayedResponse = <T,>(data: T, delay = 100): Promise<T> =>
 // ---------------------------------------------------------
 beforeEach(() => {
   jest.clearAllMocks();
-  if (!globalThis.URL) (globalThis as any).URL = {};
-  globalThis.URL.createObjectURL = jest.fn(() => 'blob:mock-url');
-  globalThis.URL.revokeObjectURL = jest.fn();
+  if (globalThis.URL) {
+    globalThis.URL.createObjectURL = jest.fn(() => 'blob:mock-url');
+    globalThis.URL.revokeObjectURL = jest.fn();
+  } else {
+    (
+      globalThis as unknown as {
+        URL: { createObjectURL: jest.Mock; revokeObjectURL: jest.Mock };
+      }
+    ).URL = {
+      createObjectURL: jest.fn(() => 'blob:mock-url'),
+      revokeObjectURL: jest.fn(),
+    };
+  }
 });
 
 describe('TodoContainer 통합 테스트 스위트', () => {
@@ -488,8 +507,7 @@ describe('TodoContainer 통합 테스트 스위트', () => {
     });
 
     test('Excel 내보내기 에러를 처리해야 함', async () => {
-      const error = new Error('Excel Error');
-      (error as any).response = { status: 500, data: {} };
+      const error = new ApiError('Excel Error', 500, {});
       (todoService.downloadExcel as jest.Mock).mockRejectedValue(error);
       const consoleSpy = jest
         .spyOn(console, 'error')
@@ -497,8 +515,10 @@ describe('TodoContainer 통합 테스트 스위트', () => {
       jest.spyOn(alertUtils, 'showDateRangePrompt').mockResolvedValue({
         isConfirmed: true,
         value: { startDate: '2024-01-01', endDate: '2024-01-31' },
-      } as any);
-      jest.spyOn(alertUtils, 'showErrorAlert').mockResolvedValue({} as any);
+      } as SweetAlertResult);
+      jest
+        .spyOn(alertUtils, 'showErrorAlert')
+        .mockResolvedValue({} as SweetAlertResult);
 
       render(<TodoContainer />);
       fireEvent.click(screen.getByRole('button', { name: /Excel 내보내기/ }));

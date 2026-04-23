@@ -6,7 +6,7 @@ const contactService = {
   // 문의 메일 발송
   sendContactEmail: async (formData: FormData) => {
     try {
-      const payload: Record<string, any> = {};
+      const payload: Record<string, unknown> = {};
       formData.forEach((value, key) => {
         payload[key] = value;
       });

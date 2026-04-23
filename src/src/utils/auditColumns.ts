@@ -23,7 +23,7 @@ export class AuditColumns extends CreateAuditColumns {
   updDtm: Date;
 }
 
-export interface AuditSettings<T = any> {
+export interface AuditSettings<T = unknown> {
   entity: T;
   id: string;
   ip: string;

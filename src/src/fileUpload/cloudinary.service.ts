@@ -52,7 +52,7 @@ export class CloudinaryService {
   async deleteFile(
     publicId: string,
     resourceType: string = 'image',
-  ): Promise<any> {
+  ): Promise<unknown> {
     return cloudinary.uploader.destroy(publicId, {
       resource_type: resourceType,
     });

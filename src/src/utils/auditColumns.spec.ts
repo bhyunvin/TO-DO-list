@@ -4,7 +4,9 @@ import { setAuditColumn, AuditColumns } from './auditColumns';
 
 describe('AuditColumns (감사 컬럼 유틸리티)', () => {
   it('새로운 엔티티에 감사 정보를 올바르게 설정해야 함', () => {
-    const entity = { auditColumns: null as any };
+    const entity: { auditColumns: AuditColumns | null } = {
+      auditColumns: null,
+    };
     const id = 'user-1';
     const ip = '127.0.0.1';
 

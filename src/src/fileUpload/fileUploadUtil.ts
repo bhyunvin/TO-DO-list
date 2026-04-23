@@ -28,7 +28,7 @@ export class FileUploadUtil {
   // 파일 정보를 Cloudinary에 업로드하고 DB에 저장하는 함수
   async saveFileInfo(
     files: File[], // Bun/Web 표준 File 객체
-    setting: AuditSettings,
+    setting: AuditSettings<FileInfoEntity>,
     manager?: EntityManager,
   ): Promise<{ savedFiles: FileInfoEntity[]; fileGroupNo: number }> {
     const repository = manager

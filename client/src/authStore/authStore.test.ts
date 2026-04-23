@@ -2,12 +2,14 @@ import { describe, test, expect, jest, mock } from 'bun:test';
 import { useAuthStore } from './authStore';
 
 mock.module('./authStore', () => {
-  const useAuthStore = jest.fn();
-  (useAuthStore as any).getState = jest.fn(() => ({
-    user: null,
-    accessToken: null,
-  }));
-  return { useAuthStore };
+  const mockStore = jest.fn();
+  Object.assign(mockStore, {
+    getState: jest.fn(() => ({
+      user: null,
+      accessToken: null,
+    })),
+  });
+  return { useAuthStore: mockStore };
 });
 
 describe('authStore', () => {

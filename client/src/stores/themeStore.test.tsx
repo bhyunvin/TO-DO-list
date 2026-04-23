@@ -31,7 +31,7 @@ const createMatchMediaMock = (matches: boolean) => () =>
     addEventListener: jest.fn(),
     removeEventListener: jest.fn(),
     dispatchEvent: jest.fn(),
-  }) as any;
+  }) as unknown as MediaQueryList;
 
 describe('themeStore', () => {
   let originalMatchMedia;

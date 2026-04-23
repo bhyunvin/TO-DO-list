@@ -321,7 +321,7 @@ export const useFileUploadProgress = () => {
       files: File[] | FileList,
       uploadUrl: string,
       category: string,
-      additionalData: Record<string, any> = {},
+      additionalData: Record<string, string | Blob> = {},
     ) => {
       const validationFiles = Array.from(files);
       const validation = validateFilesForUpload(validationFiles, category);
@@ -358,7 +358,7 @@ export const useFileUploadProgress = () => {
     async (
       files: File[],
       uploadUrl: string,
-      additionalData: Record<string, any> = {},
+      additionalData: Record<string, string | Blob> = {},
     ) => {
       resetUploadState();
       return await uploadFiles(files, uploadUrl, additionalData);

@@ -19,7 +19,7 @@ describe('ThemeToggle 컴포넌트', () => {
     mockToggleTheme = jest.fn();
 
     // useThemeStore의 기본 mock 구현
-    (useThemeStore as any).mockReturnValue({
+    (useThemeStore as unknown as jest.Mock).mockReturnValue({
       theme: 'light',
       toggleTheme: mockToggleTheme,
       initializeTheme: jest.fn(),
@@ -61,7 +61,7 @@ describe('ThemeToggle 컴포넌트', () => {
     });
 
     test('테마가 dark일 때 달 아이콘을 표시해야 함', () => {
-      (useThemeStore as any).mockReturnValue({
+      (useThemeStore as unknown as jest.Mock).mockReturnValue({
         theme: 'dark',
         toggleTheme: mockToggleTheme,
         initializeTheme: jest.fn(),
@@ -77,7 +77,7 @@ describe('ThemeToggle 컴포넌트', () => {
 
   describe('테마 상태 반영', () => {
     test('테마가 light일 때 스위치가 해제된 상태여야 함', () => {
-      (useThemeStore as any).mockReturnValue({
+      (useThemeStore as unknown as jest.Mock).mockReturnValue({
         theme: 'light',
         toggleTheme: mockToggleTheme,
         initializeTheme: jest.fn(),
@@ -94,7 +94,7 @@ describe('ThemeToggle 컴포넌트', () => {
     });
 
     test('테마가 dark일 때 스위치가 선택된 상태여야 함', () => {
-      (useThemeStore as any).mockReturnValue({
+      (useThemeStore as unknown as jest.Mock).mockReturnValue({
         theme: 'dark',
         toggleTheme: mockToggleTheme,
         initializeTheme: jest.fn(),
@@ -246,7 +246,7 @@ describe('ThemeToggle 컴포넌트', () => {
       expect(slider).toHaveClass('light');
 
       // 테마를 dark로 변경
-      (useThemeStore as any).mockReturnValue({
+      (useThemeStore as unknown as jest.Mock).mockReturnValue({
         theme: 'dark',
         toggleTheme: mockToggleTheme,
         initializeTheme: jest.fn(),
@@ -284,7 +284,7 @@ describe('ThemeToggle 컴포넌트', () => {
       expect(switchElement).toHaveAttribute('aria-label', '다크 모드 전환');
 
       // 테마 변경
-      (useThemeStore as any).mockReturnValue({
+      (useThemeStore as unknown as jest.Mock).mockReturnValue({
         theme: 'dark',
         toggleTheme: mockToggleTheme,
         initializeTheme: jest.fn(),

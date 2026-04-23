@@ -1,10 +1,14 @@
 import { mock, jest } from 'bun:test';
+import { CreateTodoDto, UpdateTodoDto } from './api/todoService';
 
 const mockTodoService = {
   getTodos: jest.fn(async () => []),
   searchTodos: jest.fn(async () => []),
-  createTodo: jest.fn(async (data: any) => ({ success: true, ...data })),
-  updateTodo: jest.fn(async (id: any, data: any) => ({
+  createTodo: jest.fn(async (data: CreateTodoDto) => ({
+    success: true,
+    ...data,
+  })),
+  updateTodo: jest.fn(async (id: number | string, data: UpdateTodoDto) => ({
     success: true,
     ...data,
   })),

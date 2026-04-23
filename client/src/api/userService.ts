@@ -38,7 +38,7 @@ const userService = {
    * 사용자 프로필 업데이트
    */
   async updateProfile(formData: FormData) {
-    const payload: Record<string, any> = {};
+    const payload: Record<string, unknown> = {};
     formData.forEach((value, key) => {
       payload[key] = value;
     });

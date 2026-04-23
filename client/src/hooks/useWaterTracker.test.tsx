@@ -1,7 +1,7 @@
 import { Window } from 'happy-dom';
 const window = new Window();
-globalThis.window = window as any;
-globalThis.document = window.document as any;
+globalThis.window = window as unknown as typeof globalThis.window;
+globalThis.document = window.document as unknown as Document;
 
 import { renderHook, act } from '@testing-library/react';
 import useWaterTracker from './useWaterTracker';

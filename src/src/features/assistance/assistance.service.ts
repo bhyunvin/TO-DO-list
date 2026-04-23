@@ -1,6 +1,6 @@
 import { GoogleGenAI, Type, Content, Part } from '@google/genai';
 import { marked } from 'marked';
-import * as sanitizeHtml from 'sanitize-html';
+import sanitizeHtml from 'sanitize-html';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { DataSource, Repository } from 'typeorm';
@@ -453,7 +453,7 @@ export class AssistanceService {
 
   private async processFinalResponse(text: string): Promise<string> {
     const unsafeHtml = await marked.parse(text);
-    return sanitizeHtml.default(unsafeHtml);
+    return sanitizeHtml(unsafeHtml);
   }
 
   // --- 도구 구현부 (Tools 구현) ---

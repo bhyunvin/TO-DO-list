@@ -14,7 +14,7 @@ const ThemeToggle = () => {
    * 토글 클릭 핸들러
    * 이벤트 전파를 중지하여 드롭다운이 닫히지 않도록 함
    */
-  const handleToggle = (e) => {
+  const handleToggle = (e: React.MouseEvent | React.KeyboardEvent) => {
     e.stopPropagation();
     e.preventDefault();
     toggleTheme();
@@ -30,7 +30,7 @@ const ThemeToggle = () => {
       tabIndex={0}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
-          handleToggle(e as any);
+          handleToggle(e);
         }
       }}
     >

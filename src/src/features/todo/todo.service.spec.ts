@@ -1,5 +1,7 @@
 import { describe, it, expect, jest } from 'bun:test';
 import { TodoService } from './todo.service';
+import { DataSource } from 'typeorm';
+import { CloudinaryService } from '../../fileUpload/cloudinary.service';
 
 describe('TodoService (투두 관리 서비스)', () => {
   it('서비스가 정의되어 있어야 함', () => {
@@ -14,8 +16,8 @@ describe('TodoService (투두 관리 서비스)', () => {
           getMany: jest.fn().mockResolvedValue([]),
         }),
       }),
-    } as any;
-    const mockCloudinaryService = {} as any;
+    } as unknown as DataSource;
+    const mockCloudinaryService = {} as unknown as CloudinaryService;
     const service = new TodoService(mockDataSource, mockCloudinaryService);
     expect(service).toBeDefined();
   });
@@ -26,8 +28,8 @@ describe('TodoService (투두 관리 서비스)', () => {
         find: jest.fn(),
         save: jest.fn(),
       }),
-    } as any;
-    const mockCloudinaryService = {} as any;
+    } as unknown as DataSource;
+    const mockCloudinaryService = {} as unknown as CloudinaryService;
     const service = new TodoService(mockDataSource, mockCloudinaryService);
     expect(service.findAll).toBeDefined();
     expect(service.create).toBeDefined();

@@ -7,26 +7,30 @@ import { afterEach, jest } from 'bun:test';
 const window = new Window();
 
 // 전역 객체 설정 (명시적으로 globalThis에 주입)
-globalThis.window = window as any;
-globalThis.document = window.document as any;
-globalThis.navigator = window.navigator as any;
-globalThis.HTMLElement = window.HTMLElement as any;
-globalThis.HTMLInputElement = window.HTMLInputElement as any;
-globalThis.HTMLTextAreaElement = window.HTMLTextAreaElement as any;
-globalThis.MouseEvent = window.MouseEvent as any;
-globalThis.KeyboardEvent = window.KeyboardEvent as any;
-globalThis.FocusEvent = window.FocusEvent as any;
-globalThis.Event = window.Event as any;
-globalThis.CustomEvent = window.CustomEvent as any;
-globalThis.Node = window.Node as any;
-globalThis.Element = window.Element as any;
-globalThis.CharacterData = window.CharacterData as any;
-globalThis.DocumentFragment = window.DocumentFragment as any;
-globalThis.Text = window.Text as any;
-
-// Storage API 주입
-globalThis.localStorage = window.localStorage as any;
-globalThis.sessionStorage = window.sessionStorage as any;
+// Happy DOM의 타입을 globalThis의 타입과 맞추기 위해 unknown을 거쳐 캐스팅합니다.
+Object.assign(globalThis, {
+  window: window as unknown as typeof globalThis.window,
+  document: window.document as unknown as Document,
+  navigator: window.navigator as unknown as Navigator,
+  HTMLElement: window.HTMLElement as unknown as typeof HTMLElement,
+  HTMLInputElement:
+    window.HTMLInputElement as unknown as typeof HTMLInputElement,
+  HTMLTextAreaElement:
+    window.HTMLTextAreaElement as unknown as typeof HTMLTextAreaElement,
+  MouseEvent: window.MouseEvent as unknown as typeof MouseEvent,
+  KeyboardEvent: window.KeyboardEvent as unknown as typeof KeyboardEvent,
+  FocusEvent: window.FocusEvent as unknown as typeof FocusEvent,
+  Event: window.Event as unknown as typeof Event,
+  CustomEvent: window.CustomEvent as unknown as typeof CustomEvent,
+  Node: window.Node as unknown as typeof Node,
+  Element: window.Element as unknown as typeof Element,
+  CharacterData: window.CharacterData as unknown as typeof CharacterData,
+  DocumentFragment:
+    window.DocumentFragment as unknown as typeof DocumentFragment,
+  Text: window.Text as unknown as typeof Text,
+  localStorage: window.localStorage as unknown as Storage,
+  sessionStorage: window.sessionStorage as unknown as Storage,
+});
 
 // ResizeObserver 모드
 globalThis.ResizeObserver = class ResizeObserver {
@@ -67,18 +71,22 @@ globalThis.IntersectionObserver = class {
   disconnect() {
     /* 의도적 빈 함수 */
   }
-} as any;
+} as unknown as typeof IntersectionObserver;
 
 // FileReader Mock (이미지 업로드 테스트용)
 class MockFileReader {
-  onload: ((ev: any) => any) | null = null;
+  onload: ((ev: ProgressEvent<FileReader>) => void) | null = null;
   readAsDataURL() {
     setTimeout(() => {
-      this.onload?.({ target: { result: 'data:image/png;base64,mock' } });
+      if (this.onload) {
+        this.onload({
+          target: { result: 'data:image/png;base64,mock' },
+        } as unknown as ProgressEvent<FileReader>);
+      }
     }, 0);
   }
 }
-globalThis.FileReader = MockFileReader as any;
+globalThis.FileReader = MockFileReader as unknown as typeof FileReader;
 
 afterEach(() => {
   cleanup();

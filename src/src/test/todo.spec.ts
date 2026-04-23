@@ -1,5 +1,7 @@
 import { describe, expect, it, beforeAll } from 'bun:test';
 import { getApi } from './setup-e2e';
+import { ErrorResponse } from '../types/common';
+
 const api = getApi();
 
 interface TodoResponse {
@@ -61,7 +63,7 @@ describe('Todo 컨트롤러 (E2E 테스트)', () => {
     expect(response.status).toBe(201);
     expect(data).toBeTruthy();
     if (data && 'todoSeq' in data) {
-      createdTodoId = data.todoSeq;
+      createdTodoId = data.todoSeq as number;
     }
   });
 
@@ -115,7 +117,7 @@ describe('Todo 컨트롤러 (E2E 테스트)', () => {
     expect(response.status).toBe(422);
 
     // 에러 응답 객체 검증 추가
-    const errorBody = error?.value as any;
+    const errorBody = error?.value as unknown as ErrorResponse;
     expect(errorBody).toBeTruthy();
     expect(errorBody.success).toBe(false);
     expect(errorBody.message).toBeDefined();

@@ -1,5 +1,6 @@
-import { Elysia } from 'elysia';
+import { Elysia, Context } from 'elysia';
 import { Logger } from '../utils/logger';
+import { ErrorResponse } from '../types/common';
 
 const logger = new Logger('GlobalExceptionHandler');
 
@@ -13,19 +14,32 @@ export const errorHandler = ({
   request,
 }: {
   code: string | number;
-  error: any;
-  set: any;
+  error: unknown;
+  set: Context['set'];
   request: Request;
-}) => {
+}):
+  | ErrorResponse
+  | {
+      success: false;
+      message: string;
+      data: null;
+      statusCode: number;
+      timestamp: string;
+      path: string;
+    } => {
   // 1. VALIDATION 처리
   if (code === 'VALIDATION') {
     set.status = 422;
-    const allErrors = error.all || error.errors || [];
+    const validationError = error as { all?: unknown[]; errors?: unknown[] };
+    const allErrors = validationError.all || validationError.errors || [];
     const validationErrors = Array.isArray(allErrors)
-      ? allErrors.map((err: any) => ({
-          field: err.path?.replace(/^\//, '') || 'unknown',
-          message: err.message || 'Validation error',
-        }))
+      ? allErrors.map((err: unknown) => {
+          const e = err as { path?: string; message?: string };
+          return {
+            field: e.path?.replace(/^\//, '') || 'unknown',
+            message: e.message || 'Validation error',
+          };
+        })
       : [];
 
     logger.error(
@@ -63,8 +77,7 @@ export const errorHandler = ({
   return {
     success: false,
     message:
-      statusCode === 500 &&
-      (message === 'Internal Server Error' || !error.message)
+      statusCode === 500 && (message === 'Internal Server Error' || !message)
         ? '서버 내부 오류가 발생했습니다.'
         : message,
     data: null,

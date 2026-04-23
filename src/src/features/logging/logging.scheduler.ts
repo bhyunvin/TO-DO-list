@@ -57,7 +57,7 @@ export class LoggingScheduler {
         const regResult = await table.repo
           .createQueryBuilder()
           .update()
-          .set({ auditColumns: { regIp: null } } as DeepPartial<any>) // DeepPartial 사용
+          .set({ auditColumns: { regIp: null } } as DeepPartial<unknown>) // DeepPartial 사용
           .where('auditColumns.regDtm < :date', { date: sixMonthsAgo })
           .andWhere('auditColumns.regIp IS NOT NULL')
           .execute();
@@ -66,7 +66,7 @@ export class LoggingScheduler {
         const updResult = await table.repo
           .createQueryBuilder()
           .update()
-          .set({ auditColumns: { updIp: null } } as DeepPartial<any>)
+          .set({ auditColumns: { updIp: null } } as DeepPartial<unknown>)
           .where('auditColumns.updDtm < :date', { date: sixMonthsAgo })
           .andWhere('auditColumns.updIp IS NOT NULL')
           .execute();

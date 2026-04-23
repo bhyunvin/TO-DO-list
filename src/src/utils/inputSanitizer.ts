@@ -144,7 +144,7 @@ export class InputSanitizerService {
    * @param fieldRules - 특정 필드를 정제하기 위한 규칙
    * @returns 정제된 객체
    */
-  sanitizeObject<T extends Record<string, any>>(
+  sanitizeObject<T extends Record<string, unknown>>(
     obj: T,
     fieldRules: Partial<
       Record<keyof T, 'string' | 'email' | 'name' | 'description'>

@@ -145,7 +145,7 @@ export class UserService {
       });
 
       // Audit 설정
-      const auditSettings: AuditSettings = {
+      const auditSettings: AuditSettings<UserEntity> = {
         entity: newUser,
         id: userId, // 회원가입 시에는 입력받은 userId 사용
         ip: clientIp,
@@ -157,7 +157,7 @@ export class UserService {
 
       // 4. 프로필 이미지 업로드 (파일이 있는 경우)
       if (file) {
-        const fileAuditSettings: AuditSettings = {
+        const fileAuditSettings: AuditSettings<FileInfoEntity> = {
           entity: null, // 내부에서 생성됨
           id: userId,
           ip: clientIp,
@@ -174,7 +174,7 @@ export class UserService {
           savedUser.userProfileImageFileGroupNo = savedFiles[0].fileGroupNo;
 
           // 업데이트를 위한 Audit 설정
-          const updateAuditSettings: AuditSettings = {
+          const updateAuditSettings: AuditSettings<UserEntity> = {
             entity: savedUser,
             id: userId,
             ip: clientIp,
@@ -323,7 +323,7 @@ export class UserService {
 
       // 프로필 이미지 업데이트
       if (file) {
-        const auditSettings: AuditSettings = {
+        const auditSettings: AuditSettings<FileInfoEntity> = {
           entity: null,
           id: String(userSeq),
           ip: clientIp,

@@ -1,8 +1,12 @@
 import { useThemeStore } from '../stores/themeStore';
+import type {
+  SweetAlertOptions,
+  SweetAlertResult,
+  SweetAlertIcon,
+} from 'sweetalert2';
 
 /**
  * SweetAlert2를 동적으로 로드합니다.
- * @returns {Promise<typeof import('sweetalert2')>}
  */
 export const loadSwal = async () => {
   // 패키지 명만 사용하여 Vite가 최적의 모듈을 가져오게 함
@@ -24,10 +28,11 @@ export const loadSwal = async () => {
 
 /**
  * 범용 알림을 표시합니다.
- * @param {import('sweetalert2').SweetAlertOptions} options SweetAlert2 옵션
- * @returns {Promise<import('sweetalert2').SweetAlertResult>}
+ * @param {SweetAlertOptions} options SweetAlert2 옵션
  */
-export const showAlert = async (options) => {
+export const showAlert = async (
+  options: SweetAlertOptions,
+): Promise<SweetAlertResult> => {
   const Swal = await loadSwal();
   return Swal.fire(options);
 };
@@ -36,9 +41,11 @@ export const showAlert = async (options) => {
  * 성공 알림을 표시합니다.
  * @param {string} title 제목
  * @param {string} [text] 내용
- * @returns {Promise<import('sweetalert2').SweetAlertResult>}
  */
-export const showSuccessAlert = async (title, text?) => {
+export const showSuccessAlert = async (
+  title: string,
+  text?: string,
+): Promise<SweetAlertResult> => {
   const Swal = await loadSwal();
   return Swal.fire(title, text || '', 'success');
 };
@@ -47,9 +54,11 @@ export const showSuccessAlert = async (title, text?) => {
  * 에러 알림을 표시합니다.
  * @param {string} title 제목
  * @param {string} [text] 내용
- * @returns {Promise<import('sweetalert2').SweetAlertResult>}
  */
-export const showErrorAlert = async (title, text?) => {
+export const showErrorAlert = async (
+  title: string,
+  text?: string,
+): Promise<SweetAlertResult> => {
   const Swal = await loadSwal();
   return Swal.fire(title, text || '', 'error');
 };
@@ -58,22 +67,27 @@ export const showErrorAlert = async (title, text?) => {
  * 경고 알림을 표시합니다.
  * @param {string} title 제목
  * @param {string} [text] 내용
- * @returns {Promise<import('sweetalert2').SweetAlertResult>}
  */
-export const showWarningAlert = async (title, text?) => {
+export const showWarningAlert = async (
+  title: string,
+  text?: string,
+): Promise<SweetAlertResult> => {
   const Swal = await loadSwal();
   return Swal.fire(title, text || '', 'warning');
 };
 
 /**
  * 토스트 알림을 표시합니다.
- * @param {Object} options 옵션
- * @param {string} options.title 제목
- * @param {'success'|'error'|'warning'|'info'} [options.icon='success'] 아이콘
- * @param {number} [options.timer=3000] 표시 시간 (ms)
- * @returns {Promise<import('sweetalert2').SweetAlertResult>}
  */
-export const showToast = async ({ title, icon = 'success', timer = 3000 }) => {
+export const showToast = async ({
+  title,
+  icon = 'success',
+  timer = 3000,
+}: {
+  title: string;
+  icon?: SweetAlertIcon;
+  timer?: number;
+}): Promise<SweetAlertResult> => {
   const Swal = await loadSwal();
   // 모바일 환경(768px 미만)에서는 하단 중앙, 그 외에는 상단 우측
   const position = window.innerWidth < 768 ? 'bottom' : 'top-end';
@@ -81,7 +95,7 @@ export const showToast = async ({ title, icon = 'success', timer = 3000 }) => {
   return Swal.fire({
     toast: true,
     position,
-    icon: icon as import('sweetalert2').SweetAlertIcon,
+    icon: icon,
     title,
     showConfirmButton: false,
     timer,
@@ -91,13 +105,6 @@ export const showToast = async ({ title, icon = 'success', timer = 3000 }) => {
 
 /**
  * 공통 확인 알림을 표시합니다 (Outline 스타일, 버튼 순서 준수).
- * @param {Object} options 알림 옵션
- * @param {string} options.title 제목
- * @param {string} options.text 내용
- * @param {string} options.confirmButtonText 확인 버튼 텍스트
- * @param {string} options.cancelButtonText 취소 버튼 텍스트
- * @param {string} options.confirmButtonColor 확인 버튼 색상 (Bootstrap class로 대체됨)
- * @returns {Promise<SweetAlertResult>} SweetAlert 결과 Promise
  */
 export const showConfirmAlert = async ({
   title,
@@ -106,7 +113,10 @@ export const showConfirmAlert = async ({
   cancelButtonText = '취소',
   customClass = {},
   ...otherOptions
-}) => {
+}: SweetAlertOptions & {
+  confirmButtonText?: string;
+  cancelButtonText?: string;
+}): Promise<SweetAlertResult> => {
   const Swal = await loadSwal();
   return Swal.fire({
     title,
