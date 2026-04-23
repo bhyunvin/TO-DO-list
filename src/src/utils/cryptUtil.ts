@@ -1,5 +1,6 @@
 import { aessiv } from '@noble/ciphers/aes.js';
 import { Logger } from './logger';
+import { env } from '../plugins/config';
 
 const logger = new Logger('CryptUtil');
 
@@ -71,7 +72,7 @@ const bytesToHex = (bytes: Uint8Array): string => {
 
 // ENCRYPTION_KEY 로딩
 const ENCRYPTION_KEY_BUF = getBufferFromEnv(
-  process.env.ENCRYPTION_KEY,
+  env.ENCRYPTION_KEY,
   32,
   '01234567890123456789012345678901',
 );

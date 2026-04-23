@@ -4,75 +4,79 @@ import { Logger } from '../utils/logger';
 const logger = new Logger('GlobalExceptionHandler');
 
 /**
- * 검증 에러 응답 형식
+ * 전역 에러 핸들러 함수
  */
-interface ValidationErrorDetail {
-  path: string;
-  message: string;
-}
+export const errorHandler = ({
+  code,
+  error,
+  set,
+  request,
+}: {
+  code: string | number;
+  error: any;
+  set: any;
+  request: Request;
+}) => {
+  // 1. VALIDATION 처리
+  if (code === 'VALIDATION') {
+    set.status = 422;
+    const allErrors = error.all || error.errors || [];
+    const validationErrors = Array.isArray(allErrors)
+      ? allErrors.map((err: any) => ({
+          field: err.path?.replace(/^\//, '') || 'unknown',
+          message: err.message || 'Validation error',
+        }))
+      : [];
 
-/**
- * 전역 에러 제어 및 검증 에러 포맷팅
- */
-function formatValidationErrors(
-  error: { all?: ValidationErrorDetail[] },
-  message: string,
-): { field: string; message: string }[] | undefined {
-  if (error && 'all' in error && Array.isArray(error.all)) {
-    const errors = error.all.map((err) => ({
-      field: err.path?.replace(/^\//, '') || 'unknown',
-      message: err.message || 'Validation error',
-    }));
-    logger.error(`Validation Error: ${message}`, JSON.stringify(errors));
-    return errors;
+    logger.error(
+      `Validation Error: ${request.url}`,
+      JSON.stringify(validationErrors),
+    );
+
+    return {
+      success: false,
+      message: '입력값 검증에 실패했습니다.',
+      errors: validationErrors,
+      statusCode: 422,
+      timestamp: new Date().toISOString(),
+      path: request.url,
+    };
   }
-  logger.error(`Validation Error: ${message}`, 'No error details available');
-  return undefined;
-}
+
+  // 2. 기타 에러 처리
+  let statusCode =
+    typeof set.status === 'number' && set.status !== 200 ? set.status : 500;
+
+  if (code === 'NOT_FOUND') statusCode = 404;
+  if (code === 'PARSE') statusCode = 400;
+
+  set.status = statusCode;
+
+  const message =
+    error instanceof Error ? error.message : '서버 내부 오류가 발생했습니다.';
+
+  logger.error(
+    `Global Error [${code}]: ${message}`,
+    error instanceof Error ? error.stack : undefined,
+  );
+
+  return {
+    success: false,
+    message:
+      statusCode === 500 &&
+      (message === 'Internal Server Error' || !error.message)
+        ? '서버 내부 오류가 발생했습니다.'
+        : message,
+    data: null,
+    statusCode,
+    timestamp: new Date().toISOString(),
+    path: request.url,
+  };
+};
 
 /**
  * 전역 에러 핸들러 플러그인
  */
 export const errorHandlerPlugin = new Elysia({ name: 'error-handler' }).onError(
-  ({ code, error, set, request }) => {
-    let statusCode: number;
-    let message: string;
-    let errors: { field: string; message: string }[] | undefined = undefined;
-
-    switch (code) {
-      case 'NOT_FOUND':
-        statusCode = 404;
-        message = '요청하신 리소스를 찾을 수 없습니다';
-        break;
-      case 'VALIDATION':
-        statusCode = 400;
-        message = '입력 데이터 검증에 실패했습니다';
-        errors = formatValidationErrors(
-          error as { all?: ValidationErrorDetail[] },
-          message,
-        );
-        break;
-      case 'PARSE':
-        statusCode = 400;
-        message = '요청 본문을 파싱할 수 없습니다';
-        break;
-      default:
-        statusCode = (set.status as number) || 500;
-        message = error instanceof Error ? error.message : 'Unknown error';
-    }
-
-    logger.error(
-      `Global Error [${code}]: ${message}`,
-      error instanceof Error ? error.stack : undefined,
-    );
-
-    return {
-      success: false,
-      statusCode,
-      message,
-      timestamp: new Date().toISOString(),
-      path: request.url,
-      ...(errors && { errors }),
-    };
-  },
+  errorHandler,
 );

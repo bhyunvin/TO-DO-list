@@ -8,7 +8,7 @@ import { configPlugin, env } from './plugins/config';
 import { databasePlugin } from './plugins/database';
 import { jwtPlugin } from './plugins/jwt';
 import { swaggerPlugin } from './plugins/swagger';
-import { errorHandlerPlugin } from './plugins/error-handler';
+import { errorHandler } from './plugins/error-handler';
 import { schedulerPlugin } from './plugins/scheduler';
 
 import { userRoutes } from './features/user/user.routes';
@@ -32,7 +32,7 @@ export const app = new Elysia()
   .use(jwtPlugin)
   .use(dbLoggingPlugin)
   .use(swaggerPlugin)
-  .use(errorHandlerPlugin)
+  .onError(errorHandler)
   .use(userRoutes)
   .use(todoRoutes)
   .use(assistanceRoutes)

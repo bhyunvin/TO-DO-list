@@ -17,7 +17,9 @@
     "build": "bun run nx run-many --target=build --all",
     "format": "prettier --write \"{src,client}/**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
     "lint": "bun run nx run-many --target=lint --all",
-    "lint:fix": "bun run nx run-many --target=lint --all -- --fix"
+    "lint:fix": "bun run nx run-many --target=lint --all -- --fix",
+    "test": "bun test --env-file=../.env.test",
+    "coverage": "bun test --coverage --env-file=../.env.test"
   },
   "engines": {
     "bun": ">=1.0.0"

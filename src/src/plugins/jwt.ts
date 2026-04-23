@@ -1,5 +1,6 @@
 import { Elysia, t } from 'elysia';
 import { jwt } from '@elysiajs/jwt';
+import { env } from './config';
 
 /**
  * JWT 사용자 타입 정의
@@ -33,7 +34,7 @@ export const jwtPlugin = (app: Elysia) =>
     .use(
       jwt({
         name: 'jwt',
-        secret: process.env.JWT_SECRET || 'fallback-secret-key',
+        secret: env.JWT_SECRET || 'fallback-secret-key',
         exp: '7d', // 액세스 토큰 유효기간: 7일
         schema: t.Object({
           sub: t.String(),
@@ -45,7 +46,7 @@ export const jwtPlugin = (app: Elysia) =>
     .use(
       jwt({
         name: 'refreshJwt',
-        secret: process.env.JWT_REFRESH_SECRET || 'fallback-refresh-secret-key',
+        secret: env.JWT_REFRESH_SECRET || 'fallback-refresh-secret-key',
         exp: '30d', // 리프레시 토큰 유효기간: 30일
         schema: t.Object({
           sub: t.String(),

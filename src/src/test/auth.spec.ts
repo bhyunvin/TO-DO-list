@@ -122,8 +122,12 @@ describe('인증 컨트롤러 (E2E 테스트)', () => {
 
     // 구현에 따라 401 Unauthorized 또는 400 Bad Request 반환
     expect(response.status).not.toBe(200);
-    // 에러 발생 시 데이터는 null임. error.value를 확인
-    expect(error?.value).toMatchObject({ success: false });
+
+    // 에러 응답 객체 검증
+    const errorBody = error?.value as any;
+    expect(errorBody).toBeTruthy();
+    expect(errorBody.success).toBe(false);
+    expect(errorBody.message).toBeDefined();
   });
 
   it('POST /user/register - 검증 오류 (422)', async () => {
@@ -138,7 +142,12 @@ describe('인증 컨트롤러 (E2E 테스트)', () => {
     const { response, error } = await api.user.register.post(payload);
 
     expect(response.status).toBe(422);
-    expect(error?.value).toMatchObject({ success: false });
-    expect(error?.value).toHaveProperty('errors');
+
+    // 에러 응답 객체 검증
+    const errorBody = error?.value as any;
+    expect(errorBody).toBeTruthy();
+    expect(errorBody.success).toBe(false);
+    expect(errorBody).toHaveProperty('errors');
+    expect(Array.isArray(errorBody.errors)).toBe(true);
   });
 });

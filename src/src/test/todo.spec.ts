@@ -108,10 +108,17 @@ describe('Todo 컨트롤러 (E2E 테스트)', () => {
       todoContent: undefined as unknown as string,
     };
 
-    const { response } = await api.todo.post(payload, {
+    const { response, error } = await api.todo.post(payload, {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
 
     expect(response.status).toBe(422);
+
+    // 에러 응답 객체 검증 추가
+    const errorBody = error?.value as any;
+    expect(errorBody).toBeTruthy();
+    expect(errorBody.success).toBe(false);
+    expect(errorBody.message).toBeDefined();
+    expect(errorBody).toHaveProperty('errors');
   });
 });

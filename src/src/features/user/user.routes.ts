@@ -1,5 +1,6 @@
 import { Elysia } from 'elysia';
 import { jwtPlugin, JWTRefreshPayload } from '../../plugins/jwt';
+import { env } from '../../plugins/config';
 import { databasePlugin } from '../../plugins/database';
 import { UserService } from './user.service';
 import { CloudinaryService } from '../../fileUpload/cloudinary.service';
@@ -76,8 +77,15 @@ export const userRoutes = new Elysia({ prefix: '/user' })
       refreshJwt,
       cookie: { refresh_token },
       request,
+      set,
     }) => {
-      const user = await userService.login(body as LoginDto);
+      let user;
+      try {
+        user = await userService.login(body as LoginDto);
+      } catch (err) {
+        set.status = 401;
+        throw err;
+      }
       const clientIp = getClientIp(request);
 
       // 액세스 토큰 생성 (복호화된 이메일 사용)
@@ -99,7 +107,7 @@ export const userRoutes = new Elysia({ prefix: '/user' })
       refresh_token.value = refreshToken;
       refresh_token.httpOnly = true;
       refresh_token.path = '/';
-      refresh_token.secure = process.env.NODE_ENV === 'production'; // HTTPS 환경에서만 true
+      refresh_token.secure = env.NODE_ENV === 'production'; // HTTPS 환경에서만 true
 
       // 민감 정보 제외하고 반환
       const publicUser = userService.getPublicUserInfo(user);

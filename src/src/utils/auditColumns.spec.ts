@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { describe, it, expect } from 'bun:test';
 import { setAuditColumn, AuditColumns } from './auditColumns';
 

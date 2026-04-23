@@ -146,7 +146,18 @@ jest.mock('../components/FileUploadProgress', () => ({
 }));
 
 jest.mock('../components/ProfileUpdateForm', () => {
-  const MockProfileUpdateForm = ({ user, onSave, onCancel }: any) => {
+  const MockProfileUpdateForm = ({
+    onSave,
+    onCancel,
+  }: {
+    onSave: (data: {
+      userName: string;
+      userEmail: string;
+      userDescription: string;
+      formData: FormData;
+    }) => Promise<void>;
+    onCancel: () => void;
+  }) => {
     const [submitting, setSubmitting] = useState(false);
     return (
       <div data-testid="profile-update-form">
@@ -173,7 +184,17 @@ jest.mock('../components/ProfileUpdateForm', () => {
 });
 
 jest.mock('../components/PasswordChangeForm', () => {
-  const MockPasswordChangeForm = ({ onSave, onCancel }: any) => {
+  const MockPasswordChangeForm = ({
+    onSave,
+    onCancel,
+  }: {
+    onSave: (data: {
+      currentPassword: string;
+      newPassword: string;
+      confirmPassword: string;
+    }) => Promise<void>;
+    onCancel: () => void;
+  }) => {
     const [submitting, setSubmitting] = useState(false);
     return (
       <div data-testid="password-change-form">
@@ -199,7 +220,13 @@ jest.mock('../components/PasswordChangeForm', () => {
 });
 
 jest.mock('react-datepicker', () => {
-  const MockDatePicker = ({ selected, onChange }: any) => (
+  const MockDatePicker = ({
+    selected,
+    onChange,
+  }: {
+    selected: Date | null;
+    onChange: (date: Date) => void;
+  }) => (
     <input
       data-testid="date-picker"
       value={selected?.toISOString().split('T')[0] || ''}
@@ -210,7 +237,13 @@ jest.mock('react-datepicker', () => {
 });
 
 jest.mock('./components/CreateTodoForm', () => ({
-  default: ({ onAddTodo, onCancel }: any) => (
+  default: ({
+    onAddTodo,
+    onCancel,
+  }: {
+    onAddTodo: (data: any) => void;
+    onCancel: () => void;
+  }) => (
     <div data-testid="create-todo-form">
       <button
         onClick={() =>
@@ -225,7 +258,15 @@ jest.mock('./components/CreateTodoForm', () => ({
 }));
 
 jest.mock('./components/EditTodoForm', () => ({
-  default: ({ todo, onSave, onCancel }: any) => (
+  default: ({
+    todo,
+    onSave,
+    onCancel,
+  }: {
+    todo: any;
+    onSave: (seq: number, data: any) => void;
+    onCancel: () => void;
+  }) => (
     <div data-testid="edit-todo-form">
       <button
         onClick={() =>
@@ -250,15 +291,7 @@ import TodoContainer from './TodoList';
 import * as alertUtils from '../utils/alertUtils';
 
 // 헬퍼 함수
-const createDelayedRejection = (delay: number) =>
-  new Promise((_, reject) =>
-    setTimeout(() => {
-      const e = new Error('Aborted');
-      e.name = 'AbortError';
-      reject(e);
-    }, delay),
-  );
-const createDelayedResponse = (data: any, delay = 100) =>
+const createDelayedResponse = <T,>(data: T, delay = 100): Promise<T> =>
   new Promise((resolve) => setTimeout(() => resolve(data), delay));
 
 // ---------------------------------------------------------

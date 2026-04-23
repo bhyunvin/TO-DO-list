@@ -3,19 +3,22 @@ import {
   UploadApiResponse,
   v2 as cloudinary,
 } from 'cloudinary';
+import { env } from '../plugins/config';
 import toStream from 'buffer-to-stream';
-
-// Cloudinary 설정 초기화 (한 번만 실행되도록 전역 범위에서 설정하거나 생성자에서 확인)
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
 
 import { Logger } from '../utils/logger';
 
 export class CloudinaryService {
   private readonly logger = new Logger('CloudinaryService');
+
+  constructor() {
+    // Cloudinary 설정 초기화 (환경 변수가 로드된 후 인스턴스 생성 시점에 실행)
+    cloudinary.config({
+      cloud_name: env.CLOUDINARY_CLOUD_NAME,
+      api_key: env.CLOUDINARY_API_KEY,
+      api_secret: env.CLOUDINARY_API_SECRET,
+    });
+  }
   /**
    * 파일을 Cloudinary에 업로드
    * @param file 업로드할 파일 (Standard File object)

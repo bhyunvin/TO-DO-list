@@ -14,7 +14,7 @@ mock.module('../api/todoService', () => ({
 }));
 
 describe('ExistingAttachments', () => {
-  test('첨부파일 영역이 렌더링되어야 함', () => {
+  test('첨부파일 영역이 렌더링되어야 함', async () => {
     render(<ExistingAttachments todoSeq={1} />);
     expect(document.body).toBeDefined();
   });

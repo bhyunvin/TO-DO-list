@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 export class CreateAuditColumns {

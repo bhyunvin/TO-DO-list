@@ -1,5 +1,6 @@
 import { Elysia } from 'elysia';
 import { cors } from '@elysiajs/cors';
+import { env } from './config';
 
 /**
  * CORS 플러그인
@@ -9,7 +10,7 @@ export const corsPlugin = new Elysia({ name: 'cors' }).use(
   cors({
     origin: [
       'http://localhost:5173',
-      process.env.FRONTEND_URL?.replace(/\/$/, '') || '',
+      env.FRONTEND_URL?.replace(/\/$/, '') || '',
     ].filter(Boolean),
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],

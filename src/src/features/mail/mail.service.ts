@@ -1,4 +1,5 @@
 import * as nodemailer from 'nodemailer';
+import { env } from '../../plugins/config';
 
 import { Logger } from '../../utils/logger';
 
@@ -10,8 +11,8 @@ export class MailService {
     this.transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: process.env.GMAIL_USER, // env.GMAIL_USER가 있으면 사용, 아니면 process.env
-        pass: process.env.GMAIL_APP_PASSWORD,
+        user: env.GMAIL_USER,
+        pass: env.GMAIL_APP_PASSWORD,
       },
     });
   }
@@ -22,7 +23,7 @@ export class MailService {
     content: string,
     file?: File, // 웹 표준 File 객체
   ): Promise<void> {
-    const developerEmail = process.env.GMAIL_USER;
+    const developerEmail = env.GMAIL_USER;
     if (!developerEmail) throw new Error('GMAIL_USER config missing');
 
     const mailOptions: nodemailer.SendMailOptions = {
