@@ -4,11 +4,9 @@ import {
   v2 as cloudinary,
 } from 'cloudinary';
 import { env } from '../plugins/config';
-import toStream from 'buffer-to-stream';
-
 import { Logger } from '../utils/logger';
 
-// 모듈 로드 시 1회 전역 초기화 (constructor 의존 없이 확실하게 설정)
+// 모듈 로드 시 1회 전역 초기화
 cloudinary.config({
   cloud_name: env.CLOUDINARY_CLOUD_NAME,
   api_key: env.CLOUDINARY_API_KEY,
@@ -20,32 +18,29 @@ export class CloudinaryService {
 
   /**
    * 파일을 Cloudinary에 업로드
+   * Bun 환경의 스트림 호환성 문제를 피하기 위해 Base64 방식을 사용합니다.
+   *
    * @param file 업로드할 파일 (Standard File object)
    * @returns 업로드 결과
    */
-  async uploadFile(
-    file: File,
-  ): Promise<UploadApiResponse | UploadApiErrorResponse> {
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
+  async uploadFile(file: File): Promise<UploadApiResponse> {
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+      const base64 = `data:${file.type};base64,${buffer.toString('base64')}`;
 
-    return new Promise((resolve, reject) => {
-      const upload = cloudinary.uploader.upload_stream(
-        {
-          resource_type: 'auto', // 이미지, 문서 등 자동 감지
-          // 공백 포함 환경 변수 등으로 전역 설정이 유실될 경우를 대비한 명시적 자격 증명 주입
-          cloud_name: env.CLOUDINARY_CLOUD_NAME,
-          api_key: env.CLOUDINARY_API_KEY,
-          api_secret: env.CLOUDINARY_API_SECRET,
-        },
-        (error, result) => {
-          if (error) return reject(new Error(error.message));
-          if (!result) return reject(new Error('Upload failed'));
-          resolve(result);
-        },
+      // uploader.upload는 성공 시 UploadApiResponse를 반환합니다.
+      return await cloudinary.uploader.upload(base64, {
+        resource_type: 'auto',
+      });
+    } catch (error) {
+      const apiError = error as UploadApiErrorResponse;
+      this.logger.error(
+        'Cloudinary upload failed',
+        apiError.message || String(error),
       );
-      toStream(buffer).pipe(upload);
-    });
+      throw new Error(apiError.message || 'Upload failed');
+    }
   }
 
   /**
@@ -58,9 +53,14 @@ export class CloudinaryService {
     publicId: string,
     resourceType: string = 'image',
   ): Promise<unknown> {
-    return cloudinary.uploader.destroy(publicId, {
-      resource_type: resourceType,
-    });
+    try {
+      return await cloudinary.uploader.destroy(publicId, {
+        resource_type: resourceType,
+      });
+    } catch (error) {
+      this.logger.error('Cloudinary delete failed', String(error));
+      throw error;
+    }
   }
 
   /**
@@ -72,7 +72,6 @@ export class CloudinaryService {
     try {
       const { pathname } = new URL(url);
       // '/upload/' 이후의 경로 캡처 (버전 'v1234/'는 무시)
-      // 예: /.../upload/v12345/folder/filename.jpg -> folder/filename
       const regex = /\/upload\/(?:v\d+\/)?(.+)\.[^.]+$/;
       const match = regex.exec(pathname);
       return match ? match[1] : '';
