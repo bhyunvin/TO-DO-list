@@ -1,4 +1,6 @@
 import { api, ApiError } from './client';
+import { useAuthStore } from '../authStore/authStore';
+import { hashPassword } from '../utils/passwordUtils';
 
 // Eden Treaty 타입 추론
 const userApi = api.user;
@@ -57,10 +59,16 @@ const userService = {
   /**
    * 비밀번호 변경
    */
-  async changePassword(currentPassword, newPassword) {
+  async changePassword(currentPassword: string, newPassword: string) {
+    const user = useAuthStore.getState().user;
+    if (!user?.userId) throw new Error('사용자 정보가 없습니다.');
+
+    const hashedCurrent = await hashPassword(currentPassword, user.userId);
+    const hashedNew = await hashPassword(newPassword, user.userId);
+
     const { data, error } = await userApi['change-password'].patch({
-      currentPassword,
-      newPassword,
+      currentPassword: hashedCurrent,
+      newPassword: hashedNew,
     });
     if (error) {
       throw new ApiError(

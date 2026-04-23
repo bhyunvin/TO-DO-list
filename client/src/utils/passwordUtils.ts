@@ -31,3 +31,23 @@ export const PASSWORD_CRITERIA = {
   MAX_LENGTH: 100,
   SPECIAL_CHAR_REGEX: /[@$!%*?&]/,
 };
+
+/**
+ * 비밀번호를 SHA-256으로 해싱합니다. (레인보우 테이블 공격 방지를 위해 userId를 솔트로 사용)
+ * @param password 평문 비밀번호
+ * @param salt 솔트 (주로 userId)
+ * @returns 해싱된 64자리 16진수 문자열
+ */
+export const hashPassword = async (
+  password: string,
+  salt: string,
+): Promise<string> => {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password + salt);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+  return hashHex;
+};

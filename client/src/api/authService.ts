@@ -3,15 +3,17 @@ import { api, ApiError } from './client';
 const userApi = api.user;
 
 import { useAuthStore } from '../authStore/authStore';
+import { hashPassword } from '../utils/passwordUtils';
 
 const authService = {
   /**
    * 로그인
    */
   async login(userId: string, userPassword: string) {
+    const hashedPw = await hashPassword(userPassword, userId);
     const { data, error } = await userApi.login.post({
       userId: userId,
-      userPw: userPassword,
+      userPw: hashedPw,
     });
 
     if (error) {
@@ -45,9 +47,17 @@ const authService = {
    * 회원가입
    */
   async signup(formData: FormData | Record<string, unknown>) {
-    let payload = formData;
-    if (formData instanceof FormData) {
-      payload = Object.fromEntries(formData.entries());
+    let payload: Record<string, any> =
+      formData instanceof FormData
+        ? Object.fromEntries(formData.entries())
+        : formData;
+
+    if (payload.userPw && payload.userId) {
+      const hashedPw = await hashPassword(
+        String(payload.userPw),
+        String(payload.userId),
+      );
+      payload = { ...payload, userPw: hashedPw };
     }
 
     const { data, error } = await userApi.register.post(payload);
