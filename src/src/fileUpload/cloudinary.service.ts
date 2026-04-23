@@ -8,17 +8,16 @@ import toStream from 'buffer-to-stream';
 
 import { Logger } from '../utils/logger';
 
+// 모듈 로드 시 1회 전역 초기화 (constructor 의존 없이 확실하게 설정)
+cloudinary.config({
+  cloud_name: env.CLOUDINARY_CLOUD_NAME,
+  api_key: env.CLOUDINARY_API_KEY,
+  api_secret: env.CLOUDINARY_API_SECRET,
+});
+
 export class CloudinaryService {
   private readonly logger = new Logger('CloudinaryService');
 
-  constructor() {
-    // Cloudinary 설정 초기화 (환경 변수가 로드된 후 인스턴스 생성 시점에 실행)
-    cloudinary.config({
-      cloud_name: env.CLOUDINARY_CLOUD_NAME,
-      api_key: env.CLOUDINARY_API_KEY,
-      api_secret: env.CLOUDINARY_API_SECRET,
-    });
-  }
   /**
    * 파일을 Cloudinary에 업로드
    * @param file 업로드할 파일 (Standard File object)
@@ -32,7 +31,13 @@ export class CloudinaryService {
 
     return new Promise((resolve, reject) => {
       const upload = cloudinary.uploader.upload_stream(
-        { resource_type: 'auto' }, // 이미지, 문서 등 자동 감지
+        {
+          resource_type: 'auto', // 이미지, 문서 등 자동 감지
+          // 공백 포함 환경 변수 등으로 전역 설정이 유실될 경우를 대비한 명시적 자격 증명 주입
+          cloud_name: env.CLOUDINARY_CLOUD_NAME,
+          api_key: env.CLOUDINARY_API_KEY,
+          api_secret: env.CLOUDINARY_API_SECRET,
+        },
         (error, result) => {
           if (error) return reject(new Error(error.message));
           if (!result) return reject(new Error('Upload failed'));
