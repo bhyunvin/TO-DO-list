@@ -416,13 +416,27 @@ export class UserService {
     if (!user.userSeq) {
       throw new Error('User sequence is missing');
     }
+
+    let profileImageUrl: string | null = null;
+    // 프로필 이미지 파일 그룹 번호가 존재하면 파일 정보 테이블에서 URL을 조회합니다.
+    if (user.userProfileImageFileGroupNo) {
+      const fileInfoRepo = this.dataSource.getRepository(FileInfoEntity);
+      const fileInfo = await fileInfoRepo.findOne({
+        where: { fileGroupNo: user.userProfileImageFileGroupNo },
+        order: { fileNo: 'ASC' },
+      });
+      if (fileInfo) {
+        profileImageUrl = fileInfo.filePath;
+      }
+    }
+
     return {
       userSeq: user.userSeq,
       userId: user.userId || '',
       userEmail: user.userEmail || '',
       userName: user.userName || '',
       userDescription: user.userDescription || null,
-      profileImage: user.profileImage || null,
+      profileImage: profileImageUrl,
       fileGroupNo: user.userProfileImageFileGroupNo || null,
       createdAt: user.auditColumns?.regDtm,
       updatedAt: user.auditColumns?.updDtm,
