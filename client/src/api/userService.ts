@@ -42,9 +42,36 @@ const userService = {
   async updateProfile(formData: FormData) {
     const payload: Record<string, unknown> = {};
     formData.forEach((value, key) => {
-      payload[key] = value;
+      // 이미지 파일은 일반 텍스트 정보 수정 payload에서 제외
+      if (key !== 'profileImage') {
+        payload[key] = value;
+      }
     });
 
+    const profileImageFile = formData.get('profileImage') as File | null;
+    let resultUser: any = null;
+
+    // 1. 프로필 이미지 파일이 있는 경우 이미지 업로드 API 먼저 호출
+    if (profileImageFile) {
+      const { data, error: uploadErr } = await userApi[
+        'upload-profile-image'
+      ].post({
+        file: profileImageFile,
+      });
+
+      if (uploadErr) {
+        throw new ApiError(
+          typeof uploadErr.value === 'string'
+            ? uploadErr.value
+            : '프로필 이미지 업로드 실패',
+          Number(uploadErr.status),
+          uploadErr.value,
+        );
+      }
+      resultUser = data;
+    }
+
+    // 2. 다른 프로필 정보 업데이트
     const { data: result, error: err } = await userApi.update.patch(payload);
     if (err) {
       throw new ApiError(
@@ -53,7 +80,9 @@ const userService = {
         err.value,
       );
     }
-    return result;
+    resultUser = result;
+
+    return resultUser;
   },
 
   /**
