@@ -311,9 +311,13 @@ export class UserService {
       }
 
       // API Key 업데이트 (암호화)
-      if (updateUserDto.aiApiKey !== undefined) {
-        if (updateUserDto.aiApiKey === '' || updateUserDto.aiApiKey === null) {
-          // 빈 문자열이나 null이면 삭제
+      // undefined이거나 null인 경우는 수정을 요청하지 않은 것으로 간주하여 기존 키를 유지합니다.
+      if (
+        updateUserDto.aiApiKey !== undefined &&
+        updateUserDto.aiApiKey !== null
+      ) {
+        if (updateUserDto.aiApiKey === '') {
+          // 명시적으로 빈 문자열을 보낸 경우에만 삭제 처리
           user.aiApiKey = null;
         } else {
           // 암호화하여 저장
