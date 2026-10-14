@@ -132,7 +132,7 @@ export const useChatStore = create<ChatStore>()(
         }
 
         const message: ChatMessage = {
-          id: `${Date.now()}${Math.random().toString(36).substring(2, 11)}`,
+          id: `${Date.now()}-${crypto.randomUUID()}`,
           timestamp: new Date(),
           ...messageData,
         };

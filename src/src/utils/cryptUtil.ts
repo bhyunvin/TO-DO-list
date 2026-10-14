@@ -45,7 +45,7 @@ const getBufferFromEnv = (
 /**
  * Hex 문자열을 Uint8Array로 변환
  */
-const hexToBytes = (hex: string): Uint8Array => {
+export const hexToBytes = (hex: string): Uint8Array => {
   if (hex.length % 2 !== 0) {
     throw new Error('유효하지 않은 16진수 문자열: 길이는 짝수여야 합니다');
   }
@@ -64,7 +64,7 @@ const hexToBytes = (hex: string): Uint8Array => {
 /**
  * Uint8Array를 Hex 문자열로 변환
  */
-const bytesToHex = (bytes: Uint8Array): string => {
+export const bytesToHex = (bytes: Uint8Array): string => {
   return Array.from(bytes)
     .map((b) => b.toString(16).padStart(2, '0'))
     .join('');

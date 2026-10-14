@@ -239,7 +239,7 @@ export class AssistanceService {
         reject,
       });
       if (!this.processing) {
-        this.processQueue();
+        void this.processQueue();
       }
     });
   }
@@ -275,7 +275,10 @@ export class AssistanceService {
       }
     }
     const exponentialDelay = baseDelay * Math.pow(2, attempt - 1);
-    const jitter = Math.random() * 1000;
+    // 암호학적으로 안전한 0 이상 1 미만의 난수 비율 계산 (Uint32 범위)
+    const randomRatio =
+      crypto.getRandomValues(new Uint32Array(1))[0] / 0x100000000;
+    const jitter = randomRatio * 1000;
     return Math.min(exponentialDelay + jitter, 30000);
   }
 

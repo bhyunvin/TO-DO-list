@@ -1,6 +1,7 @@
 import { render, fireEvent, waitFor, screen } from '../test-utils';
 import userEvent from '@testing-library/user-event';
 import ProfileUpdateForm from './ProfileUpdateForm';
+import { showConfirmAlert } from '../utils/alertUtils';
 
 // alertUtils 모킹
 jest.mock('../utils/alertUtils', () => ({
@@ -427,8 +428,7 @@ describe('ProfileUpdateForm', () => {
 
   test('shows confirmation alert when cancelling with dirty state', async () => {
     const user = userEvent.setup();
-    const { showConfirmAlert } = require('../utils/alertUtils');
-    showConfirmAlert.mockResolvedValue({ isConfirmed: true });
+    (showConfirmAlert as jest.Mock).mockResolvedValue({ isConfirmed: true });
 
     render(
       <ProfileUpdateForm

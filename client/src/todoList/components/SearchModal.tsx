@@ -67,13 +67,13 @@ const SearchModal = ({ show, onHide, onMoveToDate }) => {
   }, [keyword, startDate, endDate, isValidRange]);
 
   const handleSearchClick = () => {
-    performSearch();
+    void performSearch();
   };
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
       e.preventDefault(); // 폼 제출 방지
-      performSearch();
+      void performSearch();
     }
   };
 
@@ -88,7 +88,7 @@ const SearchModal = ({ show, onHide, onMoveToDate }) => {
     if (diffYears > 5) return; // 5년 초과시에만 자동검색 제한 (유효성 검사가 막아주겠지만 이중 체크)
 
     const timer = setTimeout(() => {
-      performSearch();
+      void performSearch();
     }, 1000);
 
     return () => clearTimeout(timer);

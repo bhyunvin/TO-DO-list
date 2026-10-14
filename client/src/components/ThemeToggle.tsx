@@ -39,7 +39,7 @@ const ThemeToggle = () => {
         <div
           className={`theme-toggle-slider ${theme === 'dark' ? 'dark' : 'light'}`}
         >
-          <div className="theme-toggle-icon">
+          <div className="theme-toggle-icon" data-testid="theme-toggle-icon">
             {theme === 'dark' ? <FaMoon /> : <FaSun />}
           </div>
         </div>

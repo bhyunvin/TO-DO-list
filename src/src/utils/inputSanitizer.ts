@@ -1,4 +1,26 @@
 /**
+ * '<' 부터 가장 가까운 '>' 까지를 태그로 간주하고 제거한다 (선형 시간, 정규식 백트래킹 없음)
+ * - 닫는 '>' 가 없는 '<' 이후 텍스트는 그대로 유지한다
+ */
+const stripHtmlTags = (input: string): string => {
+  let result = '';
+  let cursor = 0;
+
+  while (cursor < input.length) {
+    const open = input.indexOf('<', cursor);
+    if (open === -1) break;
+
+    const close = input.indexOf('>', open + 1);
+    if (close === -1) break;
+
+    result += input.slice(cursor, open);
+    cursor = close + 1;
+  }
+
+  return result + input.slice(cursor);
+};
+
+/**
  * 보안 취약점을 방지하기 위해 사용자 입력을 정제하는 유틸리티 서비스
  */
 
@@ -30,7 +52,7 @@ export class InputSanitizerService {
 
     // 허용되지 않은 경우 HTML 태그 제거 (기본값: 허용 안 함)
     if (!options.allowHtml) {
-      sanitized = sanitized.replaceAll(/<[^>]*>/g, '');
+      sanitized = stripHtmlTags(sanitized);
     }
 
     // XSS 방지를 위해 스크립트 관련 콘텐츠 제거

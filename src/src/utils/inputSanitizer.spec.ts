@@ -13,22 +13,20 @@ describe('InputSanitizerService (입력 정제 서비스)', () => {
   });
 
   describe('sanitizeString (문자열 정제)', () => {
-    it('기본적으로 HTML 태그를 제거해야 함', () => {
-      const input = '<script>alert("xss")</script>Hello World';
-      const result = service.sanitizeString(input);
-      expect(result).toBe('alert("xss")Hello World');
-    });
-
-    it('위험한 문자를 제거해야 함', () => {
-      const input = 'Hello"World\'Test;DROP';
-      const result = service.sanitizeString(input);
-      expect(result).toBe('Hello"World\'Test;DROP');
-    });
-
-    it('기본적으로 공백을 제거해야 함', () => {
-      const input = '  Hello World  ';
-      const result = service.sanitizeString(input);
-      expect(result).toBe('Hello World');
+    it.each([
+      [
+        '기본적으로 HTML 태그를 제거해야 함',
+        '<script>alert("xss")</script>Hello World',
+        'alert("xss")Hello World',
+      ],
+      [
+        '위험한 문자를 제거해야 함',
+        'Hello"World\'Test;DROP',
+        'Hello"World\'Test;DROP',
+      ],
+      ['기본적으로 공백을 제거해야 함', '  Hello World  ', 'Hello World'],
+    ])('%s', (_name, input, expected) => {
+      expect(service.sanitizeString(input)).toBe(expected);
     });
   });
 

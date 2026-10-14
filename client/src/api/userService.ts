@@ -5,6 +5,13 @@ import { hashPassword } from '../utils/passwordUtils';
 // Eden Treaty 타입 추론
 const userApi = api.user;
 
+type UploadProfileImageData = Awaited<
+  ReturnType<(typeof userApi)['upload-profile-image']['post']>
+>['data'];
+type UpdateProfileData = Awaited<
+  ReturnType<typeof userApi.update.patch>
+>['data'];
+
 const userService = {
   /**
    * 사용자 프로필 가져오기
@@ -49,7 +56,7 @@ const userService = {
     });
 
     const profileImageFile = formData.get('profileImage') as File | null;
-    let resultUser: any = null;
+    let resultUser: UploadProfileImageData | UpdateProfileData = null;
 
     // 1. 프로필 이미지 파일이 있는 경우 이미지 업로드 API 먼저 호출
     if (profileImageFile) {

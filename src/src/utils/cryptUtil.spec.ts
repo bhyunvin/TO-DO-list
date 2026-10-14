@@ -6,6 +6,8 @@ import {
   decryptSymmetric,
   encryptSymmetricDeterministic,
   decryptSymmetricDeterministic,
+  hexToBytes,
+  bytesToHex,
 } from './cryptUtil';
 
 describe('CryptUtil (암호화 유틸리티)', () => {
@@ -14,7 +16,9 @@ describe('CryptUtil (암호화 유틸리티)', () => {
 
   describe('Hex 유틸리티', () => {
     it('hex를 바이트로, 다시 바이트를 hex로 올바르게 변환해야 함', () => {
-      expect(true).toBe(true);
+      const bytes = hexToBytes('00ff10ab');
+      expect(Array.from(bytes)).toEqual([0, 255, 16, 171]);
+      expect(bytesToHex(bytes)).toBe('00ff10ab');
     });
   });
 

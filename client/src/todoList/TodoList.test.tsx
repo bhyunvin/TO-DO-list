@@ -1,7 +1,7 @@
 // 1. 기초 라이브러리 및 하위 컴포넌트 임포트
 import { render, waitFor, fireEvent, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 // HappyDOM에서 "global document" 오류를 해결하기 위한 로컬 screen 프록시
 const screen = new Proxy({} as typeof import('@testing-library/react').screen, {
@@ -428,9 +428,10 @@ describe('TodoContainer 통합 테스트 스위트', () => {
       render(<TodoContainer />);
 
       const targetRow = await screen.findByRole('row', { name: /Task_B/ });
-      const checkbox = within(targetRow).getByRole('checkbox');
+      // 체크박스는 pointer-events: none 이므로 클릭 핸들러가 있는 첫 번째 셀을 클릭
+      const [checkboxCell] = within(targetRow).getAllByRole('cell');
 
-      fireEvent.click(checkbox.closest('td'));
+      fireEvent.click(checkboxCell);
 
       await waitFor(
         () => {
@@ -451,13 +452,16 @@ describe('TodoContainer 통합 테스트 스위트', () => {
         .mockImplementation(() => {});
 
       render(<TodoContainer />);
-      const checkbox = await screen.findByRole('checkbox');
+      await screen.findByRole('checkbox');
+      const [checkboxCell] = within(
+        screen.getByRole('row', { name: /Test_Task/ }),
+      ).getAllByRole('cell');
 
       // 1. 낙관적 업데이트 확인
       (todoService.updateTodo as jest.Mock).mockImplementation(
         () => new Promise(() => {}),
       );
-      fireEvent.click(checkbox.closest('td'));
+      fireEvent.click(checkboxCell);
       await waitFor(() => expect(screen.getByRole('checkbox')).toBeChecked(), {
         timeout: 4000,
       });
@@ -483,8 +487,11 @@ describe('TodoContainer 통합 테스트 스위트', () => {
         .mockImplementation(() => {});
       render(<TodoContainer />);
 
-      const checkbox = await screen.findByRole('checkbox');
-      fireEvent.click(checkbox.closest('td'));
+      await screen.findByRole('checkbox');
+      const [checkboxCell] = within(
+        screen.getByRole('row', { name: /Fail_Task/ }),
+      ).getAllByRole('cell');
+      fireEvent.click(checkboxCell);
 
       await waitFor(() => expect(screen.getByRole('checkbox')).toBeChecked()); // 낙관적
       await waitFor(() =>

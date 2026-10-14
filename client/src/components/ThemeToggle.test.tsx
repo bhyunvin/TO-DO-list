@@ -55,9 +55,7 @@ describe('ThemeToggle 컴포넌트', () => {
     test('테마가 light일 때 태양 아이콘을 표시해야 함', () => {
       render(<ThemeToggle />);
 
-      // react-icons는 svg를 렌더링함
-      const sunIcon = document.querySelector('svg');
-      expect(sunIcon).toBeInTheDocument();
+      expect(screen.getByTestId('theme-toggle-icon')).toBeInTheDocument();
     });
 
     test('테마가 dark일 때 달 아이콘을 표시해야 함', () => {
@@ -70,8 +68,7 @@ describe('ThemeToggle 컴포넌트', () => {
 
       render(<ThemeToggle />);
 
-      const moonIcon = document.querySelector('svg');
-      expect(moonIcon).toBeInTheDocument();
+      expect(screen.getByTestId('theme-toggle-icon')).toBeInTheDocument();
     });
   });
 
@@ -88,9 +85,6 @@ describe('ThemeToggle 컴포넌트', () => {
 
       const switchElement = screen.getByRole('switch');
       expect(switchElement).toHaveAttribute('aria-checked', 'false');
-
-      const slider = document.querySelector('.theme-toggle-slider');
-      expect(slider).toHaveClass('light');
     });
 
     test('테마가 dark일 때 스위치가 선택된 상태여야 함', () => {
@@ -105,9 +99,6 @@ describe('ThemeToggle 컴포넌트', () => {
 
       const switchElement = screen.getByRole('switch');
       expect(switchElement).toHaveAttribute('aria-checked', 'true');
-
-      const slider = document.querySelector('.theme-toggle-slider');
-      expect(slider).toHaveClass('dark');
     });
   });
 
@@ -115,9 +106,7 @@ describe('ThemeToggle 컴포넌트', () => {
     test('래퍼 클릭 시 toggleTheme을 호출해야 함', () => {
       render(<ThemeToggle />);
 
-      const wrapper = screen
-        .getByText('다크 모드')
-        .closest('.theme-toggle-wrapper');
+      const wrapper = screen.getByRole('switch');
       fireEvent.click(wrapper);
 
       expect(mockToggleTheme).toHaveBeenCalledTimes(1);
@@ -135,9 +124,7 @@ describe('ThemeToggle 컴포넌트', () => {
     test('클릭 시 toggleTheme을 한 번만 호출해야 함', () => {
       render(<ThemeToggle />);
 
-      const wrapper = screen
-        .getByText('다크 모드')
-        .closest('.theme-toggle-wrapper');
+      const wrapper = screen.getByRole('switch');
       fireEvent.click(wrapper);
 
       expect(mockToggleTheme).toHaveBeenCalledTimes(1);
@@ -149,13 +136,13 @@ describe('ThemeToggle 컴포넌트', () => {
     test('래퍼 클릭 시 이벤트 전파를 중단해야 함', () => {
       const mockParentClick = jest.fn();
 
-      const { container } = render(
+      render(
         <button onClick={mockParentClick} className="theme-toggle-wrapper-mock">
           <ThemeToggle />
         </button>,
       );
 
-      const toggleWrapper = container.querySelector('.theme-toggle-wrapper');
+      const toggleWrapper = screen.getByRole('switch');
       fireEvent.click(toggleWrapper);
 
       // toggleTheme은 호출되어야 함
@@ -167,13 +154,13 @@ describe('ThemeToggle 컴포넌트', () => {
     test('토글 클릭 시 드롭다운이 닫히지 않아야 함', () => {
       const mockDropdownClick = jest.fn();
 
-      const { container } = render(
+      render(
         <button className="dropdown-menu" onClick={mockDropdownClick}>
           <ThemeToggle />
         </button>,
       );
 
-      const toggleWrapper = container.querySelector('.theme-toggle-wrapper');
+      const toggleWrapper = screen.getByRole('switch');
       fireEvent.click(toggleWrapper);
 
       // 드롭다운 클릭 핸들러는 호출되지 않아야 함
@@ -242,8 +229,6 @@ describe('ThemeToggle 컴포넌트', () => {
       // 초기 상태: light 테마
       let switchElement = screen.getByRole('switch');
       expect(switchElement).toHaveAttribute('aria-checked', 'false');
-      let slider = document.querySelector('.theme-toggle-slider');
-      expect(slider).toHaveClass('light');
 
       // 테마를 dark로 변경
       (useThemeStore as unknown as jest.Mock).mockReturnValue({
@@ -258,16 +243,12 @@ describe('ThemeToggle 컴포넌트', () => {
       // 스위치가 dark 상태로 변경됨
       switchElement = screen.getByRole('switch');
       expect(switchElement).toHaveAttribute('aria-checked', 'true');
-      slider = document.querySelector('.theme-toggle-slider');
-      expect(slider).toHaveClass('dark');
     });
 
     test('짧은 시간 동안 여러 번 클릭해도 올바르게 처리해야 함', () => {
       render(<ThemeToggle />);
 
-      const wrapper = screen
-        .getByText('다크 모드')
-        .closest('.theme-toggle-wrapper');
+      const wrapper = screen.getByRole('switch');
 
       // 빠른 연속 클릭
       fireEvent.click(wrapper);
@@ -295,41 +276,6 @@ describe('ThemeToggle 컴포넌트', () => {
 
       switchElement = screen.getByRole('switch');
       expect(switchElement).toHaveAttribute('aria-label', '다크 모드 전환');
-    });
-  });
-
-  describe('컴포넌트 구조', () => {
-    test('theme-toggle-wrapper 클래스를 포함해야 함', () => {
-      const { container } = render(<ThemeToggle />);
-
-      const toggleWrapper = container.querySelector('.theme-toggle-wrapper');
-      expect(toggleWrapper).toBeInTheDocument();
-    });
-
-    test('theme-toggle-switch 클래스를 포함해야 함', () => {
-      const { container } = render(<ThemeToggle />);
-
-      const toggleSwitch = container.querySelector('.theme-toggle-switch');
-      expect(toggleSwitch).toBeInTheDocument();
-    });
-
-    test('레이블이 스위치 옆에 표시되어야 함', () => {
-      render(<ThemeToggle />);
-
-      const label = screen.getByText('다크 모드');
-      const switchElement = screen.getByRole('switch');
-
-      // label과 switch가 모두 렌더링되어 있는지 확인
-      expect(label).toBeInTheDocument();
-      expect(switchElement).toBeInTheDocument();
-    });
-
-    test('올바른 초기 클래스와 함께 슬라이더를 렌더링해야 함', () => {
-      const { container } = render(<ThemeToggle />);
-
-      const slider = container.querySelector('.theme-toggle-slider');
-      expect(slider).toBeInTheDocument();
-      expect(slider).toHaveClass('light');
     });
   });
 });

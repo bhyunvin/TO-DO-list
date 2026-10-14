@@ -22,19 +22,20 @@ describe('AuditColumns (감사 컬럼 유틸리티)', () => {
   });
 
   it('업데이트 시 upd_* 컬럼만 변경해야 함', () => {
+    const creatorIp = 'creator-ip';
     const regDate = new Date('2023-01-01');
     const entity = {
       auditColumns: Object.assign(new AuditColumns(), {
         regId: 'creator',
-        regIp: '1.1.1.1',
+        regIp: creatorIp,
         regDtm: regDate,
         updId: 'creator',
-        updIp: '1.1.1.1',
+        updIp: creatorIp,
         updDtm: regDate,
       }),
     };
     const id = 'updater';
-    const ip = '2.2.2.2';
+    const ip = 'updater-ip';
 
     setAuditColumn({ entity, id, ip, isUpdate: true });
 

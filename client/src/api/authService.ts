@@ -1,9 +1,9 @@
 import { api, ApiError } from './client';
 
-const userApi = api.user;
-
 import { useAuthStore } from '../authStore/authStore';
 import { hashPassword } from '../utils/passwordUtils';
+
+const userApi = api.user;
 
 const authService = {
   /**
@@ -47,20 +47,23 @@ const authService = {
    * 회원가입
    */
   async signup(formData: FormData | Record<string, unknown>) {
-    let payload: Record<string, any> =
+    const rawObj =
       formData instanceof FormData
         ? Object.fromEntries(formData.entries())
         : formData;
+    const payload: Record<string, unknown> = { ...rawObj };
 
-    if (payload.userPw && payload.userId) {
-      const hashedPw = await hashPassword(
-        String(payload.userPw),
-        String(payload.userId),
-      );
-      payload = { ...payload, userPw: hashedPw };
+    if (
+      typeof payload.userPw === 'string' &&
+      typeof payload.userId === 'string'
+    ) {
+      const hashedPw = await hashPassword(payload.userPw, payload.userId);
+      payload.userPw = hashedPw;
     }
 
-    const { data, error } = await userApi.register.post(payload);
+    const { data, error } = await userApi.register.post(
+      payload as Parameters<typeof userApi.register.post>[0],
+    );
 
     if (error) {
       throw new ApiError(

@@ -86,8 +86,10 @@ export class UserService {
     if (!user) return user;
 
     // API Key와 같은 민감 정보 제외
-    const { aiApiKey: _aiApiKey, userPw: _userPw, ...publicInfo } = user;
-    return publicInfo as Partial<T>;
+    const publicInfo: Partial<T> = { ...user };
+    delete publicInfo.aiApiKey;
+    delete publicInfo.userPw;
+    return publicInfo;
   }
 
   // --- 인증 로직 ---

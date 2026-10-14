@@ -8,6 +8,7 @@ import {
 } from 'react';
 
 // 라이브러리
+import DOMPurify from 'dompurify';
 import { ko } from 'date-fns/locale';
 import 'react-datepicker/dist/react-datepicker.css';
 import { BsFileEarmarkSpreadsheet } from '@react-icons/all-files/bs/BsFileEarmarkSpreadsheet';
@@ -158,7 +159,7 @@ const TodoContainer = () => {
       }
     };
 
-    loadTodos();
+    void loadTodos();
     return () => {
       ignore = true;
     };
@@ -207,7 +208,7 @@ const TodoContainer = () => {
         });
       }
 
-      showAlert({
+      await showAlert({
         title: '성공',
         html: `
             <div class="text-center">
@@ -218,14 +219,14 @@ const TodoContainer = () => {
         icon: 'success',
       });
       setIsCreating(false);
-      fetchTodos();
+      await fetchTodos();
 
       // 성공 결과 반환
       return { success: true, ...responseData };
     } catch (error) {
       console.error('Add Todo Error:', error);
 
-      showErrorAlert('오류', '할 일 추가 중 문제가 발생했습니다.');
+      await showErrorAlert('오류', '할 일 추가 중 문제가 발생했습니다.');
       return { success: false, error };
     }
   };
@@ -334,7 +335,7 @@ const TodoContainer = () => {
       // 에러 메시지 처리 및 알림 (헬퍼 함수 활용 가능)
       const errorMessage = getErrorMessage(error, error.response);
 
-      showToast({
+      void showToast({
         title: errorMessage,
         icon: 'error',
       });
@@ -356,36 +357,36 @@ const TodoContainer = () => {
   const handleDeleteTodo = async (todoSeq) => {
     // 사용자에게 삭제 확인을 받음
 
-    await showConfirmAlert({
+    const result = await showConfirmAlert({
       title: '정말로 삭제하시겠습니까?',
       text: '삭제된 데이터는 복구할 수 없습니다.',
       confirmButtonText: '삭제',
-    }).then(async (result) => {
-      // 사용자가 '네'를 클릭한 경우에만 삭제를 진행
-      if (result.isConfirmed) {
-        try {
-          await todoService.deleteTodo(todoSeq);
+    });
 
-          showToast({
-            title: '삭제 완료!',
-            icon: 'success',
-          });
-          fetchTodos();
-        } catch (error) {
-          console.error('Delete Todo Error:', error);
+    // 사용자가 '네'를 클릭한 경우에만 삭제를 진행
+    if (result.isConfirmed) {
+      try {
+        await todoService.deleteTodo(todoSeq);
 
-          const { response } = error;
-          if (response?.data) {
-            showErrorAlert(
-              '오류',
-              `삭제에 실패했습니다: ${response.data.message}`,
-            );
-          } else {
-            showErrorAlert('오류', '서버와의 통신 중 문제가 발생했습니다.');
-          }
+        void showToast({
+          title: '삭제 완료!',
+          icon: 'success',
+        });
+        await fetchTodos();
+      } catch (error) {
+        console.error('Delete Todo Error:', error);
+
+        const { response } = error;
+        if (response?.data) {
+          await showErrorAlert(
+            '오류',
+            `삭제에 실패했습니다: ${response.data.message}`,
+          );
+        } else {
+          await showErrorAlert('오류', '서버와의 통신 중 문제가 발생했습니다.');
         }
       }
-    });
+    }
   };
 
   const handleEditTodo = (todo) => {
@@ -417,12 +418,12 @@ const TodoContainer = () => {
         });
       }
 
-      showToast({
+      void showToast({
         title: '할 일이 수정되었습니다.',
         icon: 'success',
       });
       setEditingTodo(null);
-      fetchTodos();
+      await fetchTodos();
       return { success: true, data: responseData };
     } catch (error) {
       console.error('Save Todo Error:', error);
@@ -436,19 +437,22 @@ const TodoContainer = () => {
             .map(({ fileName, errorMessage }) => `${fileName}: ${errorMessage}`)
             .join('<br>');
 
-          showAlert({
+          await showAlert({
             title: '파일 업로드 오류',
             html: errorMessages,
             icon: 'error',
           });
           return { success: false, errors: errorData.errors || [] };
         } else {
-          showErrorAlert('오류', errorData.message || '수정에 실패했습니다.');
+          await showErrorAlert(
+            '오류',
+            errorData.message || '수정에 실패했습니다.',
+          );
           return { success: false, error: errorData.message };
         }
       }
 
-      showErrorAlert('오류', '서버와의 통신 중 문제가 발생했습니다.');
+      await showErrorAlert('오류', '서버와의 통신 중 문제가 발생했습니다.');
       return { success: false, error: error.message };
     }
   };
@@ -469,18 +473,17 @@ const TodoContainer = () => {
     setIsFormDirty(isDirty);
   };
 
-  const handleUpdateProfile = () => {
+  const handleUpdateProfile = async () => {
     if (isFormDirty) {
-      showNavigationConfirmAlert().then((result) => {
-        if (result.isConfirmed) {
-          setIsUpdatingProfile(true);
-          setIsCreating(false);
-          setEditingTodo(null);
-          setIsChangingPassword(false);
-          setIsUserMenuOpen(false);
-          setIsFormDirty(false);
-        }
-      });
+      const result = await showNavigationConfirmAlert();
+      if (result.isConfirmed) {
+        setIsUpdatingProfile(true);
+        setIsCreating(false);
+        setEditingTodo(null);
+        setIsChangingPassword(false);
+        setIsUserMenuOpen(false);
+        setIsFormDirty(false);
+      }
       return;
     }
 
@@ -496,18 +499,17 @@ const TodoContainer = () => {
     setIsFormDirty(false);
   };
 
-  const handleChangePassword = () => {
+  const handleChangePassword = async () => {
     if (isFormDirty) {
-      showNavigationConfirmAlert().then((result) => {
-        if (result.isConfirmed) {
-          setIsChangingPassword(true);
-          setIsCreating(false);
-          setEditingTodo(null);
-          setIsUpdatingProfile(false);
-          setIsUserMenuOpen(false);
-          setIsFormDirty(false);
-        }
-      });
+      const result = await showNavigationConfirmAlert();
+      if (result.isConfirmed) {
+        setIsChangingPassword(true);
+        setIsCreating(false);
+        setEditingTodo(null);
+        setIsUpdatingProfile(false);
+        setIsUserMenuOpen(false);
+        setIsFormDirty(false);
+      }
       return;
     }
 
@@ -523,29 +525,40 @@ const TodoContainer = () => {
     setIsFormDirty(false);
   };
 
-  const handleSaveProfile = async (profileData) => {
+  const handleSaveProfile = async (profileData: { formData: FormData }) => {
     try {
       const { formData } = profileData;
 
       const updatedUser = await userService.updateProfile(formData);
 
+      if (!updatedUser) return;
+
+      let userToLogin = updatedUser;
+
       // 프로필 이미지가 있는 경우, 브라우저 캐시를 우회하기 위해 타임스탬프 추가
-      if (updatedUser.profileImage) {
+      if (
+        typeof updatedUser === 'object' &&
+        'profileImage' in updatedUser &&
+        updatedUser.profileImage
+      ) {
         const timestamp = Date.now();
+        const profileImageStr = String(updatedUser.profileImage);
         // 이미 쿼리 파라미터가 있는지 확인
-        const separator = updatedUser.profileImage.includes('?') ? '&' : '?';
-        updatedUser.profileImage = `${updatedUser.profileImage}${separator}t=${timestamp}`;
+        const separator = profileImageStr.includes('?') ? '&' : '?';
+        userToLogin = {
+          ...updatedUser,
+          profileImage: `${profileImageStr}${separator}t=${timestamp}`,
+        };
       }
 
-      login(updatedUser);
+      login(userToLogin as Parameters<typeof login>[0]);
 
-      showToast({
+      await showToast({
         title: '프로필이 수정되었습니다.',
         icon: 'success',
-      }).then(() => {
-        setIsUpdatingProfile(false);
-        setIsFormDirty(false);
       });
+      setIsUpdatingProfile(false);
+      setIsFormDirty(false);
     } catch (error) {
       console.error('Profile update error:', error);
 
@@ -557,19 +570,22 @@ const TodoContainer = () => {
             .map(({ fileName, errorMessage }) => `${fileName}: ${errorMessage}`)
             .join('<br>');
 
-          showAlert({
+          await showAlert({
             title: '파일 업로드 오류',
             html: errorMessages,
             icon: 'error',
           });
         } else {
-          showErrorAlert(
+          await showErrorAlert(
             '프로필 수정 실패',
             errorData.message || '서버 오류가 발생했습니다.',
           );
         }
       } else {
-        showErrorAlert('오류 발생', '서버와의 연결에 문제가 발생했습니다.');
+        await showErrorAlert(
+          '오류 발생',
+          '서버와의 연결에 문제가 발생했습니다.',
+        );
       }
     }
   };
@@ -580,17 +596,14 @@ const TodoContainer = () => {
 
       await userService.changePassword(currentPassword, newPassword);
 
-      showToast({
+      await showToast({
         title: '비밀번호가 변경되었습니다.',
         icon: 'success',
-      })
-        .then(() => {})
-        .then(() => {
-          setIsChangingPassword(false);
-          setIsFormDirty(false);
-          // 비밀번호 변경 후 로그아웃 처리
-          handleLogout();
-        });
+      });
+      setIsChangingPassword(false);
+      setIsFormDirty(false);
+      // 비밀번호 변경 후 로그아웃 처리
+      await handleLogout();
     } catch (error) {
       console.error('Password change error:', error);
 
@@ -608,15 +621,18 @@ const TodoContainer = () => {
           }
         }
 
-        showErrorAlert('비밀번호 변경 실패', errorMessage);
+        await showErrorAlert('비밀번호 변경 실패', errorMessage);
       } else {
-        showErrorAlert('오류 발생', '서버와의 연결에 문제가 발생했습니다.');
+        await showErrorAlert(
+          '오류 발생',
+          '서버와의 연결에 문제가 발생했습니다.',
+        );
       }
     }
   };
 
   const handleLogout = async () => {
-    await showConfirmAlert({
+    const result = await showConfirmAlert({
       title: '로그아웃 하시겠습니까?',
       confirmButtonText: '로그아웃',
       cancelButtonText: '취소',
@@ -625,25 +641,23 @@ const TodoContainer = () => {
         cancelButton: 'btn btn-outline-adaptive me-2',
       },
       text: '로그아웃 하시겠습니까?', // text 속성 추가
-    }).then((result) => {
-      // 사용자가 취소를 선택한 경우 로그아웃을 중단
-      if (!result.isConfirmed) {
-        return;
-      }
-
-      return (async () => {
-        setIsUserMenuOpen(false);
-        try {
-          await authService.logout();
-        } catch (error) {
-          console.error('Logout Error : ', error);
-          // 네트워크 오류 등이 발생해도 사용자에게 알린 후 로그아웃을 진행
-          showErrorAlert('오류 발생', '서버와의 연결에 문제가 발생했습니다.');
-        } finally {
-          logout();
-        }
-      })();
     });
+
+    // 사용자가 취소를 선택한 경우 로그아웃을 중단
+    if (!result.isConfirmed) {
+      return;
+    }
+
+    setIsUserMenuOpen(false);
+    try {
+      await authService.logout();
+    } catch (error) {
+      console.error('Logout Error : ', error);
+      // 네트워크 오류 등이 발생해도 사용자에게 알린 후 로그아웃을 진행
+      await showErrorAlert('오류 발생', '서버와의 연결에 문제가 발생했습니다.');
+    } finally {
+      logout();
+    }
   };
 
   const handlePrevDay = () => {
@@ -684,7 +698,7 @@ const TodoContainer = () => {
       parts: [
         {
           text: msg.isHtml
-            ? msg.content.replaceAll(/<[^>]*>/g, '')
+            ? DOMPurify.sanitize(msg.content, { ALLOWED_TAGS: [] })
             : msg.content,
         },
       ],
@@ -781,7 +795,7 @@ const TodoContainer = () => {
   const handleRetry = () => {
     const lastMessage = getRetryMessage();
     if (lastMessage) {
-      handleSendMessage(lastMessage, true);
+      void handleSendMessage(lastMessage, true);
     }
   };
 
@@ -815,7 +829,7 @@ const TodoContainer = () => {
       globalThis.URL.revokeObjectURL(url);
       a.remove();
 
-      showSuccessAlert('성공', 'Excel 파일이 다운로드되었습니다.');
+      await showSuccessAlert('성공', 'Excel 파일이 다운로드되었습니다.');
     } catch (error) {
       console.error('Excel Export Error:', error);
 
@@ -830,7 +844,7 @@ const TodoContainer = () => {
         }
       }
 
-      showErrorAlert('오류', errorMessage);
+      await showErrorAlert('오류', errorMessage);
     }
   };
 

@@ -10,6 +10,8 @@ import { getPasswordStrength, PASSWORD_CRITERIA } from '../utils/passwordUtils';
 
 import './loginForm.css';
 
+const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
 const SignupForm = ({ onSignupComplete }) => {
   const { validateFiles, formatFileSize, getUploadPolicy } =
     useFileUploadValidator();
@@ -97,7 +99,7 @@ const SignupForm = ({ onSignupComplete }) => {
       }
     } catch (error) {
       console.error('SignupForm Error : ', error);
-      showErrorAlert('오류 발생', '서버와의 연결에 문제가 발생했습니다.');
+      await showErrorAlert('오류 발생', '서버와의 연결에 문제가 발생했습니다.');
     }
   };
 
@@ -158,7 +160,7 @@ const SignupForm = ({ onSignupComplete }) => {
   const emailChangeHandler = (e) => {
     const emailValue = e.target.value;
 
-    if (!emailValue || !/[a-z0-9]+@[a-z]+\.[a-z]{2,3}/.test(emailValue)) {
+    if (!emailValue || !EMAIL_REGEX.test(emailValue)) {
       setEmailError('이메일을 확인해주세요.');
       setUserEmail('');
     } else {
@@ -226,7 +228,7 @@ const SignupForm = ({ onSignupComplete }) => {
       return false;
     }
 
-    if (!userEmail || !/[a-z0-9]+@[a-z]+\.[a-z]{2,3}/.test(userEmail)) {
+    if (!userEmail || !EMAIL_REGEX.test(userEmail)) {
       setEmailError('이메일을 확인해주세요.');
       return false;
     }
@@ -241,7 +243,7 @@ const SignupForm = ({ onSignupComplete }) => {
     }
 
     if (!privacyAgreed) {
-      showToast({
+      void showToast({
         title: '개인정보 수집 및 이용에 동의해주세요.',
         icon: 'warning',
         timer: 3000,
@@ -269,7 +271,7 @@ const SignupForm = ({ onSignupComplete }) => {
       const data = await authService.signup(signupFormData);
 
       if (data.userSeq) {
-        showAlert({
+        await showAlert({
           title: '회원가입 완료!',
           html: `
               <div class="text-center">
@@ -280,13 +282,12 @@ const SignupForm = ({ onSignupComplete }) => {
             `,
           icon: 'success',
           confirmButtonText: '로그인하기',
-        }).then(() => {
-          resetUploadState();
-          onSignupComplete();
         });
+        resetUploadState();
+        onSignupComplete();
       } else {
         console.error('회원가입 실패 : ', data);
-        showErrorAlert('', '회원가입에 실패했습니다.');
+        await showErrorAlert('', '회원가입에 실패했습니다.');
       }
     } catch (error) {
       console.error('SignupForm Error : ', error);
@@ -300,25 +301,28 @@ const SignupForm = ({ onSignupComplete }) => {
             .map((err) => `${err.fileName}: ${err.errorMessage}`)
             .join('<br>');
 
-          showAlert({
+          await showAlert({
             title: '파일 업로드 오류',
             html: errorMessages,
             icon: 'error',
           });
         } else {
-          showErrorAlert(
+          await showErrorAlert(
             '회원가입 실패',
             errorData.message || '서버 오류가 발생했습니다.',
           );
         }
       } else {
-        showErrorAlert('오류 발생', '서버와의 연결에 문제가 발생했습니다.');
+        await showErrorAlert(
+          '오류 발생',
+          '서버와의 연결에 문제가 발생했습니다.',
+        );
       }
     }
   };
 
-  const onCancel = () => {
-    showAlert({
+  const onCancel = async () => {
+    const result = await showAlert({
       title: '정말 취소하시겠습니까?',
       text: '작성중인 내용이 사라집니다.',
       icon: 'warning',
@@ -333,11 +337,10 @@ const SignupForm = ({ onSignupComplete }) => {
       buttonsStyling: false,
       confirmButtonText: '확인',
       cancelButtonText: '계속 작성',
-    }).then((result) => {
-      if (result.isConfirmed) {
-        onSignupComplete();
-      }
     });
+    if (result.isConfirmed) {
+      onSignupComplete();
+    }
   };
 
   const getFileInputClass = () => {
@@ -355,7 +358,7 @@ const SignupForm = ({ onSignupComplete }) => {
   const passwordStrength = getPasswordStrength(userPassword);
 
   const showPrivacyPolicy = () => {
-    showAlert({
+    void showAlert({
       title: '개인정보 처리방침',
       html: `
         <div style="text-align: left; max-height: 400px; overflow-y: auto; font-size: 0.9rem; line-height: 1.6;">
@@ -642,7 +645,7 @@ const SignupForm = ({ onSignupComplete }) => {
                 showValidation={false}
                 showProgress={true}
                 showDetailedStatus={true}
-                onRetryUpload={async (failedFiles) => {
+                onRetryUpload={(failedFiles) => {
                   // 프로필 이미지의 경우 유효성 검사만 재설정
                   if (failedFiles.length > 0) {
                     const file = failedFiles[0];
