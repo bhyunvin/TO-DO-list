@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useFileUploadValidator } from '../../hooks/useFileUploadValidator';
 import { useFileUploadProgress } from '../../hooks/useFileUploadProgress';
@@ -44,10 +44,15 @@ const TodoForm = ({
   } = useTodoFileHandler();
 
   // initialValues가 변경되면(보통 새로운 폼 인스턴스를 의미하지만 편집 전환 시 안전을 위해) 로컬 상태 초기화
-  useEffect(() => {
+  const [prevInitialValues, setPrevInitialValues] = useState(initialValues);
+  if (
+    initialValues.content !== prevInitialValues.content ||
+    initialValues.note !== prevInitialValues.note
+  ) {
+    setPrevInitialValues(initialValues);
     setTodoContent(initialValues.content);
     setTodoNote(initialValues.note);
-  }, [initialValues.content, initialValues.note]);
+  }
 
   const handleChange = (e) => {
     const { name, value } = e.target;

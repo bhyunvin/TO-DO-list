@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import 'sweetalert2/dist/sweetalert2.min.css';
 import { BsPaperclip } from '@react-icons/all-files/bs/BsPaperclip';
@@ -16,20 +16,28 @@ const ExistingAttachments = ({ todoSeq }) => {
   const [isLoading, setIsLoading] = useState(true);
   const { formatFileSize } = useFileUploadValidator();
 
-  const fetchAttachments = useCallback(async () => {
-    try {
-      const data = await todoService.getAttachments(todoSeq);
-      setAttachments(data);
-    } catch (error) {
-      console.error('Failed to fetch attachments:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [todoSeq]);
-
   useEffect(() => {
-    fetchAttachments();
-  }, [fetchAttachments]);
+    let ignore = false;
+    const loadAttachments = async () => {
+      try {
+        const data = await todoService.getAttachments(todoSeq);
+        if (!ignore) {
+          setAttachments(data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch attachments:', error);
+      } finally {
+        if (!ignore) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    loadAttachments();
+    return () => {
+      ignore = true;
+    };
+  }, [todoSeq]);
 
   const handleDelete = async (fileNo) => {
     const result = await showConfirmAlert({

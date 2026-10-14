@@ -118,9 +118,11 @@ const TodoContainer = () => {
   // 1일 1회 '오늘' 체크 및 리셋 훅
   useDailyDateReset(selectedDate, handleToday);
 
-  useEffect(() => {
+  const [prevProfileImage, setPrevProfileImage] = useState(user?.profileImage);
+  if (user?.profileImage !== prevProfileImage) {
+    setPrevProfileImage(user?.profileImage);
     setImgError(false);
-  }, [user?.profileImage]);
+  }
 
   const fetchTodos = useCallback(async () => {
     setIsLoadingTodos(true);
@@ -138,14 +140,29 @@ const TodoContainer = () => {
   }, [selectedDate]);
 
   useEffect(() => {
-    fetchTodos();
-  }, [fetchTodos]);
+    let ignore = false;
+    const loadTodos = async () => {
+      setIsLoadingTodos(true);
+      try {
+        const formattedDate = formatDate(selectedDate);
+        const data = await todoService.getTodos(formattedDate);
+        if (!ignore) {
+          setTodos(data);
+        }
+      } catch (error) {
+        console.error('Fetch Todos Error:', error);
+      } finally {
+        if (!ignore) {
+          setIsLoadingTodos(false);
+        }
+      }
+    };
 
-  useEffect(() => {
-    if (todoRefreshTrigger > 0) {
-      fetchTodos();
-    }
-  }, [todoRefreshTrigger, fetchTodos]);
+    loadTodos();
+    return () => {
+      ignore = true;
+    };
+  }, [selectedDate, todoRefreshTrigger]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
 import PropTypes from 'prop-types';
 import DatePicker from 'react-datepicker';
@@ -19,35 +19,28 @@ const SearchModal = ({ show, onHide, onMoveToDate }) => {
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
-  const [isValidRange, setIsValidRange] = useState(true);
+  const [prevShow, setPrevShow] = useState(show);
 
-  useEffect(() => {
+  if (show !== prevShow) {
+    setPrevShow(show);
     if (show) {
       setKeyword('');
       setStartDate(subYears(new Date(), 1));
       setEndDate(new Date());
-      setIsValidRange(true);
       setSearchResults([]);
       setHasSearched(false);
     }
-  }, [show]);
+  }
 
-  useEffect(() => {
-    if (startDate && endDate) {
-      const diffYears = differenceInYears(endDate, startDate);
-      if (startDate > endDate) {
-        setIsValidRange(false);
-      } else if (diffYears >= 5) {
-        const diffDays = differenceInDays(endDate, startDate);
-        if (diffDays > 365 * 5 + 2) {
-          setIsValidRange(false);
-        } else {
-          setIsValidRange(true);
-        }
-      } else {
-        setIsValidRange(true);
-      }
+  const isValidRange = useMemo(() => {
+    if (!startDate || !endDate) return false;
+    if (startDate > endDate) return false;
+    const diffYears = differenceInYears(endDate, startDate);
+    if (diffYears >= 5) {
+      const diffDays = differenceInDays(endDate, startDate);
+      if (diffDays > 365 * 5 + 2) return false;
     }
+    return true;
   }, [startDate, endDate]);
 
   // 검색 수행 (모달 닫지 않음)
