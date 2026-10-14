@@ -25,22 +25,34 @@
     "bun": ">=1.0.0"
   },
   "devDependencies": {
-    "@types/multer": "^2.1.0",
-    "concurrently": "^9.2.1",
-    "nx": "^22.6.5",
-    "prettier": "^3.8.3"
+    "@types/multer": "^2.3.0",
+    "concurrently": "^9.2.5",
+    "nx": "^23.3.0",
+    "prettier": "^3.9.10"
   },
   "overrides": {
     "nth-check": "2.1.1",
-    "tmp": "^0.2.4",
+    "tmp": "^0.2.7",
     "svgo": "^4.0.0",
     "css-select": "^6.0.0",
     "glob": ">=11.0.4",
-    "lodash": "4.17.23",
+    "lodash": "4.18.1",
     "diff": "8.0.3",
-    "baseline-browser-mapping": "^2.9.17"
+    "baseline-browser-mapping": "^2.11.28",
+    "axios": "^1.20.0",
+    "esbuild": "^0.28.2",
+    "postcss-selector-parser": "^7.1.6",
+    "smol-toml": "^1.9.1",
+    "uuid": "^11.1.1",
+    "undici": "^7.30.0"
   },
   "resolutions": {
-    "baseline-browser-mapping": "^2.9.17"
+    "baseline-browser-mapping": "^2.11.28",
+    "axios": "^1.20.0",
+    "esbuild": "^0.28.2",
+    "postcss-selector-parser": "^7.1.6",
+    "smol-toml": "^1.9.1",
+    "uuid": "^11.1.1",
+    "undici": "^7.30.0"
   }
 }
