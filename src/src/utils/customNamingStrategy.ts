@@ -17,13 +17,4 @@ export class CustomNamingStrategy
   columnName(propertyName: string, customName: string): string {
     return customName || snakeCase(propertyName);
   }
-
-  // 임베디드 엔티티의 부모 클래스 접두어 없이 컬럼 이름을 반환
-  embeddedColumnName(
-    _embeddedPrefixes: string[],
-    columnPropertyName: string,
-    columnCustomName: string,
-  ): string {
-    return columnCustomName || snakeCase(columnPropertyName);
-  }
 }

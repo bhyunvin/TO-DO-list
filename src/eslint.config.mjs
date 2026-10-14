@@ -18,4 +18,20 @@ export default [
     ...tseslint.configs.recommended,
     sonarjs.configs.recommended,
     eslintPluginPrettierRecommended,
+    {
+        rules: {
+            "@typescript-eslint/no-unused-vars": [
+                "error",
+                {
+                    args: "all",
+                    caughtErrors: "all",
+                    ignoreRestSiblings: false,
+                },
+            ],
+            "@typescript-eslint/no-unused-private-class-members": "error",
+            "@typescript-eslint/no-unused-expressions": "error",
+            "sonarjs/no-unused-collection": "error",
+            "sonarjs/no-unused-vars": "error",
+        },
+    },
 ];

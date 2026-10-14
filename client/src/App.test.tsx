@@ -3,11 +3,11 @@ import App from './App';
 
 // Local screen proxy to fix "global document" error in HappyDOM
 const screen = new Proxy({} as typeof import('@testing-library/react').screen, {
-  get: (_, prop) => {
+  get: (target, prop) => {
     if (typeof document !== 'undefined' && document.body) {
       return within(document.body)[prop as keyof ReturnType<typeof within>];
     }
-    return undefined;
+    return target[prop as keyof typeof target];
   },
 });
 

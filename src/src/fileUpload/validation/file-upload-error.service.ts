@@ -176,7 +176,6 @@ export class FileUploadErrorService {
    * 차단된 파일 시도에 대한 보안 이벤트 로깅
    */
   logSecurityEvent(
-    files: File[],
     errors: FileValidationError[],
     context: ErrorLogContext,
   ): void {
@@ -207,7 +206,6 @@ export class FileUploadErrorService {
   }
 
   logValidationErrors(
-    files: File[],
     errors: FileValidationError[],
     context: ErrorLogContext,
   ): void {

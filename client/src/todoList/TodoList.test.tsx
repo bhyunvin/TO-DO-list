@@ -5,11 +5,11 @@ import { useState } from 'react';
 
 // HappyDOM에서 "global document" 오류를 해결하기 위한 로컬 screen 프록시
 const screen = new Proxy({} as typeof import('@testing-library/react').screen, {
-  get: (_, prop) => {
+  get: (target, prop) => {
     if (typeof document !== 'undefined' && document.body) {
       return within(document.body)[prop as keyof ReturnType<typeof within>];
     }
-    return undefined;
+    return target[prop as keyof typeof target];
   },
 });
 

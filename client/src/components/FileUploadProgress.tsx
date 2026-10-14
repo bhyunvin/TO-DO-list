@@ -99,7 +99,7 @@ const FileUploadProgress = ({
   /**
    * 파일 유효성 검사 상태 가져오기
    */
-  const getFileValidationStatus = (file, index) => {
+  const getFileValidationStatus = (index) => {
     const result = validationResults[index];
     if (!result) return { isValid: true, message: '' };
 
@@ -552,7 +552,7 @@ const FileUploadProgress = ({
    * 개별 파일 항목 렌더링
    */
   const renderFileItem = (file, index) => {
-    const validationStatus = getFileValidationStatus(file, index);
+    const validationStatus = getFileValidationStatus(index);
     const uploadFileStatus = getFileUploadStatus(file);
 
     const hasValidationError = !validationStatus.isValid;

@@ -23,14 +23,6 @@ export class AssistanceService {
   private readonly logger = new Logger(AssistanceService.name);
   private readonly userRepository: Repository<UserEntity>;
 
-  // Queue 타입 구체화: any 제거 (제네릭으로 유연성 확보)
-  private readonly queue: Array<{
-    call: () => Promise<unknown>;
-    resolve: (value: unknown) => void;
-    reject: (reason?: Error) => void;
-  }> = [];
-  private processing = false;
-
   // SDK 타입을 사용한 도구 정의
   private readonly tools = [
     {
@@ -117,7 +109,7 @@ export class AssistanceService {
   ];
 
   constructor(
-    private readonly dataSource: DataSource,
+    dataSource: DataSource,
     private readonly todoService: TodoService,
   ) {
     this.userRepository = dataSource.getRepository(UserEntity);
@@ -129,7 +121,6 @@ export class AssistanceService {
   async chatWithRetry(
     userSeq: number,
     userName: string,
-    userId: string,
     ip: string,
     chatRequestDto: ChatRequestDto,
   ): Promise<ChatResponseDto> {
@@ -147,7 +138,6 @@ export class AssistanceService {
           userSeq,
           ip,
           userName,
-          userId,
         );
 
         return {
@@ -184,64 +174,6 @@ export class AssistanceService {
       success: false,
       error: '알 수 없는 오류가 발생했습니다.',
     };
-  }
-
-  private async processQueue() {
-    if (this.queue.length === 0) return;
-
-    const item = this.queue.shift();
-    if (!item) return;
-
-    const { call, resolve, reject } = item;
-    this.processing = true;
-
-    try {
-      const result = await call();
-      resolve(result);
-    } catch (error: unknown) {
-      const errorObj = this.convertToError(error);
-      reject(errorObj);
-    } finally {
-      this.processing = false;
-      if (this.queue.length > 0) {
-        setTimeout(() => this.processQueue(), 100);
-      }
-    }
-  }
-
-  // Error 변환 헬퍼 메서드 - Cognitive Complexity 감소
-  private convertToError(error: unknown): Error {
-    if (isError(error)) {
-      return error;
-    }
-
-    let errorMessage = 'Unknown error';
-    if (error && typeof error === 'object' && 'message' in error) {
-      const msg = (error as { message: unknown }).message;
-      if (typeof msg === 'string') {
-        errorMessage = msg;
-      } else if (msg !== null && msg !== undefined) {
-        try {
-          errorMessage = JSON.stringify(msg);
-        } catch {
-          errorMessage = 'Unknown error';
-        }
-      }
-    }
-    return new Error(errorMessage);
-  }
-
-  private enqueue<T>(call: () => Promise<T>): Promise<T> {
-    return new Promise<T>((resolve, reject) => {
-      this.queue.push({
-        call: call as () => Promise<unknown>,
-        resolve: resolve as (value: unknown) => void,
-        reject,
-      });
-      if (!this.processing) {
-        void this.processQueue();
-      }
-    });
   }
 
   private isRetryableError(error: unknown): boolean {
@@ -326,7 +258,6 @@ export class AssistanceService {
     userSeq: number,
     ip: string,
     userName: string,
-    userId: string,
   ): Promise<ChatRequestDto & { response?: string }> {
     // 1. API Key 조회
     const user = await this.userRepository.findOne({ where: { userSeq } });
@@ -385,12 +316,7 @@ export class AssistanceService {
               name: part.functionCall?.name || 'unknown',
               args: part.functionCall?.args || {},
             };
-            const result = await this.executeFunctionCall(
-              call,
-              userSeq,
-              userId,
-              ip,
-            );
+            const result = await this.executeFunctionCall(call, userSeq, ip);
             return {
               functionResponse: {
                 name: call.name || 'unknown',
@@ -465,7 +391,6 @@ export class AssistanceService {
   private async executeFunctionCall(
     call: { name: string; args: Record<string, unknown> },
     userSeq: number,
-    userId: string,
     ip: string,
   ): Promise<GetTodosResponse | ErrorResponse | Record<string, unknown>> {
     const args = call.args || {};
@@ -476,9 +401,9 @@ export class AssistanceService {
       if (name === 'getTodos') {
         return await this.executeGetTodos(userSeq, args);
       } else if (name === 'createTodo') {
-        return await this.executeCreateTodo(userSeq, userId, ip, args);
+        return await this.executeCreateTodo(userSeq, ip, args);
       } else if (name === 'updateTodo') {
-        return await this.executeUpdateTodo(userSeq, userId, ip, args);
+        return await this.executeUpdateTodo(userSeq, ip, args);
       }
       return { error: `알 수 없는 기능입니다: ${name}` };
     } catch (e: unknown) {
@@ -495,7 +420,6 @@ export class AssistanceService {
   ): Promise<GetTodosResponse> {
     return await this.getTodos(
       userSeq,
-      typeof args.status === 'string' ? args.status : undefined,
       typeof args.days === 'number' ? args.days : undefined,
     );
   }
@@ -503,7 +427,6 @@ export class AssistanceService {
   // createTodo 실행 헬퍼
   private async executeCreateTodo(
     userSeq: number,
-    userId: string,
     ip: string,
     args: Record<string, unknown>,
   ): Promise<ErrorResponse | Record<string, unknown>> {
@@ -518,7 +441,6 @@ export class AssistanceService {
     }
     return await this.createTodo(
       userSeq,
-      userId,
       ip,
       args.todoContent,
       args.todoDate,
@@ -529,13 +451,11 @@ export class AssistanceService {
   // updateTodo 실행 헬퍼
   private async executeUpdateTodo(
     userSeq: number,
-    userId: string,
     ip: string,
     args: Record<string, unknown>,
   ): Promise<ErrorResponse | Record<string, unknown>> {
     return await this.updateTodo(
       userSeq,
-      userId,
       ip,
       typeof args.todoSeq === 'number' ? args.todoSeq : undefined,
       typeof args.todoContentToFind === 'string'
@@ -554,7 +474,6 @@ export class AssistanceService {
   // getTodos: Promise<any> -> Promise<GetTodosResponse>로 변경
   private async getTodos(
     userSeq: number,
-    status?: string,
     days?: number,
   ): Promise<GetTodosResponse> {
     let targetDate: string | null = null;
@@ -582,7 +501,6 @@ export class AssistanceService {
 
   private async createTodo(
     userSeq: number,
-    userId: string,
     ip: string,
     content: string,
     date: string,
@@ -599,7 +517,6 @@ export class AssistanceService {
 
   private async updateTodo(
     userSeq: number,
-    userId: string,
     ip: string,
     todoSeq?: number,
     contentToFind?: string,

@@ -14,18 +14,22 @@ describe('InputSanitizerService (입력 정제 서비스)', () => {
 
   describe('sanitizeString (문자열 정제)', () => {
     it.each([
-      [
-        '기본적으로 HTML 태그를 제거해야 함',
-        '<script>alert("xss")</script>Hello World',
-        'alert("xss")Hello World',
-      ],
-      [
-        '위험한 문자를 제거해야 함',
-        'Hello"World\'Test;DROP',
-        'Hello"World\'Test;DROP',
-      ],
-      ['기본적으로 공백을 제거해야 함', '  Hello World  ', 'Hello World'],
-    ])('%s', (_name, input, expected) => {
+      {
+        name: '기본적으로 HTML 태그를 제거해야 함',
+        input: '<script>alert("xss")</script>Hello World',
+        expected: 'alert("xss")Hello World',
+      },
+      {
+        name: '위험한 문자를 제거해야 함',
+        input: 'Hello"World\'Test;DROP',
+        expected: 'Hello"World\'Test;DROP',
+      },
+      {
+        name: '기본적으로 공백을 제거해야 함',
+        input: '  Hello World  ',
+        expected: 'Hello World',
+      },
+    ])('$name', ({ input, expected }) => {
       expect(service.sanitizeString(input)).toBe(expected);
     });
   });

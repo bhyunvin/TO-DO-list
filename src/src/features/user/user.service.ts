@@ -30,7 +30,7 @@ export class UserService {
 
   constructor(
     private readonly dataSource: DataSource,
-    private readonly cloudinaryService: CloudinaryService,
+    cloudinaryService: CloudinaryService,
   ) {
     this.userRepository = dataSource.getRepository(UserEntity);
     this.refreshTokenRepository = dataSource.getRepository(RefreshTokenEntity);

@@ -40,10 +40,14 @@ export const useTodoFileHandler = () => {
   };
 
   const removeFile = (index: number) => {
-    const newFiles = todoFiles.filter((_, i) => i !== index);
-    const newValidationResults = fileValidationResults.filter(
-      (_, i) => i !== index,
-    );
+    const newFiles = [
+      ...todoFiles.slice(0, index),
+      ...todoFiles.slice(index + 1),
+    ];
+    const newValidationResults = [
+      ...fileValidationResults.slice(0, index),
+      ...fileValidationResults.slice(index + 1),
+    ];
 
     setTodoFiles(newFiles);
     setFileValidationResults(newValidationResults);

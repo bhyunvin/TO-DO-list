@@ -34,7 +34,6 @@ export const assistanceRoutes = new Elysia({ prefix: '/assistance' })
       const result = await assistanceService.chatWithRetry(
         Number(user.id),
         user.username || '',
-        String(user.id),
         clientIp,
         body as ChatRequestDto,
       );

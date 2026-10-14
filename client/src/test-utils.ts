@@ -8,12 +8,12 @@ import React from 'react';
 export const screen = new Proxy(
   {} as typeof import('@testing-library/react').screen,
   {
-    get: (_, prop) => {
+    get: (target, prop) => {
       if (typeof document !== 'undefined' && document.body) {
         const queries = within(document.body);
         return queries[prop as keyof typeof queries];
       }
-      return undefined;
+      return target[prop as keyof typeof target];
     },
   },
 );
