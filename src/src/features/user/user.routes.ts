@@ -109,12 +109,9 @@ export const userRoutes = new Elysia({ prefix: '/user' })
       refresh_token.path = '/';
       refresh_token.secure = env.NODE_ENV === 'production'; // HTTPS 환경에서만 true
 
-      // 민감 정보 제외하고 반환
-      const publicUser = userService.getPublicUserInfo(user);
-
       return {
         accessToken,
-        user: await userService.toUserResponse(publicUser),
+        user: await userService.toUserResponse(user),
       };
     },
     {
@@ -141,10 +138,7 @@ export const userRoutes = new Elysia({ prefix: '/user' })
       // 사용자 정보 복호화
       const decryptedUser = await userService.decryptUserInfo(foundUser);
 
-      // 민감 정보 제외하고 반환
-      const publicUser = userService.getPublicUserInfo(decryptedUser);
-
-      return userService.toUserResponse(publicUser);
+      return userService.toUserResponse(decryptedUser);
     },
     {
       response: UserResponseSchema,

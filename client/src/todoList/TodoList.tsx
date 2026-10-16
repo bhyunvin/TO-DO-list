@@ -166,6 +166,24 @@ const TodoContainer = () => {
   }, [selectedDate, todoRefreshTrigger]);
 
   useEffect(() => {
+    let ignore = false;
+    const fetchLatestProfile = async () => {
+      try {
+        const latestProfile = await userService.getProfile();
+        if (!ignore && latestProfile) {
+          login(latestProfile as Parameters<typeof login>[0]);
+        }
+      } catch (error) {
+        console.error('Failed to sync profile:', error);
+      }
+    };
+    void fetchLatestProfile();
+    return () => {
+      ignore = true;
+    };
+  }, [login]);
+
+  useEffect(() => {
     const handleClickOutside = (event) => {
       if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
         setIsUserMenuOpen(false);

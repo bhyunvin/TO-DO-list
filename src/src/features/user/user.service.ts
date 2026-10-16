@@ -446,7 +446,7 @@ export class UserService {
       fileGroupNo: user.userProfileImageFileGroupNo || null,
       createdAt: user.auditColumns?.regDtm,
       updatedAt: user.auditColumns?.updDtm,
-      hasAiApiKey: !!user.aiApiKey,
+      hasAiApiKey: !!(user.aiApiKey && user.aiApiKey.trim().length > 0),
     };
   }
 }
