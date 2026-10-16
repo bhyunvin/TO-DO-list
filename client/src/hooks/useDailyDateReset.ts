@@ -33,7 +33,7 @@ const useDailyDateReset = (selectedDate, handleToday) => {
         // 만약 사용자가 보고 있는 날짜가 오늘이 아니라면 -> 오늘로 리셋 & 알림
         if (selectedDateStr !== todayStr) {
           handleToday();
-          showToast({
+          void showToast({
             title: '새로운 하루가 시작되었습니다! \n오늘 날짜로 이동합니다.',
             icon: 'info',
           });

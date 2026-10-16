@@ -14,7 +14,8 @@ export default defineConfig({
       plugins: [
         purgecss({
           content: ['./index.html', './src/**/*.{js,jsx,ts,tsx}'],
-          defaultExtractor: (content) => content.match(/[\w-/:]+(?<!:)/g) || [],
+          defaultExtractor: (content) =>
+            content.match(/[\w-/]+(?::[\w-/]+)*/g) || [],
           safelist: {
             standard: [
               // Bootstrap dynamic classes and necessary classes

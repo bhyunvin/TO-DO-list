@@ -32,7 +32,7 @@ const customFetch = async (input: RequestInfo | URL, init?: RequestInit) => {
     if (!urlString.includes('/user/login')) {
       console.error('인증 실패: 로그인이 필요합니다.');
       logout();
-      showErrorAlert(
+      void showErrorAlert(
         '세션 만료',
         '세션이 만료되었습니다. 다시 로그인해주세요.',
       );

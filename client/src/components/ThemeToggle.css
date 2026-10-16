@@ -114,6 +114,6 @@
   .theme-toggle-switch,
   .theme-toggle-slider,
   .theme-toggle-icon {
-    transition-duration: 0.01ms !important;
+    transition-duration: 0.01ms;
   }
 }

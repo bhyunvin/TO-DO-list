@@ -127,13 +127,13 @@ const ProfileUpdateForm = ({
         if (user?.userEmail?.includes('@')) {
           setUserEmail(user.userEmail);
         }
-        showErrorAlert('오류', '프로필 정보를 불러오는데 실패했습니다.');
+        await showErrorAlert('오류', '프로필 정보를 불러오는데 실패했습니다.');
       } finally {
         setIsLoadingDetail(false);
       }
     };
 
-    fetchProfileDetail();
+    void fetchProfileDetail();
   }, [user]);
 
   // 변경 감지 및 부모 컴포넌트에 알림
@@ -367,7 +367,7 @@ const ProfileUpdateForm = ({
     const hasChanges = checkChanges(originalUser, user, currentValues);
 
     if (hasChanges) {
-      showConfirmAlert({
+      void showConfirmAlert({
         title: '정말 취소하시겠습니까?',
         text: '변경사항이 저장되지 않습니다.',
         confirmButtonText: '확인',
@@ -463,7 +463,7 @@ const ProfileUpdateForm = ({
             showValidation={false}
             showProgress={true}
             showDetailedStatus={true}
-            onRetryUpload={async (failedFiles) => {
+            onRetryUpload={(failedFiles) => {
               // 프로필 이미지의 경우 유효성 검사만 재설정
               if (failedFiles.length > 0) {
                 const file = failedFiles[0];

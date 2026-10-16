@@ -25,13 +25,13 @@ const LoginForm = () => {
     setIsLoading(true);
 
     if (!id) {
-      showWarningAlert('', '아이디를 입력해주세요.');
+      await showWarningAlert('', '아이디를 입력해주세요.');
       setIsLoading(false);
       return;
     }
 
     if (!password) {
-      showWarningAlert('', '비밀번호를 입력해주세요.');
+      await showWarningAlert('', '비밀번호를 입력해주세요.');
       setIsLoading(false);
       return;
     }
@@ -49,21 +49,24 @@ const LoginForm = () => {
           const msg = (data as { message: unknown }).message;
           if (typeof msg === 'string') errorMsg = msg;
         }
-        showErrorAlert('로그인 실패', errorMsg);
+        await showErrorAlert('로그인 실패', errorMsg);
       }
     } catch (error) {
       console.error('LoginForm Login Error : ', error);
 
       const { response } = error;
       if (response?.status === 204) {
-        showErrorAlert('로그인 실패', '사용자가 존재하지 않습니다.');
+        await showErrorAlert('로그인 실패', '사용자가 존재하지 않습니다.');
       } else if (response?.data) {
-        showErrorAlert(
+        await showErrorAlert(
           '로그인 실패',
           response.data.message || '다시 시도해 주세요.',
         );
       } else {
-        showErrorAlert('오류 발생', '서버와의 연결에 문제가 발생했습니다.');
+        await showErrorAlert(
+          '오류 발생',
+          '서버와의 연결에 문제가 발생했습니다.',
+        );
       }
     } finally {
       setIsLoading(false);

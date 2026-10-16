@@ -65,7 +65,7 @@ const TestUtils = {
 };
 
 // 테스트 1: 페이지 새로고침 후 테마 지속성
-const test1_PageReloadPersistence = async () => {
+const test1_PageReloadPersistence = () => {
   console.log('\n=== Test 1: Theme persists after page reload ===');
   console.log('Manual steps:');
   console.log('1. Set theme to dark using the toggle');
@@ -92,7 +92,7 @@ const test1_PageReloadPersistence = async () => {
 };
 
 // 테스트 2: 로그아웃/로그인 후 테마 지속성
-const test2_LogoutLoginPersistence = async () => {
+const test2_LogoutLoginPersistence = () => {
   console.log('\n=== Test 2: Theme persists after logout and login ===');
   console.log('Manual steps:');
   console.log('1. Set theme to dark using the toggle');
@@ -121,7 +121,7 @@ const test2_LogoutLoginPersistence = async () => {
 };
 
 // 테스트 3: 여러 브라우저 탭에서 테마 지속성
-const test3_MultipleTabsPersistence = async () => {
+const test3_MultipleTabsPersistence = () => {
   console.log('\n=== Test 3: Theme persists across browser tabs ===');
   console.log('Manual steps:');
   console.log('1. Open this application in Tab 1');
@@ -150,7 +150,7 @@ const test3_MultipleTabsPersistence = async () => {
 };
 
 // 테스트 4: 저장된 선호도가 없을 때 기본 테마
-const test4_DefaultThemeNoPreference = async () => {
+const test4_DefaultThemeNoPreference = () => {
   console.log('\n=== Test 4: Default theme when no preference exists ===');
   console.log('This test will clear localStorage and reload the page.');
   console.log(
@@ -200,7 +200,7 @@ const test4_DefaultThemeNoPreference_Verify = () => {
 };
 
 // 테스트 5: 시스템 선호도 감지
-const test5_SystemPreferenceDetection = async () => {
+const test5_SystemPreferenceDetection = () => {
   console.log('\n=== Test 5: System preference detection ===');
   console.log(
     'This test checks if the app respects system dark mode preference.',
@@ -265,16 +265,16 @@ const runAllAutomatedTests = async () => {
 
   const results = [];
 
-  results.push(await test1_PageReloadPersistence());
+  results.push(test1_PageReloadPersistence());
   await TestUtils.wait(500);
 
-  results.push(await test2_LogoutLoginPersistence());
+  results.push(test2_LogoutLoginPersistence());
   await TestUtils.wait(500);
 
-  results.push(await test3_MultipleTabsPersistence());
+  results.push(test3_MultipleTabsPersistence());
   await TestUtils.wait(500);
 
-  results.push(await test5_SystemPreferenceDetection());
+  results.push(test5_SystemPreferenceDetection());
 
   console.log('\n╔════════════════════════════════════════════════╗');
   console.log('║  Test Summary                                  ║');

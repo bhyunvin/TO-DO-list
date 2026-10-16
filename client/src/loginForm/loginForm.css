@@ -99,19 +99,19 @@
 
 [data-theme='dark'] .login-container .form-text,
 [data-theme='dark'] .signup-container .form-text {
-  color: var(--text-secondary) !important;
+  color: var(--text-secondary);
 }
 
 [data-theme='dark'] .login-container small.form-text,
 [data-theme='dark'] .signup-container small.form-text,
 [data-theme='dark'] .login-container small.text-muted,
 [data-theme='dark'] .signup-container small.text-muted {
-  color: var(--text-secondary) !important;
+  color: var(--text-secondary);
 }
 
 [data-theme='dark'] .login-container .text-danger,
 [data-theme='dark'] .signup-container .text-danger {
-  color: var(--color-danger) !important;
+  color: var(--color-danger);
 }
 
 [data-theme='dark'] .login-container p,
@@ -138,14 +138,14 @@
 
 /* Light Mode Defaults for Popup */
 html[data-theme='light'] body .swal2-popup.swal2-privacy-popup {
-  background: #ffffff !important;
-  color: #212529 !important;
+  background: #ffffff;
+  color: #212529;
 }
 
 /* Dark Mode Overrides for Popup */
 html[data-theme='dark'] body .swal2-popup.swal2-privacy-popup {
-  background: #2b3035 !important;
-  color: #dee2e6 !important;
+  background: #2b3035;
+  color: #dee2e6;
 }
 
 /* Popup Content Scrollbar Styling */

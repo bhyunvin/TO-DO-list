@@ -498,17 +498,17 @@
 }
 
 /* 날짜 입력 필드 스타일 */
-.date-picker-input {
-  background-color: var(--bg-secondary) !important;
-  color: var(--text-primary) !important;
-  border-color: var(--border-medium) !important;
+.form-control.date-picker-input {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border-color: var(--border-medium);
 }
 
 /* 검색어 입력 필드 스타일 */
-.search-input {
-  background-color: var(--bg-secondary) !important;
-  color: var(--text-primary) !important;
-  border-color: var(--border-medium) !important;
+.form-control.search-input {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border-color: var(--border-medium);
 }
 
 /* 검색 결과 컨테이너 */
@@ -583,9 +583,9 @@
 }
 
 /* 모달 헤더/푸터 보더 색상 */
-.modal-header.border-secondary,
-.modal-footer.border-secondary {
-  border-color: var(--border-separator) !important;
+div.modal-header.border-secondary,
+div.modal-footer.border-secondary {
+  border-color: var(--border-separator);
 }
 
 /* 모달 푸터 버튼 정렬 (글로벌 강제 스타일 제거 후 필요한 것만 추가) */

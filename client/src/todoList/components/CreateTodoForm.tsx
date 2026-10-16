@@ -9,7 +9,7 @@ const CreateTodoForm = ({ onAddTodo, onCancel }) => {
     const result = await onAddTodo(formData);
 
     if (result?.success) {
-      showToast({
+      await showToast({
         icon: 'success',
         title: '할 일이 추가되었습니다.',
         timer: 1500,

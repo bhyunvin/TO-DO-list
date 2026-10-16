@@ -75,7 +75,7 @@ const TodoForm = ({
     e.preventDefault();
 
     if (!todoContent.trim()) {
-      showWarningAlert('할 일을 입력해주세요.');
+      await showWarningAlert('할 일을 입력해주세요.');
       return;
     }
 
@@ -84,7 +84,7 @@ const TodoForm = ({
         ({ isValid }) => !isValid,
       );
       if (invalidFiles.length > 0) {
-        showErrorAlert(
+        await showErrorAlert(
           '파일 오류',
           '유효하지 않은 파일이 있습니다. 파일을 다시 선택해주세요.',
         );
@@ -200,7 +200,7 @@ const TodoForm = ({
               uploadErrors={uploadErrors}
               uploadedFiles={uploadedFiles}
               onRemoveFile={removeFile}
-              onRetryUpload={async (failedFiles) => {
+              onRetryUpload={(failedFiles) => {
                 const retryValidation = validateFiles(
                   failedFiles,
                   TODO_CONSTANTS.UPLOAD_POLICY_KEY,

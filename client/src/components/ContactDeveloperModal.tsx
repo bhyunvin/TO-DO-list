@@ -22,7 +22,7 @@ const ContactDeveloperModal = ({ show, onHide }) => {
     if (selectedFile) {
       // 이미지 파일만 허용 (간단한 체크)
       if (!selectedFile.type.startsWith('image/')) {
-        showWarningAlert('이미지 파일만 첨부할 수 있습니다.');
+        void showWarningAlert('이미지 파일만 첨부할 수 있습니다.');
         e.target.value = ''; // 초기화
         setFile(null);
         return;
@@ -35,12 +35,12 @@ const ContactDeveloperModal = ({ show, onHide }) => {
     e.preventDefault();
 
     if (!title.trim()) {
-      showWarningAlert('제목을 입력해주세요.');
+      void showWarningAlert('제목을 입력해주세요.');
       return;
     }
 
     if (!content.trim() || content.trim().length < 10) {
-      showWarningAlert('내용은 최소 10자 이상 입력해주세요.');
+      void showWarningAlert('내용은 최소 10자 이상 입력해주세요.');
       return;
     }
 
@@ -56,10 +56,13 @@ const ContactDeveloperModal = ({ show, onHide }) => {
 
       await contactService.sendContactEmail(formData);
 
-      showSuccessAlert('성공', '소중한 의견이 개발자에게 전달되었습니다.');
+      await showSuccessAlert(
+        '성공',
+        '소중한 의견이 개발자에게 전달되었습니다.',
+      );
       handleClose();
     } catch (error) {
-      showErrorAlert(
+      await showErrorAlert(
         '전송 실패',
         '메일 발송 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.',
       );

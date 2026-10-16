@@ -69,6 +69,16 @@
   --shadow-light: 0 2px 4px rgba(0, 0, 0, 0.3);
   --shadow-medium: 0 4px 6px rgba(0, 0, 0, 0.2);
   --shadow-dropdown: 0 0.5rem 1rem rgba(0, 0, 0, 0.4);
+  /* Bootstrap 5 다크모드 호환 CSS 변수 */
+  --bs-body-color: var(--text-primary);
+  --bs-body-bg: var(--bg-secondary);
+  --bs-secondary-color: var(--text-secondary);
+  --bs-secondary-rgb: 58, 58, 58;
+  --bs-danger-rgb: 255, 71, 87;
+  --bs-success-rgb: 46, 204, 113;
+  --bs-warning-rgb: 255, 193, 7;
+  --bs-info-rgb: 23, 162, 184;
+  --bs-border-color: var(--border-medium);
 }
 
 /* 접근성: 모션 감소 선호 사용자를 위한 설정 */
@@ -77,10 +87,12 @@
     --transition-duration: 0.01ms;
   }
 
-  * {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+    transition-duration: 0.01ms;
   }
 }
 
@@ -113,12 +125,12 @@ body {
   min-height: 100vh;
 }
 
-/* 다크 모드 강제 적용 - 우선순위 높임 */
+/* 다크 모드 적용 - 높은 명시도로 기본 스타일 오버라이드 */
 html[data-theme='dark'],
 html[data-theme='dark'] body,
 html[data-theme='dark'] #root {
-  background-color: #2d2d2d !important;
-  color: #e9ecef !important;
+  background-color: #2d2d2d;
+  color: #e9ecef;
 }
 
 /* 다크 모드 전역 스타일 */

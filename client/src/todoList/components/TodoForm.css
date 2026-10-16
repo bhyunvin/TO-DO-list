@@ -37,18 +37,18 @@
 }
 
 [data-theme='dark'] .todo-form .form-text {
-  color: var(--text-secondary) !important;
+  color: var(--text-secondary);
 }
 
 [data-theme='dark'] .todo-form small.form-text,
 [data-theme='dark'] .todo-form small.text-muted {
-  color: var(--text-secondary) !important;
+  color: var(--text-secondary);
 }
 
 [data-theme='dark'] .todo-form .text-danger {
-  color: var(--color-danger) !important;
+  color: var(--color-danger);
 }
 
 [data-theme='dark'] .todo-form .text-success {
-  color: var(--color-success) !important;
+  color: var(--color-success);
 }

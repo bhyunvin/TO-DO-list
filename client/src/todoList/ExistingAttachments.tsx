@@ -33,7 +33,7 @@ const ExistingAttachments = ({ todoSeq }) => {
       }
     };
 
-    loadAttachments();
+    void loadAttachments();
     return () => {
       ignore = true;
     };
@@ -51,10 +51,10 @@ const ExistingAttachments = ({ todoSeq }) => {
       try {
         await todoService.deleteAttachment(todoSeq, fileNo);
         setAttachments((prev) => prev.filter((file) => file.fileNo !== fileNo));
-        showSuccessAlert('삭제 완료', '파일이 삭제되었습니다.');
+        await showSuccessAlert('삭제 완료', '파일이 삭제되었습니다.');
       } catch (error) {
         console.error('Delete attachment error:', error);
-        showErrorAlert('오류 발생', '파일 삭제 중 문제가 발생했습니다.');
+        await showErrorAlert('오류 발생', '파일 삭제 중 문제가 발생했습니다.');
       }
     }
   };
@@ -80,7 +80,7 @@ const ExistingAttachments = ({ todoSeq }) => {
       }, 100);
     } catch (error) {
       console.error('File download error:', error);
-      showErrorAlert(
+      await showErrorAlert(
         '오류 발생',
         '파일을 열 수 없습니다. 권한이 없거나 서버 오류입니다.',
       );

@@ -37,14 +37,14 @@
 
 /* Bootstrap text-muted 클래스 다크 모드 오버라이드 */
 [data-theme='dark'] .text-muted {
-  color: var(--text-secondary) !important;
+  color: var(--text-secondary);
 }
 
 /* 폼 내부의 작은 텍스트 (안내문구) */
 [data-theme='dark'] small.form-text,
 [data-theme='dark'] small.text-muted,
 [data-theme='dark'] .form-text.text-muted {
-  color: var(--text-secondary) !important;
+  color: var(--text-secondary);
 }
 
 /* 모든 small 태그 다크 모드 */
@@ -55,22 +55,22 @@
 /* 유효성 검사 피드백 텍스트 */
 [data-theme='dark'] .text-danger,
 [data-theme='dark'] small.text-danger {
-  color: var(--color-danger) !important;
+  color: var(--color-danger);
 }
 
 [data-theme='dark'] .text-success,
 [data-theme='dark'] small.text-success {
-  color: var(--color-success) !important;
+  color: var(--color-success);
 }
 
 [data-theme='dark'] .text-warning,
 [data-theme='dark'] small.text-warning {
-  color: #ffc107 !important;
+  color: #ffc107;
 }
 
 [data-theme='dark'] .text-info,
 [data-theme='dark'] small.text-info {
-  color: #17a2b8 !important;
+  color: #17a2b8;
 }
 
 /* 입력 그룹 */
@@ -313,7 +313,7 @@
 }
 
 [data-theme='dark'] .badge.bg-secondary {
-  background-color: var(--bg-tertiary) !important;
+  background-color: var(--bg-tertiary);
   color: var(--text-primary);
 }
 
@@ -453,34 +453,34 @@
 
 /* 테마 적응형 아웃라인 버튼 - 높은 우선순위 적용 */
 .btn.btn-outline-adaptive {
-  color: #212529 !important; /* 라이트 모드 텍스트 (다크) */
-  border: 1px solid #212529 !important; /* 라이트 모드 테두리 (다크) */
-  background-color: transparent !important;
+  color: #212529; /* 라이트 모드 텍스트 (다크) */
+  border: 1px solid #212529; /* 라이트 모드 테두리 (다크) */
+  background-color: transparent;
   transition: all 0.2s ease-in-out;
 }
 
 .btn.btn-outline-adaptive:hover,
 .btn.btn-outline-adaptive:focus {
-  color: #ffffff !important;
-  background-color: #212529 !important;
-  border-color: #212529 !important;
+  color: #ffffff;
+  background-color: #212529;
+  border-color: #212529;
 }
 
 /* 다크 모드 오버라이드 */
 [data-theme='dark'] .btn.btn-outline-adaptive {
-  color: var(--text-primary) !important;
-  border-color: var(--border-medium) !important;
+  color: var(--text-primary);
+  border-color: var(--border-medium);
 }
 
 [data-theme='dark'] .btn.btn-outline-adaptive:hover,
 [data-theme='dark'] .btn.btn-outline-adaptive:focus {
-  color: #212529 !important; /* 호버 시 텍스트 색상 (다크) */
-  background-color: #f8f9fa !important; /* 호버 시 배경색 (라이트) */
-  border-color: #f8f9fa !important;
+  color: #212529; /* 호버 시 텍스트 색상 (다크) */
+  background-color: #f8f9fa; /* 호버 시 배경색 (라이트) */
+  border-color: #f8f9fa;
 }
 
 .btn.btn-outline-adaptive:disabled {
-  color: var(--text-muted) !important;
-  border-color: var(--border-medium) !important;
-  background-color: transparent !important;
+  color: var(--text-muted);
+  border-color: var(--border-medium);
+  background-color: transparent;
 }

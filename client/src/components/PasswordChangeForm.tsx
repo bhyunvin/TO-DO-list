@@ -217,7 +217,7 @@ const PasswordChangeForm = ({
     const hasChanges = currentPassword || newPassword || confirmPassword;
 
     if (hasChanges) {
-      showConfirmAlert({
+      void showConfirmAlert({
         title: '정말 취소하시겠습니까?',
         text: '입력한 내용이 저장되지 않습니다.',
         confirmButtonText: '확인',
