@@ -376,8 +376,8 @@ export class TodoService {
         const fileRepo = manager.getRepository(FileInfoEntity);
         for (const f of savedFiles) {
           f.fileGroupNo = todo.todoFileGroupNo;
-          await fileRepo.save(f);
         }
+        await fileRepo.save(savedFiles);
       }
     } else {
       todo.todoFileGroupNo = fileGroupNo;

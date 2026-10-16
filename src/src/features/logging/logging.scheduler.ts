@@ -51,35 +51,36 @@ export class LoggingScheduler {
       { name: 'NJ_USER_REFRESH_TOKEN', repo: refreshTokenRepo },
     ];
 
-    for (const table of tables) {
-      try {
-        // reg_ip 익명화
-        const regResult = await table.repo
-          .createQueryBuilder()
-          .update()
-          .set({ auditColumns: { regIp: null } } as DeepPartial<unknown>) // DeepPartial 사용
-          .where('auditColumns.regDtm < :date', { date: sixMonthsAgo })
-          .andWhere('auditColumns.regIp IS NOT NULL')
-          .execute();
+    await Promise.all(
+      tables.map(async (table) => {
+        try {
+          const [regResult, updResult] = await Promise.all([
+            table.repo
+              .createQueryBuilder()
+              .update()
+              .set({ auditColumns: { regIp: null } } as DeepPartial<unknown>)
+              .where('auditColumns.regDtm < :date', { date: sixMonthsAgo })
+              .andWhere('auditColumns.regIp IS NOT NULL')
+              .execute(),
+            table.repo
+              .createQueryBuilder()
+              .update()
+              .set({ auditColumns: { updIp: null } } as DeepPartial<unknown>)
+              .where('auditColumns.updDtm < :date', { date: sixMonthsAgo })
+              .andWhere('auditColumns.updIp IS NOT NULL')
+              .execute(),
+          ]);
 
-        // upd_ip 익명화
-        const updResult = await table.repo
-          .createQueryBuilder()
-          .update()
-          .set({ auditColumns: { updIp: null } } as DeepPartial<unknown>)
-          .where('auditColumns.updDtm < :date', { date: sixMonthsAgo })
-          .andWhere('auditColumns.updIp IS NOT NULL')
-          .execute();
-
-        if ((regResult.affected || 0) > 0 || (updResult.affected || 0) > 0) {
-          this.logger.log(
-            `${table.name}에서 IP를 null로 업데이트: reg_ip(${regResult.affected || 0}개), upd_ip(${updResult.affected || 0}개)`,
-          );
+          if ((regResult.affected || 0) > 0 || (updResult.affected || 0) > 0) {
+            this.logger.log(
+              `${table.name}에서 IP를 null로 업데이트: reg_ip(${regResult.affected || 0}개), upd_ip(${updResult.affected || 0}개)`,
+            );
+          }
+        } catch (error) {
+          this.logger.error(`${table.name} 테이블의 IP 익명화 실패`, error);
         }
-      } catch (error) {
-        this.logger.error(`${table.name} 테이블의 IP 익명화 실패`, error);
-      }
-    }
+      }),
+    );
 
     this.logger.log('로그 정리 및 IP 익명화 완료.');
   }

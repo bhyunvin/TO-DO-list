@@ -77,11 +77,12 @@ export class FileUploadUtil {
 
       // 2. 나머지 파일 처리
       if (files.length > 1) {
-        for (let i = 1; i < files.length; i++) {
-          const newFile = await processFile(files[i], fileGroupNo);
-          const savedFile = await repository.save(newFile);
-          savedFiles.push(savedFile);
-        }
+        const remainingFiles = files.slice(1);
+        const newFiles = await Promise.all(
+          remainingFiles.map((file) => processFile(file, fileGroupNo)),
+        );
+        const savedRemainingFiles = await repository.save(newFiles);
+        savedFiles.push(...savedRemainingFiles);
       }
     }
 

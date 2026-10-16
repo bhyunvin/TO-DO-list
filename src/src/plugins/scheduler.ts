@@ -25,7 +25,7 @@ export const schedulerPlugin = new Elysia({ name: 'scheduler' })
   .onStart(() => {
     // 서버 시작 5초 후에 초기 로그 정리 실행
     setTimeout(() => {
-      new LoggingScheduler(dataSource).cleanupOldLogsAndAnonymizeIp();
+      void new LoggingScheduler(dataSource).cleanupOldLogsAndAnonymizeIp();
     }, 5000);
     logger.log('📅 로그 스케줄러가 등록되었습니다.');
   });

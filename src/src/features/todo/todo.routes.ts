@@ -36,23 +36,26 @@ export const todoRoutes = new Elysia({ prefix: '/todo' })
       const userId = Number(user.id);
       const todos = await todoService.findAll(userId, todoDate);
 
-      const result = [];
-      for (const todo of todos) {
-        const attachments = await todoService.getAttachments(
-          todo.todoSeq,
-          Number(user.id),
-        );
-        result.push({
-          todoSeq: todo.todoSeq,
-          todoContent: todo.todoContent,
-          todoDate: todo.todoDate,
-          todoNote: todo.todoNote,
-          completeDtm: todo.completeDtm ? todo.completeDtm.toISOString() : null,
-          attachments: attachments,
-          // Entity 직접 접근 (auditColumns 가상 프로퍼티 없음)
-          createdAt: todo.auditColumns.regDtm.toISOString(),
-        });
-      }
+      const result = await Promise.all(
+        todos.map(async (todo) => {
+          const attachments = await todoService.getAttachments(
+            todo.todoSeq,
+            userId,
+          );
+          return {
+            todoSeq: todo.todoSeq,
+            todoContent: todo.todoContent,
+            todoDate: todo.todoDate,
+            todoNote: todo.todoNote,
+            completeDtm: todo.completeDtm
+              ? todo.completeDtm.toISOString()
+              : null,
+            attachments,
+            // Entity 직접 접근 (auditColumns 가상 프로퍼티 없음)
+            createdAt: todo.auditColumns.regDtm.toISOString(),
+          };
+        }),
+      );
       return result;
     },
     {
@@ -70,22 +73,25 @@ export const todoRoutes = new Elysia({ prefix: '/todo' })
         Number(user.id),
         query as SearchTodoDto,
       );
-      const result = [];
-      for (const todo of todos) {
-        const attachments = await todoService.getAttachments(
-          todo.todoSeq,
-          Number(user.id),
-        );
-        result.push({
-          todoSeq: todo.todoSeq,
-          todoContent: todo.todoContent,
-          todoDate: todo.todoDate,
-          todoNote: todo.todoNote,
-          completeDtm: todo.completeDtm ? todo.completeDtm.toISOString() : null,
-          attachments,
-          createdAt: todo.auditColumns.regDtm.toISOString(),
-        });
-      }
+      const result = await Promise.all(
+        todos.map(async (todo) => {
+          const attachments = await todoService.getAttachments(
+            todo.todoSeq,
+            Number(user.id),
+          );
+          return {
+            todoSeq: todo.todoSeq,
+            todoContent: todo.todoContent,
+            todoDate: todo.todoDate,
+            todoNote: todo.todoNote,
+            completeDtm: todo.completeDtm
+              ? todo.completeDtm.toISOString()
+              : null,
+            attachments,
+            createdAt: todo.auditColumns.regDtm.toISOString(),
+          };
+        }),
+      );
       return result;
     },
     {
